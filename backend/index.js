@@ -94,7 +94,7 @@ app.get(`/v${version}/song/info/:id`, async (req, res) => {
 // example: /v1/user_preferences/0/
 app.get(`/v${version}/user_preferences/:user_id`, async (req, res) => {
     const query = `SELECT * FROM ${database}.user_preferences WHERE user_id = ?`;
-    pool.query(query, [req.params.id], (error, results) => {
+    pool.query(query, [req.params.user_id], (error, results) => {
         if (!results[0]) {
             res.json({ error_message: "This user has no preferences yet" });
         } else {
@@ -113,6 +113,25 @@ app.get(`/v${version}/user_preferences/new`, async (req, res) => {
     };
     const query = `INSERT INTO ${database}.user_preferences VALUES(?,?,?)`;
     pool.query(query, Object.values(data), (error) => {
+        if (error) {
+            res.json({
+                error_message: `${error.code}: Inserting record failed!`,
+            });
+        } else {
+            res.json({ data: data });
+        }
+    });
+});
+
+// user_preferences: insert record into user_preference
+// example: /v1/user_preferences/update
+app.get(`/v${version}/user_preferences/new`, async (req, res) => {
+    const data = {
+        id: req.body.id,
+        score: req.body.score,
+    };
+    const query = `UPDATE ${database}.user_preferences SET score= ? WHERE id= ?`;
+    pool.query(query, [data.score, data.id], (error) => {
         if (error) {
             res.json({
                 error_message: `${error.code}: Inserting record failed!`,
