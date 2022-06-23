@@ -1,4 +1,5 @@
 require("dotenv").config();
+const e = require("express");
 const express = require("express");
 const mysql = require("mysql");
 const app = express();
@@ -98,6 +99,26 @@ app.get(`/v${version}/user_preferences/:user_id`, async (req, res) => {
             res.json({ error_message: "This user has no preferences yet" });
         } else {
             res.json(results[0]);
+        }
+    });
+});
+
+// user_preferences: insert record into user_preference
+// example: /v1/user_preferences/new
+app.get(`/v${version}/user_preferences/new`, async (req, res) => {
+    const data = {
+        user_id: req.body.user_id,
+        song_id: req.body.song_id,
+        score: req.body.score,
+    };
+    const query = `INSERT INTO ${database}.user_preferences VALUES(?,?,?)`;
+    pool.query(query, Object.values(data), (error) => {
+        if (error) {
+            res.json({
+                error_message: `${error.code}: Inserting record failed!`,
+            });
+        } else {
+            res.json({ data: data });
         }
     });
 });
