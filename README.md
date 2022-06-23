@@ -1,1 +1,2 @@
-# Project-Fuxi
+# Project Fuxi
+Summer code revamp
