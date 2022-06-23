@@ -31,10 +31,6 @@ function sanatize(input) {
     return escaped.slice(1, -1);
 }
 
-// user_preferences
-// - get score from song_id (user_id)
-// - create new record
-
 app.listen(port, () => {
     console.log(`REST API listening on port ${port}`);
 });
