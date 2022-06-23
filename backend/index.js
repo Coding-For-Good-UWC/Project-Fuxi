@@ -109,7 +109,7 @@ app.get(`/v${version}/user_preferences/id/:user_id`, async (req, res) => {
     });
 });
 
-// user_preferences: insert record into user_preference
+// user_preferences: insert record into user_preferences
 // example: /v1/user_preferences/new
 app.get(`/v${version}/user_preferences/new`, async (req, res) => {
     const data = {
@@ -129,7 +129,7 @@ app.get(`/v${version}/user_preferences/new`, async (req, res) => {
     });
 });
 
-// user_preferences: insert record into user_preference
+// user_preferences: updates record into user_preferences
 // example: /v1/user_preferences/update
 app.get(`/v${version}/user_preferences/update`, async (req, res) => {
     const data = {
