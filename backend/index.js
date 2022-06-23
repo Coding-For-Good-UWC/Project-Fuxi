@@ -21,6 +21,16 @@ let pool = mysql.createPool({
     database: database,
 });
 
+function sanatize(input) {
+    let escaped = ""
+    if (typeof input === 'string' || input instanceof String){
+        escaped = pool.escape(input);
+    } else {
+        escaped = pool.escape(input.toString());
+    }
+    return escaped.slice(1, -1);
+}
+
 // user_preferences
 // - get score from song_id (user_id)
 // - create new record
@@ -37,7 +47,7 @@ app.get(`/v${version}/`, async (req, res) => {
 // example: /v1/user/id/johndoe0
 app.get(`/v${version}/user/id/:username`, async (req, res) => {
     const query = `SELECT * FROM ${database}.users WHERE username = ?`;
-    pool.query(query, [req.params.username], (error, results) => {
+    pool.query(query, [sanatize(req.params.username)], (error, results) => {
         if (!results[0]) {
             res.json({ error_message: "No id with that username found" });
         } else {
@@ -50,7 +60,7 @@ app.get(`/v${version}/user/id/:username`, async (req, res) => {
 // example: /v1/user/info/0
 app.get(`/v${version}/user/info/:id`, async (req, res) => {
     const query = `SELECT * FROM ${database}.users WHERE id = ?`;
-    pool.query(query, [req.params.id], (error, results) => {
+    pool.query(query, [sanatize(req.params.id)], (error, results) => {
         if (!results[0]) {
             res.json({ error_message: "No user with that id found" });
         } else {
@@ -61,14 +71,14 @@ app.get(`/v${version}/user/info/:id`, async (req, res) => {
 
 // user: use login with username, password
 // example: /v1/user/login
-app.get(`/v${version}/user/info/`, async (req, res) => {
+app.get(`/v${version}/user/login/`, async (req, res) => {
     let params = req.body;
     const query = `SELECT password_hash FROM ${database}.users WHERE username = ?`;
-    pool.query(query, [pool.escape(params.username)], (error, results) => {
+    pool.query(query, [sanatize(params.username)], (error, results) => {
         if (!results[0]) {
             res.json({ error_message: "No user with that username found" });
         } else {
-            if (results[0].password_hash == params.password) {
+            if (results[0].password_hash == sanatize(params.password)) {
                 res.send({ token: "jwttokenorsmth" }); //TODO: ASK ADI
             } else {
                 res.json({ error_message: "Password is invalid" });
@@ -81,7 +91,7 @@ app.get(`/v${version}/user/info/`, async (req, res) => {
 // example: /v1/song/info/0
 app.get(`/v${version}/song/info/:id`, async (req, res) => {
     const query = `SELECT * FROM ${database}.songs WHERE id = ?`;
-    pool.query(query, [req.params.id], (error, results) => {
+    pool.query(query, [sanatize(req.params.id)], (error, results) => {
         if (!results[0]) {
             res.json({ error_message: "No song with that id found" });
         } else {
@@ -91,10 +101,10 @@ app.get(`/v${version}/song/info/:id`, async (req, res) => {
 });
 
 // user_preferences: get user_preferences from user_id
-// example: /v1/user_preferences/0/
-app.get(`/v${version}/user_preferences/:user_id`, async (req, res) => {
+// example: /v1/user_preferences/id/0/
+app.get(`/v${version}/user_preferences/id/:user_id`, async (req, res) => {
     const query = `SELECT * FROM ${database}.user_preferences WHERE user_id = ?`;
-    pool.query(query, [req.params.user_id], (error, results) => {
+    pool.query(query, [sanatize(req.params.user_id)], (error, results) => {
         if (!results[0]) {
             res.json({ error_message: "This user has no preferences yet" });
         } else {
@@ -107,12 +117,12 @@ app.get(`/v${version}/user_preferences/:user_id`, async (req, res) => {
 // example: /v1/user_preferences/new
 app.get(`/v${version}/user_preferences/new`, async (req, res) => {
     const data = {
-        user_id: req.body.user_id,
-        song_id: req.body.song_id,
-        score: req.body.score,
+        user_id: sanatize(req.body.user_id),
+        song_id: sanatize(req.body.song_id),
+        score: sanatize(req.body.score),
     };
-    const query = `INSERT INTO ${database}.user_preferences VALUES(?,?,?)`;
-    pool.query(query, Object.values(data), (error) => {
+    const query = `INSERT INTO ${database}.user_preferences(user_id, song_id, score) VALUES(?,?,?)`;
+    pool.query(query, [data.user_id, data.song_id, data.score], (error) => {
         if (error) {
             res.json({
                 error_message: `${error.code}: Inserting record failed!`,
@@ -125,10 +135,10 @@ app.get(`/v${version}/user_preferences/new`, async (req, res) => {
 
 // user_preferences: insert record into user_preference
 // example: /v1/user_preferences/update
-app.get(`/v${version}/user_preferences/new`, async (req, res) => {
+app.get(`/v${version}/user_preferences/update`, async (req, res) => {
     const data = {
-        id: req.body.id,
-        score: req.body.score,
+        id: sanatize(req.body.id),
+        score: sanatize(req.body.score),
     };
     const query = `UPDATE ${database}.user_preferences SET score= ? WHERE id= ?`;
     pool.query(query, [data.score, data.id], (error) => {
