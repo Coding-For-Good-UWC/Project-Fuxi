@@ -110,7 +110,7 @@ app.get(`/v${version}/user_preferences/id/:user_id`, async (req, res) => {
 
 // user_preferences: insert record into user_preferences
 // example: /v1/user_preferences/new
-app.get(`/v${version}/user_preferences/new`, async (req, res) => {
+app.post(`/v${version}/user_preferences/new`, async (req, res) => {
     const data = {
         user_id: sanatize(req.body.user_id),
         song_id: sanatize(req.body.song_id),
