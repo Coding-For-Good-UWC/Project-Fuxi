@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 var corsOptions = {
-  origin: "http://localhost:19006",
+  origin: "http://localhost:8081",
   credentials:  true
 }
 
