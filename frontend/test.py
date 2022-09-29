@@ -1,2 +1,0 @@
-import pySerial
-def fetchData():
