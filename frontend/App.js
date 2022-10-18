@@ -1,3 +1,28 @@
+// import * as React from 'react';
+
+// import { NavigationContainer } from '@react-navigation/native';
+// import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// import LandingScreen from './app/screens/LandingScreen'; 
+// import LoginScreen from './app/screens/LoginScreen'; 
+// // import PlayerScreen from './app/screens/PlayerScreen'; 
+
+// const Stack = createNativeStackNavigator();
+
+// function App() {
+//   return (
+//     <NavigationContainer>
+//       <Stack.Navigator>
+//         <Stack.Screen name="Home" component={LandingScreen} />
+//       </Stack.Navigator>
+//     </NavigationContainer>
+//   );
+// }
+
+// export default App;
+
+
+
 import LandingScreen from './app/screens/LandingScreen';
 import LoginScreen from './app/screens/LoginScreen';
 import PlayerScreen from './app/screens/PlayerScreen';
@@ -7,12 +32,16 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { Platform } from 'react-native'; 
 
+// import TrackPlayer from 'react-native-track-player';
+
+const Stack = createNativeStackNavigator();
+
+// TrackPlayer.registerPlaybackService (() => require ('./service')); 
+
 export default function App() 
 {
   console.log ("APP EXECUTED"); 
   
-  const Stack = createNativeStackNavigator();
-
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -37,6 +66,8 @@ export default function App()
       </Stack.Navigator>
     </NavigationContainer>
 
-    // <LoginScreen />
+    // <PlayerScreen />
+
+    // <LandingScreen />
   )
 }

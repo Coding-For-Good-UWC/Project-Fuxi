@@ -13,7 +13,7 @@ import
 
 import colours from '../config/colours.js'; 
 
-function LoginScreen (props) 
+function LoginScreen ({ navigation }) 
 {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -73,6 +73,13 @@ function LoginScreen (props)
             style={styles.loginButton}
             onPress={handleLogin}
             title="LOGIN"
+          />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Button
+            style={styles.loginButton}
+            onPress={() => navigation.navigate("Player")}
+            title="PLAYER"
           />
         </TouchableOpacity>
       </View>
