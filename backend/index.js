@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 var corsOptions = {
-  origin: "http://localhost:8081",
+  origin: "http://localhost:19006",
   credentials:  true
 }
 
@@ -89,7 +89,7 @@ app.get(`/v${version}/user/info/`, auth, async (req, res) => {
 });
 // user: use login with username, password
 // example: /v1/user/login
-app.post(`/v${version}/user/login/`, async (req, res) => {
+app.post(`/v${version}/user/login/`, async (req, res) => {    
     let params = req.body;
     const query = `SELECT * FROM ${database}.users WHERE username = ?`;
     pool.query(query, [sanitize(params.username)], (error, results) =>
@@ -119,12 +119,15 @@ app.get(`/v${version}/user/logout/`, function (req, res) {
 // songs: read song information from song_id
 // example: /v1/song/info/0
 app.get(`/v${version}/song/info/:id`, async (req, res) => {
+    // console.log ("CALLED"); 
+
     const query = `SELECT * FROM ${database}.songs WHERE id = ?`;
     pool.query(query, [sanitize(req.params.id)], (error, results) => {
         if (!results[0]) {
             res.json({ error_message: "No song with that id found" });
         } else {
             res.json({ status: "ok", data:results[0]});
+            // console.log (results[0]); 
         }
     });
 });

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import 
 {
     StyleSheet,
@@ -12,69 +12,52 @@ import
   } from "react-native";
 
   import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-  import { faThumbsUp, faThumbsDown, faPause, faFastForward } from '@fortawesome/free-solid-svg-icons/'
+  import { faThumbsUp, faThumbsDown, faPause, faFastForward, faPlay } from '@fortawesome/free-solid-svg-icons/'
+
+import { Audio } from 'expo-av';
 
 import colours from '../config/colours.js'; 
 
-// import TrackPlayer from "react-native-track-player"; 
-
-// const tracks = [
-//   {
-//     id: 1, 
-//     url: require ('../assets/temp-track-1.mp3'), 
-//     title: "Track 1"
-//   }, 
-//   {
-//     id: 2, 
-//     url: require ('../assets/temp-track-2.mp3'), 
-//     title: "Track 2"
-//   }, 
-//   {
-//     id: 3, 
-//     url: require ('../assets/temp-track-3.mp3'), 
-//     title: "Track 3"
-//   }
-// ]
-
-// TrackPlayer.updateOptions ({
-//   stopWithApp: false, 
-//   capabilities: [
-//     TrackPlayer.CAPABILITY_PLAY, 
-//     TrackPlayer.CAPABILITY_PAUSE
-//   ], 
-//   compactCapabilities: [
-//     TrackPlayer.CAPABILITY_PLAY, 
-//     TrackPlayer.CAPABILITY_PAUSE
-//   ], 
-// })
-
 function PlayerScreen ({ navigation }) 
 {
-  // const setupPlayer = async () => 
-  // {
-  //   try
-  //   {
-  //     await TrackPlayer.setupPlayer(); 
-  //     await TrackPlayer.add(tracks); 
-  //   }
-  //   catch (e)
-  //   {
-  //     console.log (e); 
-  //   }
-  // }
-
-  // useEffect (() => 
-  // {
-  //   setupPlayer(); 
-
-  //   return () => TrackPlayer.destroy(); 
-  // }, []); 
-
-  const pauseHandler = () => 
+  const [sound, setSound] = useState (); 
+  
+  const playHandler = async() =>
   {
-    console.log ("PAUSE"); 
-    // TrackPlayer.pause(); 
+      console.log('Loading Sound'); 
+
+      const response = await fetch ('http://localhost:8080/v1/song/info/0', 
+      {
+        credentials: 'include', 
+        method: "GET", 
+      }).then (res => res.json()); 
+      
+      // const response = await fetch ('https://samplelib.com/lib/preview/mp3/sample-6s.mp3'); 
+
+      const audio = response.data.spotify_uri; 
+
+      const { sound } = await Audio.Sound.createAsync(audio); 
+      setSound(sound);
+
+      await sound.playAsync();
   }
+
+  const pauseHandler = async () => 
+  {
+    if (!sound)
+      return; 
+
+    console.log ("PAUSE"); 
+    await sound.pauseAsync(); 
+  }
+
+  useEffect(() => {
+    return sound ? () => 
+    {
+        console.log('Unloading Sound');
+        sound.unloadAsync();
+    } : undefined;
+  }, [sound]);
   
   const skipHandler = () => 
   {
@@ -104,6 +87,9 @@ function PlayerScreen ({ navigation })
         <FontAwesomeIcon icon={ faThumbsUp } size={55} />
       </TouchableOpacity>
       <View style={styles.voteSkipContainer}>
+        <TouchableOpacity style={styles.buttonBg} onPress={playHandler}>
+          <FontAwesomeIcon icon={ faPlay } size={55} />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.buttonBg} onPress={pauseHandler}>
           <FontAwesomeIcon icon={ faPause } size={55} />
         </TouchableOpacity>
