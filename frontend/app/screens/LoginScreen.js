@@ -38,7 +38,10 @@ function LoginScreen ({ navigation })
 			if (result.status !== 'ok')
 				console.log(result.error_message); 
 			else
+      {
         console.log ("SUCCESS"); 
+        navigation.navigate("Player"); 
+      }
 		}
    
     return (
@@ -75,13 +78,13 @@ function LoginScreen ({ navigation })
             title="LOGIN"
           />
         </TouchableOpacity>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Button
             style={styles.loginButton}
             onPress={() => navigation.navigate("Player")}
             title="PLAYER"
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     );
 }

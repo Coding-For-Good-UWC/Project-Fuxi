@@ -18,37 +18,31 @@ import { Audio } from 'expo-av';
 
 import colours from '../config/colours.js'; 
 
+var currentlyPlaying = -1; 
+
 function PlayerScreen ({ navigation }) 
 {
   const [sound, setSound] = useState (); 
-  
-  const playHandler = async() =>
+  const [isPlaying, setIsPlaying] = useState (false); 
+
+  useEffect (() => 
   {
-      console.log('Loading Sound'); 
-
-      const response = await fetch ('http://localhost:8080/v1/song/info/0', 
-      {
-        credentials: 'include', 
-        method: "GET", 
-      }).then (res => res.json()); 
-      
-      // const response = await fetch ('https://samplelib.com/lib/preview/mp3/sample-6s.mp3'); 
-
-      const audio = response.data.spotify_uri; 
-
-      const { sound } = await Audio.Sound.createAsync(audio); 
-      setSound(sound);
-
-      await sound.playAsync();
-  }
+    voteHandler (0)(); 
+  }, [])
 
   const pauseHandler = async () => 
   {
     if (!sound)
       return; 
 
-    console.log ("PAUSE"); 
-    await sound.pauseAsync(); 
+    if (isPlaying)
+      await sound.pauseAsync(); 
+    else
+      await sound.playAsync (); 
+
+    console.log (isPlaying ? "PAUSED" : "UNPAUSED"); 
+    
+    setIsPlaying (!isPlaying); 
   }
 
   useEffect(() => {
@@ -58,46 +52,61 @@ function PlayerScreen ({ navigation })
         sound.unloadAsync();
     } : undefined;
   }, [sound]);
-  
-  const skipHandler = () => 
+
+  const voteHandler = (pscore) => 
   {
-    console.log ("SKIP"); 
-    // TrackPlayer.skipToNext(); 
+    return async() => 
+    {
+      let response = await fetch('http://localhost:8080/v1/user_preferences/new', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+        'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(
+        {
+          "user_id": 1, 
+          "song_id": currentlyPlaying, 
+          "score": pscore, 
+        })
+      }).then(res => res.json())
+      
+      if (response.status !== 'ok'){
+          alert(response.error_message)
+      }
+      else
+      {
+        const audio = response.data.uri; 
+
+        currentlyPlaying = response.data.song_id; 
+
+        console.log('Loading Sound'); 
+        console.log (audio); 
+
+        const { sound } = await Audio.Sound.createAsync(audio); 
+        setSound(sound);
+
+        await sound.playAsync();        
+        setIsPlaying (true); 
+      }
+    }
   }
 
-  const voteUpHandler = () => 
-  {
-    console.log ("VOTE UP"); 
-    // skipHandler (); 
-  }
-
-  const voteDownHandler = () => 
-  {
-    console.log ("VOTE DOWN"); 
-    // skipHandler (); 
-  }
 
   return (
     <View style={styles.container}>
-      {/* <audio controls autoPlay>
-        <source src="../assets/temp-track-1" type="audio/mpeg" />
-        Your browser does not support the audio element.
-      </audio> */}
-      <TouchableOpacity style={styles.voteUpContainer} onPress={voteUpHandler}>
+      <TouchableOpacity style={styles.voteUpContainer} onPress={() => voteHandler(1)()}>
         <FontAwesomeIcon icon={ faThumbsUp } size={55} />
       </TouchableOpacity>
       <View style={styles.voteSkipContainer}>
-        <TouchableOpacity style={styles.buttonBg} onPress={playHandler}>
-          <FontAwesomeIcon icon={ faPlay } size={55} />
-        </TouchableOpacity>
         <TouchableOpacity style={styles.buttonBg} onPress={pauseHandler}>
-          <FontAwesomeIcon icon={ faPause } size={55} />
+          <FontAwesomeIcon icon={ isPlaying ? faPause : faPlay } size={55} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonBg} onPress={skipHandler}>
+        <TouchableOpacity style={styles.buttonBg} onPress={() => voteHandler(0)()}>
           <FontAwesomeIcon icon={ faFastForward } size={55} />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.voteDownContainer} onPress={voteDownHandler}>
+      <TouchableOpacity style={styles.voteDownContainer} onPress={() => voteHandler(-1)()}>
         <FontAwesomeIcon icon={ faThumbsDown } size={55} />
       </TouchableOpacity>
     </View>
