@@ -55,6 +55,7 @@ function PlayerScreen ({ navigation })
 
   const voteHandler = (pscore) => 
   {
+    //TODO - avoid spamming before response
     return async() => 
     {
       console.log(currentlyPlaying)
