@@ -57,6 +57,7 @@ function PlayerScreen ({ navigation })
   {
     return async() => 
     {
+      console.log(currentlyPlaying)
       let response = await fetch('http://localhost:8080/v1/user_preferences/new', {
         method: 'POST',
         credentials: 'include',
@@ -71,14 +72,11 @@ function PlayerScreen ({ navigation })
         })
       }).then(res => res.json())
       
-      if (response.status !== 'ok'){
-          alert(response.error_message)
-      }
+      if (response.status !== 'ok') alert(response.error_message)
       else
       {
         const audio = response.data.uri; 
-
-        currentlyPlaying = response.data.song_id; 
+        currentlyPlaying = response.data.id; 
 
         console.log('Loading Sound'); 
         console.log (audio); 
