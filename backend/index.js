@@ -60,7 +60,7 @@ app.listen(port, () => {
 });
 
 app.get(`/v${version}/`, async (req, res) => {
-    res.json({ error_message: "Request recieved" });
+    res.json({ status: "error", error_message: "Password is invalid" });    
 });
 
 // user: read user_id from username
@@ -146,20 +146,16 @@ app.get(`/v${version}/user_preferences/info`, auth, async (req, res) => {
 app.post(`/v${version}/user_preferences/new`, auth, async (req, res) => { // TODO: change req.body.user_id to req.session.user
     const params = {
         user_id: req.body.user_id,
-        song_id: sanitize(req.body.song_id),
-        score: sanitize(req.body.score),
-    };
+        song_id: req.body.song_id,
+        score: req.body.score,
+    }
 
-    if (params.score != 0)
+    if (params.score != 0 && params.song_id != -1)
     {
+        console.log("UPDATING")
         const query = `INSERT INTO ${database}.user_preferences(user_id, song_id, score) VALUES(?,?,?) ON DUPLICATE KEY UPDATE score=score+?`;
         pool.query(query, [params.user_id, params.song_id, params.score, params.score], (error) => {
-            if (error) {
-                res.json({
-                    status: 'error', 
-                    error_message: `${error.code}: Inserting record failed!`,
-                });
-            } 
+            if (error) res.json({ status: "error", error_message: `${error.code}: Inserting record failed!` }); 
         });
     }
 
@@ -172,37 +168,21 @@ app.post(`/v${version}/user_preferences/new`, auth, async (req, res) => { // TOD
             const userQuery = `SELECT * FROM ${database}.user_preferences WHERE user_id = ?`;
             pool.query(userQuery, [params.user_id], async(error, data) => 
             {
-                // res.json({ status: "ok", data:results[0]});
-                let cantPlay = []; 
-                let range = results.length + data.reduce((total, track) => { 
-                    if (track.score == -1) 
-                        cantPlay.push(track.song_id) 
-                        
-                    return total += track.score; 
-                }, 0); 
-
-                let random = Math.floor(Math.random()*range);
-                
-                cantPlay.sort()
-
-                let track  = random < results.length - cantPlay.length ? random - cantPlay.reduce((total, track) => total += track<random, 0) :
-                                                data.find(track => {random -= track.score; return random <= results.length - cantPlay.length}).song_id;
-
-                // let uri = await fetch (`/v${version}/song/info/${track}`).then (res => res.json()).spotify_uri; 
-                let uri = ""; 
-                const query = `SELECT * FROM ${database}.songs WHERE id = ${track}`;
-                pool.query(query, [], (error, results) => {
-                    if (!results[0])
-                        res.json({ status: "error", error_message: "No song with that id found" });
-                    else 
-                    {
-                        uri = results[0].uri; 
-                        res.json ({ data: { uri, song_id: track }, status: "ok" }); 
-                    }
-                });
-                
+                randList = JSON.parse(JSON.stringify(results))
+                cantPlay = []
+                for (let i=0; i<data.length; i++){
+                    if (data[i].score == -1) cantPlay.push(data[i].song_id)
+                    else for (let j=0; j<data[i].score; j++) randList.push(results[data[i].song_id])
+                }
+                for (let i=0; i<cantPlay.length; i++)
+                    for(let j=0; j<randList.length; j++)
+                        if (cantPlay[i] == randList[j].id) randList.splice(j, 1)
+                            
+                if (!randList[0]) res.json({ status: "error", error_message: "No liked songs in current selection, zooming to other part of the database"})
+                else res.json ({ data: randList[Math.floor(Math.random() * randList.length)], status: "ok" });
             })
         }
     })
 })
+
 
