@@ -103,7 +103,7 @@ app.post(`/v${version}/user/login/`, async (req, res) => {
                 req.session.user = results[0].id;
                 res.json({ status:"ok" });
             } else {
-                res.json({ error_message: "Password is invalid" });
+                res.json({ status: "error", error_message: "Password is invalid" });
             }
         }
     });
@@ -196,7 +196,7 @@ app.post(`/v${version}/user_preferences/new`, auth, async (req, res) => { // TOD
                         res.json({ status: "error", error_message: "No song with that id found" });
                     else 
                     {
-                        uri = results[0].spotify_uri; 
+                        uri = results[0].uri; 
                         res.json ({ data: { uri, song_id: track }, status: "ok" }); 
                     }
                 });
