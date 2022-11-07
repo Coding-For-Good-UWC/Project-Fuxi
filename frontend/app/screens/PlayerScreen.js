@@ -64,10 +64,9 @@ function PlayerScreen ({ navigation })
 
   const voteHandler = (pscore) => 
   {
-    //TODO - avoid spamming before response
-    return async() => 
+    const getSong = async(pscore) => 
     {
-      console.log(currentlyPlaying)
+      console.log ("GET SONG CALLED"); 
 
       let response = await fetch('http://localhost:8080/v1/user_preferences/new', {
         method: 'POST',
@@ -83,13 +82,16 @@ function PlayerScreen ({ navigation })
         })
       }).then(res => res.json())
       
-      if (response.status !== 'ok') alert(response.error_message)
+      if (response.status !== 'ok'){
+          alert(response.error_message)
+      }
       else
       {
         console.log (response.data); 
 
         const audio = response.data.uri; 
-        currentlyPlaying = response.data.id; 
+
+        currentlyPlaying = response.data.song_id; 
 
         console.log('Loading Sound'); 
         console.log (audio); 
