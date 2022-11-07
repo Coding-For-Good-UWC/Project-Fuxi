@@ -42,7 +42,5 @@ export default function App()
     </NavigationContainer>
 
     // <PlayerScreen />
-
-    // <LandingScreen />
   )
 }

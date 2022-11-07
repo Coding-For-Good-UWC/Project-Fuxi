@@ -1,195 +1,213 @@
-import React from 'react';
-import { 
-    StyleSheet, 
-    Text, 
-    Button, 
-    View,
-    Animated,  
-    Pressable,
-    Image
+import React, { useState } from 'react';
+ 
+import {
+   StyleSheet,
+   Text,
+   Button,
+   View,
+   Image, 
+   ScrollView, 
+   Dimensions,
+   TouchableOpacity
 } from 'react-native';
+ 
+import colours from '../config/colours.js';
 
-function LandingScreen({ navigation }) {
+const carouselImages = [
+    require("../assets/carousel-images/image-1.jpg"), 
+    require("../assets/carousel-images/image-2.jpg"), 
+    require("../assets/carousel-images/image-3.jpg"), 
+    require("../assets/carousel-images/image-4.jpg")
+]
+
+// const { width } = Dimensions.get("window"); 
+// const height = width * 0.6; 
+
+function LandingScreen({ navigation }) 
+{
+    const [currentCarouselIndex, setCurrentCarouselIndex] = useState (0); 
+
+    const updateCarouselBullets = ({nativeEvent}) => 
+    {
+        const slide = Math.floor(nativeEvent.contentOffset.x / nativeEvent.layoutMeasurement.width); 
+        if (slide !== currentCarouselIndex)
+            setCurrentCarouselIndex (slide); 
+    }
+
     return (
-        <View style={styles.container}>
-            <View style={styles.top}>
-                <Text style={styles.title}>Project Fuxi</Text>
-                <Text style={styles.bodyText}>The unanimous Declaration of the thirteen united States of America, When in the Course of human events, it becomes necessary for one people to dissolve the political bands which have connected them with another, and to assume among the powers of the earth, the separate and equal station to which the Laws of Nature and of Nature's God entitle them, a decent respect to the opinions of mankind requires that they should declare the causes which impel them to the separation. We hold these truths to be self-evident, that all men are created equal, that they are endowed by their Creator with certain unalienable Rights, that among these are Life, Liberty and the pursuit of Happiness. </Text>
-                <Image source={require("../assets/fuxiIcon.png")} style={styles.image}/>
+       <View style={styles.container}>
+            <View style={styles.carouselContainer} pointerEvents={'auto'}>
+                <ScrollView 
+                    pagingEnabled
+                    horizontal
+                    bounces={false}
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.carouselScrollView}
+                    onScroll={updateCarouselBullets}
+                >
+                {
+                    carouselImages.map ((image, index) => (
+                        <Image source={image} key={index} style={styles.carouselImage}></Image>
+                    ))
+                }
+                </ScrollView>
+                <View style={styles.carouselBulletContainer}>
+                    {
+                        carouselImages.map ((item, index) => <Text style={index == currentCarouselIndex ? styles.carouselBulletActive : styles.carouselBullet} key={index}>⬤</Text>)
+                    
+                    }
+                </View>
+                <View style={styles.carouselOverlay} pointerEvents={'none'}>
+                    <Text style={styles.titleText}>Project FUXI</Text>
+                </View>
             </View>
-            <View style={styles.bottom}>
-                {/* <button style={styles.button}>
-                    <Text style={styles.buttonText}>LOGIN</Text>
-                </button> */}
-
-                <Button 
-                    title="Login" 
-                    // style={styles.button}
-                    onPress={() => navigation.navigate("Login")}
-                />
+            <View style={styles.bodyContainer}>
+                <View style={styles.bodyCard}>
+                    <View style={styles.fuxiImageContainer}>
+                        <Image source={require('../assets/fuxiIcon.png')} style={styles.fuxiImage} />
+                    </View>
+                    <View style={styles.descriptionContainer}>
+                        <Text style={styles.subtitleText}>Project FUXI</Text>
+                        <Text numberOfLines={10} style={styles.descriptionText}>Project Fuxi is an initiative aiming to increaes the quality of life of dementia patients through the use of Music Therapy. Music, combined with detailed data collection, autobiographical information, and user-friendly solutions, can have a significant impact on the well-being of those with dementia. As the areas of the brain that process musical memory are some of the last to be affected, carefully curated and individualised music can encourage brain activity and animate those who would otherwise be quiet and confused.</Text>
+                        <Button 
+                            title="Login" 
+                            color={colours.blue}
+                            onPress={() => navigation.navigate("Login")}
+                        />
+                    </View>
+                </View>
             </View>
-        </View>
-    );
+            <View style={styles.parallaxContainer}>
+                <Image source={require ('../assets/carousel-images/image-1.jpg')} style={styles.parallaxImage} />
+            </View>
+       </View>
+   );
 }
-
-const styles = StyleSheet.create( {
+ 
+const styles = StyleSheet.create({
     container: 
     {
-        width: "100%",
-        height: "100%",
-        flex: 1,
-        alignItems: 'center',
-    },
-    top: {
-        flex: 5,
-        backgroundColor: '#dde6d5',
-        width: "100%",
-        height: "100%",
-        fontSize: 20,
-    },
-    image: {
-        justifyContent: 'right',
-        marginLeft: '115px',
-        alignItems: 'center',
-        marginTop: '-330px',
-        width: 315, 
-        height: 445,
-    },
-    title: {
-        paddingLeft: '35%',
-        fontSize: 70,
-        marginTop: '7px', 
-        fontFamily:'PingFang TC',
-        color: '#0f1f13',
-        textShadowColor: '#3c6948',
-        textShadowRadius: 25,
-        textShadowOffset: 0
-    },
-
-    bodyText: {
-        marginRight: 90, 
-        marginLeft: 470, 
-        marginTop: 50, 
-        fontFamily: 'PingFang TC', 
-        fontSize: 19,
-        color: '#0f1f13',
-    },
-    Text: {
-        color: 'black',
-        backgroundColor: 'white',
-        alignItems: 'center',
-        justifyContent:'center',
-        fontSize: 75,
-        marginRight: 50,
-        marginLeft: 50,
-        fontFamily: 'PingFang TC'
-    },
-    Text2: {
-        marginRight: 50,
-        marginLeft: 50,
-    },
-    button: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 4,
-        elevation: 3,
-        backgroundColor: '#3c6948',
-        fontFamily: 'PingFang TC',
-        paddingLeft: '25px',
-        paddingRight: '25px',
-        paddingTop: '15px',
-        paddingBottom: '15px'
-    },
-    buttonText: {
-        fontSize: 16,
-        lineHeight: 21,
-        letterSpacing: 0.25,
-        color: 'antiquewhite',
-        fontFamily: 'PingFang TC',
-    },
-    bottom: {
-        flex: 0.9,
-        backgroundColor: '#000a03',
-        color: 'white', 
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: "100%",
+        flex: 1
+    }, 
+    carouselContainer: 
+    {
+        width: "100%", 
+        height: "100%" 
+    },  
+    carouselScrollView: 
+    {
+        width: "100%", 
         height: "100%"
-    },
+    }, 
+    carouselImage: 
+    {
+        width: Dimensions.get('window').width, 
+        height: "100%", 
+        resizeMode: 'cover', 
+    }, 
+    carouselBulletContainer: 
+    {
+        flexDirection: 'row', 
+        position: 'absolute', 
+        bottom: 20, 
+        alignSelf: 'center', 
+    }, 
+    carouselBullet: 
+    {
+        color: '#888', 
+        margin: 3
+    }, 
+    carouselBulletActive: 
+    {
+        color: '#fff', 
+        margin: 3
+    }, 
+    carouselOverlay: 
+    {
+        height: "100%",
+        width: "100%",
+        position: 'absolute',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+        flex: 1, 
+        justifyContent: 'center', 
+        alignItems: 'center'
+        // pointer-events: none; 
+    }, 
+    titleText: 
+    {
+        color: "white",
+        fontSize: 80, 
+        paddingBottom: 100
+    }, 
+
+    bodyContainer: 
+    {
+        backgroundColor: colours.bg, 
+        height: 660, 
+        paddingLeft: "10%", 
+        paddingRight: "10%", 
+        paddingTop: "7%", 
+        paddingBottom: "7%", 
+        width: "100%", 
+    }, 
+    bodyCard: 
+    {
+        backgroundColor: colours.charcoal, 
+        flexDirection: 'row', 
+        borderRadius: 15, 
+        shadowColor: 'black',
+        shadowOffset: { width: 10, height: 15 },
+        shadowRadius: 5,
+        shadowOpacity: 0.3, 
+        paddingLeft: "5%", 
+        paddingRight: "5%", 
+        width: "100%", 
+        height: "100%"
+    }, 
+    fuxiImageContainer: 
+    {
+        flex: 1, 
+        // backgroundColor: "green", 
+        justifyContent: 'center', 
+        alignItems: 'center'
+    }, 
+    fuxiImage: 
+    {
+        width: "100%", 
+        aspectRatio: 1
+    }, 
+    descriptionContainer: 
+    {
+        flex: 2, 
+        // backgroundColor: "red", 
+        // justifyContent: 'center', 
+        paddingTop: "5%"
+    }, 
+    subtitleText: 
+    {
+        color: colours.text, 
+        fontSize: 30, 
+        fontWeight: 'bold', 
+        paddingBottom: 20
+    }, 
+    descriptionText: 
+    {
+        color: colours.text, 
+        fontSize: 23, 
+        lineHeight: 30, 
+        paddingBottom: 20
+    }, 
+    parallaxContainer: 
+    {
+        height: 400, 
+        width: "100%", 
+    }, 
+    parallaxImage: 
+    {
+        resizeMode: 'cover', 
+        width: "100%", 
+        height: "100%"
+    }
 });
-
-export default LandingScreen;
-
-
-
-
-// import React from 'react';
-// import { 
-//     StyleSheet, 
-//     View, 
-//     Text, 
-//     Button
-// } from 'react-native';
-
-// import colours from '../config/colours.js'; 
-
-// function LandingScreen({ navigation }) {
-//     return (
-//         <View style={styles.container}>
-//             <Button 
-//                 title="Login"
-//                 onPress={() => navigation.navigate("Login")}/>
-//             <Button 
-//                 title="Player"
-//                 onPress={() => navigation.navigate("Player")}/>
-//         </View>
-//     );
-// }
-
-// const styles = StyleSheet.create({
-//     container: 
-//     {
-//         flex: 1, 
-//         justifyContent: 'center', 
-//         alignItems: 'center', 
-//         backgroundColor: "lightblue", 
-//     }, 
-// })
-
-
-
-// // const styles = StyleSheet.create({
-// //     container: 
-// //     {
-// //         flex: 1, 
-// //         flexDirection: 'row',
-// //         // alignItems: 'center', 
-// //         // justifyContent: 'center', 
-// //     },
-// //     left: 
-// //     {
-// //         flex: 1, 
-// //         // backgroundColor: "red", 
-// //         alignItems: 'center', 
-// //         justifyContent: 'center', 
-// //     }, 
-// //     image: 
-// //     {
-// //         width: 100, 
-// //         height: 100, 
-// //     }, 
-// //     right: 
-// //     {
-// //         flex: 1.5, 
-// //         // backgroundColor: "orange", 
-// //         alignItems: 'center', 
-// //         justifyContent: 'center', 
-// //     }, 
-// //     title: 
-// //     {
-// //         // fontFamily: 
-// //         fontSize: 30
-// //     },
-// // })
-
-// export default LandingScreen;
+ 
+export default LandingScreen; 

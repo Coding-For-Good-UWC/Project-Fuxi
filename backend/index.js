@@ -103,7 +103,7 @@ app.post(`/v${version}/user/login/`, async (req, res) => {
                 req.session.user = results[0].id;
                 res.json({ status:"ok" });
             } else {
-                res.json({ error_message: "Password is invalid" });
+                res.json({ status: "error", error_message: "Password is invalid" });
             }
         }
     });
@@ -168,7 +168,6 @@ app.post(`/v${version}/user_preferences/new`, auth, async (req, res) => { // TOD
             const userQuery = `SELECT * FROM ${database}.user_preferences WHERE user_id = ?`;
             pool.query(userQuery, [params.user_id], async(error, data) => 
             {
-            
                 randList = JSON.parse(JSON.stringify(results))
                 cantPlay = []
                 for (let i=0; i<data.length; i++){
@@ -181,7 +180,6 @@ app.post(`/v${version}/user_preferences/new`, auth, async (req, res) => { // TOD
                             
                 if (!randList[0]) res.json({ status: "error", error_message: "No liked songs in current selection, zooming to other part of the database"})
                 else res.json ({ data: randList[Math.floor(Math.random() * randList.length)], status: "ok" });
-            
             })
         }
     })
