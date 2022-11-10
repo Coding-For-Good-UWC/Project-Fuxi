@@ -152,7 +152,7 @@ app.post(`/v${version}/user_preferences/new`, auth, async (req, res) => { // TOD
 
     if (params.score != 0 && params.song_id != -1)
     {
-        console.log("UPDATING")
+        // console.log("UPDATING")
         const query = `INSERT INTO ${database}.user_preferences(user_id, song_id, score) VALUES(?,?,?) ON DUPLICATE KEY UPDATE score=score+?`;
         pool.query(query, [params.user_id, params.song_id, params.score, params.score], (error) => {
             if (error) res.json({ status: "error", error_message: `${error.code}: Inserting record failed!` }); 
@@ -177,9 +177,12 @@ app.post(`/v${version}/user_preferences/new`, auth, async (req, res) => { // TOD
                 for (let i=0; i<cantPlay.length; i++)
                     for(let j=0; j<randList.length; j++)
                         if (cantPlay[i] == randList[j].id) randList.splice(j, 1)
+                
+                // console.log (randList)
                             
                 if (!randList[0]) res.json({ status: "error", error_message: "No liked songs in current selection, zooming to other part of the database"})
                 else res.json ({ data: randList[Math.floor(Math.random() * randList.length)], status: "ok" });
+
             })
         }
     })

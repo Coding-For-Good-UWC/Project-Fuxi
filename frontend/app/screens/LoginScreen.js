@@ -102,8 +102,8 @@ const styles = StyleSheet.create
     alignItems: "center", 
     justifyContent: "center", 
     backgroundColor: colours.bg, 
-    paddingLeft: "20%", 
-    paddingRight: "20%", 
+    paddingLeft: "40%", 
+    paddingRight: "40%", 
     paddingTop: "10%", 
     paddingBottom: "10%", 
   }, 
@@ -113,7 +113,8 @@ const styles = StyleSheet.create
     alignItems: "center", 
     justifyContent: "center", 
     backgroundColor: colours.charcoal, 
-    width: "100%", 
+    // width: "100%", 
+    width: 600, 
     height: "100%",
     borderRadius: 15, 
     shadowColor: 'black',
@@ -157,11 +158,12 @@ const styles = StyleSheet.create
     color: colours.text, 
     fontSize: 45, 
     fontWeight: 'bold', 
+    marginTop: 40
   }, 
   loginText: 
   {
     color: colours.text, 
-    fontSize: 35, 
+    fontSize: 30, 
     fontWeight: 'bold', 
     marginBottom: 20
   }, 

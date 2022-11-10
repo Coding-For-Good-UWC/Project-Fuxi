@@ -22,10 +22,15 @@ var currentlyPlaying = -1;
 
 function PlayerScreen ({ navigation }) 
 {
-  const [sound, setSound] = useState (); 
+  const [sound, setSound] = useState (null); 
+  const [songPercentage, setSongPercentage] = useState (0); 
   const [isPlaying, setIsPlaying] = useState (false); 
-
   const [isFirstPlay, setIsFirstPlay] = useState (true); 
+  const [isLoading, setIsLoading] = useState (false); 
+  const [songInfo, setSongInfo] = useState ({
+    title: 'Track Name', 
+    imgUri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Square_gray.svg/1200px-Square_gray.svg.png'
+  }); 
 
   const pauseHandler = async () => 
   {
@@ -45,6 +50,11 @@ function PlayerScreen ({ navigation })
     setIsPlaying (!isPlaying); 
   }
 
+  useEffect(() => 
+  {
+    voteHandler (0); 
+  }, [])
+
   useEffect(() => {
     return sound ? () => 
     {
@@ -53,21 +63,18 @@ function PlayerScreen ({ navigation })
     } : undefined;
   }, [sound]);
 
-  const onPlaybackStatusUpdate = async() => 
-  {
-    if (!sound)
+  const onPlaybackStatusUpdate = playbackStatus => {
+    if (!playbackStatus.isLoaded) 
       return; 
-
-    const status = await sound.getStatusAsync(); 
-    console.log (status.positionMillis); 
-  }
+    
+    setSongPercentage ((playbackStatus.positionMillis / playbackStatus.durationMillis) * 100); 
+  };
 
   const voteHandler = (pscore) => 
   {
-    //TODO - avoid spamming before response
-    return async() => 
+    const getSong = async() => 
     {
-      console.log(currentlyPlaying)
+      setIsLoading (true); 
 
       let response = await fetch('http://localhost:8080/v1/user_preferences/new', {
         method: 'POST',
@@ -86,38 +93,39 @@ function PlayerScreen ({ navigation })
       if (response.status !== 'ok') alert(response.error_message)
       else
       {
-        console.log (response.data); 
-
         const audio = response.data.uri; 
         currentlyPlaying = response.data.id; 
 
-        console.log('Loading Sound'); 
-        console.log (audio); 
+        const newSongInfo = 
+        {
+          title: response.data.title + " - " + response.data.artist, 
+          imgUri: response.data.img_uri
+        }
+
+        setSongInfo (newSongInfo); 
 
         const { sound } = await Audio.Sound.createAsync(audio); 
-        // console.log (sound); 
-        // const status = await sound.getStatusAsync(); 
-        // console.log (status); 
         setSound(sound);
-        
-        await sound.playAsync(); 
-        setIsPlaying (true); 
-        sound.setOnPlaybackStatusUpdate (onPlaybackStatusUpdate); 
 
-        // const playbackStatus = await sound.getStatusAsync(); 
-        // playbackStatus.positionMillis; 
+        sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+        
+        if (!isFirstPlay)
+        { 
+          setIsPlaying (true); 
+          await sound.playAsync(); 
+        }
       }
+
+      setIsLoading (false); 
     }
 
-    // try 
-    // {
-      getSong (isFirstPlay ? 0 : pscore); 
-      setIsFirstPlay (false); 
-    // } catch (e) 
-    // {
-    //   console.log ("ERROR"); 
-    //   console.error(e);
-    // } 
+    if (isLoading) 
+    {
+      console.log ("Already loading a song"); 
+      return; 
+    }
+    getSong (isFirstPlay ? 0 : pscore); 
+    if (isFirstPlay) setIsFirstPlay (false); 
   }
 
   return (
@@ -128,15 +136,16 @@ function PlayerScreen ({ navigation })
         </View>
         <View style={styles.musicInfoContainer}>
           <View style={styles.coverImageContainer}>
-            <Image style={styles.coverImage} source={require("../assets/tempMusicCover.jpeg")} />
+            <Image style={styles.coverImage} source={{uri: songInfo.imgUri}} />
+            {/* <Image style={styles.coverImage} source={require("../assets/tempMusicCover.jpeg")} /> */}
           </View>
           <View style={styles.playerContainer}>
             <View style={styles.songNameContainer}>
-              <Text style={styles.songName}>Song Name - Artist Name</Text>
+              <Text style={styles.songName} numberOfLines={1}>{songInfo.title}</Text>
             </View>
             <View style={styles.progressContainer}>
               <View style={styles.progressBar}>
-                <View style={styles.progressBarFill}></View>
+                <View style={[styles.progressBarFill, {width: `${songPercentage}%`}]}></View>
               </View>
 
               <TouchableOpacity style={styles.playPauseButton} onPress={pauseHandler}>
@@ -200,14 +209,15 @@ const styles = StyleSheet.create
 
   titleContainer: 
   {
-    flex: 0.2
+    flex: 0.1, 
+    // backgroundColor: 'orange'
   }, 
   title: 
   {
     color: colours.text, 
     fontSize: 45, 
     fontWeight: 'bold', 
-    marginBottom: 20
+    // marginBottom: 20, 
   }, 
 
   musicInfoContainer: 
@@ -218,14 +228,16 @@ const styles = StyleSheet.create
     alignItems: 'center', 
     // backgroundColor: 'green', 
     width: "100%", 
-    marginLeft: "1%", 
-    marginRight: "1%", 
+    // height: "80%", 
+    paddingLeft: "15%", 
+    paddingRight: "15%", 
+    // backgroundColor: 'green'
   }, 
   
   coverImageContainer: 
   {
     flex: 1, 
-    // backgroundColor: 'blue'
+    // backgroundColor: 'blue', 
   }, 
   coverImage: 
   {
@@ -236,8 +248,11 @@ const styles = StyleSheet.create
 
   playerContainer: 
   {
-    flex: 5, 
+    marginLeft: '4%', 
+    flex: 4, 
     flexDirection: 'column', 
+    // backgroundColor: 'red', 
+    height: "40%"
   }, 
 
   songNameContainer: 
@@ -247,7 +262,7 @@ const styles = StyleSheet.create
   songName: 
   {
     color: colours.text, 
-    fontSize: 35, 
+    fontSize: 30, 
     fontWeight: 'bold', 
     marginBottom: 20
   }, 
@@ -256,7 +271,7 @@ const styles = StyleSheet.create
   {
     flex: 1, 
     flexDirection: 'row', 
-    alignItems: 'center'
+    alignItems: 'center', 
   }, 
   playPauseButton: 
   {
@@ -267,19 +282,22 @@ const styles = StyleSheet.create
     justifyContent: 'center', 
     alignItems: 'center', 
     margin: 15, 
-    backgroundColor: "#3c6e71"
+    backgroundColor: "#3c6e71", 
+    position: 'absolute', 
+    right: 0, 
+    bottom: -2, 
   }, 
   progressBar: 
   {
     backgroundColor: colours.bg, 
-    width: "40%", 
+    width: "90%", 
     height: 18, 
     borderRadius: 25
   }, 
   progressBarFill: 
   {
     backgroundColor: 'white', 
-    width: "40%", 
+    // width: "40%", 
     height: "100%", 
     borderRadius: 25
   }, 
