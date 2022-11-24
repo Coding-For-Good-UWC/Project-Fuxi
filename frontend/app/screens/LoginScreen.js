@@ -40,7 +40,7 @@ function LoginScreen ({ navigation })
 			else
       {
         console.log ("SUCCESS"); 
-        navigation.navigate("Player"); 
+        navigation.navigate("Dashboard"); 
       }
 		}
    

@@ -1,21 +1,21 @@
 import LandingScreen from './app/screens/LandingScreen';
 import LoginScreen from './app/screens/LoginScreen';
+import CaregiverDashboard from './app/screens/CaregiverDashboard'; 
 import PlayerScreen from './app/screens/PlayerScreen';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { Platform } from 'react-native'; 
-
-// import TrackPlayer from 'react-native-track-player';
+import PatientRegistration from './app/screens/PatientRegistration';
 
 const Stack = createNativeStackNavigator();
-
-// TrackPlayer.registerPlaybackService (() => require ('./service')); 
 
 export default function App() 
 {
   console.log ("APP EXECUTED"); 
+
+  // return <CaregiverDashboard />; 
   
   return (
     <NavigationContainer>
@@ -31,6 +31,16 @@ export default function App()
         <Stack.Screen 
           name="Login" 
           component={LoginScreen} 
+          options={{ headerShown: Platform.OS !== 'web' }}
+        />
+        <Stack.Screen 
+          name="Dashboard" 
+          component={CaregiverDashboard} 
+          options={{ headerShown: Platform.OS !== 'web' }}
+        />
+        <Stack.Screen 
+          name="PatientRegistration" 
+          component={PatientRegistration} 
           options={{ headerShown: Platform.OS !== 'web' }}
         />
         <Stack.Screen 
