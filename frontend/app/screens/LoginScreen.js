@@ -21,11 +21,9 @@ function LoginScreen ({ navigation })
     let handleLogin = async (evt) => 
     {
 			evt.preventDefault(); 
-
-			let result = await fetch ('http://localhost:8080/v1/user/login', 
-      {
-				method: 'POST',
-				// credentials: 'include',
+      
+      const response = await fetch ('http://localhost:8080/v1/user/login', {
+        method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(
 					{
@@ -33,16 +31,13 @@ function LoginScreen ({ navigation })
 						"password": password
 					}
 				)
-			}).then(res => res.json())
+      }); 
+      const data = await response.json (); 
 
-			if (result.status !== 'ok')
-				console.log(result.error_message); 
-			else
-      {
-        console.log ("SUCCESS"); 
-        // navigation.navigate("Dashboard"); 
-        navigation.navigate("Player"); 
-      }
+      if (data.status === 'ok')
+        navigation.navigate ("Player"); 
+      else
+        console.log (data.error_message); 
 		}
    
     return (

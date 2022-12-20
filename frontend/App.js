@@ -17,8 +17,8 @@ export default function App()
 {
   console.log ("APP EXECUTED"); 
 
-  // return <PatientMusicForm/ >; 
   // return <PatientRegistration/ >; 
+  // return <PatientMusicForm/ >; 
   
   return (
     <NavigationContainer>
