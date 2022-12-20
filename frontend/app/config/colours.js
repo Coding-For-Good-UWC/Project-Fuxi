@@ -7,5 +7,6 @@ export default
     text: '#C0E0DE', 
 
     blue: '#4F7CAC',
+    selected: '#6e9fd4',
     light: '#9EEFE5'
 }

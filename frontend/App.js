@@ -7,7 +7,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { Platform } from 'react-native'; 
+
 import PatientRegistration from './app/screens/PatientRegistration';
+import PatientMusicForm from './app/screens/PatientMusicForm';
 
 const Stack = createNativeStackNavigator();
 
@@ -15,7 +17,8 @@ export default function App()
 {
   console.log ("APP EXECUTED"); 
 
-  // return <CaregiverDashboard />; 
+  // return <PatientMusicForm/ >; 
+  // return <PatientRegistration/ >; 
   
   return (
     <NavigationContainer>

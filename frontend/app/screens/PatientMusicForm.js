@@ -9,83 +9,73 @@ import
     Button,
     TouchableOpacity, 
     Platform
-  } from "react-native";
+} from "react-native";
+
+import GenreToggleButton from '../components/GenreToggleButton'; 
 
 import colours from '../config/colours.js'; 
 
-function LoginScreen ({ navigation }) 
+function PatientMusicForm ({ navigation }) 
 {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+    const genres = ["Pop", "Hip-hop", "Rap", "Classical", "Jazz"]; 
+    const [preferredGenres, setPreferredGenres] = useState(Array(6).fill(false)); 
 
-    let handleLogin = async (evt) => 
+    const updatePreferences = (genreIndex) => 
     {
-			evt.preventDefault(); 
+        let newPreferredGenres = preferredGenres; 
+        preferredGenres[genreIndex] = !preferredGenres[genreIndex]; 
+        setPreferredGenres(newPreferredGenres); 
+        console.log (preferredGenres); 
+    }
 
-			let result = await fetch ('http://localhost:8080/v1/user/login', 
-      {
-				method: 'POST',
-				// credentials: 'include',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(
-					{
-						"username": username,
-						"password": password
-					}
-				)
-			}).then(res => res.json())
+    const submitHandler = async (evt) => 
+    {
+        evt.preventDefault(); 
 
-			if (result.status !== 'ok')
-				console.log(result.error_message); 
-			else
-      {
-        console.log ("SUCCESS"); 
-        // navigation.navigate("Dashboard"); 
-        navigation.navigate("Player"); 
-      }
-		}
-   
+        const genreData = Object.assign(...genres.map((k, i) => ({[k]: preferredGenres[i]}))); // construct object
+
+        console.log (genreData); 
+
+        // TODO: post to db
+
+			// let result = await fetch ('http://localhost:8080/v1/user/login', 
+      // {
+			// 	method: 'POST',
+			// 	// credentials: 'include',
+			// 	headers: { 'Content-Type': 'application/json' },
+			// 	body: JSON.stringify(
+			// 		{
+			// 			"username": username,
+			// 			"password": password
+			// 		}
+			// 	)
+			// }).then(res => res.json())
+
+			// if (result.status !== 'ok')
+			// 	console.log(result.error_message); 
+			// else
+      // {
+      //   console.log ("SUCCESS"); 
+      //   navigation.navigate("Dashboard"); 
+      // }
+    }
+
     return (
       <View style={styles.container}>
         <View style={styles.card}>
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>Project FUXI</Text>
+            <Text style={styles.title}>New Patient</Text>
           </View>
           <View style={styles.bodyContainer}>
-            <View style={styles.leftContainer}>
-              <Image style={styles.image} source={require("../assets/fuxiIcon.png")} />
-            </View>
             <View style={styles.rightContainer}>
-              <Text style={styles.loginText}>LOGIN</Text>
-              <View
-                style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Username"
-                  autoCapitalize="none"
-                  secureTextEntry={false}
-                  onChangeText={(username) => setUsername(username)}
-                />
-              </View>
-        
-              <View
-                style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Password"
-                  secureTextEntry={true}
-                  onChangeText={(password) => setPassword(password)}
-                />
-              </View>
+                {genres.map((genre, index) => <GenreToggleButton genre={genre} key={index} updatePreferences={() => updatePreferences(index)} />)}
 
-              <TouchableOpacity><Text style={styles.clickableText}>Sign Up</Text></TouchableOpacity>
-              <TouchableOpacity><Text style={styles.clickableText}>Forgot Password?</Text></TouchableOpacity>
               <TouchableOpacity>
                 <Button
                   style={styles.loginButton}
-                  onPress={handleLogin}
+                  onPress={submitHandler}
                   color={colours.blue}
-                  title="LOGIN"
+                  title="Submit"
                 />
               </TouchableOpacity>
               </View>
@@ -139,13 +129,13 @@ const styles = StyleSheet.create
     width: "100%", 
     height: "100%",
   }, 
-  leftContainer: 
-  {
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    // backgroundColor: 'red'
-  }, 
+  // leftContainer: 
+  // {
+  //   flex: 1, 
+  //   justifyContent: 'center', 
+  //   alignItems: 'center', 
+  //   // backgroundColor: 'red'
+  // }, 
   rightContainer: 
   {
     flex: 1.2, 
@@ -168,13 +158,13 @@ const styles = StyleSheet.create
     fontWeight: 'bold', 
     marginBottom: 20
   }, 
-  image: 
-  {
-    // height: 100, 
-    // aspectRatio: 1, 
-    width: "100%", 
-    aspectRatio: 1, 
-  }, 
+  // image: 
+  // {
+  //   // height: 100, 
+  //   // aspectRatio: 1, 
+  //   width: "100%", 
+  //   aspectRatio: 1, 
+  // }, 
   inputContainer: 
   {
     backgroundColor: colours.blue,
@@ -208,4 +198,4 @@ const styles = StyleSheet.create
   // }
 });
 
-export default LoginScreen;
+export default PatientMusicForm;

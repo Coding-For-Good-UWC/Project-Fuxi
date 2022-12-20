@@ -96,6 +96,8 @@ function PlayerScreen ({ navigation })
         const audio = response.data.uri; 
         currentlyPlaying = response.data.id; 
 
+        console.log (audio); 
+
         const newSongInfo = 
         {
           title: response.data.title + " - " + response.data.artist, 
