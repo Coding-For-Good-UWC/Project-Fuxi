@@ -7,8 +7,7 @@ import
     Image,
     TextInput,
     Button,
-    TouchableOpacity, 
-    Platform
+    TouchableOpacity
   } from "react-native";
 
 import colours from '../config/colours.js'; 
@@ -21,23 +20,20 @@ function LoginScreen ({ navigation })
     let handleLogin = async (evt) => 
     {
 			evt.preventDefault(); 
-      
-      const response = await fetch ('http://localhost:8080/v1/user/login', {
-        method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(
-					{
-						"username": username,
-						"password": password
-					}
-				)
-      }); 
-      const data = await response.json (); 
 
+      const response = await fetch ("http://localhost:8080/institute/login", // get students for selected teacher's class
+      { 
+        body: JSON.stringify ({ username, password }), // send over text representation of json object 
+        headers: { "Content-Type": "application/json" }, // let server know to turn plain text back into json object
+        method: "POST"
+        // credentials: "include"
+      }); 
+      const data = await response.json(); 
+      
       if (data.status === 'ok')
-        navigation.navigate ("Player"); 
+        navigation.navigate ("PatientRegistration"); 
       else
-        console.log (data.error_message); 
+        console.log (data.message); 
 		}
    
     return (

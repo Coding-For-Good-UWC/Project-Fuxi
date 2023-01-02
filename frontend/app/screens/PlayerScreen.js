@@ -76,7 +76,7 @@ function PlayerScreen ({ navigation })
     {
       setIsLoading (true); 
 
-      let response = await fetch('http://localhost:8080/v1/user_preferences/new', {
+      let response = await fetch('http://localhost:8080/track/next', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -84,9 +84,9 @@ function PlayerScreen ({ navigation })
         },
         body: JSON.stringify(
         {
-          "user_id": 1, 
-          "song_id": currentlyPlaying, 
-          "score": pscore, 
+          "patientId": 1, 
+          "trackId": currentlyPlaying, 
+          "rating": pscore, 
         })
       }).then(res => res.json())
       

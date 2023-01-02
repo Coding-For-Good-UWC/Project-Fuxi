@@ -50,26 +50,23 @@ function PatientRegistration ({ navigation })
 
       console.log (patientData); 
 
-			// let result = await fetch ('http://localhost:8080/v1/user/login', 
+			// let result = await fetch ('http://localhost:8080/patient/new', 
       // {
 			// 	method: 'POST',
-			// 	// credentials: 'include',
 			// 	headers: { 'Content-Type': 'application/json' },
-			// 	body: JSON.stringify(
-			// 		{
-			// 			"username": username,
-			// 			"password": password
-			// 		}
-			// 	)
+			// 	body: JSON.stringify(patientData)
 			// }).then(res => res.json())
 
-			// if (result.status !== 'ok')
-			// 	console.log(result.error_message); 
-			// else
-      // {
-      //   console.log ("SUCCESS"); 
-      //   navigation.navigate("Dashboard"); 
-      // }
+      const response = await fetch ("http://localhost:8080/patient/new", 
+      { 
+        body: JSON.stringify (patientData), 
+        headers: { "Content-Type": "application/json" }, 
+        method: "POST"
+        // credentials: "include"
+      }); 
+      const data = await response.json(); 
+
+      console.log (data.newPatient); 
 		}
 
     const validateNumInput = (text) => 

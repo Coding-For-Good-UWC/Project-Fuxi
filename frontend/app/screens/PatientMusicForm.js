@@ -17,7 +17,7 @@ import colours from '../config/colours.js';
 
 function PatientMusicForm ({ navigation }) 
 {
-    const genres = ["Pop", "Hip-hop", "Rap", "Classical", "Jazz"]; 
+    const genres = ["Pop", "Hip-hop", "Rap", "Classical", "Jazz"]; // TODO: force to pick at least 3
     const [preferredGenres, setPreferredGenres] = useState(Array(6).fill(false)); 
 
     const updatePreferences = (genreIndex) => 
