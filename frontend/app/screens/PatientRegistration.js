@@ -50,13 +50,6 @@ function PatientRegistration ({ navigation })
 
       console.log (patientData); 
 
-			// let result = await fetch ('http://localhost:8080/patient/new', 
-      // {
-			// 	method: 'POST',
-			// 	headers: { 'Content-Type': 'application/json' },
-			// 	body: JSON.stringify(patientData)
-			// }).then(res => res.json())
-
       const response = await fetch ("http://localhost:8080/patient/new", 
       { 
         body: JSON.stringify (patientData), 

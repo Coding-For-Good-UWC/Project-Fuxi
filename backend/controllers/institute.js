@@ -15,21 +15,6 @@ const login = async (req, res, next) =>
     req.session.loggedIn = true;
     req.session.institute = institute._id;
 
-    // req.session.save(function (err) {
-    //     if (err)
-    //     {
-    //         console.log (err); 
-    //         return next(err); 
-    //     } 
-    //     // res.redirect('/')
-    // })
-
-    // res.setHeader(
-    //     'Access-Control-Allow-Origin',
-    //     'http://localhost:8080'
-    // );
-    // res.setHeader('Access-Control-Allow-Credentials', 'true'); 
-
     console.log ("LOGGED IN SUCCESSFULLY"); 
     console.log (req.session); 
     console.log ("----------------------"); 

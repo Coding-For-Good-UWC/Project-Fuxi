@@ -1,6 +1,7 @@
-const fetch = require ("node-fetch"); 
+// const fetch = require ("node-fetch"); 
 
 const trackModel = require("../models/track"); 
+const patientModel = require("../models/patient"); 
 
 // { 
 // 	"patientId": "63aa684762a0f822a9a2a5ca", 
@@ -17,13 +18,13 @@ const getNextTrack = async (req, res) =>
     if (rating < -1 || rating > 1)
         return res.status(400).json({ message: "Score must be a valid integer between -1 and 1" }); 
 
-    const response = await fetch ('http://localhost:8080/patient/getPatient', {
-        method: "POST", 
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: patientId })
-    }); 
-    const patient = await response.json (); 
-    // const patient = await patientModel.findById(patientId); 
+    // const response = await fetch ('http://localhost:8080/patient/getPatient', {
+    //     method: "POST", 
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ id: patientId })
+    // }); 
+    // const patient = await response.json (); 
+    const patient = await patientModel.findById(patientId); 
 
     if (!patient)
         return res.status(404).json({ message: "No patient by id " + patientId }); 

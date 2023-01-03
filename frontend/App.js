@@ -1,22 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import CredentialForm from "./app/components/CredentialForm";
 
 function App() {
   const [username, setUsername] = useState(null);
 
-  const attemptIdentifyMe = useCallback(async () => {
-    console.log ("ATTEMPT IDENTIFY"); 
-    const response = await fetch("http://localhost:8080/institute");
-    if (response.ok) {
-      console.log ("A");
-      const data = await response.json();
-      setUsername(data.username);
-    } else {
-      console.log ("B"); 
-      setUsername(null);
-    }
-  }, []);
-  const attemptLogin = useCallback(
+  const attemptLogin = 
     async (body) => {
       console.log ("ATTEMPT LOGIN"); 
       const response = await fetch("http://localhost:8080/institute/login", {
@@ -28,36 +16,32 @@ function App() {
       });
       if (response.ok) {
         console.log ("LOGGED IN SUCCESSFULLY"); 
-        attemptIdentifyMe();
       } else {
         const data = await response.json();
         console.log(data);
       }
-    },
-    [attemptIdentifyMe]
-  );
-  // const logout = useCallback(async () => {
-  //   await fetch("/institute", {
-  //     method: "DELETE",
-  //   });
-  //   attemptIdentifyMe();
-  // }, [attemptIdentifyMe]);
 
-  // useEffect(() => {
-  //   attemptIdentifyMe();
-  // }, [attemptIdentifyMe]);
+
+      response = await fetch("http://localhost:8080/institute");
+      if (response.ok) {
+        console.log ("A");
+        const data = await response.json();
+        setUsername(data.username);
+      } else {
+        console.log ("B"); 
+        setUsername(null);
+      }
+    };
 
   return (
     <div>
       {username === null ? (
         <CredentialForm
-          // onRegister={attemptRegistration}
           onLogin={attemptLogin}
         />
       ) : (
         <div>
           <div>Welcome, {username}!</div>
-          {/* <button onClick={logout}>Log out</button> */}
         </div>
       )}
     </div>
