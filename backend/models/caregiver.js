@@ -22,13 +22,13 @@ const schema = new Schema (
     }
 )
 
-schema.virtual("patients", { // institute.patients
+schema.virtual("patients", { // caregiver.patients
     ref: "patients", 
-    localField: "_id", // patient points to institute by id
-    foreignField: "institute", // patients have institute property
+    localField: "_id", // patient points to caregiver by id
+    foreignField: "caregiver", // patients have caregiver property
     justOne: false
 })
 
-// frontend: res.json institute.patients to frontend
+// frontend: res.json caregiver.patients to frontend
 
-module.exports = model ("institutes", schema); 
+module.exports = model ("caregivers", schema); 

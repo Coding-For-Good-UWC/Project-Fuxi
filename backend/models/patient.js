@@ -56,11 +56,11 @@ const schema = new Schema ({
             required: true
         }
     }], 
-    institute: 
+    caregiver: 
     {
         type: Types.ObjectId, 
         required: true, 
-        ref: "institutes"
+        ref: "caregivers"
     }
 })
 

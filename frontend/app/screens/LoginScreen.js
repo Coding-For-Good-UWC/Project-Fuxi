@@ -22,17 +22,20 @@ function LoginScreen ({ navigation })
     {
 			evt.preventDefault(); 
 
-      const response = await fetch ("http://localhost:8080/institute/login", // get students for selected teacher's class
+      const response = await fetch ("http://localhost:8080/caregiver/login", // get students for selected teacher's class
       { 
         body: JSON.stringify ({ username, password }), // send over text representation of json object 
         headers: { "Content-Type": "application/json" }, // let server know to turn plain text back into json object
         method: "POST"
-        // credentials: "include"
       }); 
       const data = await response.json(); 
+
+      const caregiver = data.caregiver; 
+
+      console.log (caregiver); 
       
       if (data.status === 'ok')
-        navigation.navigate ("PatientRegistration"); 
+        navigation.navigate ("Dashboard", { caregiver });
       else
         console.log (data.message); 
 		}
@@ -171,7 +174,7 @@ export default LoginScreen;
 //     {
 // 			evt.preventDefault(); 
 
-//       const response = await fetch ("http://localhost:8080/institute/login", // get students for selected teacher's class
+//       const response = await fetch ("http://localhost:8080/caregiver/login", // get students for selected teacher's class
 //       { 
 //         body: JSON.stringify ({ username, password }), // send over text representation of json object 
 //         headers: { "Content-Type": "application/json" }, // let server know to turn plain text back into json object

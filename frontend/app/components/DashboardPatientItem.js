@@ -9,25 +9,27 @@ import
 
 import colours from '../config/colours.js'; 
 
-function DashboardPatientItem (props, { navigation }) 
+function DashboardPatientItem (props) 
 {
-    const {id, name, location, birthdate, ethnicity, language, gender} = props.data; 
+    const { name, age, ethnicity } = props.data; 
+
+    console.log ("PROPS")
+    console.log(props.data)
+    console.log(typeof(props.data))
+    console.log (name)
+    console.log (age)
+    console.log (ethnicity)
 
     return (
       <View style={styles.container}>
         <View style={styles.card}>
             <View style={styles.nameContainer}>
-                <Text style={styles.nameText}>{name + " (" + gender[0] + ")"}</Text>
+                <Text style={styles.nameText}>{name}</Text>
             </View>
             <View style={styles.bodyContainer}>
-                <View style={styles.imageContainer}>
-                    <Image style={styles.profileImage} source={{uri: "https://picsum.photos/512/512"}}></Image>
-                </View>
                 <View style={styles.infoContainer}>
-                    <Text style={styles.infoText}>{"Location: " + location}</Text>
-                    <Text style={styles.infoText}>{"Born: " + birthdate}</Text>
+                    <Text style={styles.infoText}>{"Age: " + age}</Text>
                     <Text style={styles.infoText}>{"Ethnicity: " + ethnicity}</Text>
-                    <Text style={styles.infoText}>{"Language: " + language}</Text>
                 </View>
             </View>
         </View>
@@ -85,13 +87,13 @@ const styles = StyleSheet.create
         flexDirection: 'row', 
     }, 
 
-    imageContainer: 
-    {
-        flex: 1, 
-        // backgroundColor: 'blue', 
-        justifyContent: 'center', // vertically center
+    // imageContainer: 
+    // {
+    //     flex: 1, 
+    //     // backgroundColor: 'blue', 
+    //     justifyContent: 'center', // vertically center
 
-    }, 
+    // }, 
     infoContainer: 
     {
         flex: 1.5, 

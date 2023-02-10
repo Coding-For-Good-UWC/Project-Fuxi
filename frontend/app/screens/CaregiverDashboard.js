@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import 
 {
     StyleSheet,
@@ -72,27 +72,81 @@ const DUMMY_PATIENT_DATA = [
   }, 
 ];
 
-function CaregiverDashboard ({ navigation }) 
+function CaregiverDashboard ({ route, navigation }) 
 {
-    return (
-      <View style={styles.container}>
-        <View style={styles.card}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>Caregiver Dashboard</Text>
-          </View>
-          <View style={styles.bodyContainer}>
-            { DUMMY_PATIENT_DATA.map ((patientData, index) => <DashboardPatientItem data={patientData} key={index} />)}
-          </View>
-        <View style={styles.newPatientButton}>
-        <Button // TODO: POSITION TOP RIGHT (position absolute not working)
-            title="New Patient" 
-            color={colours.blue}
-            onPress={() => navigation.navigate("PatientRegistration")}
-        />
+  const { caregiver } = route.params;
+
+  const [isLoading, setIsLoading] = useState (true); 
+  const [patients, setPatients] = useState([]); 
+  
+  useEffect (() => 
+  {
+    const getPatients = async() => 
+    {
+      setIsLoading (true); 
+
+      const response = await fetch ("http://localhost:8080/patient/getPatients", 
+      { 
+        body: JSON.stringify ({ caregiverId: caregiver._id }), 
+        headers: { "Content-Type": "application/json" }, 
+        method: "POST"
+      }); 
+
+      const data = await response.json(); 
+
+      const patients = data.patients; 
+
+      // console.log (data); 
+
+      // const patients = []; 
+
+      // for (const key in data)
+      // {
+      //     const patient = 
+      //     {
+      //         id: key, 
+      //         ...data[key]
+      //     }; 
+
+      //     patients.push (patient); 
+      // }
+
+      // console.log (">>>>>>>>>>˘")
+      // console.log (patients)
+      // console.log (">>>>>>>>>>  ˘")
+
+      setPatients (patients); 
+      
+      setIsLoading (false); 
+    }
+
+    getPatients(); 
+  }, [])
+
+  if (isLoading)
+  {
+      return <Text>LOADING</Text>; 
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Patient Dashboard</Text>
         </View>
+        <View style={styles.bodyContainer}>
+          { patients.map ((data, index) => <DashboardPatientItem data={data} key={index} />)}
         </View>
-      </View> 
-    );
+      <View style={styles.newPatientButton}>
+      <Button // TODO: POSITION TOP RIGHT (position absolute not working)
+          title="New Patient" 
+          color={colours.blue}
+          onPress={() => navigation.navigate("PatientRegistration")}
+      />
+      </View>
+      </View>
+    </View> 
+  );
 }
 
 const styles = StyleSheet.create

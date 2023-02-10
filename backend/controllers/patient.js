@@ -2,8 +2,8 @@ const patientModel = require("../models/patient");
 
 const getPatients = async(req, res) => 
 {
-    const patients = await patientModel.find({institute: req.session.institute}); 
-    res.status(200).json({patients}); 
+    const patients = await patientModel.find({ caregiver: req.body.caregiverId }); 
+    res.status(200).json({ patients }); 
 }
 
 // { 
@@ -16,13 +16,13 @@ const getPatients = async(req, res) =>
 //   }
 const newPatient = async (req, res) => 
 {
-    console.log (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"); 
-    console.log (req.session); 
-    console.log (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"); 
+    // console.log (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"); 
+    // console.log (req.session); 
+    // console.log (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"); 
 
     const newPatient = await patientModel.create({ 
         ...req.body, 
-        institute: req.session.institute
+        caregiver: req.session.caregiver
     })
 
     res.status(200).json(newPatient); 
