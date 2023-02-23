@@ -10,6 +10,17 @@ const { Schema, model, Types } = mongoose;
 // language
 
 const schema = new Schema ({
+    username: 
+    {
+        type: String, 
+        unique: true, 
+        required: true
+    }, 
+    password: 
+    {
+        type: String, 
+        required: true
+    },
     name: 
     {
         type: String, 
@@ -56,12 +67,16 @@ const schema = new Schema ({
             required: true
         }
     }], 
-    caregiver: 
-    {
-        type: Types.ObjectId, 
-        required: true, 
-        ref: "caregivers"
-    }
+    requestedSongs:
+    [{
+        type: String
+    }]
+    // caregiver: 
+    // {
+    //     type: Types.ObjectId, 
+    //     required: true, 
+    //     ref: "caregivers"
+    // }
 })
 
 module.exports = model ("patients", schema); 

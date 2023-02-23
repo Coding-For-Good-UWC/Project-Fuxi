@@ -24,6 +24,13 @@ function LandingScreen({ navigation }) {
             >
                 <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.buttonContainer}
+                onPress={() => navigation.navigate("Signup")}
+                underlayColor={colours.highlight}
+            >
+                <Text style={styles.buttonText}>Signup</Text>
+            </TouchableOpacity>
         </View>
     );
 }

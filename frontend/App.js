@@ -1,6 +1,7 @@
 import LandingScreen from './app/screens/LandingScreen';
 
 import LoginScreen from './app/screens/LoginScreen';
+import SignupScreen from './app/screens/SignupScreen';
 import CaregiverDashboard from './app/screens/CaregiverDashboard'; 
 import PlayerScreen from './app/screens/PlayerScreen';
 
@@ -32,6 +33,11 @@ export default function App()
         <Stack.Screen 
           name="Login" 
           component={LoginScreen} 
+          options={{ headerShown: Platform.OS !== 'web' }}
+        />
+        <Stack.Screen 
+          name="Signup" 
+          component={SignupScreen} 
           options={{ headerShown: Platform.OS !== 'web' }}
         />
         <Stack.Screen 

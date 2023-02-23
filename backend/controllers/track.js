@@ -61,4 +61,13 @@ const getNextTrack = async (req, res) =>
     return res.status(500).json({ message: "Something went wrong "}); 
 } 
 
+// Write an async function that finds all the unique values for Genre in the Track collection.
+// Return the list of unique values.
+// const getGenres = async (req, res) =>
+// {
+//     const genres = await trackModel.distinct("Genre");
+//     console.log(genres);
+//     return res.status(200).json({ data: genres, status: "ok" }); 
+// }
+
 module.exports = { getNextTrack }; 
