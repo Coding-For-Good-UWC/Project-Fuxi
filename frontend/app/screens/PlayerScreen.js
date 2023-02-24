@@ -18,10 +18,12 @@ import { Audio } from 'expo-av';
 
 import colours from '../config/colours.js'; 
 
-var currentlyPlaying = -1; 
+let currentlyPlaying = -1; 
 
-function PlayerScreen ({ navigation }) 
+function PlayerScreen ({ route, navigation }) 
 {
+  const { patient } = route.params;
+
   const [sound, setSound] = useState (null); 
   const [songPercentage, setSongPercentage] = useState (0); 
   const [isPlaying, setIsPlaying] = useState (false); 
@@ -76,35 +78,74 @@ function PlayerScreen ({ navigation })
     {
       setIsLoading (true); 
 
-      let response = await fetch('http://localhost:8080/track/next', {
+      console.log ("PATIENT>>>>>>>>>>>>>")
+      console.log (patient)
+
+      let response = await fetch('http://172.20.10.4:8080/track/next', {
         method: 'POST',
-        credentials: 'include',
+        // credentials: 'include',
         headers: {
         'Content-Type': 'application/json',
         },
         body: JSON.stringify(
         {
-          "patientId": 1, 
+          "patientId": patient._id, 
           "trackId": currentlyPlaying, 
           "rating": pscore, 
         })
       }).then(res => res.json())
       
-      if (response.status !== 'ok') alert(response.error_message)
+      if (response.status !== 'OK') 
+        alert(response.error_message)
       else
       {
-        const audio = response.data.uri; 
-        currentlyPlaying = response.data.id; 
+        currentlyPlaying = response.trackId; 
 
-        console.log (audio); 
+        console.log ("RETURNED TRACK ID: "); 
+        console.log (currentlyPlaying); 
+        console.log ("--------—----—----—----—----—")
+
+        const response2 = await fetch ("http://172.20.10.4:8080/track/get", 
+        { 
+            body: JSON.stringify ({id: currentlyPlaying}), // send over text representation of json object 
+            headers: { "Content-Type": "application/json" }, 
+            method: "POST"
+        }); 
+        const data = await response2.json(); 
+
+        if (data.status === "ERROR")
+          console.log(data.message); 
+        else
+        {
+          console.log ("FOUND TRACK")
+          console.log(data.track)
+        }
+
+        const track = data.track; 
+
+        // https://drive.google.com/file/d/1WuaFGP3XNFbdSJUT5FQlS9eFZ4g2aEa6
+        let audio = track.URI; 
+        console.log ("AUDIO: " + audio); 
+        // Get the id of the track.URI by taking the part AFTER /d/
+        const id = audio.substring(audio.indexOf("/d/")).split("/")[2];  
+
+        audio = "http://docs.google.com/uc?export=open&id=" + id; 
+        // console.log("ID: " + id); 
+
+        // audio = audio + "id"
+
+        console.log (currentlyPlaying); 
 
         const newSongInfo = 
         {
-          title: response.data.title + " - " + response.data.artist, 
-          imgUri: response.data.img_uri
+          title: track.Title,
+          // imgUri: response2.data.img_uri
         }
 
         setSongInfo (newSongInfo); 
+
+
+
 
         const { sound } = await Audio.Sound.createAsync(audio); 
         setSound(sound);
@@ -138,8 +179,8 @@ function PlayerScreen ({ navigation })
         </View>
         <View style={styles.musicInfoContainer}>
           <View style={styles.coverImageContainer}>
-            <Image style={styles.coverImage} source={{uri: songInfo.imgUri}} />
-            {/* <Image style={styles.coverImage} source={require("../assets/tempMusicCover.jpeg")} /> */}
+            {/* <Image style={styles.coverImage} source={{uri: songInfo.imgUri}} /> */}
+            <Image style={styles.coverImage} source={require("../assets/tempMusicCover.jpeg")} />
           </View>
           <View style={styles.playerContainer}>
             <View style={styles.songNameContainer}>

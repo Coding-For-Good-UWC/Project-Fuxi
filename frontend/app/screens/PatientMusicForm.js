@@ -285,7 +285,7 @@ function PatientMusicForm ({ route, navigation })
         genres: selectedGenres
       }
 
-      const response = await fetch ("http://localhost:8080/patient/signup", 
+      const response = await fetch ("http://172.20.10.4:8080/patient/signup", 
       { 
         body: JSON.stringify (newPatientData), 
         headers: { "Content-Type": "application/json" }, 
@@ -302,7 +302,7 @@ function PatientMusicForm ({ route, navigation })
         console.log (">>>>>>>>>>>>>")
         console.log (data.newPatient); 
         console.log (data.newPatient._id)
-        navigation.navigate ("Player"); 
+        navigation.navigate ("Player", { patient: data.newPatient }); 
       }
     }
 

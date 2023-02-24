@@ -8,7 +8,7 @@ const patientModel = require("../models/patient");
 // 	"trackId": "63a12ee8e733c3b2acc5ccef", 
 // 	"rating": -1
 // }
-const getNextTrack = async (req, res) => 
+const getNextTrackId = async (req, res) => 
 { 
     const { patientId, trackId, rating } = req.body; 
 
@@ -28,14 +28,14 @@ const getNextTrack = async (req, res) =>
 
     if (!patient)
         return res.status(404).json({ message: "No patient by id " + patientId }); 
-        
-    const track = await trackModel.findById(trackId); 
-        
-    if (!track)
-        return res.status(404).json({ message: "No track by id " + trackId }); 
-
+    
     if (rating != 0)
     {
+        const track = await trackModel.findById(trackId); 
+            
+        if (!track)
+            return res.status(404).json({ message: "No track by id " + trackId }); 
+
         patient.trackRatings.push({ track: track._id, rating }); 
         await patient.save(); 
     }
@@ -45,7 +45,40 @@ const getNextTrack = async (req, res) =>
         [track]: acc[track] !== undefined ? acc[track] + rating : rating
     }), {}); 
 
+    console.log ("TRACK RATINGS")
+    console.log (trackRatings);
+
+    // If there are no positive tracks, add every track to the patient's trackRatings array with a rating of 0 for the genres they like
+    if (Object.values(trackRatings).every(rating => rating <= 0))
+    {
+        const genres = patient.genres; 
+        console.log ("GENRES")
+        console.log(genres)
+        // Get all tracks in the trackModel where genre is in the genre array
+        const tracks = await trackModel.find({ Genre: { $in: genres } });
+        console.log ("TRACKS:")
+        console.log(tracks)
+        // Add every track to the patient's trackRatings array with a rating of 1
+        tracks.forEach(track => patient.trackRatings.push({ track: track._id, rating: 1 }));
+        console.log ("TRACK RATINGS:")
+        console.log (patient.trackRatings)
+
+        await patient.save();
+
+        console.log ("SAVED"); 
+
+        // Pick random track from the tracks array
+        const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
+
+        console.log ("RANDOM TRACK"); 
+        console.log (randomTrack); 
+
+        return res.json({ trackId: randomTrack._id, status: "OK", message: "No positive tracks, returning a random track based on patient's genre preferences (" + genres.join(", ") + ")" });
+    }
+
     const positiveTracks = Object.entries(trackRatings).filter(([track, rating]) => rating != -1).map(([track, rating]) => ({ track, rating: rating + 1 })); 
+    console.log ("POSITIVE TRACKS")
+    console.log (positiveTracks);
 
     const totalScore = positiveTracks.reduce((acc, { track, rating }) => acc + rating, 0); 
 
@@ -55,11 +88,31 @@ const getNextTrack = async (req, res) =>
         diceRoll -= rating; 
 
         if (diceRoll <= 0)
-            return res.json({ data: track, status: "ok" }); 
+            return res.json({ trackId: track, status: "OK", message: "Returning a random track based on weighted average of weightings" }); 
     }
 
-    return res.status(500).json({ message: "Something went wrong "}); 
+    return res.status(500).json({ message: "Something went wrong"}); 
 } 
+
+// Write an async function that returns the track object given its id
+const getTrack = async (req, res) =>
+{
+    const { id } = req.body;
+
+    console.log ("SEARCHING FOR TRACK BY ID " + id); 
+
+    if (!id)
+        return res.status(400).json({ status: "ERROR", message: "Track id required" });
+
+    const track = await trackModel.findById(id);
+
+    console.log (track)
+
+    // if (!track)
+    //     return res.status(404).json({ status: "ERROR", message: "No track by id " + id });
+    
+    return res.status(200).json({ track, status: "OK", message: "Found track by id " + id });
+}
 
 // Write an async function that finds all the unique values for Genre in the Track collection.
 // Return the list of unique values.
@@ -67,7 +120,7 @@ const getNextTrack = async (req, res) =>
 // {
 //     const genres = await trackModel.distinct("Genre");
 //     console.log(genres);
-//     return res.status(200).json({ data: genres, status: "ok" }); 
+//     return res.status(200).json({ data: genres, status: "OK" }); 
 // }
 
-module.exports = { getNextTrack }; 
+module.exports = { getNextTrackId, getTrack }; 

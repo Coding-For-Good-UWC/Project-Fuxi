@@ -6,11 +6,7 @@ import
     StyleSheet,
     Text,
     View,
-    Image,
-    TextInput,
-    Button,
-    TouchableOpacity, 
-    Platform
+    Button
   } from "react-native";
 
 import DashboardPatientItem from "../components/DashboardPatientItem.js";

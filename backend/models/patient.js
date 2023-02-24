@@ -53,7 +53,8 @@ const schema = new Schema ({
     }, 
     genres: 
     [{
-        type: String
+        type: String, 
+        required: true
     }], 
     trackRatings: 
     [{
