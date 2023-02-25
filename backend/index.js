@@ -23,20 +23,12 @@ const app = express();
 // }
 // app.use(cors(corsOptions));
 
-
 app.use(express.urlencoded({ extended: true })); 
 app.use(express.json());
 // app.use(cookieParser()); 
 
 app.use(cors()); 
 
-// app.use(session({
-//     secret: SESSION_SECRET,
-//     saveUninitialized: false,
-//     resave: false, 
-//     // store: mongoStore.create({ mongoUrl: MONGO_URI }), 
-//     cookie: { path: '/', httpOnly: true, secure: false, maxAge: 3600000 }
-// }))
 app.use(
     session({
       secret: SESSION_SECRET,

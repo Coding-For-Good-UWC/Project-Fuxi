@@ -81,7 +81,7 @@ function PlayerScreen ({ route, navigation })
       console.log ("PATIENT>>>>>>>>>>>>>")
       console.log (patient)
 
-      let response = await fetch('http://172.20.10.4:8080/track/next', {
+      let response = await fetch('http://localhost:8080/track/next', {
         method: 'POST',
         // credentials: 'include',
         headers: {
@@ -105,7 +105,7 @@ function PlayerScreen ({ route, navigation })
         console.log (currentlyPlaying); 
         console.log ("--------—----—----—----—----—")
 
-        const response2 = await fetch ("http://172.20.10.4:8080/track/get", 
+        const response2 = await fetch ("http://localhost:8080/track/get", 
         { 
             body: JSON.stringify ({id: currentlyPlaying}), // send over text representation of json object 
             headers: { "Content-Type": "application/json" }, 

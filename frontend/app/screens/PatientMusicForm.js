@@ -237,11 +237,8 @@ import
     StyleSheet,
     Text,
     View,
-    Image,
-    TextInput,
     Button,
-    TouchableOpacity, 
-    Platform
+    TouchableOpacity
 } from "react-native";
 
 import GenreToggleButton from '../components/GenreToggleButton'; 
@@ -285,12 +282,11 @@ function PatientMusicForm ({ route, navigation })
         genres: selectedGenres
       }
 
-      const response = await fetch ("http://172.20.10.4:8080/patient/signup", 
+      const response = await fetch ("http://localhost:8080/patient/signup", 
       { 
         body: JSON.stringify (newPatientData), 
         headers: { "Content-Type": "application/json" }, 
         method: "POST"
-        // credentials: "include"
       }); 
       const data = await response.json(); 
 
@@ -346,26 +342,6 @@ const styles = StyleSheet.create
     paddingTop: "10%", 
     paddingBottom: "10%", 
   }, 
-  // card: 
-  // {
-  //   flex: 1, 
-  //   alignItems: "center", 
-  //   justifyContent: "center", 
-  //   backgroundColor: colours.charcoal, 
-  //   // width: "100%", 
-  //   width: 600, 
-  //   height: "100%",
-  //   borderRadius: 15, 
-  //   shadowColor: 'black',
-  //   shadowOffset: { width: 10, height: 15 },
-  //   shadowRadius: 5,
-  //   shadowOpacity: 0.3, 
-  //   flexDirection: 'column', 
-  //   paddingLeft: "20%", 
-  //   paddingRight: "20%", 
-  //   paddingTop: "5%", 
-  //   paddingBottom: "5%", 
-  // }, 
   titleContainer: 
   {
     flex: 0.5,
@@ -377,14 +353,6 @@ const styles = StyleSheet.create
     width: "100%", 
     height: "100%",
   }, 
-  // leftContainer: 
-  // {
-  //   flex: 1, 
-  //   justifyContent: 'center', 
-  //   alignItems: 'center', 
-  //   // backgroundColor: 'red'
-  // }, 
-
   info: {
     fontSize:"18%"
 

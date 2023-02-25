@@ -2,7 +2,7 @@ import LandingScreen from './app/screens/LandingScreen';
 
 import LoginScreen from './app/screens/LoginScreen';
 import SignupScreen from './app/screens/SignupScreen';
-import CaregiverDashboard from './app/screens/CaregiverDashboard'; 
+// import CaregiverDashboard from './app/screens/CaregiverDashboard'; 
 import PlayerScreen from './app/screens/PlayerScreen';
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -50,11 +50,11 @@ export default function App()
           component={PatientMusicForm} 
           options={{ headerShown: Platform.OS !== 'web' }}
         />
-        <Stack.Screen 
+        {/* <Stack.Screen 
           name="Dashboard" 
           component={CaregiverDashboard} 
           options={{ headerShown: Platform.OS !== 'web' }}
-        />
+        /> */}
         <Stack.Screen 
           name="Player" 
           component={PlayerScreen} 

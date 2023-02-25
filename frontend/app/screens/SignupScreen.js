@@ -21,7 +21,7 @@ function SignupScreen ({ navigation })
     {
         evt.preventDefault(); 
 
-        const response = await fetch ("http://172.20.10.4:8080/patient/checkUsername", // get students for selected teacher's class
+        const response = await fetch ("http://localhost:8080/patient/checkUsername", // get students for selected teacher's class
         { 
             body: JSON.stringify ({ username, password }), // send over text representation of json object 
             headers: { "Content-Type": "application/json" }, // let server know to turn plain text back into json object

@@ -22,15 +22,6 @@ const login = async (req, res) =>
     res.status(200).json({ patient, status:"OK", message: "Login successful" });
 }
 
-
-
-// const getPatients = async(req, res) => 
-// {
-//     const patients = await patientModel.find({ caregiver: req.body.caregiverId }); 
-//     res.status(200).json({ patients }); 
-// }
-
-
 // Aysnc function to check if username already in use
 const checkUsername = async (req, res) =>
 {
@@ -71,7 +62,6 @@ const signup = async (req, res) =>
         birthplace,
         language, 
         genres
-        // caregiver: req.session.caregiver
     })
 
     // Remove password from patient object

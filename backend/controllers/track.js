@@ -1,5 +1,3 @@
-// const fetch = require ("node-fetch"); 
-
 const trackModel = require("../models/track"); 
 const patientModel = require("../models/patient"); 
 
@@ -8,6 +6,7 @@ const patientModel = require("../models/patient");
 // 	"trackId": "63a12ee8e733c3b2acc5ccef", 
 // 	"rating": -1
 // }
+// For first track played, pass a rating of 0 and any track id (won't matter)
 const getNextTrackId = async (req, res) => 
 { 
     const { patientId, trackId, rating } = req.body; 
@@ -18,12 +17,6 @@ const getNextTrackId = async (req, res) =>
     if (rating < -1 || rating > 1)
         return res.status(400).json({ message: "Score must be a valid integer between -1 and 1" }); 
 
-    // const response = await fetch ('http://localhost:8080/patient/getPatient', {
-    //     method: "POST", 
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ id: patientId })
-    // }); 
-    // const patient = await response.json (); 
     const patient = await patientModel.findById(patientId); 
 
     if (!patient)
@@ -52,26 +45,13 @@ const getNextTrackId = async (req, res) =>
     if (Object.values(trackRatings).every(rating => rating <= 0))
     {
         const genres = patient.genres; 
-        console.log ("GENRES")
-        console.log(genres)
         // Get all tracks in the trackModel where genre is in the genre array
         const tracks = await trackModel.find({ Genre: { $in: genres } });
-        console.log ("TRACKS:")
-        console.log(tracks)
         // Add every track to the patient's trackRatings array with a rating of 1
         tracks.forEach(track => patient.trackRatings.push({ track: track._id, rating: 1 }));
-        console.log ("TRACK RATINGS:")
-        console.log (patient.trackRatings)
-
         await patient.save();
-
-        console.log ("SAVED"); 
-
         // Pick random track from the tracks array
         const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
-
-        console.log ("RANDOM TRACK"); 
-        console.log (randomTrack); 
 
         return res.json({ trackId: randomTrack._id, status: "OK", message: "No positive tracks, returning a random track based on patient's genre preferences (" + genres.join(", ") + ")" });
     }
@@ -105,22 +85,8 @@ const getTrack = async (req, res) =>
         return res.status(400).json({ status: "ERROR", message: "Track id required" });
 
     const track = await trackModel.findById(id);
-
-    console.log (track)
-
-    // if (!track)
-    //     return res.status(404).json({ status: "ERROR", message: "No track by id " + id });
     
     return res.status(200).json({ track, status: "OK", message: "Found track by id " + id });
 }
-
-// Write an async function that finds all the unique values for Genre in the Track collection.
-// Return the list of unique values.
-// const getGenres = async (req, res) =>
-// {
-//     const genres = await trackModel.distinct("Genre");
-//     console.log(genres);
-//     return res.status(200).json({ data: genres, status: "OK" }); 
-// }
 
 module.exports = { getNextTrackId, getTrack }; 
