@@ -1,5 +1,8 @@
 import LandingScreen from './app/screens/LandingScreen';
+
 import LoginScreen from './app/screens/LoginScreen';
+import SignupScreen from './app/screens/SignupScreen';
+// import CaregiverDashboard from './app/screens/CaregiverDashboard'; 
 import PlayerScreen from './app/screens/PlayerScreen';
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -7,16 +10,15 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { Platform } from 'react-native'; 
 
-// import TrackPlayer from 'react-native-track-player';
+import PatientRegistration from './app/screens/PatientRegistration';
+import PatientMusicForm from './app/screens/PatientMusicForm';
 
 const Stack = createNativeStackNavigator();
-
-// TrackPlayer.registerPlaybackService (() => require ('./service')); 
 
 export default function App() 
 {
   console.log ("APP EXECUTED"); 
-  
+
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -33,6 +35,26 @@ export default function App()
           component={LoginScreen} 
           options={{ headerShown: Platform.OS !== 'web' }}
         />
+        <Stack.Screen 
+          name="Signup" 
+          component={SignupScreen} 
+          options={{ headerShown: Platform.OS !== 'web' }}
+        />
+        <Stack.Screen 
+          name="PatientRegistration" 
+          component={PatientRegistration} 
+          options={{ headerShown: Platform.OS !== 'web' }}
+        />
+        <Stack.Screen 
+          name="PatientMusicForm" 
+          component={PatientMusicForm} 
+          options={{ headerShown: Platform.OS !== 'web' }}
+        />
+        {/* <Stack.Screen 
+          name="Dashboard" 
+          component={CaregiverDashboard} 
+          options={{ headerShown: Platform.OS !== 'web' }}
+        /> */}
         <Stack.Screen 
           name="Player" 
           component={PlayerScreen} 

@@ -12,39 +12,37 @@ import
 
 import colours from '../config/colours.js'; 
 
-function LoginScreen ({ navigation }) 
+function SignupScreen ({ navigation }) 
 {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
     let handleLogin = async (evt) => 
     {
-			evt.preventDefault(); 
+        evt.preventDefault(); 
 
-      const response = await fetch ("http://localhost:8080/patient/login", // get students for selected teacher's class
-      { 
-        body: JSON.stringify ({ username, password }), // send over text representation of json object 
-        headers: { "Content-Type": "application/json" }, // let server know to turn plain text back into json object
-        method: "POST"
-      }); 
-      const data = await response.json(); 
+        const response = await fetch ("http://localhost:8080/patient/checkUsername", // get students for selected teacher's class
+        { 
+            body: JSON.stringify ({ username, password }), // send over text representation of json object 
+            headers: { "Content-Type": "application/json" }, // let server know to turn plain text back into json object
+            method: "POST"
+        }); 
+        const data = await response.json(); 
       
-      
-      if (data.status === 'ERROR')
-      console.log (data.message);
-      else
-      {
-        console.log ("LOG IN SUCCESSFUL")
-        const patient = data.patient;
-        navigation.navigate ("Player", { patient });
-      }
-		}
+        if (data.status === 'ERROR')
+            console.log(data.message);
+        else
+        {
+            console.log ("Username available"); 
+            navigation.navigate ("PatientRegistration", { username, password });
+        }
+    }
    
     return (
       <View style={styles.container}>
         <View style={styles.titleContainer}>
           <Text style={styles.titleText}>Project FUXI</Text>
-          <Text style={styles.titleText}>Login</Text>
+          <Text style={styles.titleText}>Signup</Text>
         </View>
         <Image style={styles.image} source={require("../assets/fuxiIcon.png")} />
         <View
@@ -75,7 +73,7 @@ function LoginScreen ({ navigation })
             onPress={handleLogin}
             underlayColor={colours.highlight}
         >
-            <Text style={styles.buttonText}>Login</Text>
+            <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
       </View>
     );
@@ -149,4 +147,4 @@ const styles = StyleSheet.create
     }
 });
 
-export default LoginScreen;
+export default SignupScreen;
