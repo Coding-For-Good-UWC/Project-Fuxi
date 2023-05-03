@@ -11,12 +11,14 @@ import
     Platform
   } from "react-native";
 
-  import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-  import { faThumbsUp, faThumbsDown, faPause, faFastForward, faPlay } from '@fortawesome/free-solid-svg-icons/'
+  // import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+  // import { faThumbsUp, faThumbsDown, faPause, faFastForward, faPlay } from '@fortawesome/free-solid-svg-icons/'
 
 import { Audio } from 'expo-av';
 
 import colours from '../config/colours.js'; 
+
+// import sampleAudio from '../assets/BackgroundMusic.mp3';
 
 let currentlyPlaying = -1; 
 
@@ -78,6 +80,18 @@ function PlayerScreen ({ route, navigation })
     {
       setIsLoading (true); 
 
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: false,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
+      
+      
+      
+      
+
       console.log ("PATIENT>>>>>>>>>>>>>")
       console.log (patient)
 
@@ -127,9 +141,11 @@ function PlayerScreen ({ route, navigation })
         let audio = track.URI; 
         console.log ("AUDIO: " + audio); 
         // Get the id of the track.URI by taking the part AFTER /d/
-        const id = audio.substring(audio.indexOf("/d/")).split("/")[2];  
+        // const id = audio.substring(audio.indexOf("/d/")).split("/")[2];  
+        // audio = "http://docs.google.com/uc?export=open&id=" + id; 
+        const id = audio.substring(audio.indexOf("/d/")).split("/")[2];
+        audio = "https://drive.google.com/uc?export=download&id=" + id;
 
-        audio = "http://docs.google.com/uc?export=open&id=" + id; 
         // console.log("ID: " + id); 
 
         // audio = audio + "id"
@@ -143,13 +159,9 @@ function PlayerScreen ({ route, navigation })
         }
 
         setSongInfo (newSongInfo); 
-
-
-
-
-        const { sound } = await Audio.Sound.createAsync(audio); 
+        const { sound } = await Audio.Sound.createAsync({ uri: audio });
+        // const { sound } = await Audio.Sound.createAsync(sampleAudio);
         setSound(sound);
-
         sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
         
         if (!isFirstPlay)
@@ -157,6 +169,11 @@ function PlayerScreen ({ route, navigation })
           setIsPlaying (true); 
           await sound.playAsync(); 
         }
+        // const playbackObject = new Audio.Sound();
+        // await playbackObject.loadAsync(sampleAudio);
+        // setSound(playbackObject);
+        // await playbackObject.playAsync();
+
       }
 
       setIsLoading (false); 
@@ -192,7 +209,7 @@ function PlayerScreen ({ route, navigation })
               </View>
 
               <TouchableOpacity style={styles.playPauseButton} onPress={pauseHandler}>
-                <FontAwesomeIcon icon={ isPlaying ? faPause : faPlay } size={20} style={{paddingLeft: "5%"}} />
+                {/* <FontAwesomeIcon icon={ isPlaying ? faPause : faPlay } size={20} style={{paddingLeft: "5%"}} /> */}
               </TouchableOpacity>
             </View>
           </View>
@@ -200,13 +217,13 @@ function PlayerScreen ({ route, navigation })
       </View>
       <View style={[styles.bottomContainer, styles.card]}>
         <TouchableOpacity style={[styles.voteUpButton, styles.voteButton]} onPress={() => voteHandler(1)}>
-          <FontAwesomeIcon icon={ faThumbsUp } size={55} />
+          {/* <FontAwesomeIcon icon={ faThumbsUp } size={55} /> */}
         </TouchableOpacity>
         <TouchableOpacity style={[styles.skipButton, styles.voteButton]} onPress={() => voteHandler(1)}>
-          <FontAwesomeIcon icon={ faFastForward } size={55} />
+          {/* <FontAwesomeIcon icon={ faFastForward } size={55} /> */}
         </TouchableOpacity>
         <TouchableOpacity style={[styles.voteDownButton, styles.voteButton]} onPress={() => voteHandler(-1)}>
-          <FontAwesomeIcon icon={ faThumbsDown } size={55} />
+          {/* <FontAwesomeIcon icon={ faThumbsDown } size={55} /> */}
         </TouchableOpacity>
       </View>
     </View>
