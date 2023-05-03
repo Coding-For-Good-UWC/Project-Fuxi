@@ -1,3 +1,6 @@
+import React, { useState, useMemo } from 'react';
+import { View, StyleSheet } from 'react-native';
+
 import LandingScreen from './app/screens/LandingScreen';
 
 import LoginScreen from './app/screens/LoginScreen';
@@ -13,13 +16,19 @@ import { Platform } from 'react-native';
 import PatientRegistration from './app/screens/PatientRegistration';
 import PatientMusicForm from './app/screens/PatientMusicForm';
 
+import LoadingContext from './app/store/LoadingContext';
+import LoadingScreen from './app/components/LoadingScreen';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() 
 {
-  console.log ("APP EXECUTED"); 
+  const [isLoading, setIsLoading] = useState (false); 
+  const isLoadingContextValue = useMemo (() => ({ isLoading, setIsLoading }), [isLoading, setIsLoading]); 
 
   return (
+    <View style={styles.container}>
+    <LoadingContext.Provider value={isLoadingContextValue}>
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
@@ -33,34 +42,39 @@ export default function App()
         <Stack.Screen 
           name="Login" 
           component={LoginScreen} 
-          options={{ headerShown: Platform.OS !== 'web' }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen 
           name="Signup" 
           component={SignupScreen} 
-          options={{ headerShown: Platform.OS !== 'web' }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen 
           name="PatientRegistration" 
           component={PatientRegistration} 
-          options={{ headerShown: Platform.OS !== 'web' }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen 
           name="PatientMusicForm" 
           component={PatientMusicForm} 
-          options={{ headerShown: Platform.OS !== 'web' }}
+          options={{ headerShown: false }}
         />
-        {/* <Stack.Screen 
-          name="Dashboard" 
-          component={CaregiverDashboard} 
-          options={{ headerShown: Platform.OS !== 'web' }}
-        /> */}
         <Stack.Screen 
           name="Player" 
           component={PlayerScreen} 
-          options={{ headerShown: Platform.OS !== 'web' }}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </LoadingContext.Provider>
+    { isLoading && <LoadingScreen />}
+    </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+});

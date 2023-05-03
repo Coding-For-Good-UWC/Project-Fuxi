@@ -1,401 +1,427 @@
-import React, { useState, useEffect } from "react";
-import 
-{
-    StyleSheet,
-    Text,
-    View,
-    Image,
-    TextInput,
-    Button,
-    TouchableOpacity, 
-    Platform
-  } from "react-native";
+import React, { useState, useEffect, useContext } from "react";
+import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import Slider from "@react-native-community/slider";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+    faPlay,
+    faPause,
+    faBackward,
+    faForward,
+    faRepeat,
+} from "@fortawesome/free-solid-svg-icons";
 
-  // import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-  // import { faThumbsUp, faThumbsDown, faPause, faFastForward, faPlay } from '@fortawesome/free-solid-svg-icons/'
+import { Audio } from "expo-av";
+import LoadingContext from "../store/LoadingContext.js";
 
-import { Audio } from 'expo-av';
+import colours from "../config/colours.js";
+let currentlyPlaying = -1;
 
-import colours from '../config/colours.js'; 
-
-// import sampleAudio from '../assets/BackgroundMusic.mp3';
-
-let currentlyPlaying = -1; 
-
-function PlayerScreen ({ route, navigation }) 
-{
-  const { patient } = route.params;
-
-  const [sound, setSound] = useState (null); 
-  const [songPercentage, setSongPercentage] = useState (0); 
-  const [isPlaying, setIsPlaying] = useState (false); 
-  const [isFirstPlay, setIsFirstPlay] = useState (true); 
-  const [isLoading, setIsLoading] = useState (false); 
-  const [songInfo, setSongInfo] = useState ({
-    title: 'Track Name', 
-    imgUri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Square_gray.svg/1200px-Square_gray.svg.png'
-  }); 
-
-  const pauseHandler = async () => 
-  {
-    if (isFirstPlay)
-      voteHandler (0); 
-
-    if (!sound)
-      return; 
-
-    if (isPlaying)
-      await sound.pauseAsync(); 
-    else
-      await sound.playAsync (); 
-
-    console.log (isPlaying ? "PAUSED" : "UNPAUSED"); 
-    
-    setIsPlaying (!isPlaying); 
-  }
-
-  useEffect(() => 
-  {
-    voteHandler (0); 
-  }, [])
-
-  useEffect(() => {
-    return sound ? () => 
-    {
-        console.log('Unloading Sound');
-        sound.unloadAsync();
-    } : undefined;
-  }, [sound]);
-
-  const onPlaybackStatusUpdate = playbackStatus => {
-    if (!playbackStatus.isLoaded) 
-      return; 
-    
-    setSongPercentage ((playbackStatus.positionMillis / playbackStatus.durationMillis) * 100); 
-  };
-
-  const voteHandler = (pscore) => 
-  {
-    const getSong = async() => 
-    {
-      setIsLoading (true); 
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        staysActiveInBackground: false,
-        playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
-      });
-      
-      
-      
-      
-
-      console.log ("PATIENT>>>>>>>>>>>>>")
-      console.log (patient)
-
-      let response = await fetch('http://localhost:8080/track/next', {
-        method: 'POST',
-        // credentials: 'include',
-        headers: {
-        'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(
-        {
-          "patientId": patient._id, 
-          "trackId": currentlyPlaying, 
-          "rating": pscore, 
-        })
-      }).then(res => res.json())
-      
-      if (response.status !== 'OK') 
-        alert(response.error_message)
-      else
-      {
-        currentlyPlaying = response.trackId; 
-
-        console.log ("RETURNED TRACK ID: "); 
-        console.log (currentlyPlaying); 
-        console.log ("--------—----—----—----—----—")
-
-        const response2 = await fetch ("http://localhost:8080/track/get", 
-        { 
-            body: JSON.stringify ({id: currentlyPlaying}), // send over text representation of json object 
-            headers: { "Content-Type": "application/json" }, 
-            method: "POST"
-        }); 
-        const data = await response2.json(); 
-
-        if (data.status === "ERROR")
-          console.log(data.message); 
-        else
-        {
-          console.log ("FOUND TRACK")
-          console.log(data.track)
-        }
-
-        const track = data.track; 
-
-        // https://drive.google.com/file/d/1WuaFGP3XNFbdSJUT5FQlS9eFZ4g2aEa6
-        let audio = track.URI; 
-        console.log ("AUDIO: " + audio); 
-        // Get the id of the track.URI by taking the part AFTER /d/
-        // const id = audio.substring(audio.indexOf("/d/")).split("/")[2];  
-        // audio = "http://docs.google.com/uc?export=open&id=" + id; 
-        const id = audio.substring(audio.indexOf("/d/")).split("/")[2];
-        audio = "https://drive.google.com/uc?export=download&id=" + id;
-
-        // console.log("ID: " + id); 
-
-        // audio = audio + "id"
-
-        console.log (currentlyPlaying); 
-
-        const newSongInfo = 
-        {
-          title: track.Title,
-          // imgUri: response2.data.img_uri
-        }
-
-        setSongInfo (newSongInfo); 
-        const { sound } = await Audio.Sound.createAsync({ uri: audio });
-        // const { sound } = await Audio.Sound.createAsync(sampleAudio);
-        setSound(sound);
-        sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
-        
-        if (!isFirstPlay)
-        { 
-          setIsPlaying (true); 
-          await sound.playAsync(); 
-        }
-        // const playbackObject = new Audio.Sound();
-        // await playbackObject.loadAsync(sampleAudio);
-        // setSound(playbackObject);
-        // await playbackObject.playAsync();
-
-      }
-
-      setIsLoading (false); 
-    }
-
-    if (isLoading) 
-    {
-      console.log ("Already loading a song"); 
-      return; 
-    }
-    getSong (isFirstPlay ? 0 : pscore); 
-    if (isFirstPlay) setIsFirstPlay (false); 
-  }
-
-  return (
-    <View style={styles.container}>
-      <View style={[styles.topContainer, styles.card]}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Project FUXI</Text>
-        </View>
-        <View style={styles.musicInfoContainer}>
-          <View style={styles.coverImageContainer}>
-            {/* <Image style={styles.coverImage} source={{uri: songInfo.imgUri}} /> */}
-            <Image style={styles.coverImage} source={require("../assets/tempMusicCover.jpeg")} />
-          </View>
-          <View style={styles.playerContainer}>
-            <View style={styles.songNameContainer}>
-              <Text style={styles.songName} numberOfLines={1}>{songInfo.title}</Text>
-            </View>
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressBarFill, {width: `${songPercentage}%`}]}></View>
-              </View>
-
-              <TouchableOpacity style={styles.playPauseButton} onPress={pauseHandler}>
-                {/* <FontAwesomeIcon icon={ isPlaying ? faPause : faPlay } size={20} style={{paddingLeft: "5%"}} /> */}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </View>
-      <View style={[styles.bottomContainer, styles.card]}>
-        <TouchableOpacity style={[styles.voteUpButton, styles.voteButton]} onPress={() => voteHandler(1)}>
-          {/* <FontAwesomeIcon icon={ faThumbsUp } size={55} /> */}
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.skipButton, styles.voteButton]} onPress={() => voteHandler(1)}>
-          {/* <FontAwesomeIcon icon={ faFastForward } size={55} /> */}
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.voteDownButton, styles.voteButton]} onPress={() => voteHandler(-1)}>
-          {/* <FontAwesomeIcon icon={ faThumbsDown } size={55} /> */}
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+function getRatingColor(value) {
+    const colors = [
+        colours.voteDown,
+        "#FFAA00",
+        colours.primary,
+        "#66CC00",
+        colours.voteUp,
+    ];
+    return colors[value - 1];
 }
 
-const styles = StyleSheet.create
-({
-  container: 
-  {
-    flex: 1, 
-    backgroundColor: colours.bg, 
-    flexDirection: 'column', 
-    paddingLeft: "10%", 
-    paddingRight: "10%", 
-    paddingTop: "7%", 
-    paddingBottom: "7%", 
-    width: "100%", 
-  }, 
-  card: 
-  {
-    backgroundColor: colours.charcoal, 
-    borderRadius: 15, 
-    shadowColor: 'black',
-    shadowOffset: { width: 10, height: 15 },
-    shadowRadius: 5,
-    shadowOpacity: 0.3, 
-    paddingLeft: "4%", 
-    paddingRight: "4%", 
-    paddingTop: "2%", 
-    paddingBottom: "2%", 
-    width: "100%", 
-    height: "100%", 
-    marginBottom: "2%", 
-  }, 
-  topContainer: 
-  {
-    flex: 1.7, 
-    justifyContent: 'center', 
-    alignItems: "center", 
-    flexDirection: 'column', 
-  }, 
+function getRatingText(value) {
+    const texts = ["Low", "Low-Mid", "Medium", "Mid-High", "High"];
+    return texts[value - 1];
+}
 
-  titleContainer: 
-  {
-    flex: 0.1, 
-    // backgroundColor: 'orange'
-  }, 
-  title: 
-  {
-    color: colours.text, 
-    fontSize: 45, 
-    fontWeight: 'bold', 
-    // marginBottom: 20, 
-  }, 
+function secondsToMinutes(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? "0" + secs : secs}`;
+}
 
-  musicInfoContainer: 
-  {
-    flex: 1, 
-    flexDirection: 'row', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    // backgroundColor: 'green', 
-    width: "100%", 
-    // height: "80%", 
-    paddingLeft: "15%", 
-    paddingRight: "15%", 
-    // backgroundColor: 'green'
-  }, 
-  
-  coverImageContainer: 
-  {
-    flex: 1, 
-    // backgroundColor: 'blue', 
-  }, 
-  coverImage: 
-  {
-    height: "70%", 
-    aspectRatio: 1, 
-    borderRadius: 20, 
-  }, 
+function PlayerScreen({ route, navigation }) {
+    const { patient } = route.params;
 
-  playerContainer: 
-  {
-    marginLeft: '4%', 
-    flex: 4, 
-    flexDirection: 'column', 
-    // backgroundColor: 'red', 
-    height: "40%"
-  }, 
+    const [sound, setSound] = useState(null);
+    const [songPercentage, setSongPercentage] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isFirstPlay, setIsFirstPlay] = useState(true);
+    // const [isLoading, setIsLoading] = useState(false);
+    const { isLoading, setIsLoading } = useContext(LoadingContext);
+    const [songInfo, setSongInfo] = useState({
+        title: "Track Name",
+        imgUri: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Square_gray.svg/1200px-Square_gray.svg.png",
+    });
+    const [sliderTouching, setSliderTouching] = useState(false);
 
-  songNameContainer: 
-  {
-    flex: 1
-  }, 
-  songName: 
-  {
-    color: colours.text, 
-    fontSize: 30, 
-    fontWeight: 'bold', 
-    marginBottom: 20
-  }, 
+    const [rating, setRating] = useState(3);
+    const [ratingColor, setRatingColor] = useState(getRatingColor(rating));
+    const [ratingText, setRatingText] = useState(getRatingText(rating));
 
-  progressContainer: 
-  {
-    flex: 1, 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-  }, 
-  playPauseButton: 
-  {
-    width: 32, 
-    height: 32, 
-    borderRadius: '100%', 
-    backgroundColor: 'lightgrey', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    margin: 15, 
-    backgroundColor: "#3c6e71", 
-    position: 'absolute', 
-    right: 0, 
-    bottom: -2, 
-  }, 
-  progressBar: 
-  {
-    backgroundColor: colours.bg, 
-    width: "90%", 
-    height: 18, 
-    borderRadius: 25
-  }, 
-  progressBarFill: 
-  {
-    backgroundColor: 'white', 
-    // width: "40%", 
-    height: "100%", 
-    borderRadius: 25
-  }, 
+    const [elapsedTime, setElapsedTime] = useState("0:00");
 
+    const [isLooping, setIsLooping] = useState(false);
 
+    useEffect(() => {
+        if (sound) {
+            sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+        }
+    }, [sound]);
 
+    const pauseHandler = async () => {
+        if (isFirstPlay) {
+            await voteHandler(true);
+        }
 
-  bottomContainer: 
-  {
-    flex: 1, 
-    justifyContent: 'center', 
-    flexDirection: 'row', 
-  }, 
-  voteButton: 
-  {
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: "center", 
-    borderRadius: 10, 
-    marginLeft: "1%", 
-    marginRight: "1%", 
-    shadowColor: 'black',
-    shadowOffset: { width: 10, height: 15 },
-    shadowRadius: 5,
-    shadowOpacity: 0.1, 
-  }, 
-  voteUpButton: 
-  {
-    backgroundColor: "#52b952", 
-  }, 
-  skipButton: 
-  {
-    backgroundColor: colours.text, 
-  }, 
-  voteDownButton: 
-  {
-    backgroundColor: "#ec5a5a", 
-  }
+        if (!sound) {
+            console.log("Sound not initialized yet");
+            return;
+        }
+
+        if (isPlaying) await sound.pauseAsync();
+        else await sound.playAsync();
+
+        console.log(isPlaying ? "PAUSED" : "UNPAUSED");
+
+        setIsPlaying(!isPlaying);
+    };
+
+    useEffect(() => {
+        voteHandler(true);
+    }, []);
+
+    useEffect(() => {
+        return sound
+            ? () => {
+                  console.log("Unloading Sound");
+                  sound.unloadAsync();
+              }
+            : undefined;
+    }, [sound]);
+
+    const onPlaybackStatusUpdate = async (playbackStatus) => {
+        if (!playbackStatus.isLoaded) return;
+    
+        if (!sliderTouching) {
+            setSongPercentage(
+                (playbackStatus.positionMillis /
+                    playbackStatus.durationMillis) *
+                    100
+            );
+        }
+    
+        setElapsedTime(
+            secondsToMinutes(Math.floor(playbackStatus.positionMillis / 1000))
+        );
+    
+        // Check if the track has ended
+        if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
+            console.log ("TRACK ENDED"); 
+            if (isLooping) {
+                console.log ("LOOPING");
+                await sound.setPositionAsync(0);
+                await sound.playAsync();
+            } else {
+                console.log ("NEXT TRACK");
+                voteHandler();
+            }
+        }
+    };
+
+    const onSliderValueChange = async (value) => {
+        if (!sliderTouching) {
+            if (sound) {
+                const newPosition = (value / 100) * sound._durationMillis;
+                await sound.setPositionAsync(newPosition);
+            }
+            setSongPercentage(value);
+        }
+    };
+
+    const fetchApi = async (url, body) => {
+        return await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        }).then((res) => res.json());
+    };
+
+    const playAudio = async (track) => {
+        const id = track.URI.substring(track.URI.indexOf("/d/")).split("/")[2];
+        const audio = "https://drive.google.com/uc?export=download&id=" + id;
+
+        try {
+            const { sound } = await Audio.Sound.createAsync({ uri: audio });
+
+            setSongInfo({ title: track.Title });
+            setSound(sound);
+            sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+
+            if (!isFirstPlay) {
+                setIsPlaying(true);
+                await sound.playAsync();
+            }
+        } catch (error) {
+            console.log("Error loading audio:", error);
+        }
+    };
+
+    const voteHandler = (usedDefaultRating = false) => {
+        const getSong = async () => {
+            setIsLoading(true);
+
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: false,
+                staysActiveInBackground: false,
+                playsInSilentModeIOS: true,
+                shouldDuckAndroid: true,
+                playThroughEarpieceAndroid: false,
+            });
+
+            const response = await fetchApi(
+                "http://localhost:8080/track/next",
+                {
+                    patientId: patient._id,
+                    trackId: currentlyPlaying,
+                    // rating: usedDefaultRating ? 3 : rating,
+                    rating: 0,
+                }
+            );
+
+            if (response.status !== "OK") alert(response.error_message);
+            else {
+                currentlyPlaying = response.trackId;
+                const data = await fetchApi("http://localhost:8080/track/get", {
+                    id: currentlyPlaying,
+                });
+
+                console.log("Received data " + data);
+
+                if (data.status === "ERROR") console.log(data.message);
+                else await playAudio(data.track);
+            }
+
+            setIsLoading(false);
+        };
+
+        if (!isLoading) {
+            getSong(isFirstPlay ? 0 : rating);
+            if (isFirstPlay) setIsFirstPlay(false);
+        } else {
+            console.log("Already loading a song");
+        }
+    };
+
+    const onRatingValueChange = (value) => {
+        setRating(value);
+        setRatingColor(getRatingColor(value));
+        setRatingText(getRatingText(value));
+        // voteHandler(value);
+    };
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.topContainer}>
+                <Text style={styles.title}>Project FUXI</Text>
+                <View style={styles.musicInfoContainer}>
+                    <Image
+                        style={styles.coverImage}
+                        source={require("../assets/tempMusicCover.jpeg")}
+                    />
+                    <Text style={styles.songName} numberOfLines={1}>
+                        {songInfo.title}
+                    </Text>
+                    <View style={styles.progressBarContainer}>
+                        <Slider
+                            style={styles.slider}
+                            minimumValue={0}
+                            maximumValue={100}
+                            value={songPercentage}
+                            minimumTrackTintColor={colours.primary}
+                            maximumTrackTintColor={colours.secondary}
+                            thumbTintColor={colours.primary}
+                            onValueChange={(value) => {
+                                if (sliderTouching) {
+                                    setSongPercentage(value);
+                                }
+                            }}
+                            onTouchStart={() => setSliderTouching(true)}
+                            onTouchEnd={() => {
+                                setSliderTouching(false);
+                                onSliderValueChange(songPercentage);
+                            }}
+                        />
+                        <Text style={styles.elapsedTime}>{elapsedTime}</Text>
+                    </View>
+                    <View style={styles.ratingContainer}>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={voteHandler}
+                        >
+                            <FontAwesomeIcon icon={faBackward} size={20} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => {
+                                setIsLooping(!isLooping);
+                            }}                            
+                        >
+                            <FontAwesomeIcon icon={faRepeat} size={20} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={pauseHandler}
+                        >
+                            <FontAwesomeIcon
+                                icon={isPlaying ? faPause : faPlay}
+                                size={20}
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={voteHandler}
+                        >
+                            <FontAwesomeIcon icon={faForward} size={20} />
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={{ color: isLooping ? colours.primary : colours.secondary }}>
+                        Loop: {isLooping ? "On" : "Off"}
+                    </Text>
+                </View>
+            </View>
+            <View style={styles.bottomContainer}>
+                <View style={styles.sliderContainer}>
+                    <Slider
+                        style={styles.ratingSlider}
+                        minimumValue={1}
+                        maximumValue={5}
+                        step={1}
+                        value={rating}
+                        minimumTrackTintColor={ratingColor}
+                        maximumTrackTintColor="#CCCCCC"
+                        // thumbImage={require("../assets/tag-down-icon.png")} // Replace with the downward tag icon path
+                        onSlidingComplete={onRatingValueChange}
+                    />
+                    <View style={styles.sliderValues}>
+                        {[0, 1, 2, 3, 4, 5].map((value) => (
+                            <Text key={value} style={styles.sliderValue}>
+                                {value}
+                            </Text>
+                        ))}
+                    </View>
+                    <Text style={{ ...styles.ratingText, color: ratingColor }}>
+                        {ratingText}
+                    </Text>
+                </View>
+            </View>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colours.bg,
+        paddingHorizontal: 20,
+    },
+    topContainer: {
+        flex: 2,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: colours.primaryText,
+        marginBottom: 20,
+    },
+    musicInfoContainer: {
+        alignItems: "center",
+    },
+    coverImage: {
+        width: 200,
+        height: 200,
+        borderRadius: 10,
+        marginBottom: 20,
+    },
+    songName: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: colours.primaryText,
+        marginBottom: 10,
+    },
+    progressBarContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 30,
+    },
+    elapsedTime: {
+        fontSize: 14,
+        color: colours.primaryText,
+        paddingHorizontal: 8,
+    },
+    button: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: 8,
+    },
+    progressBar: {
+        flex: 1,
+        height: 5,
+        backgroundColor: colours.secondary,
+        borderRadius: 3,
+        marginRight: 10,
+    },
+    progressBarFill: {
+        backgroundColor: colours.primary,
+        borderRadius: 3,
+    },
+    playPauseButton: {
+        alignSelf: "center",
+        marginBottom: 30,
+    },
+    bottomContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    sliderContainer: {
+        alignItems: "center",
+    },
+    slider: {
+        flex: 1,
+        marginRight: 10,
+    },
+    ratingSlider: {
+        width: 300,
+        marginBottom: 10,
+    },
+    sliderValues: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "100%",
+        paddingHorizontal: 10,
+        marginBottom: 10,
+    },
+    sliderValue: {
+        fontSize: 12,
+        color: "gray",
+    },
+    ratingText: {
+        fontSize: 18,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    ratingContainer: {
+        flexDirection: "row",
+    },
+    loopText: {
+        fontSize: 16,
+        color: colours.primaryText,
+        marginTop: 10,
+    },
 });
 
 export default PlayerScreen;

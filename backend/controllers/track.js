@@ -38,8 +38,8 @@ const getNextTrackId = async (req, res) =>
         [track]: acc[track] !== undefined ? acc[track] + rating : rating
     }), {}); 
 
-    console.log ("TRACK RATINGS")
-    console.log (trackRatings);
+    // console.log ("TRACK RATINGS")
+    // console.log (trackRatings);
 
     // If there are no positive tracks, add every track to the patient's trackRatings array with a rating of 0 for the genres they like
     if (Object.values(trackRatings).every(rating => rating <= 0))
@@ -57,8 +57,8 @@ const getNextTrackId = async (req, res) =>
     }
 
     const positiveTracks = Object.entries(trackRatings).filter(([track, rating]) => rating != -1).map(([track, rating]) => ({ track, rating: rating + 1 })); 
-    console.log ("POSITIVE TRACKS")
-    console.log (positiveTracks);
+    // console.log ("POSITIVE TRACKS")
+    // console.log (positiveTracks);
 
     const totalScore = positiveTracks.reduce((acc, { track, rating }) => acc + rating, 0); 
 
@@ -68,7 +68,10 @@ const getNextTrackId = async (req, res) =>
         diceRoll -= rating; 
 
         if (diceRoll <= 0)
+        {
+            console.log ("RETURNING TRACK ID " + track);
             return res.json({ trackId: track, status: "OK", message: "Returning a random track based on weighted average of weightings" }); 
+        }
     }
 
     return res.status(500).json({ message: "Something went wrong"}); 
@@ -79,13 +82,14 @@ const getTrack = async (req, res) =>
 {
     const { id } = req.body;
 
-    console.log ("SEARCHING FOR TRACK BY ID " + id); 
+    // console.log ("SEARCHING FOR TRACK BY ID " + id); 
 
     if (!id)
         return res.status(400).json({ status: "ERROR", message: "Track id required" });
 
     const track = await trackModel.findById(id);
     
+    console.log ("FOUND TRACK " + track);
     return res.status(200).json({ track, status: "OK", message: "Found track by id " + id });
 }
 

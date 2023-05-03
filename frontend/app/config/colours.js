@@ -1,17 +1,8 @@
-export default 
-{
-    // bg: '#162521', 
-    bg: '#FFFFFF', // white
-    charcoal: '#B0DDE4', 
-    grey: '#556970', 
-
-    text: '#000000', // black
-    button: '#286FB4', 
-    // text: '#C0E0DE', 
-
-    highlight: '#DF4C73',
-
-    blue: '#286FB4',
-    selected: '#6e9fd4',
-    light: '#E2F0F9'
-}
+export default {
+    bg: "#F6F7F9", // light grayish-blue
+    primary: "#3F51B5", // indigo
+    secondary: "#E0E0E0", // light gray
+    primaryText: "#212121", // very dark gray
+    voteUp: "#4CAF50", // green
+    voteDown: "#F44336", // red
+};
