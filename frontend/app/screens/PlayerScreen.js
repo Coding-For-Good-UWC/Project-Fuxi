@@ -100,7 +100,7 @@ function PlayerScreen({ route, navigation }) {
 
     const onPlaybackStatusUpdate = async (playbackStatus) => {
         if (!playbackStatus.isLoaded) return;
-    
+
         if (!sliderTouching) {
             setSongPercentage(
                 (playbackStatus.positionMillis /
@@ -108,20 +108,20 @@ function PlayerScreen({ route, navigation }) {
                     100
             );
         }
-    
+
         setElapsedTime(
             secondsToMinutes(Math.floor(playbackStatus.positionMillis / 1000))
         );
-    
+
         // Check if the track has ended
         if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
-            console.log ("TRACK ENDED"); 
+            console.log("TRACK ENDED");
             if (isLooping) {
-                console.log ("LOOPING");
+                console.log("LOOPING");
                 await sound.setPositionAsync(0);
                 await sound.playAsync();
             } else {
-                console.log ("NEXT TRACK");
+                console.log("NEXT TRACK");
                 voteHandler();
             }
         }
@@ -265,7 +265,7 @@ function PlayerScreen({ route, navigation }) {
                             style={styles.button}
                             onPress={() => {
                                 setIsLooping(!isLooping);
-                            }}                            
+                            }}
                         >
                             <FontAwesomeIcon icon={faRepeat} size={20} />
                         </TouchableOpacity>
@@ -285,7 +285,16 @@ function PlayerScreen({ route, navigation }) {
                             <FontAwesomeIcon icon={faForward} size={20} />
                         </TouchableOpacity>
                     </View>
-                    <Text style={{ color: isLooping ? colours.primary : colours.secondary }}>
+                    <Text
+                        style={[
+                            {
+                                color: isLooping
+                                    ? colours.primary
+                                    : colours.secondary,
+                            },
+                            styles.loopText,
+                        ]}
+                    >
                         Loop: {isLooping ? "On" : "Off"}
                     </Text>
                 </View>
@@ -300,7 +309,6 @@ function PlayerScreen({ route, navigation }) {
                         value={rating}
                         minimumTrackTintColor={ratingColor}
                         maximumTrackTintColor="#CCCCCC"
-                        // thumbImage={require("../assets/tag-down-icon.png")} // Replace with the downward tag icon path
                         onSlidingComplete={onRatingValueChange}
                     />
                     <View style={styles.sliderValues}>
@@ -329,6 +337,7 @@ const styles = StyleSheet.create({
         flex: 2,
         justifyContent: "center",
         alignItems: "center",
+        paddingTop: 130,
     },
     title: {
         fontSize: 24,
@@ -349,14 +358,14 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         color: colours.primaryText,
-        marginBottom: 10,
+        marginTop: 10
     },
     progressBarContainer: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 30,
-    },
+        marginVertical: 20,
+    },    
     elapsedTime: {
         fontSize: 14,
         color: colours.primaryText,
@@ -386,6 +395,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+        paddingBottom: 120
     },
     sliderContainer: {
         alignItems: "center",
@@ -419,7 +429,6 @@ const styles = StyleSheet.create({
     },
     loopText: {
         fontSize: 16,
-        color: colours.primaryText,
         marginTop: 10,
     },
 });

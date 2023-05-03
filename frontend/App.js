@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, StyleSheet, Animated } from 'react-native';
 
 import LandingScreen from './app/screens/LandingScreen';
 
@@ -23,8 +23,25 @@ const Stack = createNativeStackNavigator();
 
 export default function App() 
 {
-  const [isLoading, setIsLoading] = useState (false); 
-  const isLoadingContextValue = useMemo (() => ({ isLoading, setIsLoading }), [isLoading, setIsLoading]); 
+  const [isLoading, setIsLoading] = useState(false);
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const isLoadingContextValue = useMemo(() => ({ isLoading, setIsLoading }), [isLoading, setIsLoading]);
+
+  useEffect(() => {
+    if (isLoading) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isLoading, fadeAnim]);
 
   return (
     <View style={styles.container}>
@@ -67,7 +84,7 @@ export default function App()
       </Stack.Navigator>
     </NavigationContainer>
     </LoadingContext.Provider>
-    { isLoading && <LoadingScreen />}
+    { isLoading && <LoadingScreen fadeAnim={fadeAnim} />}
     </View>
   )
 }
