@@ -25,7 +25,7 @@ function DatePickerModel(props) {
             borderColor: colours.border,
           }}
           current={props.currentDate}
-          selected="2020-07-23"
+          selected="1950-01-01"
           mode="calendar"
           minuteInterval={30}
           style={styles.datePicker}

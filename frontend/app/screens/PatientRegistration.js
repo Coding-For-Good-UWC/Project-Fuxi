@@ -18,7 +18,6 @@ function PatientRegistration({ route, navigation }) {
     const { username, password } = route.params;
 
     const [name, setName] = useState("");
-    const [age, setAge] = useState(0);
     const [ethnicity, setEthnicity] = useState("");
     const [birthdate, setBirthdate] = useState("");
     const [birthplace, setBirthplace] = useState("");
@@ -37,8 +36,30 @@ function PatientRegistration({ route, navigation }) {
         "Hokkien",
     ];
 
-    const handleLogin = async (evt) => {
+    const handleSubmit = async (evt) => {
         evt.preventDefault();
+
+        // Check if username, password, name, age, ethnicity, birthdate, birthplace, or language are null
+        if (
+            !username ||
+            !password ||
+            !name ||
+            !ethnicity ||
+            !birthdate ||
+            !birthplace ||
+            !language
+        ) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        const birthDateObj = new Date(birthdate);
+        const currentDate = new Date();
+        let age = currentDate.getFullYear() - birthDateObj.getFullYear();
+        const monthDiff = currentDate.getMonth() - birthDateObj.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < birthDateObj.getDate())) {
+            age--;
+        }
 
         const patientData = {
             username,
@@ -52,19 +73,6 @@ function PatientRegistration({ route, navigation }) {
         };
 
         navigation.navigate("PatientMusicForm", { ...patientData });
-    };
-
-    const validateNumInput = (text) => {
-        let digitsOnly = "";
-        const digits = "0123456789";
-
-        for (let i = 0; i < text.length; i++) {
-            if (digits.indexOf(text[i]) > -1) {
-                digitsOnly = digitsOnly + text[i];
-            }
-        }
-
-        return digitsOnly;
     };
 
     const onSelectEthnicity = (ethnicity) => {
@@ -93,25 +101,10 @@ function PatientRegistration({ route, navigation }) {
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
-                            placeholder="Age"
-                            placeholderTextColor={colours.selected}
-                            value={age}
-                            onChangeText={(age) =>
-                                setAge(validateNumInput(age))
-                            }
-                        />
-                    </View>
-
-                    <View style={styles.inputContainer}>
-                        <TextInput
-                            style={styles.input}
                             placeholder="Birthdate"
                             placeholderTextColor={colours.selected}
                             value={birthdate}
                             editable={false}
-                            onChangeText={(age) =>
-                                setAge(validateNumInput(age))
-                            }
                         />
                     </View>
                     <Button
@@ -182,14 +175,11 @@ function PatientRegistration({ route, navigation }) {
                             onChangeText={(language) => setLanguage(language)}
                         />
                     </View>
-
-                    <TouchableOpacity>
-                        <Button
-                            style={styles.RegisterButton}
-                            onPress={handleLogin}
-                            color={colours.blue}
-                            title="Register"
-                        />
+                    <TouchableOpacity
+                        style={styles.submitButton}
+                        onPress={handleSubmit}
+                    >
+                        <Text style={styles.submitButtonText}>Next</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -249,16 +239,24 @@ const styles = StyleSheet.create({
       marginRight: 20,
       color: colours.primaryText,
   },
-  RegisterButton: {
-      width: "80%",
-      padding: "10%",
-      borderRadius: 0,
-      height: 50,
-      alignItems: "center",
-      justifyContent: "center",
-      marginTop: 40,
-      backgroundColor: colours.primary,
-  },
+  submitButton: {
+    backgroundColor: colours.primary,
+    borderRadius: 10,
+    width: 100,
+    height: 40,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+},
+submitButtonText: {
+    color: colours.bg,
+    textAlign: "center",
+    paddingLeft: 10,
+    paddingRight: 10,
+    fontSize: 18,
+    fontWeight: "450",
+},
   modalContainer: {
       flex: 1,
       justifyContent: "center",

@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import colours from "../config/colours.js";
 
 function MusicToggleButton(props) {
-    const [borderColor, setBorderColor] = useState(colours.primary);
+    const [borderColor, setBorderColor] = useState(colours.bg);
 
     const toggleSelected = () => {
         const newColor =
@@ -12,6 +12,7 @@ function MusicToggleButton(props) {
                 ? colours.bg
                 : colours.tertiary;
         setBorderColor(newColor);
+        props.updatePreferences();
     };
 
     return (
