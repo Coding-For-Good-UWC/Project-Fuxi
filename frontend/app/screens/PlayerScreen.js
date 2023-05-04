@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import {
+    StyleSheet,
+    View,
+    Text,
+    TouchableOpacity,
+    Image,
+    StatusBar,
+} from "react-native";
 import Slider from "@react-native-community/slider";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -12,6 +19,7 @@ import {
 
 import { Audio } from "expo-av";
 import LoadingContext from "../store/LoadingContext.js";
+import BackButton from "../components/BackButton.js";
 
 import colours from "../config/colours.js";
 let currentlyPlaying = -1;
@@ -69,7 +77,7 @@ function PlayerScreen({ route, navigation }) {
 
     const pauseHandler = async () => {
         if (isFirstPlay) {
-            await voteHandler(true);
+            await voteHandler(3);
         }
 
         if (!sound) {
@@ -86,7 +94,7 @@ function PlayerScreen({ route, navigation }) {
     };
 
     useEffect(() => {
-        voteHandler(true);
+        voteHandler(3);
     }, []);
 
     useEffect(() => {
@@ -122,7 +130,7 @@ function PlayerScreen({ route, navigation }) {
                 await sound.playAsync();
             } else {
                 console.log("NEXT TRACK");
-                voteHandler();
+                voteHandler(rating);
             }
         }
     };
@@ -167,7 +175,7 @@ function PlayerScreen({ route, navigation }) {
         }
     };
 
-    const voteHandler = (usedDefaultRating = false) => {
+    const voteHandler = (finalRating) => {
         const getSong = async () => {
             setIsLoading(true);
 
@@ -184,8 +192,7 @@ function PlayerScreen({ route, navigation }) {
                 {
                     patientId: patient._id,
                     trackId: currentlyPlaying,
-                    // rating: usedDefaultRating ? 3 : rating,
-                    rating: 0,
+                    rating: finalRating,
                 }
             );
 
@@ -217,11 +224,12 @@ function PlayerScreen({ route, navigation }) {
         setRating(value);
         setRatingColor(getRatingColor(value));
         setRatingText(getRatingText(value));
-        // voteHandler(value);
     };
 
     return (
         <View style={styles.container}>
+            <BackButton navigation={navigation} />
+            <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
             <View style={styles.topContainer}>
                 <Text style={styles.title}>Project FUXI</Text>
                 <View style={styles.musicInfoContainer}>
@@ -257,7 +265,7 @@ function PlayerScreen({ route, navigation }) {
                     <View style={styles.ratingContainer}>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={voteHandler}
+                            onPress={() => console.log ("BACK")}
                         >
                             <FontAwesomeIcon icon={faBackward} size={20} />
                         </TouchableOpacity>
@@ -280,7 +288,7 @@ function PlayerScreen({ route, navigation }) {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={voteHandler}
+                            onPress={() => voteHandler(rating)}
                         >
                             <FontAwesomeIcon icon={faForward} size={20} />
                         </TouchableOpacity>
@@ -340,7 +348,7 @@ const styles = StyleSheet.create({
         paddingTop: 130,
     },
     title: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: "bold",
         color: colours.primaryText,
         marginBottom: 20,
@@ -351,21 +359,21 @@ const styles = StyleSheet.create({
     coverImage: {
         width: 200,
         height: 200,
-        borderRadius: 10,
+        borderRadius: 20,
         marginBottom: 20,
     },
     songName: {
         fontSize: 18,
         fontWeight: "bold",
         color: colours.primaryText,
-        marginTop: 10
+        marginTop: 10,
     },
     progressBarContainer: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
         marginVertical: 20,
-    },    
+    },
     elapsedTime: {
         fontSize: 14,
         color: colours.primaryText,
@@ -395,7 +403,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        paddingBottom: 120
+        paddingBottom: 120,
     },
     sliderContainer: {
         alignItems: "center",
@@ -423,13 +431,23 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         textAlign: "center",
+        marginTop: 5,
     },
     ratingContainer: {
         flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
+        width: "80%",
+        marginTop: 10,
+        marginBottom: 20,
+        backgroundColor: colours.bg,
+        borderRadius: 25,
+        paddingVertical: 5,
     },
     loopText: {
         fontSize: 16,
         marginTop: 10,
+        color: colours.primaryText,
     },
 });
 

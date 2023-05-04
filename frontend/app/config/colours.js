@@ -5,4 +5,5 @@ export default {
     primaryText: "#212121", // very dark gray
     voteUp: "#4CAF50", // green
     voteDown: "#F44336", // red
+    tertiary: "#7E57C2", // deep purple
 };

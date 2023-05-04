@@ -35,51 +35,46 @@ function LandingScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    container: 
-    {
-        flex: 1, 
-        alignItems: "center", 
-        justifyContent: "center", 
-        backgroundColor: colours.bg
-    }, 
-    titleContainer: 
-    {
-        borderBottomWidth: 4,
-        borderBottomColor: colours.highlight, 
-        marginBottom: 20, 
-    }, 
-    titleText: 
-    {
-        fontSize: 40, 
-        color: colours.text, 
-        paddingBottom: 20, 
-        fontWeight: '500'
-    }, 
-    image: 
-    {
-        height: 100, 
-        aspectRatio: 1, 
-        marginBottom: 70
-    }, 
-    buttonContainer:
-    {
-        backgroundColor: colours.button,
-        borderRadius: 10,
-        width: 100, 
-        height: 40, 
-        display: 'flex', 
-        alignItems: "center", 
-        justifyContent: "center", 
+    container: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: colours.bg,
     },
-    buttonText:
-    {
-        color:colours.light,
-        textAlign:'center',
-        paddingLeft : 10,
-        paddingRight : 10, 
-        fontSize: 18, 
-        fontWeight: '450'
-    }
-})
+    titleContainer: {
+        borderBottomWidth: 2,
+        borderBottomColor: colours.primary,
+        marginBottom: 20,
+    },
+    titleText: {
+        fontSize: 32,
+        color: colours.primaryText,
+        paddingBottom: 20,
+        fontWeight: "500",
+    },
+    image: {
+        height: 100,
+        aspectRatio: 1,
+        marginBottom: 70,
+    },
+    buttonContainer: {
+        backgroundColor: colours.primary,
+        borderRadius: 10,
+        width: 120,
+        height: 40,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 10,
+    },
+    buttonText: {
+        color: colours.bg,
+        textAlign: "center",
+        paddingLeft: 10,
+        paddingRight: 10,
+        fontSize: 18,
+        fontWeight: "450",
+    },
+});
 
 export default LandingScreen;

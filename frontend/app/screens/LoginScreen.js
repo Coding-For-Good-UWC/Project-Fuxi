@@ -11,6 +11,7 @@ import {
 
 import colours from "../config/colours.js";
 import LoadingContext from "../store/LoadingContext.js";
+import BackButton from "../components/BackButton.js";
 
 function LoginScreen({ navigation }) {
     const { isLoading, setIsLoading } = useContext(LoadingContext);
@@ -48,6 +49,7 @@ function LoginScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
+            <BackButton navigation={navigation} />
             <View style={styles.titleContainer}>
                 <Text style={styles.titleText}>Project FUXI</Text>
                 <Text style={styles.titleText}>Login</Text>
@@ -100,15 +102,14 @@ const styles = StyleSheet.create({
         backgroundColor: colours.bg,
     },
     titleContainer: {
-        borderBottomWidth: 4,
-        borderBottomColor: colours.highlight,
+        borderBottomWidth: 2,
+        borderBottomColor: colours.primary,
         marginBottom: 20,
     },
     titleText: {
-        fontSize: 40,
-        color: colours.text,
-        // lineHeight: 70
-        paddingBottom: 20,
+        fontSize: 32,
+        color: colours.primaryText,
+        paddingBottom: 10,
         fontWeight: "500",
     },
     image: {
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     inputContainer: {
-        backgroundColor: colours.charcoal,
+        backgroundColor: colours.secondary,
         borderRadius: 30,
         width: Platform.OS === "web" ? "30%" : "70%",
         height: 50,
@@ -128,12 +129,16 @@ const styles = StyleSheet.create({
         height: 50,
         padding: 10,
         marginLeft: 20,
+        color: colours.primaryText,
     },
     clickableText: {
         height: 30,
+        color: colours.primary,
+        textDecorationLine: "underline",
+        marginBottom: 10,
     },
     buttonContainer: {
-        backgroundColor: colours.button,
+        backgroundColor: colours.primary,
         borderRadius: 10,
         width: 100,
         height: 40,
@@ -142,7 +147,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     buttonText: {
-        color: colours.light,
+        color: colours.bg,
         textAlign: "center",
         paddingLeft: 10,
         paddingRight: 10,

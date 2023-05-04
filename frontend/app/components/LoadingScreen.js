@@ -30,15 +30,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Black with 80% opacity
-    zIndex: 1000, // Make sure the loading screen is on top of all other components
+    backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+    zIndex: 1000, 
   },
   loadingIcon: {
-    marginBottom: 10, // Add some space between the icon and the text
+    marginBottom: 10, 
   },
   text: {
-    color: 'white', // Set the text color to white
-    fontSize: 18, // Set the font size (optional)
+    color: 'white', 
+    fontSize: 18, 
   }
 });
 

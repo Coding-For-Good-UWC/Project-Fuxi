@@ -9,10 +9,19 @@ const patientModel = require("../models/patient");
 // For first track played, pass a rating of 0 and any track id (won't matter)
 const getNextTrackId = async (req, res) => 
 { 
-    const { patientId, trackId, rating } = req.body; 
+    const { patientId, trackId } = req.body; 
+    let { rating } = req.body;
 
     if (!patientId || !trackId || rating === undefined)
         return res.status(400).json({ message: "Patient id, track id and rating required"}); 
+
+    // TEMPORARILY MAP 1-5 RATING TO -1-1 SCALE
+    if (rating <= 2)
+        rating = -1;
+    if (rating == 3)
+        rating = 0;
+    if (rating >= 4)
+        rating = 1;
 
     if (rating < -1 || rating > 1)
         return res.status(400).json({ message: "Score must be a valid integer between -1 and 1" }); 
