@@ -18,7 +18,7 @@ function BackButton({ navigation }) {
 const styles = StyleSheet.create({
     buttonContainer: {
         backgroundColor: colours.secondary,
-        borderRadius: 25, //
+        borderRadius: 25, 
         width: 50, 
         height: 50, 
         alignItems: 'center',

@@ -5,13 +5,10 @@ import LandingScreen from './app/screens/LandingScreen';
 
 import LoginScreen from './app/screens/LoginScreen';
 import SignupScreen from './app/screens/SignupScreen';
-// import CaregiverDashboard from './app/screens/CaregiverDashboard'; 
 import PlayerScreen from './app/screens/PlayerScreen';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-import { Platform } from 'react-native'; 
 
 import PatientRegistration from './app/screens/PatientRegistration';
 import PatientMusicForm from './app/screens/PatientMusicForm';
