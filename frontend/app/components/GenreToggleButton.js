@@ -12,7 +12,6 @@ function MusicToggleButton(props) {
                 ? colours.bg
                 : colours.tertiary;
         setBorderColor(newColor);
-        // props.updatePreferences();
     };
 
     return (

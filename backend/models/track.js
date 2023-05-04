@@ -3,25 +3,40 @@ const mongoose = require ("mongoose");
 const { Schema, model, Types } = mongoose; 
 
 const schema = new Schema ({
-    uri: 
+    Title:
     {
         type: String, 
-        unique: true, 
-        required: true
-    }, 
-    name: 
-    {
-        type: String, 
+        unique: false,
         required: true
     },
-    artist: 
+    URI:
     {
-        type: String, 
+        type: String,
+        unique: true, 
         required: true
-    }, 
-    imageUrl: 
+    },
+    Artist:
     {
-        type: String, 
+        type: String,
+        unique: false,
+        required: true
+    },
+    Language:
+    {
+        type: String,
+        unique: false,
+        required: true
+    },
+    Genre:
+    {
+        type: String,
+        unique: false,
+        required: true
+    },
+    ImageURL:
+    {
+        type: String,
+        unique: false,
         required: true
     }
 })
