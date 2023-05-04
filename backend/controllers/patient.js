@@ -70,21 +70,21 @@ const signup = async (req, res) =>
     res.status(200).json({ newPatient, status: "OK", message: "Patient created" }); 
 }
 
-const getPatient = async (req, res) => 
-{
-    const { id } = req.body; 
+// const getPatient = async (req, res) => 
+// {
+//     const { id } = req.body; 
 
-    if (!id)
-        res.status(404).json({ message: "Patient id required" }); 
+//     if (!id)
+//         res.status(404).json({ message: "Patient id required" }); 
 
-    const patient = await patientModel.findById(id); 
+//     const patient = await patientModel.findById(id); 
 
-    if (!patient)
-        res.status(404).json({ message: `Patient by id ${id} not found` }); 
+//     if (!patient)
+//         res.status(404).json({ message: `Patient by id ${id} not found` }); 
 
-    // Remove password from patient object
-    patient.password = undefined;
-    res.status(200).json(patient); 
-}
+//     // Remove password from patient object
+//     patient.password = undefined;
+//     res.status(200).json(patient); 
+// }
 
-module.exports = { login, checkUsername, signup, getPatient }; 
+module.exports = { login, checkUsername, signup }; 

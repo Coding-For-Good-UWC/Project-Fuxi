@@ -1,9 +1,0 @@
-# .env file
-```
-PORT = 8080
-VERSION = 1
-HOST_NAME=
-USERNAME=
-PASSWORD=
-DATABASE=
-```

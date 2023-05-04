@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "REST API for accessing the MySQL database.",
+  "description": "REST API for accessing the mongo database.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

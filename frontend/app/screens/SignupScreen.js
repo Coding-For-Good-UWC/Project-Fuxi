@@ -49,6 +49,7 @@ function SignupScreen({ navigation }) {
     if (data.status === "ERROR") console.log(data.message);
     else {
       console.log("Username available");
+      alert("Username already in use!");
       navigation.navigate("PatientRegistration", { username, password });
     }
   };

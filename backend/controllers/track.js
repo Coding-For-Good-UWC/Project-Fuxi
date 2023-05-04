@@ -47,9 +47,6 @@ const getNextTrackId = async (req, res) =>
         [track]: acc[track] !== undefined ? acc[track] + rating : rating
     }), {}); 
 
-    // console.log ("TRACK RATINGS")
-    // console.log (trackRatings);
-
     // If there are no positive tracks, add every track to the patient's trackRatings array with a rating of 0 for the genres they like
     if (Object.values(trackRatings).every(rating => rating <= 0))
     {
@@ -66,8 +63,6 @@ const getNextTrackId = async (req, res) =>
     }
 
     const positiveTracks = Object.entries(trackRatings).filter(([track, rating]) => rating != -1).map(([track, rating]) => ({ track, rating: rating + 1 })); 
-    // console.log ("POSITIVE TRACKS")
-    // console.log (positiveTracks);
 
     const totalScore = positiveTracks.reduce((acc, { track, rating }) => acc + rating, 0); 
 
@@ -86,12 +81,10 @@ const getNextTrackId = async (req, res) =>
     return res.status(500).json({ message: "Something went wrong"}); 
 } 
 
-// Write an async function that returns the track object given its id
+// Async function that returns the track object given its id
 const getTrack = async (req, res) =>
 {
     const { id } = req.body;
-
-    // console.log ("SEARCHING FOR TRACK BY ID " + id); 
 
     if (!id)
         return res.status(400).json({ status: "ERROR", message: "Track id required" });
