@@ -1,85 +1,117 @@
 import React, { useState } from "react";
-import 
-{
-    StyleSheet,
-    Text,
-    View,
-    Image,
-    TextInput,
-    TouchableOpacity, 
-    Platform
-  } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  Platform,
+  Alert,
+} from "react-native";
 
-import colours from '../config/colours.js'; 
+import colours from "../config/colours.js";
 import BackButton from "../components/BackButton.js";
 
-function SignupScreen ({ navigation }) 
-{
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+function SignupScreen({ navigation }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmedPassword, setConfirmedPassword] = useState("");
 
-    let handleLogin = async (evt) => 
-    {
-        evt.preventDefault(); 
+  const passwordRegex = /^(?=.*\d)[A-Za-z\d]{8,}$/;
 
-        const response = await fetch ("http://localhost:8080/patient/checkUsername", // get students for selected teacher's class
-        { 
-            body: JSON.stringify ({ username, password }), // send over text representation of json object 
-            headers: { "Content-Type": "application/json" }, // let server know to turn plain text back into json object
-            method: "POST"
-        }); 
-        const data = await response.json(); 
-      
-        if (data.status === 'ERROR')
-            console.log(data.message);
-        else
-        {
-            console.log ("Username available"); 
-            navigation.navigate ("PatientRegistration", { username, password });
-        }
+  let handleSignUp = async (evt) => {
+    evt.preventDefault();
+
+    if (password !== confirmedPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
     }
-   
-    return (
-      <View style={styles.container}>
-        <BackButton navigation={navigation} />
-        <View style={styles.titleContainer}>
-          <Text style={styles.titleText}>Project FUXI</Text>
-          <Text style={styles.titleText}>Signup</Text>
-        </View>
-        <Image style={styles.image} source={require("../assets/fuxiIcon.png")} />
-        <View
-          style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            autoCapitalize="none"
-            secureTextEntry={false}
-            onChangeText={(username) => setUsername(username)}
-          />
-        </View>
-   
-        <View
-          style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry={true}
-            onChangeText={(password) => setPassword(password)}
-          />
-        </View>
 
-        <TouchableOpacity><Text style={styles.clickableText}>Sign Up</Text></TouchableOpacity>
-        <TouchableOpacity><Text style={styles.clickableText}>Forgot Password?</Text></TouchableOpacity>
-        <TouchableOpacity
-            style={styles.buttonContainer}
-            onPress={handleLogin}
-            underlayColor={colours.highlight}
-        >
-            <Text style={styles.buttonText}>Sign Up</Text>
-        </TouchableOpacity>
-      </View>
+    if (!passwordRegex.test(password)) {
+      Alert.alert(
+        "Error",
+        "Password must have at least 8 characters and include a digit"
+      );
+      return;
+    }
+
+    const response = await fetch(
+      "http://localhost:8080/patient/checkUsername",
+      {
+        body: JSON.stringify({ username, password }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      }
     );
+    const data = await response.json();
+
+    if (data.status === "ERROR") console.log(data.message);
+    else {
+      console.log("Username available");
+      navigation.navigate("PatientRegistration", { username, password });
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <BackButton navigation={navigation} />
+      <View style={styles.titleContainer}>
+        <Text style={styles.titleText}>Project FUXI</Text>
+        <Text style={styles.titleText}>Signup</Text>
+      </View>
+      <Image
+        style={styles.image}
+        source={require("../assets/fuxiIcon.png")}
+      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          autoCapitalize="none"
+          secureTextEntry={false}
+          onChangeText={(username) => setUsername(username)}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry={true}
+          onChangeText={(password) => setPassword(password)}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          secureTextEntry={true}
+          onChangeText={(confirmedPassword) =>
+            setConfirmedPassword(confirmedPassword)
+          }
+        />
+      </View>
+
+      <TouchableOpacity onPress={handleSignUp}>
+        <Text style={styles.clickableText}>Sign Up</Text>
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <Text style={styles.clickableText}>Forgot Password?</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.buttonContainer}
+        onPress={handleSignUp}
+        underlayColor={colours.highlight}
+      >
+        <Text style={styles.buttonText}>Sign Up</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
