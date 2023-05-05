@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
     StyleSheet,
     Text,
@@ -9,15 +9,20 @@ import {
     Platform,
     Alert,
 } from "react-native";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
+import LoadingContext from "../store/LoadingContext.js";
 
 import colours from "../config/colours.js";
 import BackButton from "../components/BackButton.js";
 
-function SignupScreen({ navigation }) {
+function SignupScreen({ navigation }) 
+{
+    const [name, setName] = useState(""); 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmedPassword, setConfirmedPassword] = useState("");
+
+    const { isLoading, setIsLoading } = useContext(LoadingContext);
 
     const passwordRegex = /^(?=.*\d)[A-Za-z\d]{8,}$/;
 
@@ -37,6 +42,8 @@ function SignupScreen({ navigation }) {
             return;
         }
 
+        setIsLoading(true);
+
         const auth = getAuth();
         const userCredential = await createUserWithEmailAndPassword(
             auth,
@@ -44,69 +51,28 @@ function SignupScreen({ navigation }) {
             password
         );
 
-        // Signed in
-        // console.log (userCredential);
         const user = userCredential.user;
-        console.log(user.uid);
-
-        let response = await fetch("http://localhost:8080/institute/signup", {
-            body: JSON.stringify({ uuid: user.uid, email: user.email }),
+        const response = await fetch("http://localhost:8080/institute/signup", {
+            body: JSON.stringify({ uid: user.uid, email: user.email, name }),
             headers: { "Content-Type": "application/json" },
             method: "POST",
         });
-        let data = await response.json();
-        console.log("Institute created");
-        console.log(data.institute);
-        
+        const data = await response.json();
+        console.log ("CREATED INSTITUTE:")
+        console.log (data);
+
         const idToken = await auth.currentUser.getIdToken();
-        
-        response = await fetch("http://localhost:8080/institute/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", token: idToken },
+
+        const response2 = await fetch("http://localhost:8080/institute/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", token: idToken },
         });
-        data = await response.json();
-        console.log(data);
-        
+        const data2 = await response2.json();
+        console.log ("VERIFIED INSTITUTE:")
+        console.log (data2);
+
+        setIsLoading(false);
         navigation.navigate("Dashboard");
-
-
-        // const response = await fetch(
-        //   "http://localhost:8080/institute/checkUsername",
-        //   {
-        //     body: JSON.stringify({ username, password }),
-        //     headers: { "Content-Type": "application/json" },
-        //     method: "POST",
-        //   }
-        // );
-        // const data = await response.json();
-
-        // if (data.status === "ERROR")
-        // {
-        //   console.log(data.message)
-        //   alert(data.message);
-        // }
-        // else {
-        //   console.log("Username available");
-        //   // navigation.navigate("PatientRegistration", { username, password });
-
-        //   const payload = { username, password };
-
-        //   const response = await fetch("http://localhost:8080/institute/signup", {
-        //       body: JSON.stringify(payload),
-        //       headers: { "Content-Type": "application/json" },
-        //       method: "POST",
-        //   });
-        //   const data = await response.json();
-
-        //   if (data.status === "ERROR") console.log(data.message);
-        //   else {
-        //       console.log("Institute created");
-        //       console.log(">>>>>>>>>>>>>");
-        //       console.log(data.institute);
-        //       console.log(data.institute._id);
-        //       navigation.navigate("Dashboard", { institute: data.institute });
-        //   }
-        // }
     };
 
     return (
@@ -123,13 +89,21 @@ function SignupScreen({ navigation }) {
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
-                    placeholder="Username"
+                    placeholder="Name"
                     autoCapitalize="none"
                     secureTextEntry={false}
-                    onChangeText={(username) => setEmail(username)}
+                    onChangeText={(name) => setName(name)}
                 />
             </View>
-
+            <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    autoCapitalize="none"
+                    secureTextEntry={false}
+                    onChangeText={(email) => setEmail(email)}
+                />
+            </View>
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}

@@ -1,4 +1,4 @@
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 
 const getInstitute = async () => 
 {
@@ -16,4 +16,4 @@ const getInstitute = async () =>
     return data.institute; 
 }
 
-export { getInstitute };
+export { getInstitute }; 

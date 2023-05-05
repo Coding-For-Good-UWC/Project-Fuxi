@@ -17,9 +17,8 @@ import PatientItem from "../components/PatientItem.js";
 import { getPatients } from  '../api/patients'; 
 import { getInstitute } from "../api/institutes";
 
-function PatientDashboard({ route, navigation }) {
-    // const { institute } = route.params; // TEMP
-
+function PatientDashboard({ route, navigation }) 
+{
     const { isLoading, setIsLoading } = useContext(LoadingContext);
 
     const [patientData, setPatientData] = useState();
@@ -28,12 +27,6 @@ function PatientDashboard({ route, navigation }) {
     useEffect(() => {
         const loadPatients = async () => {
             setIsLoading(true);
-
-            // const response = await fetch(
-            //     `http://localhost:8080/institute/patients/${institute._id}`
-            // );
-            // const data = await response.json();
-            // const patients = data.patients;
 
             const institute = await getInstitute();
             console.log("INSTITUTE:");
@@ -80,7 +73,7 @@ function PatientDashboard({ route, navigation }) {
             <BackButton navigation={navigation} />
             <View style={styles.titleContainer}>
                 <Text style={styles.titleText}>Dashboard</Text>
-                <Text style={styles.subtitleText}>{institute.email}</Text>
+                <Text style={styles.subtitleText}>{institute.name}</Text>
             </View>
             <TouchableOpacity
                 style={styles.editButton}

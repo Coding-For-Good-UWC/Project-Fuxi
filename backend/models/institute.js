@@ -4,19 +4,7 @@ const { Schema, model, Types } = mongoose;
 
 const schema = new Schema (
     {
-        // username: 
-        // {
-        //     type: String, 
-        //     unique: true, 
-        //     required: true
-        // }, 
-        // password: 
-        // {
-        //     type: String, 
-        //     required: true
-        // }
-
-        uuid:
+        uid:
         {
             type: String,
             unique: true,
@@ -27,6 +15,12 @@ const schema = new Schema (
             type: String,
             unique: true,
             required: true
+        },
+        name:
+        {
+            type: String,
+            required: true,
+            unique: true
         }
     }
 )
@@ -37,7 +31,5 @@ schema.virtual("patients", { // institute.patients
     foreignField: "institute", // patients have institute property
     justOne: false
 })
-
-// frontend: res.json institute.patients to frontend
 
 module.exports = model ("institutes", schema); 

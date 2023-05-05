@@ -7,57 +7,50 @@ import {
     TextInput,
     TouchableOpacity,
     Platform,
+    Alert
 } from "react-native";
 
 import colours from "../config/colours.js";
 import LoadingContext from "../store/LoadingContext.js";
 import BackButton from "../components/BackButton.js";
 
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+
 function LoginScreen({ navigation }) {
     const { isLoading, setIsLoading } = useContext(LoadingContext);
 
-    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     let handleLogin = async (evt) => {
         evt.preventDefault();
-
+    
         setIsLoading(true);
-
-        const response = await fetch(
-            "http://localhost:8080/institute/login", 
-            {
-                body: JSON.stringify({ username, password }), 
-                headers: { "Content-Type": "application/json" }, 
+    
+        try {
+            const auth = getAuth();
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    
+            const user = userCredential.user;
+            const idToken = await auth.currentUser.getIdToken();
+    
+            const response = await fetch("http://localhost:8080/institute/verify", {
                 method: "POST",
-            }
-        );
-        const data = await response.json();
-
-        if (data.status === "ERROR") 
-        {
-            console.log(data.message);
-            setIsLoading(false); 
-        }
-        else {
+                headers: { "Content-Type": "application/json", token: idToken },
+            });
+            const data = await response.json();
             console.log("LOG IN SUCCESSFUL");
-            const institute = data.institute;
-            console.log (institute);
-
-            // const response2 = await fetch(`http://localhost:8080/institute/patients/${institute._id}`);
-            // const data2 = await response2.json();
-            // console.log(data2);
-            // const patient = data2.patients[0];
-            // console.log ("PATIENT:")
-            // console.log (patient)
-
-            navigation.navigate("Dashboard", { institute });
-
-            // setIsLoading(false);
-            // navigation.navigate("Player", { patient });
+            console.log(data);
+    
+            setIsLoading(false);
+            navigation.navigate("Dashboard");
+        } catch (error) {
+            console.log(error);
+            setIsLoading(false);
+            Alert.alert("Error", "Invalid email or password");
         }
     };
-
+    
     return (
         <View style={styles.container}>
             <BackButton navigation={navigation} />
@@ -69,15 +62,13 @@ function LoginScreen({ navigation }) {
                 style={styles.image}
                 source={require("../assets/fuxiIcon.png")}
             />
-            <View style={styles.inputContainer}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Username"
-                    autoCapitalize="none"
-                    secureTextEntry={false}
-                    onChangeText={(username) => setUsername(username)}
-                />
-            </View>
+            <TextInput
+                style={styles.input}
+                placeholder="Email"
+                autoCapitalize="none"
+                secureTextEntry={false}
+                onChangeText={(email) => setEmail(email)}
+            />
 
             <View style={styles.inputContainer}>
                 <TextInput
