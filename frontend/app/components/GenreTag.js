@@ -15,7 +15,7 @@ function GenreTag(props) {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colours.secondary,
+        backgroundColor: colours.voteDown,
         borderRadius: 10,
         alignItems: "center",
         justifyContent: "center",

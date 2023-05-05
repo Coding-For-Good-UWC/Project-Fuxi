@@ -7,12 +7,12 @@ import GenreTag from "./GenreTag";
 import colours from "../config/colours";
 
 function PatientItem(props) {
-    const { name, age, gender, genres }  = props.patient;
+    const { name, age, genres }  = props.patient;
     return (
         <View style={styles.container}>
             <Image style={styles.image} source={{ uri: "https://picsum.photos/200" }} />
             <View style={styles.info}>
-                <Text style={styles.name}>{name} ({gender}), {age}</Text>
+                <Text style={styles.name}>{name} (M), {age}</Text>
                 <View style={styles.genreTags}>
                     {genres.map((genre, index) => {
                         return <GenreTag key={index} genre={genre} />;
@@ -26,7 +26,7 @@ function PatientItem(props) {
 const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
-        backgroundColor: colours.primary,
+        backgroundColor: colours.secondary,
         alignItems: "center",
         justifyContent: "flex-start",
         paddingHorizontal: 10,
@@ -34,6 +34,8 @@ const styles = StyleSheet.create({
         height: 100,
         marginBottom: 10,
         borderRadius: 10,
+        borderWidth: 1,
+        borderColor: colours.primary,
     },
     image: {
         height: 80,

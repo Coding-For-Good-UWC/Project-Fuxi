@@ -235,7 +235,7 @@ function PlayerScreen({ route, navigation }) {
                 <View style={styles.musicInfoContainer}>
                     <Image
                         style={styles.coverImage}
-                        source={require("../assets/tempMusicCover.jpeg")}
+                        source={require("../assets/tempMusicCover.png")}
                     />
                     <Text style={styles.songName} numberOfLines={1}>
                         {songInfo.title}
