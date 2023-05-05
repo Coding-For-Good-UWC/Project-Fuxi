@@ -7,6 +7,15 @@ const cors = require('cors');
 const mongoStore = require("connect-mongo"); 
 // var cookieParser = require('cookie-parser')
 
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./.firebase.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+
 const routes = require ("./routes"); 
 
 const { PORT=8080, SESSION_SECRET, MONGO_URI } = process.env; 

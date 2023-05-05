@@ -4,15 +4,28 @@ const { Schema, model, Types } = mongoose;
 
 const schema = new Schema (
     {
-        username: 
+        // username: 
+        // {
+        //     type: String, 
+        //     unique: true, 
+        //     required: true
+        // }, 
+        // password: 
+        // {
+        //     type: String, 
+        //     required: true
+        // }
+
+        uuid:
         {
-            type: String, 
-            unique: true, 
+            type: String,
+            unique: true,
             required: true
-        }, 
-        password: 
+        },
+        email:
         {
-            type: String, 
+            type: String,
+            unique: true,
             required: true
         }
     }

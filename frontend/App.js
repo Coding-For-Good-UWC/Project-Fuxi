@@ -18,6 +18,8 @@ import PatientMusicForm from './app/screens/PatientMusicForm';
 import LoadingContext from './app/store/LoadingContext';
 import LoadingScreen from './app/components/LoadingScreen';
 
+import './firebaseConfig';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() 
