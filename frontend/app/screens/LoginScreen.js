@@ -25,10 +25,10 @@ function LoginScreen({ navigation }) {
         setIsLoading(true);
 
         const response = await fetch(
-            "http://localhost:8080/patient/login", // get students for selected teacher's class
+            "http://localhost:8080/institute/login", 
             {
-                body: JSON.stringify({ username, password }), // send over text representation of json object
-                headers: { "Content-Type": "application/json" }, // let server know to turn plain text back into json object
+                body: JSON.stringify({ username, password }), 
+                headers: { "Content-Type": "application/json" }, 
                 method: "POST",
             }
         );
@@ -41,9 +41,20 @@ function LoginScreen({ navigation }) {
         }
         else {
             console.log("LOG IN SUCCESSFUL");
-            const patient = data.patient;
-            setIsLoading(false);
-            navigation.navigate("Player", { patient });
+            const institute = data.institute;
+            console.log (institute);
+
+            // const response2 = await fetch(`http://localhost:8080/institute/patients/${institute._id}`);
+            // const data2 = await response2.json();
+            // console.log(data2);
+            // const patient = data2.patients[0];
+            // console.log ("PATIENT:")
+            // console.log (patient)
+
+            navigation.navigate("Dashboard", { institute });
+
+            // setIsLoading(false);
+            // navigation.navigate("Player", { patient });
         }
     };
 

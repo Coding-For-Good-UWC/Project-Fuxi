@@ -10,6 +10,8 @@ import PlayerScreen from './app/screens/PlayerScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+import PatientDashboard from './app/screens/PatientDashboard';
+
 import PatientRegistration from './app/screens/PatientRegistration';
 import PatientMusicForm from './app/screens/PatientMusicForm';
 
@@ -48,10 +50,7 @@ export default function App()
         <Stack.Screen
           name="Landing"
           component={LandingScreen}
-          options={{ 
-            title: 'Welcome', 
-            headerShown: false, 
-          }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen 
           name="Login" 
@@ -61,6 +60,11 @@ export default function App()
         <Stack.Screen 
           name="Signup" 
           component={SignupScreen} 
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="Dashboard" 
+          component={PatientDashboard} 
           options={{ headerShown: false }}
         />
         <Stack.Screen 

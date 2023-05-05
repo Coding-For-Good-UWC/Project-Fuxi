@@ -15,7 +15,7 @@ import BackButton from "../components/BackButton";
 import colours from "../config/colours.js";
 
 function PatientRegistration({ route, navigation }) {
-    const { username, password } = route.params;
+    const { institute } = route.params;
 
     const [name, setName] = useState("");
     const [ethnicity, setEthnicity] = useState("");
@@ -41,8 +41,6 @@ function PatientRegistration({ route, navigation }) {
 
         // Check if username, password, name, age, ethnicity, birthdate, birthplace, or language are null
         if (
-            !username ||
-            !password ||
             !name ||
             !ethnicity ||
             !birthdate ||
@@ -62,14 +60,13 @@ function PatientRegistration({ route, navigation }) {
         }
 
         const patientData = {
-            username,
-            password,
             name,
             age,
-            ethnicity,
             birthdate,
+            ethnicity,
             birthplace,
             language,
+            institute
         };
 
         navigation.navigate("PatientMusicForm", { ...patientData });

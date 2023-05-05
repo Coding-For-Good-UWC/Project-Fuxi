@@ -1,12 +1,12 @@
 const express = require ("express"); 
 
-// const caregiverRoutes = require ("./caregiver"); 
+const instituteRoutes = require ("./institute"); 
 const patientRoutes = require ("./patient"); 
 const trackRoutes = require ("./track"); 
 
 const router = express.Router (); 
 
-// router.use ("/caregiver", caregiverRoutes); 
+router.use ("/institute", instituteRoutes); 
 router.use ("/patient", patientRoutes); 
 router.use ("/track", trackRoutes); 
 

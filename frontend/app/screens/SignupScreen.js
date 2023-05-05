@@ -37,7 +37,7 @@ function SignupScreen({ navigation }) {
     }
 
     const response = await fetch(
-      "http://localhost:8080/patient/checkUsername",
+      "http://localhost:8080/institute/checkUsername",
       {
         body: JSON.stringify({ username, password }),
         headers: { "Content-Type": "application/json" },
@@ -46,11 +46,32 @@ function SignupScreen({ navigation }) {
     );
     const data = await response.json();
 
-    if (data.status === "ERROR") console.log(data.message);
+    if (data.status === "ERROR") 
+    {
+      console.log(data.message)
+      alert(data.message);
+    }
     else {
       console.log("Username available");
-      alert("Username already in use!");
-      navigation.navigate("PatientRegistration", { username, password });
+      // navigation.navigate("PatientRegistration", { username, password });
+
+      const payload = { username, password }; 
+
+      const response = await fetch("http://localhost:8080/institute/signup", {
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+      });
+      const data = await response.json();
+
+      if (data.status === "ERROR") console.log(data.message);
+      else {
+          console.log("Institute created");
+          console.log(">>>>>>>>>>>>>");
+          console.log(data.institute);
+          console.log(data.institute._id);
+          navigation.navigate("Dashboard", { institute: data.institute });
+      }
     }
   };
 

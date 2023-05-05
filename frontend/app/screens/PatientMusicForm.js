@@ -8,14 +8,13 @@ import colours from "../config/colours.js";
 
 function PatientMusicForm({ route, navigation }) {
     const {
-        username,
-        password,
         name,
         age,
         ethnicity,
         birthdate,
         birthplace,
         language,
+        institute
     } = route.params;
 
     const genres = [
@@ -67,8 +66,6 @@ const submitHandler = async (evt) => {
         );
 
         const newPatientData = {
-            username,
-            password,
             name,
             age,
             ethnicity,
@@ -76,25 +73,26 @@ const submitHandler = async (evt) => {
             birthplace,
             language,
             genres: selectedGenres,
+            instituteId: institute._id
         };
 
         console.log(newPatientData);
 
-        // const response = await fetch("http://localhost:8080/patient/signup", {
-        //     body: JSON.stringify(newPatientData),
-        //     headers: { "Content-Type": "application/json" },
-        //     method: "POST",
-        // });
-        // const data = await response.json();
+        const response = await fetch("http://localhost:8080/patient/new", {
+            body: JSON.stringify(newPatientData),
+            headers: { "Content-Type": "application/json" },
+            method: "POST",
+        });
+        const data = await response.json();
 
-        // if (data.status === "ERROR") console.log(data.message);
-        // else {
-        //     console.log("Patient created");
-        //     console.log(">>>>>>>>>>>>>");
-        //     console.log(data.newPatient);
-        //     console.log(data.newPatient._id);
-        //     navigation.navigate("Player", { patient: data.newPatient });
-        // }
+        if (data.status === "ERROR") console.log(data.message);
+        else {
+            console.log("Patient created");
+            console.log(">>>>>>>>>>>>>");
+            console.log(data.patient);
+            console.log(data.patient._id);
+            navigation.navigate("Dashboard", { institute });
+        }
     };
 
     return (

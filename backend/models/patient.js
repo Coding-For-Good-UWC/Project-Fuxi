@@ -2,25 +2,7 @@ const mongoose = require ("mongoose");
 
 const { Schema, model, Types } = mongoose; 
 
-// name, 
-// age, 
-// ethnicity, 
-// birthdate, 
-// birthplace, 
-// language
-
 const schema = new Schema ({
-    username: 
-    {
-        type: String, 
-        unique: true, 
-        required: true
-    }, 
-    password: 
-    {
-        type: String, 
-        required: true
-    },
     name: 
     {
         type: String, 
@@ -71,13 +53,13 @@ const schema = new Schema ({
     requestedSongs:
     [{
         type: String
-    }]
-    // caregiver: 
-    // {
-    //     type: Types.ObjectId, 
-    //     required: true, 
-    //     ref: "caregivers"
-    // }
+    }],
+    institute: 
+    {
+        type: Types.ObjectId, 
+        required: true, 
+        ref: "institutes"
+    }
 })
 
 module.exports = model ("patients", schema); 
