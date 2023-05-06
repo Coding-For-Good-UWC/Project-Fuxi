@@ -58,7 +58,7 @@ function PatientDashboard({ route, navigation })
 
     const addPatient = () => 
     {
-        // navigation.navigate("PatientRegistration", { institute });
+        navigation.navigate("PatientRegistration");
     }
 
     if (isLoading)
@@ -126,15 +126,16 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     },
     editButton: {
-        position: "absolute",
-        top: 20,
-        right: 20,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
         backgroundColor: colours.primary,
-        alignItems: "center",
-        justifyContent: "center",
+        borderRadius: 25, 
+        width: 50, 
+        height: 50, 
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        top: 60, 
+        right: 30, 
+        zIndex: 1, 
     },
     patientList: {
         width: "100%",

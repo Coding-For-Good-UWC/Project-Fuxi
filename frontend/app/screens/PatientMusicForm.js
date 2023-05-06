@@ -1,21 +1,19 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View, Button, TouchableOpacity } from "react-native";
+import React, { useState, useContext } from "react";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 
 import GenreToggleButton from "../components/GenreToggleButton";
 import BackButton from "../components/BackButton";
+import LoadingContext from "../store/LoadingContext";
 
 import colours from "../config/colours.js";
 
-function PatientMusicForm({ route, navigation }) {
-    const {
-        name,
-        age,
-        ethnicity,
-        birthdate,
-        birthplace,
-        language,
-        institute
-    } = route.params;
+import { getInstitute } from "../api/institutes";
+
+function PatientMusicForm({ route, navigation }) 
+{
+    const { isLoading, setIsLoading } = useContext(LoadingContext);
+
+    const { name, age, ethnicity, birthdate, birthplace, language } = route.params;
 
     const genres = [
         "Cantonese",
@@ -35,26 +33,22 @@ function PatientMusicForm({ route, navigation }) {
     );
 
     const updatePreferences = (genreIndex) => {
-      let newPreferredGenres = [...preferredGenres];
-      newPreferredGenres[genreIndex] = !newPreferredGenres[genreIndex];
-      setPreferredGenres(newPreferredGenres);
-  };  
+        let newPreferredGenres = [...preferredGenres];
+        newPreferredGenres[genreIndex] = !newPreferredGenres[genreIndex];
+        setPreferredGenres(newPreferredGenres);
+    };
 
-const submitHandler = async (evt) => {
-    console.log("CLICKAGE");
+    const submitHandler = async (evt) => {
+        evt.preventDefault();
 
-    evt.preventDefault();
-
-    console.log(preferredGenres); // Moved the console.log here
-
-    // check if there are at least 3 genres selected
-    const selectedGenreCount = preferredGenres.filter(
-        (genre) => genre
-    ).length;
-    if (selectedGenreCount < 3) {
-        alert("Please select at least 3 genres.");
-        return;
-    }
+        // check if there are at least 3 genres selected
+        const selectedGenreCount = preferredGenres.filter(
+            (genre) => genre
+        ).length;
+        if (selectedGenreCount < 3) {
+            alert("Please select at least 3 genres.");
+            return;
+        }
 
         const genreData = Object.assign(
             ...genres.map((k, i) => ({ [k]: preferredGenres[i] }))
@@ -65,6 +59,10 @@ const submitHandler = async (evt) => {
             (key) => genreData[key]
         );
 
+        setIsLoading (true);
+
+        const institute = await getInstitute();
+
         const newPatientData = {
             name,
             age,
@@ -73,7 +71,7 @@ const submitHandler = async (evt) => {
             birthplace,
             language,
             genres: selectedGenres,
-            instituteId: institute._id
+            instituteId: institute._id,
         };
 
         console.log(newPatientData);
@@ -85,13 +83,20 @@ const submitHandler = async (evt) => {
         });
         const data = await response.json();
 
-        if (data.status === "ERROR") console.log(data.message);
-        else {
+        if (data.status === "ERROR") 
+        {
+            setIsLoading(false);
+            console.log(data.message);
+        }
+        else 
+        {
             console.log("Patient created");
             console.log(">>>>>>>>>>>>>");
             console.log(data.patient);
             console.log(data.patient._id);
-            navigation.navigate("Dashboard", { institute });
+
+            setIsLoading(false);
+            navigation.navigate("Dashboard");
         }
     };
 
@@ -136,12 +141,12 @@ const styles = StyleSheet.create({
         backgroundColor: colours.bg,
     },
     titleContainer: {
-        marginTop: 40,
+        marginTop: 100,
         alignItems: "center",
         marginBottom: 20,
     },
     bodyContainer: {
-        flex: 1,
+        flex: 0.9,
         flexDirection: "column",
         width: "100%",
         paddingHorizontal: "10%",

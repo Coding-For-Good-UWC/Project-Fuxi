@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import { StyleSheet, View, Image, Text } from "react-native";
 
@@ -34,8 +34,8 @@ const styles = StyleSheet.create({
         height: 100,
         marginBottom: 10,
         borderRadius: 10,
-        borderWidth: 1,
-        borderColor: colours.primary,
+        // borderWidth: 1,
+        // borderColor: colours.primaryText,
     },
     image: {
         height: 80,

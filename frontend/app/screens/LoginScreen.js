@@ -62,13 +62,15 @@ function LoginScreen({ navigation }) {
                 style={styles.image}
                 source={require("../assets/fuxiIcon.png")}
             />
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                autoCapitalize="none"
-                secureTextEntry={false}
-                onChangeText={(email) => setEmail(email)}
-            />
+            <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    autoCapitalize="none"
+                    secureTextEntry={false}
+                    onChangeText={(email) => setEmail(email)}
+                />
+            </View>
 
             <View style={styles.inputContainer}>
                 <TextInput

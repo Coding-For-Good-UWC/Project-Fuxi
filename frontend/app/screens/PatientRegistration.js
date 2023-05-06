@@ -15,8 +15,6 @@ import BackButton from "../components/BackButton";
 import colours from "../config/colours.js";
 
 function PatientRegistration({ route, navigation }) {
-    const { institute } = route.params;
-
     const [name, setName] = useState("");
     const [ethnicity, setEthnicity] = useState("");
     const [birthdate, setBirthdate] = useState("");
@@ -65,8 +63,7 @@ function PatientRegistration({ route, navigation }) {
             birthdate,
             ethnicity,
             birthplace,
-            language,
-            institute
+            language
         };
 
         navigation.navigate("PatientMusicForm", { ...patientData });
@@ -112,6 +109,16 @@ function PatientRegistration({ route, navigation }) {
                         }
                     />
                     <Text></Text>
+                    <Text></Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Ethnicity"
+                            placeholderTextColor={colours.selected}
+                            value={ethnicity}
+                            editable={false}
+                        />
+                    </View>
                     <Button
                         title="Select Ethnicity"
                         color={colours.blue}
@@ -202,10 +209,10 @@ const styles = StyleSheet.create({
   titleContainer: {
       flex: 0.1,
       marginTop: 20, // Add marginTop
-      marginBottom: 20, // Add marginBottom
+    //   marginBottom: 20, // Add marginBottom
   },
   bodyContainer: {
-      flex: 0.8,
+      flex: 0.55,
       flexDirection: "row",
       width: "100%",
       height: "100%",
