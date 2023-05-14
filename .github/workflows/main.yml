@@ -9,7 +9,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3.5.2
+      uses: actions/checkout@main
 
     - name: Run TruffleHog
-      uses: trufflesecurity/trufflehog@v3.34.0
+      uses: trufflesecurity/trufflehog@main
