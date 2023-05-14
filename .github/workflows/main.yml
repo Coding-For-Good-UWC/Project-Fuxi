@@ -1,15 +1,17 @@
-name: TruffleHog OSS
-
-on:
-  push:
-
+name: TruffleHog Secrets Scan
+on: push
 jobs:
-  trufflehog:
+  TruffleHog:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@main
-
-    - name: Run TruffleHog
-      uses: trufflesecurity/trufflehog@main
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
