@@ -95,4 +95,43 @@ const getTrack = async (req, res) =>
     return res.status(200).json({ track, status: "OK", message: "Found track by id " + id });
 }
 
+const scrapeTracks = async (req, res) =>
+{
+	const { patientId, patient } = req.body;
+	const patient = await patientModel.findById(patientId);
+
+    const query = patient.ethnicity + " " + patient.language + " " + patient.genres.join(" ") + " " + patient.birthplace + " " + Date.now().getFullYear() - patient.birthdate.getFullYear() + " " + patient.name;
+    fetch("https://127.0.0.1:5000/search/"+query, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        return response.json();
+    })
+    .then(json => {
+        const tracks = json.tracks;
+
+		tracks.forEach(track => {
+			trackModel.create({
+				Title: track['title']
+				URI: track['vid']
+				Artist: track['author']
+				Language: patient.language,
+				Genre: "NULL",
+				ImageURL: track['thumb']
+			})
+		});
+
+		tracks.forEach(track => patient.trackRatings.push({ track: track._id, rating: 3 }));
+
+        return res.status(200).json({ status: "OK", message: "Found tracks for patient " + patientId });
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({ status: "ERROR", message: "Something went wrong" });
+    })
+}
+
 module.exports = { getNextTrackId, getTrack }; 
