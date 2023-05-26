@@ -24,6 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(cors()); 
+app.timeout = 120000; // Set the timeout to 2 minutes
 
 app.use(
     session({
@@ -37,6 +38,7 @@ app.use(
     })
   );
 
+app.use('/temp', express.static(path.join(__dirname, 'temp'))); // Serve the temp folder for storing audio files from yt urls
 
 app.use (routes); 
 
