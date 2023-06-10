@@ -4,9 +4,10 @@ import { View, StyleSheet, Animated } from 'react-native';
 import LandingScreen from './app/screens/LandingScreen';
 
 import LoginScreen from './app/screens/LoginScreen';
+import ManualPlayerScreen from './app/screens/ManualPlayerScreen'
 import SignupScreen from './app/screens/SignupScreen';
 import PlayerScreen from './app/screens/PlayerScreen';
-
+import PrePlayerScreen from './app/screens/PrePlayerScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -84,6 +85,19 @@ export default function App()
           component={PlayerScreen} 
           options={{ headerShown: false }}
         />
+
+      <Stack.Screen 
+          name="PrePlayer" 
+          component={PrePlayerScreen} 
+          options={{ headerShown: false }}
+        />
+
+      <Stack.Screen 
+          name="ManualPlayer" 
+          component={ManualPlayerScreen} 
+          options={{ headerShown: false }}
+        />
+
       </Stack.Navigator>
     </NavigationContainer>
     </LoadingContext.Provider>

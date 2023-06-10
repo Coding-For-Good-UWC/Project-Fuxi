@@ -53,7 +53,7 @@ function PatientDashboard({ route, navigation })
         const patient = patientData.find((patient) => patient._id === patientId);
         console.log(patient);
 
-        navigation.navigate("Player", { patient });
+        navigation.navigate("PrePlayer", { patient });
     };
 
     const addPatient = () => 
