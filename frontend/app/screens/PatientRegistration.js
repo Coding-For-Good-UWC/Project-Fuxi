@@ -81,6 +81,7 @@ function PatientRegistration({ route, navigation }) {
             <View style={styles.titleContainer}>
                 <Text style={styles.title}>New Patient</Text>
             </View>
+            <Text></Text>
             <View style={styles.bodyContainer}>
                 <View style={styles.rightContainer}>
                     <View style={styles.inputContainer}>
