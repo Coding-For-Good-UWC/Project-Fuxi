@@ -165,8 +165,6 @@ const scrapeTracks = async (req, res) =>
 
 }
 
-module.exports = { getNextTrackId, getTrack, scrapeTracks };
-
 // Async function that serves the audio stream of a YouTube video given its URL
 // Temporary audio files are saved in the temp folder
 // Using ytdl to get the audio URL and ffmpeg to convert the audio format
@@ -216,4 +214,4 @@ const playTrack = async (req, res) => {
     }
 };
 
-module.exports = { getNextTrackId, getTrack, playTrack };
+module.exports = { getNextTrackId, getTrack, playTrack, scrapeTracks };
