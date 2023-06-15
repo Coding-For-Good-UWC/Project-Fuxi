@@ -7,7 +7,7 @@ import {
     Image,
     StatusBar,
 } from "react-native";
-import Slider from "@react-native-community/slider";
+import Slider from '@react-native-community/slider';
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
     faPlay,
@@ -40,138 +40,46 @@ function getRatingText(value) {
     return texts[value - 1];
 }
 
-function secondsToMinutes(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs < 10 ? "0" + secs : secs}`;
-}
-
 function PlayerScreen({ route, navigation }) {
     const { patient } = route.params;
 
-    const [sound, setSound] = useState(null);
-    const [songPercentage, setSongPercentage] = useState(0);
+    const [audio, setAudio] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [duration, setDuration] = useState(0);
+    const [position, setPosition] = useState(0);
     const [isFirstPlay, setIsFirstPlay] = useState(true);
-    // const [isLoading, setIsLoading] = useState(false);
+
     const { isLoading, setIsLoading } = useContext(LoadingContext);
+
     const [songInfo, setSongInfo] = useState({
         title: "Track Name",
         imgUri: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Square_gray.svg/1200px-Square_gray.svg.png",
     });
-    const [sliderTouching, setSliderTouching] = useState(false);
 
     const [rating, setRating] = useState(3);
     const [ratingColor, setRatingColor] = useState(getRatingColor(rating));
     const [ratingText, setRatingText] = useState(getRatingText(rating));
 
     const [elapsedTime, setElapsedTime] = useState("0:00");
-
     const [isLooping, setIsLooping] = useState(false);
-
-    useEffect(() => {
-        if (sound) {
-            sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
-        }
-    }, [sound]);
-
-    const pauseHandler = async () => {
-        if (isFirstPlay) {
-            await voteHandler(3);
-        }
-
-        if (!sound) {
-            console.log("Sound not initialized yet");
-            return;
-        }
-
-        if (isPlaying) await sound.pauseAsync();
-        else await sound.playAsync();
-
-        console.log(isPlaying ? "PAUSED" : "UNPAUSED");
-
-        setIsPlaying(!isPlaying);
-    };
 
     useEffect(() => {
         voteHandler(3);
     }, []);
 
-    useEffect(() => {
-        return sound
-            ? () => {
-                  console.log("Unloading Sound");
-                  sound.unloadAsync();
-              }
-            : undefined;
-    }, [sound]);
-
-    const onPlaybackStatusUpdate = async (playbackStatus) => {
-        if (!playbackStatus.isLoaded) return;
-
-        if (!sliderTouching) {
-            setSongPercentage(
-                (playbackStatus.positionMillis /
-                    playbackStatus.durationMillis) *
-                    100
-            );
-        }
-
-        setElapsedTime(
-            secondsToMinutes(Math.floor(playbackStatus.positionMillis / 1000))
-        );
-
-        // Check if the track has ended
-        if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
-            console.log("TRACK ENDED");
-            if (isLooping) {
-                console.log("LOOPING");
-                await sound.setPositionAsync(0);
-                await sound.playAsync();
-            } else {
-                console.log("NEXT TRACK");
-                voteHandler(rating);
-            }
-        }
+    const pauseHandler = async () => {
+        if (isPlaying) {
+            await audio.pauseAsync();
+          } else {
+            const playbackStatus = await audio.playAsync();
+            setPosition(playbackStatus.positionMillis);
+          }
+          setIsPlaying(!isPlaying);
     };
 
-    const onSliderValueChange = async (value) => {
-        if (!sliderTouching) {
-            if (sound) {
-                const newPosition = (value / 100) * sound._durationMillis;
-                await sound.setPositionAsync(newPosition);
-            }
-            setSongPercentage(value);
-        }
-    };
-
-    const fetchApi = async (url, body) => {
-        return await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-        }).then((res) => res.json());
-    };
-
-    const playAudio = async (track) => {
-        const id = track.URI.substring(track.URI.indexOf("/d/")).split("/")[2];
-        const audio = "https://drive.google.com/uc?export=download&id=" + id;
-
-        try {
-            const { sound } = await Audio.Sound.createAsync({ uri: audio });
-
-            setSongInfo({ title: track.Title });
-            setSound(sound);
-            sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
-
-            if (!isFirstPlay) {
-                setIsPlaying(true);
-                await sound.playAsync();
-            }
-        } catch (error) {
-            console.log("Error loading audio:", error);
+    const handleSliderValueChange = async (value) => {
+        if (audio) {
+            await audio.setPositionAsync(value);
         }
     };
 
@@ -179,69 +87,63 @@ function PlayerScreen({ route, navigation }) {
         const getSong = async () => {
             setIsLoading(true);
 
-            await Audio.setAudioModeAsync({
-                allowsRecordingIOS: false,
-                staysActiveInBackground: false,
-                playsInSilentModeIOS: true,
-                shouldDuckAndroid: true,
-                playThroughEarpieceAndroid: false,
+            const payload = {
+                patientId: patient._id,
+                trackId: currentlyPlaying,
+                rating: finalRating,
+            };
+
+            console.log ("Payload:")
+            console.log (payload)
+
+            const response = await fetch ("http://localhost:8080/track/next", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
             });
 
-            const response = await fetchApi(
-                "http://localhost:8080/track/next",
-                {
-                    patientId: patient._id,
-                    trackId: currentlyPlaying,
-                    rating: finalRating,
-                }
-            );
-
-            const { track } = response;
-
-            console.log("Received response!");
-            console.log (response)
-
-            if (response.status !== "OK") alert(response.error_message);
-            else {
-                currentlyPlaying = response.trackId;
-
-                const youtubeUrl =
-                    "https://www.youtube.com/watch?v=" + track.URI;
-
-                console.log (youtubeUrl)
-
-                const data = await fetch("http://localhost:8080/track/audio-url?videoUrl=" + encodeURIComponent(youtubeUrl))
-
-                console.log (data)
-
-                const { audioURL } = await data.json();
-
-                console.log(">".repeat(50));
-                console.log("audioURL: ", audioURL);
-                console.log(">".repeat(50));
-
-                const { sound } = await Audio.Sound.createAsync({
-                    uri: audioURL,
-                });
-
-                setAudio(sound);
-                setDuration(sound._durationMillis);
-
-                // Set the listener here, right after creating the audio object
-                sound.setOnPlaybackStatusUpdate((status) => {
-                    console.log(
-                        "Updating position to " +
-                            status.positionMillis +
-                            "/" +
-                            duration
-                    );
-                    setPosition(status.positionMillis);
-                    if (status.didJustFinish) {
-                        console.log("COMPLETE");
-                        setIsPlaying(false);
-                    }
-                });
+            if (!response.ok) {
+                alert('Something went wrong!');
+                setIsLoading(false);
+                return; 
             }
+
+            let data = await response.json();
+
+            console.log ("RESPONSE")
+            console.log (data)
+
+            const { track } = data;
+
+            currentlyPlaying = data.trackId;
+
+            const youtubeUrl = "https://www.youtube.com/watch?v=" + track.URI;
+            data = await fetch("http://localhost:8080/track/audio-url?videoUrl=" + encodeURIComponent(youtubeUrl))
+            const { audioURL } = await data.json();
+            console.log("audioURL: ", audioURL);
+
+            const { sound } = await Audio.Sound.createAsync({ uri: audioURL });
+
+            console.log ("Loaded sound:")
+            console.log (sound)
+
+            setAudio(sound);
+            setDuration(sound._durationMillis);
+
+            // Set the listener here, right after creating the audio object
+            sound.setOnPlaybackStatusUpdate((status) => {
+                console.log(
+                    "Updating position to " +
+                        status.positionMillis +
+                        "/" +
+                        duration
+                );
+                setPosition(status.positionMillis);
+                if (status.didJustFinish) {
+                    console.log("COMPLETE");
+                    setIsPlaying(false);
+                }
+            });
 
             setIsLoading(false);
         };
@@ -275,7 +177,7 @@ function PlayerScreen({ route, navigation }) {
                         {songInfo.title}
                     </Text>
                     <View style={styles.progressBarContainer}>
-                        <Slider
+                        {/* <Slider
                             style={styles.slider}
                             minimumValue={0}
                             maximumValue={100}
@@ -293,6 +195,17 @@ function PlayerScreen({ route, navigation }) {
                                 setSliderTouching(false);
                                 onSliderValueChange(songPercentage);
                             }}
+                        /> */}
+                        <Slider
+                            style={styles.slider}
+                            minimumValue={0}
+                            maximumValue={duration}
+                            value={position}
+                            onValueChange={handleSliderValueChange}
+                            onSlidingComplete={handleSliderValueChange}
+                            minimumTrackTintColor="#3d5875"
+                            maximumTrackTintColor="#d3d3d3"
+                            thumbTintColor="#3d5875"
                         />
                         <Text style={styles.elapsedTime}>{elapsedTime}</Text>
                     </View>
