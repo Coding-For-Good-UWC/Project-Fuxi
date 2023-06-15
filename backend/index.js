@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const session = require('express-session');
 const cors = require('cors');
 const mongoStore = require("connect-mongo"); 
+const path = require('path');
 
 var admin = require("firebase-admin");
 
