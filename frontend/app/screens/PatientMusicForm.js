@@ -95,6 +95,16 @@ function PatientMusicForm({ route, navigation })
             console.log(data.patient);
             console.log(data.patient._id);
 
+			let res = await fetch("http://localhost:8080/track/scrape", {
+				body: JSON.stringify({ patientId: data.patient._id }),
+				headers: { "Content-Type": "application/json" },
+				method: "POST",
+			});
+			let resData = await res.json();
+		    if (resData.status === "ERROR") {
+				console.log(resData.message)
+			}
+
             setIsLoading(false);
             navigation.navigate("Dashboard");
         }

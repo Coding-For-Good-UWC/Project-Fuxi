@@ -5,5 +5,7 @@ const router = express.Router ();
 
 router.post ("/next", controller.getNextTrackId); 
 router.post ("/get", controller.getTrack); 
+router.post ("/scrape", controller.scrapeTracks);
+router.get('/audio-url', controller.playTrack);
 
 module.exports = router; 
