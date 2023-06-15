@@ -1,3 +1,5 @@
+const fetch = require("node-fetch");
+
 const trackModel = require("../models/track"); 
 const patientModel = require("../models/patient"); 
 
@@ -97,41 +99,39 @@ const getTrack = async (req, res) =>
 
 const scrapeTracks = async (req, res) =>
 {
-	const { patientId, patient } = req.body;
+	console.log("Scraping tracks");
+	const { patientId } = req.body;
 	const patient = await patientModel.findById(patientId);
-
-    const query = patient.ethnicity + " " + patient.language + " " + patient.genres.join(" ") + " " + patient.birthplace + " " + Date.now().getFullYear() - patient.birthdate.getFullYear() + " " + patient.name;
-    fetch("https://127.0.0.1:5000/search/"+query, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => {
-        return response.json();
-    })
-    .then(json => {
-        const tracks = json.tracks;
-
-		tracks.forEach(track => {
-			trackModel.create({
-				Title: track['title']
-				URI: track['vid']
-				Artist: track['author']
+		
+	console.log(patient.trackRatings);
+    const query = patient.ethnicity + " " + patient.language + " " + patient.genres.join(" ") + " " + patient.birthplace + " -compilation -playlist -top -best -songs -mix -hits" ; // + " " + (Date.now() - patient.birthdate).toString();
+    
+	let response = await fetch("http://127.0.0.1:5000/api/search/"+query).then(res => res.json())
+	const tracks = response.tracks;
+	console.log(tracks);
+	for (let i = 0; i < tracks.length; i++) {
+		// Try and find the track in the database if it already exists by its URI
+		const track = await trackModel.findOne({ URI: tracks[i]['vid'] });
+		if (track) {
+			tracks[i] = track;
+		} else {
+			let doc = await trackModel.create({
+				Title: tracks[i]['title'],
+				URI: tracks[i]['vid'],
+				Artist: tracks[i]['author'],
 				Language: patient.language,
-				Genre: "NULL",
-				ImageURL: track['thumb']
+				Genre: patient.genres[0],
+				ImageURL: tracks[i]['thumb'],
 			})
-		});
+			tracks[i] = doc;
+		}
+	}
+		
+	tracks.forEach(t => patient.trackRatings.push({ track: t._id, rating: 3 }));
 
-		tracks.forEach(track => patient.trackRatings.push({ track: track._id, rating: 3 }));
+	await patient.save();
+    return res.status(200).json({ status: "OK", message: "Found tracks for patient: " + patientId });
 
-        return res.status(200).json({ status: "OK", message: "Found tracks for patient " + patientId });
-    })
-    .catch(err => {
-        console.log(err);
-        return res.status(500).json({ status: "ERROR", message: "Something went wrong" });
-    })
 }
 
-module.exports = { getNextTrackId, getTrack }; 
+module.exports = { getNextTrackId, getTrack, scrapeTracks };

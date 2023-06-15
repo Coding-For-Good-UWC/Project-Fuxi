@@ -96,7 +96,7 @@ function PatientMusicForm({ route, navigation })
             console.log(data.patient._id);
 
 			let res = await fetch("http://localhost:8080/track/scrape", {
-				body: JSON.stringify({ patientId: data.patient._id, patient: patient }),
+				body: JSON.stringify({ patientId: data.patient._id }),
 				headers: { "Content-Type": "application/json" },
 				method: "POST",
 			});
