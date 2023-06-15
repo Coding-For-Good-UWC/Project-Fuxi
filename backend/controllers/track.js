@@ -1,3 +1,5 @@
+const fetch = require("node-fetch");
+
 const ytdl = require('ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
@@ -120,12 +122,50 @@ const getTrack = async (req, res) => {
             .json({ status: "ERROR", message: "Track id required" });
 
     const track = await trackModel.findById(id);
-
     console.log("FOUND TRACK " + track);
     return res
         .status(200)
         .json({ track, status: "OK", message: "Found track by id " + id });
 };
+
+const scrapeTracks = async (req, res) =>
+{
+	console.log("Scraping tracks");
+	const { patientId } = req.body;
+	const patient = await patientModel.findById(patientId);
+		
+	console.log(patient.trackRatings);
+    const query = patient.ethnicity + " " + patient.language + " " + patient.genres.join(" ") + " " + patient.birthplace + " -compilation -playlist -top -best -songs -mix -hits" ; // + " " + (Date.now() - patient.birthdate).toString();
+    
+	let response = await fetch("http://127.0.0.1:5000/api/search/"+query).then(res => res.json())
+	const tracks = response.tracks;
+	console.log(tracks);
+	for (let i = 0; i < tracks.length; i++) {
+		// Try and find the track in the database if it already exists by its URI
+		const track = await trackModel.findOne({ URI: tracks[i]['vid'] });
+		if (track) {
+			tracks[i] = track;
+		} else {
+			let doc = await trackModel.create({
+				Title: tracks[i]['title'],
+				URI: tracks[i]['vid'],
+				Artist: tracks[i]['author'],
+				Language: patient.language,
+				Genre: patient.genres[0],
+				ImageURL: tracks[i]['thumb'],
+			})
+			tracks[i] = doc;
+		}
+	}
+		
+	tracks.forEach(t => patient.trackRatings.push({ track: t._id, rating: 3 }));
+
+	await patient.save();
+    return res.status(200).json({ status: "OK", message: "Found tracks for patient: " + patientId });
+
+}
+
+module.exports = { getNextTrackId, getTrack, scrapeTracks };
 
 // Async function that serves the audio stream of a YouTube video given its URL
 // Temporary audio files are saved in the temp folder
