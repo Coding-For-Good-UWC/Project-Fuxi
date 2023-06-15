@@ -41,7 +41,7 @@ function LoginScreen({ navigation }) {
             const data = await response.json();
             console.log("LOG IN SUCCESSFUL");
             console.log(data);
-    
+
             setIsLoading(false);
             navigation.navigate("Dashboard");
         } catch (error) {

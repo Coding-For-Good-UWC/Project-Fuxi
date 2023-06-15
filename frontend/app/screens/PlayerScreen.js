@@ -196,17 +196,51 @@ function PlayerScreen({ route, navigation }) {
                 }
             );
 
+            const { track } = response;
+
+            console.log("Received response!");
+            console.log (response)
+
             if (response.status !== "OK") alert(response.error_message);
             else {
                 currentlyPlaying = response.trackId;
-                const data = await fetchApi("http://localhost:8080/track/get", {
-                    id: currentlyPlaying,
+
+                const youtubeUrl =
+                    "https://www.youtube.com/watch?v=" + track.URI;
+
+                console.log (youtubeUrl)
+
+                const data = await fetch("http://localhost:8080/track/audio-url?videoUrl=" + encodeURIComponent(youtubeUrl))
+
+                console.log (data)
+
+                const { audioURL } = await data.json();
+
+                console.log(">".repeat(50));
+                console.log("audioURL: ", audioURL);
+                console.log(">".repeat(50));
+
+                const { sound } = await Audio.Sound.createAsync({
+                    uri: audioURL,
                 });
 
-                console.log("Received data " + data);
+                setAudio(sound);
+                setDuration(sound._durationMillis);
 
-                if (data.status === "ERROR") console.log(data.message);
-                else await playAudio(data.track);
+                // Set the listener here, right after creating the audio object
+                sound.setOnPlaybackStatusUpdate((status) => {
+                    console.log(
+                        "Updating position to " +
+                            status.positionMillis +
+                            "/" +
+                            duration
+                    );
+                    setPosition(status.positionMillis);
+                    if (status.didJustFinish) {
+                        console.log("COMPLETE");
+                        setIsPlaying(false);
+                    }
+                });
             }
 
             setIsLoading(false);
@@ -265,7 +299,7 @@ function PlayerScreen({ route, navigation }) {
                     <View style={styles.ratingContainer}>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={() => console.log ("BACK")}
+                            onPress={() => console.log("BACK")}
                         >
                             <FontAwesomeIcon icon={faBackward} size={20} />
                         </TouchableOpacity>

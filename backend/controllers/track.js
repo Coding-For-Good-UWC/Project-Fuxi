@@ -100,8 +100,11 @@ const getNextTrackId = async (req, res) => {
 
         if (diceRoll <= 0) {
             console.log("RETURNING TRACK ID " + track);
+            const trackObj = await trackModel.findById(track);
+            console.log("FOUND TRACK " + trackObj);
             return res.json({
-                trackId: track,
+                // trackId: track,
+                track: trackObj,
                 status: "OK",
                 message:
                     "Returning a random track based on weighted average of weightings",
@@ -134,18 +137,20 @@ const scrapeTracks = async (req, res) =>
 	const { patientId } = req.body;
 	const patient = await patientModel.findById(patientId);
 		
-	console.log(patient.trackRatings);
+	// console.log(patient.trackRatings);
     const query = patient.ethnicity + " " + patient.language + " " + patient.genres.join(" ") + " " + patient.birthplace + " -compilation -playlist -top -best -songs -mix -hits" ; // + " " + (Date.now() - patient.birthdate).toString();
     
 	let response = await fetch("http://127.0.0.1:5000/api/search/"+query).then(res => res.json())
 	const tracks = response.tracks;
-	console.log(tracks);
+	// console.log(tracks);
 	for (let i = 0; i < tracks.length; i++) {
 		// Try and find the track in the database if it already exists by its URI
 		const track = await trackModel.findOne({ URI: tracks[i]['vid'] });
 		if (track) {
+            console.log ("Found track");
 			tracks[i] = track;
 		} else {
+            console.log("Creating track");
 			let doc = await trackModel.create({
 				Title: tracks[i]['title'],
 				URI: tracks[i]['vid'],
