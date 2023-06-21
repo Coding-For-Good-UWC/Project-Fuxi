@@ -118,12 +118,24 @@ function PlayerScreen({ route, navigation }) {
 
             let data = await response.json();
 
-            console.log ("RESPONSE")
+            console.log ("RESPONSE") 
             console.log (data)
 
             const { track } = data;
 
             currentlyPlaying = data.trackId;
+
+            console.log (track)
+
+            const newSongInfo = {
+                title: (track.Title + " - " + track.Artist),
+                imgUri: track.ImageURL,
+            };
+
+            setSongInfo(newSongInfo);
+
+            console.log ("new song info")
+            console.log (newSongInfo)
 
             const youtubeUrl = "https://www.youtube.com/watch?v=" + track.URI;
             data = await fetch("http://10.0.1.169:8080/track/audio-url?videoUrl=" + encodeURIComponent(youtubeUrl))
@@ -137,9 +149,14 @@ function PlayerScreen({ route, navigation }) {
             setAudio(sound);
             setDuration(status.durationMillis);
 
-            // Set the listener here, right after creating the audio object
             sound.setOnPlaybackStatusUpdate((status) => {
                 setPosition(status.positionMillis);
+
+                // Set elapsed time to minutes:seconds
+                const minutes = Math.floor(status.positionMillis / 60 * 1000);
+                const seconds = ((status.positionMillis % (60 * 1000)) / 1000).toFixed(0);
+                setElapsedTime(minutes + ":" + (seconds < 10 ? '0' : '') + seconds);
+
                 if (status.didJustFinish) {
                   console.log('COMPLETE');
                   setIsPlaying(false);
@@ -172,31 +189,12 @@ function PlayerScreen({ route, navigation }) {
                 <View style={styles.musicInfoContainer}>
                     <Image
                         style={styles.coverImage}
-                        source={require("../assets/tempMusicCover.png")}
+                        source={{ uri: songInfo.imgUri }}
                     />
                     <Text style={styles.songName} numberOfLines={1}>
                         {songInfo.title}
                     </Text>
                     <View style={styles.progressBarContainer}>
-                        {/* <Slider
-                            style={styles.slider}
-                            minimumValue={0}
-                            maximumValue={100}
-                            value={songPercentage}
-                            minimumTrackTintColor={colours.primary}
-                            maximumTrackTintColor={colours.secondary}
-                            thumbTintColor={colours.primary}
-                            onValueChange={(value) => {
-                                if (sliderTouching) {
-                                    setSongPercentage(value);
-                                }
-                            }}
-                            onTouchStart={() => setSliderTouching(true)}
-                            onTouchEnd={() => {
-                                setSliderTouching(false);
-                                onSliderValueChange(songPercentage);
-                            }}
-                        /> */}
                         <Slider
                             style={styles.slider}
                             minimumValue={0}
