@@ -22,25 +22,24 @@ import LoadingContext from "../store/LoadingContext.js";
 import BackButton from "../components/BackButton.js";
 
 import colours from "../config/colours.js";
+
+const DEFAULT_SONG_INFO = {
+    title: "Track Name",
+    imgUri: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Square_gray.svg/1200px-Square_gray.svg.png",
+};
+
+const RATING_VALUES = ["Low", "Low-Mid", "Medium", "Mid-High", "High"];
+const RATING_COLORS = [
+    colours.voteDown,
+    "#FFAA00",
+    colours.primary,
+    "#66CC00",
+    colours.voteUp,
+];
+
 let currentlyPlaying = -1;
 
-function getRatingColor(value) {
-    const colors = [
-        colours.voteDown,
-        "#FFAA00",
-        colours.primary,
-        "#66CC00",
-        colours.voteUp,
-    ];
-    return colors[value - 1];
-}
-
-function getRatingText(value) {
-    const texts = ["Low", "Low-Mid", "Medium", "Mid-High", "High"];
-    return texts[value - 1];
-}
-
-function PlayerScreen({ route, navigation }) {
+const PlayerScreen = ({ route, navigation }) => {
     const { patient } = route.params;
 
     const [audio, setAudio] = useState(null);
@@ -51,30 +50,27 @@ function PlayerScreen({ route, navigation }) {
 
     const { isLoading, setIsLoading } = useContext(LoadingContext);
 
-    const [songInfo, setSongInfo] = useState({
-        title: "Track Name",
-        imgUri: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Square_gray.svg/1200px-Square_gray.svg.png",
-    });
+    const [songInfo, setSongInfo] = useState(DEFAULT_SONG_INFO);
 
     const [rating, setRating] = useState(3);
-    const [ratingColor, setRatingColor] = useState(getRatingColor(rating));
-    const [ratingText, setRatingText] = useState(getRatingText(rating));
+    const [ratingColor, setRatingColor] = useState(RATING_COLORS[rating - 1]);
+    const [ratingText, setRatingText] = useState(RATING_VALUES[rating - 1]);
 
     const [elapsedTime, setElapsedTime] = useState("0:00");
     const [isLooping, setIsLooping] = useState(false);
 
     useEffect(() => {
-        voteHandler(3);
+        handleRatingUpdate(3);
     }, []);
 
-    const pauseHandler = async () => {
+    const togglePlayPause = async () => {
         if (isPlaying) {
             await audio.pauseAsync();
-          } else {
+        } else {
             const playbackStatus = await audio.playAsync();
             setPosition(playbackStatus.positionMillis);
-          }
-          setIsPlaying(!isPlaying);
+        }
+        setIsPlaying(!isPlaying);
     };
 
     const handleSliderValueChange = async (value) => {
@@ -83,8 +79,8 @@ function PlayerScreen({ route, navigation }) {
         }
     };
 
-    const voteHandler = (finalRating) => {
-        const getSong = async () => {
+    const handleRatingUpdate = (finalRating) => {
+        const updateSong = async () => {
             setIsLoading(true);
 
             await Audio.setAudioModeAsync({
@@ -101,9 +97,6 @@ function PlayerScreen({ route, navigation }) {
                 rating: finalRating,
             };
 
-            console.log ("Payload:")
-            console.log (payload)
-
             const response = await fetch ("http://localhost:8080/track/next", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -117,67 +110,70 @@ function PlayerScreen({ route, navigation }) {
             }
 
             let data = await response.json();
-
-            console.log ("RESPONSE") 
-            console.log (data)
-
             const { track } = data;
 
             currentlyPlaying = data.trackId;
 
-            console.log (track)
-
             const newSongInfo = {
-                title: (track.Title + " - " + track.Artist),
+                title: `${track.Title} - ${track.Artist}`,
                 imgUri: track.ImageURL,
             };
 
             setSongInfo(newSongInfo);
 
-            console.log ("new song info")
-            console.log (newSongInfo)
-
-            const youtubeUrl = "https://www.youtube.com/watch?v=" + track.URI;
-            data = await fetch("http://10.0.1.169:8080/track/audio-url?videoUrl=" + encodeURIComponent(youtubeUrl))
+            const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
+            data = await fetch(`http://10.0.1.169:8080/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}`);
             const { audioURL } = await data.json();
-            console.log("audioURL: ", audioURL);
+
+            if (audio)
+                await audio.unloadAsync();
 
             const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
         
-            console.log ("Loaded sound")
-            
             setAudio(sound);
             setDuration(status.durationMillis);
-
-            sound.setOnPlaybackStatusUpdate((status) => {
-                setPosition(status.positionMillis);
-
-                // Set elapsed time to minutes:seconds
-                const minutes = Math.floor(status.positionMillis / 60 * 1000);
-                const seconds = ((status.positionMillis % (60 * 1000)) / 1000).toFixed(0);
-                setElapsedTime(minutes + ":" + (seconds < 10 ? '0' : '') + seconds);
-
-                if (status.didJustFinish) {
-                  console.log('COMPLETE');
-                  setIsPlaying(false);
-                }
-            });
+            setElapsedTime("0:00");
 
             setIsLoading(false);
         };
 
         if (!isLoading) {
-            getSong(isFirstPlay ? 0 : rating);
+            updateSong(isFirstPlay ? 0 : rating);
             if (isFirstPlay) setIsFirstPlay(false);
-        } else {
-            console.log("Already loading a song");
         }
     };
 
-    const onRatingValueChange = (value) => {
+    useEffect(() => {
+        if (audio) 
+        {
+            audio.setOnPlaybackStatusUpdate((status) => {
+                setPosition(status.positionMillis);
+    
+                const totalSeconds = Math.floor(status.positionMillis / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                setElapsedTime(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+    
+                if (status.didJustFinish) {
+                    console.log("IS LOOPING: ");
+                    console.log(isLooping);
+                    if (isLooping) {
+                        console.log("Replaying");
+                        audio.replayAsync(); // Replay track if isLooping is true
+                    }
+                    else {
+                        console.log("Track finished");
+                        setIsPlaying(false);
+                    }
+                }
+            });
+        }
+    }, [audio, isLooping]);  // add audio and isLooping as dependency
+
+    const handleRatingValueChange = (value) => {
         setRating(value);
-        setRatingColor(getRatingColor(value));
-        setRatingText(getRatingText(value));
+        setRatingColor(RATING_COLORS[value - 1]);
+        setRatingText(RATING_VALUES[value - 1]);
     };
 
     return (
@@ -225,7 +221,7 @@ function PlayerScreen({ route, navigation }) {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={pauseHandler}
+                            onPress={togglePlayPause}
                         >
                             <FontAwesomeIcon
                                 icon={isPlaying ? faPause : faPlay}
@@ -263,7 +259,7 @@ function PlayerScreen({ route, navigation }) {
                         value={rating}
                         minimumTrackTintColor={ratingColor}
                         maximumTrackTintColor="#CCCCCC"
-                        onSlidingComplete={onRatingValueChange}
+                        onSlidingComplete={handleRatingValueChange}
                     />
                     <View style={styles.sliderValues}>
                         {[0, 1, 2, 3, 4, 5].map((value) => (
@@ -365,10 +361,9 @@ const styles = StyleSheet.create({
     sliderValues: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
         width: "100%",
-        paddingHorizontal: 10,
-        marginBottom: 10,
-    },
+    },    
     sliderValue: {
         fontSize: 12,
         color: "gray",
