@@ -60,7 +60,7 @@ const PlayerScreen = ({ route, navigation }) => {
     const [isLooping, setIsLooping] = useState(false);
 
     useEffect(() => {
-        handleRatingUpdate(3);
+        updateSong();
     }, []);
 
     const togglePlayPause = async () => {
@@ -79,70 +79,92 @@ const PlayerScreen = ({ route, navigation }) => {
         }
     };
 
-    const handleRatingUpdate = (finalRating) => {
-        const updateSong = async () => {
-            setIsLoading(true);
-
-            await Audio.setAudioModeAsync({
-                allowsRecordingIOS: false,
-                staysActiveInBackground: false,
-                playsInSilentModeIOS: true,
-                shouldDuckAndroid: true,
-                playThroughEarpieceAndroid: false,
-            });
-
-            const payload = {
+    const updateTrackRating = async () => {
+        const response = await fetch("http://localhost:8080/track/rating", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
                 patientId: patient._id,
                 trackId: currentlyPlaying,
-                rating: finalRating,
-            };
+                rating: rating - 3
+            }),
+        });
 
-            const response = await fetch ("http://localhost:8080/track/next", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
+        const data = await response.json();
 
-            if (!response.ok) {
-                alert('Something went wrong!');
-                setIsLoading(false);
-                return; 
-            }
-
-            let data = await response.json();
-            const { track } = data;
-
-            currentlyPlaying = data.trackId;
-
-            const newSongInfo = {
-                title: `${track.Title} - ${track.Artist}`,
-                imgUri: track.ImageURL,
-            };
-
-            setSongInfo(newSongInfo);
-
-            const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
-            data = await fetch(`http://10.0.1.169:8080/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}`);
-            const { audioURL } = await data.json();
-
-            if (audio)
-                await audio.unloadAsync();
-
-            const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
-        
-            setAudio(sound);
-            setDuration(status.durationMillis);
-            setElapsedTime("0:00");
-
-            setIsLoading(false);
-        };
-
-        if (!isLoading) {
-            updateSong(isFirstPlay ? 0 : rating);
-            if (isFirstPlay) setIsFirstPlay(false);
+        if (data.status === "ERROR") {
+            console.error("ERROR: " + data.message);
+            return;
         }
+
+        // console.log("Track rating updated successfully");
     };
 
+    const updateSong = async () => {
+        setIsLoading(true);
+
+        await Audio.setAudioModeAsync({
+            allowsRecordingIOS: false,
+            staysActiveInBackground: false,
+            playsInSilentModeIOS: true,
+            shouldDuckAndroid: true,
+            playThroughEarpieceAndroid: false,
+        });
+
+        const payload = {
+            patientId: patient._id,
+            // trackId: currentlyPlaying,
+            // rating: finalRating,
+        };
+
+        const response = await fetch ("http://localhost:8080/track/next", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            alert('Something went wrong!');
+            setIsLoading(false);
+            return; 
+        }
+
+        let data = await response.json();
+        const { track } = data;
+
+        console.log ("LOOK HERE")
+        console.log (track)
+        
+        currentlyPlaying = track._id;
+
+        const newSongInfo = {
+            title: `${track.Title} - ${track.Artist}`,
+            imgUri: track.ImageURL,
+        };
+
+        setSongInfo(newSongInfo);
+
+        const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
+        data = await fetch(`http://10.0.1.169:8080/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}`);
+        const { audioURL } = await data.json();
+
+        if (audio)
+            await audio.unloadAsync();
+
+        const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
+    
+        setAudio(sound);
+        setDuration(status.durationMillis);
+        setElapsedTime("0:00");
+
+        setIsLoading(false);
+    };  
+
+    const nextTrack = async () => {
+        await updateTrackRating();
+        await updateSong();
+    };
+    
     useEffect(() => {
         if (audio) 
         {
@@ -155,14 +177,13 @@ const PlayerScreen = ({ route, navigation }) => {
                 setElapsedTime(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
     
                 if (status.didJustFinish) {
-                    console.log("IS LOOPING: ");
-                    console.log(isLooping);
                     if (isLooping) {
-                        console.log("Replaying");
+                        // TODO: increase rating for this track by 1
                         audio.replayAsync(); // Replay track if isLooping is true
                     }
                     else {
-                        console.log("Track finished");
+                        // Get the next track and set the rating of the current track to the rating slider value
+                        nextTrack(); 
                         setIsPlaying(false);
                     }
                 }
@@ -171,6 +192,7 @@ const PlayerScreen = ({ route, navigation }) => {
     }, [audio, isLooping]);  // add audio and isLooping as dependency
 
     const handleRatingValueChange = (value) => {
+        console.log ("Rating value changed to " + value);
         setRating(value);
         setRatingColor(RATING_COLORS[value - 1]);
         setRatingText(RATING_VALUES[value - 1]);
@@ -196,7 +218,6 @@ const PlayerScreen = ({ route, navigation }) => {
                             minimumValue={0}
                             maximumValue={duration}
                             value={position}
-                            onValueChange={handleSliderValueChange}
                             onSlidingComplete={handleSliderValueChange}
                             minimumTrackTintColor="#3d5875"
                             maximumTrackTintColor="#d3d3d3"
@@ -230,7 +251,7 @@ const PlayerScreen = ({ route, navigation }) => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={() => voteHandler(rating)}
+                            onPress={() => handleRatingUpdate(rating)}
                         >
                             <FontAwesomeIcon icon={faForward} size={20} />
                         </TouchableOpacity>

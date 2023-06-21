@@ -29,9 +29,10 @@ function LoginScreen({ navigation }) {
     
         try {
             const auth = getAuth();
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+            // await signInWithEmailAndPassword(auth, email, password);
+            await signInWithEmailAndPassword(auth, "apex@gmail.com", "Supersecret1");
     
-            const user = userCredential.user;
             const idToken = await auth.currentUser.getIdToken();
     
             const response = await fetch("http://localhost:8080/institute/verify", {
@@ -39,8 +40,8 @@ function LoginScreen({ navigation }) {
                 headers: { "Content-Type": "application/json", token: idToken },
             });
             const data = await response.json();
-            console.log("LOG IN SUCCESSFUL");
-            console.log(data);
+            // console.log("LOG IN SUCCESSFUL");
+            // console.log(data);
 
             setIsLoading(false);
             navigation.navigate("Dashboard");

@@ -8,51 +8,57 @@ const path = require('path');
 const trackModel = require("../models/track");
 const patientModel = require("../models/patient");
 
-// {
-// 	"patientId": "63aa684762a0f822a9a2a5ca",
-// 	"trackId": "63a12ee8e733c3b2acc5ccef",
-// 	"rating": -1
-// }
-// For first track played, pass a rating of 0 and any track id (won't matter)
+const updateTrackRating = async (req, res) => {
+    console.log ("CALLED UPDATE TRACK RATING"); 
+
+    try
+    {
+        const { patientId, trackId, rating } = req.body;
+
+        console.log (req.body)
+
+        if (!patientId || !trackId || rating === undefined)
+            return res.status(400).json({ status: "ERROR", message: "Patient id, track id and rating required" });
+
+        console.log("Updating track rating for patient " + patientId + " and track " + trackId + " to increase by " + rating);
+
+        const patient = await patientModel.findById(patientId);
+
+        if (!patient)
+            return res.status(404).json({ status:"ERROR", message: "No patient by id " + patientId });
+
+        console.log ("FOUND PATIENT");
+
+        const track = await trackModel.findById(trackId);
+
+        console.log ("FOUND TRACK");
+
+        if (!track)
+            return res.status(404).json({ status: "ERROR", message: "No track by id " + trackId });
+
+        patient.trackRatings.push({ track: track._id, rating });
+        await patient.save();
+
+        console.log("Updated track rating for patient " + patientId + " and track " + trackId + " to increase by " + rating);
+        res.status(200).json({ status: "OK", message: "Track rating updated successfully" });
+    }
+    catch (err)
+    {
+        console.log(err);
+        res.status(500).json({ status: "ERROR", message: "Something went wrong" });
+    }
+};
+
 const getNextTrackId = async (req, res) => {
-    const { patientId, trackId } = req.body;
-    let { rating } = req.body;
+    const { patientId } = req.body;
 
-    if (!patientId || !trackId || rating === undefined)
-        return res
-            .status(400)
-            .json({ message: "Patient id, track id and rating required" });
-
-    // TEMPORARILY MAP 1-5 RATING TO -1-1 SCALE
-    if (rating <= 2) rating = -1;
-    if (rating == 3) rating = 0;
-    if (rating >= 4) rating = 1;
-
-    if (rating < -1 || rating > 1)
-        return res
-            .status(400)
-            .json({
-                message: "Score must be a valid integer between -1 and 1",
-            });
+    if (!patientId)
+        return res.status(400).json({ status: "ERROR", message: "Patient id required" });
 
     const patient = await patientModel.findById(patientId);
 
     if (!patient)
-        return res
-            .status(404)
-            .json({ message: "No patient by id " + patientId });
-
-    if (rating != 0) {
-        const track = await trackModel.findById(trackId);
-
-        if (!track)
-            return res
-                .status(404)
-                .json({ message: "No track by id " + trackId });
-
-        patient.trackRatings.push({ track: track._id, rating });
-        await patient.save();
-    }
+        return res.status(404).json({ status: "ERROR", message: "No patient by id " + patientId });
 
     const trackRatings = patient.trackRatings.reduce(
         (acc, { track, rating }) => ({
@@ -62,17 +68,13 @@ const getNextTrackId = async (req, res) => {
         {}
     );
 
-    // If there are no positive tracks, add every track to the patient's trackRatings array with a rating of 0 for the genres they like
     if (Object.values(trackRatings).every((rating) => rating <= 0)) {
         const genres = patient.genres;
-        // Get all tracks in the trackModel where genre is in the genre array
         const tracks = await trackModel.find({ Genre: { $in: genres } });
-        // Add every track to the patient's trackRatings array with a rating of 1
         tracks.forEach((track) =>
             patient.trackRatings.push({ track: track._id, rating: 1 })
         );
         await patient.save();
-        // Pick random track from the tracks array
         const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
 
         return res.json({
@@ -99,11 +101,8 @@ const getNextTrackId = async (req, res) => {
         diceRoll -= rating;
 
         if (diceRoll <= 0) {
-            console.log("RETURNING TRACK ID " + track);
             const trackObj = await trackModel.findById(track);
-            console.log("FOUND TRACK " + trackObj);
             return res.json({
-                // trackId: track,
                 track: trackObj,
                 status: "OK",
                 message:
@@ -112,7 +111,7 @@ const getNextTrackId = async (req, res) => {
         }
     }
 
-    return res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ status: "ERROR", message: "Something went wrong" });
 };
 
 // Async function that returns the track object given its id
@@ -219,4 +218,4 @@ const playTrack = async (req, res) => {
     }
 };
 
-module.exports = { getNextTrackId, getTrack, playTrack, scrapeTracks };
+module.exports = { getNextTrackId, getTrack, playTrack, scrapeTracks, updateTrackRating };
