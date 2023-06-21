@@ -87,6 +87,14 @@ function PlayerScreen({ route, navigation }) {
         const getSong = async () => {
             setIsLoading(true);
 
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: false,
+                staysActiveInBackground: false,
+                playsInSilentModeIOS: true,
+                shouldDuckAndroid: true,
+                playThroughEarpieceAndroid: false,
+            });
+
             const payload = {
                 patientId: patient._id,
                 trackId: currentlyPlaying,
@@ -118,30 +126,23 @@ function PlayerScreen({ route, navigation }) {
             currentlyPlaying = data.trackId;
 
             const youtubeUrl = "https://www.youtube.com/watch?v=" + track.URI;
-            data = await fetch("http://localhost:8080/track/audio-url?videoUrl=" + encodeURIComponent(youtubeUrl))
+            data = await fetch("http://10.0.1.169:8080/track/audio-url?videoUrl=" + encodeURIComponent(youtubeUrl))
             const { audioURL } = await data.json();
             console.log("audioURL: ", audioURL);
 
-            const { sound } = await Audio.Sound.createAsync({ uri: audioURL });
-
-            console.log ("Loaded sound:")
-            console.log (sound)
-
+            const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
+        
+            console.log ("Loaded sound")
+            
             setAudio(sound);
-            setDuration(sound._durationMillis);
+            setDuration(status.durationMillis);
 
             // Set the listener here, right after creating the audio object
             sound.setOnPlaybackStatusUpdate((status) => {
-                console.log(
-                    "Updating position to " +
-                        status.positionMillis +
-                        "/" +
-                        duration
-                );
                 setPosition(status.positionMillis);
                 if (status.didJustFinish) {
-                    console.log("COMPLETE");
-                    setIsPlaying(false);
+                  console.log('COMPLETE');
+                  setIsPlaying(false);
                 }
             });
 

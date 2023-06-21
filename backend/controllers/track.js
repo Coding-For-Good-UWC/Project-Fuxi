@@ -185,7 +185,7 @@ const playTrack = async (req, res) => {
         // Define the output file path
         const outputFilePath = path.join(
             __dirname,
-            "temp",
+            "../temp",
             `${Date.now()}.mp3`
         );
 
