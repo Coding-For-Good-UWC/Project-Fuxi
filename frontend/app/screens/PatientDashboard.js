@@ -29,17 +29,17 @@ function PatientDashboard({ route, navigation })
             setIsLoading(true);
 
             const institute = await getInstitute();
-            console.log("INSTITUTE:");
-            console.log(institute);
+            // console.log("INSTITUTE:");
+            // console.log(institute);
 
             setInstitute (institute);
 
             const patients = await getPatients(); 
 
-            console.log("PATIENTS:");
-            patients.forEach((patient) => {
-                console.log(patient.name);
-            });
+            // console.log("PATIENTS:");
+            // patients.forEach((patient) => {
+            //     console.log(patient.name);
+            // });
 
             setPatientData(patients);
             setIsLoading(false);
@@ -50,7 +50,7 @@ function PatientDashboard({ route, navigation })
 
     const selectPatient = (patientId) => {
         const patient = patientData.find((patient) => patient._id === patientId);
-        console.log(patient);
+        // console.log(patient);
 
         navigation.navigate("PrePlayer", { patient });
     };

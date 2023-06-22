@@ -30,10 +30,10 @@ const updateTrackRating = async (req, res) => {
         if (!track)
             return res.status(404).json({ status: "ERROR", message: "No track by id " + trackId });
 
-        patient.trackRatings.push({ track: track._id, rating });
+        // update the rating in the patient's trackRatings array. it should be the old rating + rating (change in rating)
+        patient.trackRatings.find((trackRating) => trackRating.track == trackId).rating += rating;
         await patient.save();
 
-        // console.log for example increased rating for trackid {trackid} by {rating change}, so it is now {rating}
         console.log("Increased rating for trackid " + trackId + " by " + rating + ", so it is now " + patient.trackRatings.find((trackRating) => trackRating.track == trackId).rating);
 
         res.status(200).json({ status: "OK", message: "Track rating updated successfully" });
@@ -46,68 +46,76 @@ const updateTrackRating = async (req, res) => {
 };
 
 const getNextTrackId = async (req, res) => {
-    const { patientId } = req.body;
+    console.log ("CALLED GET NEXT TRACK ID"); 
 
-    if (!patientId)
-        return res.status(400).json({ status: "ERROR", message: "Patient id required" });
+    try
+    {
+        const { patientId } = req.body;
 
-    const patient = await patientModel.findById(patientId);
+        if (!patientId)
+            return res.status(400).json({ status: "ERROR", message: "Patient id required" });
 
-    if (!patient)
-        return res.status(404).json({ status: "ERROR", message: "No patient by id " + patientId });
+        const patient = await patientModel.findById(patientId);
 
-    const trackRatings = patient.trackRatings.reduce(
-        (acc, { track, rating }) => ({
-            ...acc,
-            [track]: acc[track] !== undefined ? acc[track] + rating : rating,
-        }),
-        {}
-    );
+        if (!patient)
+            return res.status(404).json({ status: "ERROR", message: "No patient by id " + patientId });
 
-    if (Object.values(trackRatings).every((rating) => rating <= 0)) {
-        const genres = patient.genres;
-        const tracks = await trackModel.find({ Genre: { $in: genres } });
-        tracks.forEach((track) =>
-            patient.trackRatings.push({ track: track._id, rating: 1 })
+        const trackRatings = patient.trackRatings.reduce(
+            (acc, { track, rating }) => ({
+                ...acc,
+                [track]: acc[track] !== undefined ? acc[track] + rating : rating,
+            }),
+            {}
         );
-        await patient.save();
-        const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
 
-        return res.json({
-            trackId: randomTrack._id,
-            status: "OK",
-            message:
-                "No positive tracks, returning a random track based on patient's genre preferences (" +
-                genres.join(", ") +
-                ")",
-        });
-    }
+        if (Object.values(trackRatings).every((rating) => rating <= 0)) {
+            const genres = patient.genres;
+            const tracks = await trackModel.find({ Genre: { $in: genres } });
+            tracks.forEach((track) =>
+                patient.trackRatings.push({ track: track._id, rating: 1 })
+            );
+            await patient.save();
+            const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
 
-    const positiveTracks = Object.entries(trackRatings)
-        .filter(([track, rating]) => rating != -1)
-        .map(([track, rating]) => ({ track, rating: rating + 1 }));
-
-    const totalScore = positiveTracks.reduce(
-        (acc, { track, rating }) => acc + rating,
-        0
-    );
-
-    let diceRoll = Math.floor(Math.random() * totalScore);
-    for (let { track, rating } of positiveTracks) {
-        diceRoll -= rating;
-
-        if (diceRoll <= 0) {
-            const trackObj = await trackModel.findById(track);
             return res.json({
-                track: trackObj,
+                trackId: randomTrack._id,
                 status: "OK",
                 message:
-                    "Returning a random track based on weighted average of weightings",
+                    "No positive tracks, returning a random track based on patient's genre preferences (" +
+                    genres.join(", ") +
+                    ")",
             });
         }
-    }
 
-    return res.status(500).json({ status: "ERROR", message: "Something went wrong" });
+        const positiveTracks = Object.entries(trackRatings)
+            .filter(([track, rating]) => rating != -1)
+            .map(([track, rating]) => ({ track, rating: rating + 1 }));
+
+        const totalScore = positiveTracks.reduce(
+            (acc, { track, rating }) => acc + rating,
+            0
+        );
+
+        let diceRoll = Math.floor(Math.random() * totalScore);
+        for (let { track, rating } of positiveTracks) {
+            diceRoll -= rating;
+
+            if (diceRoll <= 0) {
+                const trackObj = await trackModel.findById(track);
+                return res.json({
+                    track: trackObj,
+                    status: "OK",
+                    message:
+                        "Returning a random track based on weighted average of weightings",
+                });
+            }
+        }
+    }
+    catch (err)
+    {
+        console.log(err);
+        res.status(500).json({ status: "ERROR", message: "Server error" });
+    }
 };
 
 // Async function that returns the track object given its id
@@ -171,17 +179,19 @@ const scrapeTracks = async (req, res) =>
 // Frontend example can be found here: https://github.com/antoinekllee/youtube-audio-streamer/blob/main/App.js
 const playTrack = async (req, res) => {
     const videoUrl = req.query.videoUrl;
+    const patientId = req.query.patientId; 
     try {
+        deleteFilesWithPrefix(`${patientId}_`);
+
         const info = await ytdl.getInfo(videoUrl);
         const audioURL = ytdl.chooseFormat(info.formats, {
             filter: "audioonly",
         }).url;
 
-        // Define the output file path
         const outputFilePath = path.join(
             __dirname,
             "../temp",
-            `${Date.now()}.mp3`
+            `${patientId}_${Date.now()}.mp3`
         );
 
         // Create a writable stream to save the converted audio
@@ -212,6 +222,22 @@ const playTrack = async (req, res) => {
         console.error("Error fetching audio URL:", error);
         res.status(500).json({ error: "Error fetching audio URL" });
     }
+};
+
+// Delete files in the temp folder with the specified prefix
+const deleteFilesWithPrefix = (prefix) => {
+    const tempFolderPath = path.join(__dirname, "../temp");
+    fs.readdir(tempFolderPath, (err, files) => {
+        if (err) throw err;
+
+        files.forEach((file) => {
+            if (file.startsWith(prefix)) {
+                fs.unlink(path.join(tempFolderPath, file), (err) => {
+                    if (err) throw err;
+                });
+            }
+        });
+    });
 };
 
 module.exports = { getNextTrackId, getTrack, playTrack, scrapeTracks, updateTrackRating };
