@@ -162,7 +162,7 @@ const PlayerScreen = ({ route, navigation }) => {
 
         setIsLoading(false);
     };  
-
+ 
     const nextTrack = async () => {
         await updateTrackRating();
         await updateSong();
