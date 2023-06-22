@@ -45,7 +45,8 @@
     "react-native-snap-carousel": "^3.9.1",
     "react-native-svg": "12.3.0",
     "react-native-web": "^0.18.9",
-    "react-parallax": "^3.5.1"
+    "react-parallax": "^3.5.1",
+    "expo-constants": "~13.2.4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

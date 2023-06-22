@@ -5,15 +5,25 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "BACKEND_HOST": "http://localhost:8080"
+      }
     },
     "preview": {
       "android": {
         "buildType": "apk"
       },
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "BACKEND_HOST": "https://project-fuxi-fsugt.ondigitalocean.app"
+      }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "BACKEND_HOST": "https://project-fuxi-fsugt.ondigitalocean.app"
+      }
+    }
   },
   "submit": {
     "production": {}
