@@ -16,6 +16,7 @@ import {
     faForward,
     faRepeat,
 } from "@fortawesome/free-solid-svg-icons";
+import Constants from 'expo-constants'
 
 import { Audio } from "expo-av";
 import LoadingContext from "../store/LoadingContext.js";
@@ -80,7 +81,7 @@ const PlayerScreen = ({ route, navigation }) => {
     };
 
     const updateTrackRating = async () => {
-        const response = await fetch("http://localhost:8080/track/rating", {
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/rating`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -115,7 +116,7 @@ const PlayerScreen = ({ route, navigation }) => {
             // rating: finalRating,
         };
 
-        const response = await fetch ("http://localhost:8080/track/next", {
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/next`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -140,7 +141,7 @@ const PlayerScreen = ({ route, navigation }) => {
         setSongInfo(newSongInfo);
 
         const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
-        data = await fetch(`http://localhost:8080/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}`);
+        data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}`);
         const { audioURL } = await data.json();
 
         if (audio)

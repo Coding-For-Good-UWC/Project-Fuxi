@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
 import LoadingContext from "../store/LoadingContext.js";
+import Constants from 'expo-constants'
 
 import colours from "../config/colours.js";
 import BackButton from "../components/BackButton.js";
@@ -52,7 +53,7 @@ function SignupScreen({ navigation })
         );
 
         const user = userCredential.user;
-        const response = await fetch("http://localhost:8080/institute/signup", {
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/signup`, {
             body: JSON.stringify({ uid: user.uid, email: user.email, name }),
             headers: { "Content-Type": "application/json" },
             method: "POST",
@@ -63,7 +64,7 @@ function SignupScreen({ navigation })
 
         const idToken = await auth.currentUser.getIdToken();
 
-        const response2 = await fetch("http://localhost:8080/institute/verify", {
+        const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
             method: "POST",
             headers: { "Content-Type": "application/json", token: idToken },
         });
