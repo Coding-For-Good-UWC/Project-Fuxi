@@ -1,10 +1,9 @@
-from flask import Flask, jsonify, render_template, redirect, url_for, request, make_response
+from flask import Flask, jsonify
 from ytmusicapi import YTMusic
-import json
 
 app = Flask(__name__)
 
-ytmusic = YTMusic("oauth.json") 
+ytmusic = YTMusic() 
 
 @app.route('/api/search/<query>')
 def search(query):

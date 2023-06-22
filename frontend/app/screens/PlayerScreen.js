@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef} from "react";
 import {
     StyleSheet,
     View,
@@ -60,6 +60,8 @@ const PlayerScreen = ({ route, navigation }) => {
     const [elapsedTime, setElapsedTime] = useState("0:00");
     const [isLooping, setIsLooping] = useState(false);
 
+    const ratingRef = useRef(rating);
+
     useEffect(() => {
         updateSong();
     }, []);
@@ -87,7 +89,7 @@ const PlayerScreen = ({ route, navigation }) => {
             body: JSON.stringify({
                 patientId: patient._id,
                 trackId: currentlyPlaying,
-                rating: rating - 3
+                rating: ratingRef.current - 3
             }),
         });
 
@@ -141,7 +143,8 @@ const PlayerScreen = ({ route, navigation }) => {
         setSongInfo(newSongInfo);
 
         const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
-        data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}`);
+        data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}&patientId=${patient._id}`);
+
         const { audioURL } = await data.json();
 
         if (audio)
@@ -155,7 +158,7 @@ const PlayerScreen = ({ route, navigation }) => {
 
         setIsLoading(false);
     };  
-
+ 
     const nextTrack = async () => {
         await updateTrackRating();
         await updateSong();
@@ -188,10 +191,12 @@ const PlayerScreen = ({ route, navigation }) => {
     }, [audio, isLooping]);  // add audio and isLooping as dependency
 
     const handleRatingValueChange = (value) => {
+        console.log ("Setting rating to " + value) // This will log the new value
         setRating(value);
+        ratingRef.current = value; // Add this line
         setRatingColor(RATING_COLORS[value - 1]);
         setRatingText(RATING_VALUES[value - 1]);
-    };
+    };    
 
     return (
         <View style={styles.container}>
@@ -246,7 +251,7 @@ const PlayerScreen = ({ route, navigation }) => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={() => handleRatingUpdate(rating)}
+                            onPress={() => nextTrack()}
                         >
                             <FontAwesomeIcon icon={faForward} size={20} />
                         </TouchableOpacity>
@@ -267,16 +272,16 @@ const PlayerScreen = ({ route, navigation }) => {
             </View>
             <View style={styles.bottomContainer}>
                 <View style={styles.sliderContainer}>
-                    <Slider
-                        style={styles.ratingSlider}
-                        minimumValue={1}
-                        maximumValue={5}
-                        step={1}
-                        value={rating}
-                        minimumTrackTintColor={ratingColor}
-                        maximumTrackTintColor="#CCCCCC"
-                        onSlidingComplete={handleRatingValueChange}
-                    />
+                <Slider
+                    style={styles.ratingSlider}
+                    minimumValue={1}
+                    maximumValue={5}
+                    step={1}
+                    value={rating}
+                    minimumTrackTintColor={ratingColor}
+                    maximumTrackTintColor="#CCCCCC"
+                    onValueChange={handleRatingValueChange}
+                />
                     <View style={styles.sliderValues}>
                         {[0, 1, 2, 3, 4, 5].map((value) => (
                             <Text key={value} style={styles.sliderValue}>
