@@ -20,18 +20,12 @@ const updateTrackRating = async (req, res) => {
         if (!patientId || !trackId || rating === undefined)
             return res.status(400).json({ status: "ERROR", message: "Patient id, track id and rating required" });
 
-        console.log("Updating track rating for patient " + patientId + " and track " + trackId + " to increase by " + rating);
-
         const patient = await patientModel.findById(patientId);
 
         if (!patient)
             return res.status(404).json({ status:"ERROR", message: "No patient by id " + patientId });
 
-        console.log ("FOUND PATIENT");
-
         const track = await trackModel.findById(trackId);
-
-        console.log ("FOUND TRACK");
 
         if (!track)
             return res.status(404).json({ status: "ERROR", message: "No track by id " + trackId });
@@ -39,7 +33,9 @@ const updateTrackRating = async (req, res) => {
         patient.trackRatings.push({ track: track._id, rating });
         await patient.save();
 
-        console.log("Updated track rating for patient " + patientId + " and track " + trackId + " to increase by " + rating);
+        // console.log for example increased rating for trackid {trackid} by {rating change}, so it is now {rating}
+        console.log("Increased rating for trackid " + trackId + " by " + rating + ", so it is now " + patient.trackRatings.find((trackRating) => trackRating.track == trackId).rating);
+
         res.status(200).json({ status: "OK", message: "Track rating updated successfully" });
     }
     catch (err)
@@ -165,8 +161,8 @@ const scrapeTracks = async (req, res) =>
 	tracks.forEach(t => patient.trackRatings.push({ track: t._id, rating: 3 }));
 
 	await patient.save();
+    
     return res.status(200).json({ status: "OK", message: "Found tracks for patient: " + patientId });
-
 }
 
 // Async function that serves the audio stream of a YouTube video given its URL

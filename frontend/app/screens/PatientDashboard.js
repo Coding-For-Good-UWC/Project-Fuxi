@@ -42,7 +42,6 @@ function PatientDashboard({ route, navigation })
             });
 
             setPatientData(patients);
-
             setIsLoading(false);
         };
 

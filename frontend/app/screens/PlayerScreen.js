@@ -96,8 +96,6 @@ const PlayerScreen = ({ route, navigation }) => {
             console.error("ERROR: " + data.message);
             return;
         }
-
-        // console.log("Track rating updated successfully");
     };
 
     const updateSong = async () => {
@@ -131,9 +129,6 @@ const PlayerScreen = ({ route, navigation }) => {
 
         let data = await response.json();
         const { track } = data;
-
-        console.log ("LOOK HERE")
-        console.log (track)
         
         currentlyPlaying = track._id;
 
@@ -145,7 +140,7 @@ const PlayerScreen = ({ route, navigation }) => {
         setSongInfo(newSongInfo);
 
         const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
-        data = await fetch(`http://10.0.1.169:8080/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}`);
+        data = await fetch(`http://localhost:8080/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}`);
         const { audioURL } = await data.json();
 
         if (audio)
@@ -192,7 +187,6 @@ const PlayerScreen = ({ route, navigation }) => {
     }, [audio, isLooping]);  // add audio and isLooping as dependency
 
     const handleRatingValueChange = (value) => {
-        console.log ("Rating value changed to " + value);
         setRating(value);
         setRatingColor(RATING_COLORS[value - 1]);
         setRatingText(RATING_VALUES[value - 1]);
