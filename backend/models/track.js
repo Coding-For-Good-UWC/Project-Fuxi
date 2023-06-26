@@ -19,7 +19,7 @@ const schema = new Schema ({
     {
         type: String,
         unique: false,
-        required: true
+        required: false
     },
     Language:
     {
@@ -31,7 +31,7 @@ const schema = new Schema ({
     {
         type: String,
         unique: false,
-        required: true
+        required: false
     },
     ImageURL:
     {

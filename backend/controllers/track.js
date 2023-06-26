@@ -1,5 +1,5 @@
 const fetch = require("node-fetch");
-
+const YoutubeMusicApi = require('youtube-music-api');
 const ytdl = require('ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
@@ -7,6 +7,18 @@ const path = require('path');
 
 const trackModel = require("../models/track");
 const patientModel = require("../models/patient");
+
+const api = new YoutubeMusicApi();
+api.initalize();
+
+const generatePrompts = (patient) => {
+	console.log("Scraping tracks");
+	console.log(patient.birthdate.getTime());
+	const era = Math.floor((patient.birthdate.getTime()/(1000 * 60 * 60 * 24 * 365) + 18) / 10) * 10 + 1970;
+	return [ patient.ethnicity + " " + patient.language + " songs",
+			 patient.language + " " + patient.genres.join(" ") + " songs",
+			 patient.language + " songs from the " + era + "'s"]
+}
 
 const updateTrackRating = async (req, res) => {
     console.log ("CALLED UPDATE TRACK RATING"); 
@@ -47,7 +59,6 @@ const updateTrackRating = async (req, res) => {
 
 const getNextTrackId = async (req, res) => {
     const { patientId } = req.body;
-
     if (!patientId)
         return res.status(400).json({ status: "ERROR", message: "Patient id required" });
 
@@ -63,6 +74,16 @@ const getNextTrackId = async (req, res) => {
         }),
         {}
     );
+	
+	if (trackRatings.length <= 15) {
+		await fetch("http://localhost:3000/scrapeTracks", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ patientId }),
+		})
+	}
 
     if (Object.values(trackRatings).every((rating) => rating <= 0)) {
         const genres = patient.genres;
@@ -76,10 +97,7 @@ const getNextTrackId = async (req, res) => {
         return res.json({
             trackId: randomTrack._id,
             status: "OK",
-            message:
-                "No positive tracks, returning a random track based on patient's genre preferences (" +
-                genres.join(", ") +
-                ")",
+            message: "No positive tracks, returning a random track based on patient's genre preferences (" + genres.join(", ") +")",
         });
     }
 
@@ -126,39 +144,87 @@ const getTrack = async (req, res) => {
         .json({ track, status: "OK", message: "Found track by id " + id });
 };
 
+
+
+// const scrapeQuery = (req, res) => {
+//     api.search(query, "song").then(result => {
+//         const tracks = result.content.map(x => {
+//             return {
+//                 title: x.name,
+//                 vid: x.videoId,
+//                 thumb: x.thumbnails ? x.thumbnails[0].url : '',
+//                 author: x.artist ? x.artist[0].name : '',
+//                 year: x.year || ''
+//             }
+//         });
+//         const results = {tracks: tracks};
+//         console.log("RESULTS: ", results);
+//         res.json(results);
+//     }).catch(error => {
+//         res.json({error: error.message});
+//     });
+// });
+
+// app.get('/api/song/:id', (req, res) => {
+//     const id = req.params.id;
+//     api.getSong(id).then(result => {
+//         res.json(result);
+//     }).catch(error => {
+//         res.json({error: error.message});
+//     });
+// });
+
 const scrapeTracks = async (req, res) =>
 {
 	console.log("Scraping tracks");
 	const { patientId } = req.body;
 	const patient = await patientModel.findById(patientId);
 		
-	// console.log(patient.trackRatings);
-    const query = patient.ethnicity + " " + patient.language + " " + patient.genres.join(" ") + " " + patient.birthplace + " -compilation -playlist -top -best -songs -mix -hits" ; // + " " + (Date.now() - patient.birthdate).toString();
-    
-	let response = await fetch("http://127.0.0.1:5000/api/search/"+query).then(res => res.json())
-	const tracks = response.tracks;
-	// console.log(tracks);
-	for (let i = 0; i < tracks.length; i++) {
-		// Try and find the track in the database if it already exists by its URI
-		const track = await trackModel.findOne({ URI: tracks[i]['vid'] });
-		if (track) {
-            console.log ("Found track");
-			tracks[i] = track;
-		} else {
-            console.log("Creating track");
-			let doc = await trackModel.create({
-				Title: tracks[i]['title'],
-				URI: tracks[i]['vid'],
-				Artist: tracks[i]['author'],
-				Language: patient.language,
-				Genre: patient.genres[0],
-				ImageURL: tracks[i]['thumb'],
-			})
-			tracks[i] = doc;
+	const queries = generatePrompts(patient);
+	console.log(queries);
+
+	queries.forEach(async (query) => {
+		console.log("Query: " + query);
+		let response = await api.search(query, "song");
+
+		let tracks = Array(response.content.length);
+		for (let i=0; i<response.content.length; i++) {
+			let tmp = response.content[i];
+			console.log(tmp);
+			tracks[i] = {
+			  title: tmp.name,
+			  vid: tmp.videoId,
+			  thumb: tmp.thumbnails ? tmp.thumbnails[0].url : '',
+			  author: tmp.artist ? tmp.artist.name : '',
+			  year: tmp.year || ''
+			};
 		}
-	}
 		
-	tracks.forEach(t => patient.trackRatings.push({ track: t._id, rating: 3 }));
+		console.log("IEGBEIBIEHB!")
+		console.log(tracks);
+
+		for (let i = 0; i < tracks.length; i++) {
+			// Try and find the track in the database if it already exists by its URI
+			const track = await trackModel.findOne({ URI: tracks[i]['vid'] });
+			if (track) {
+				console.log ("Found track");
+				tracks[i] = track;
+			} else {
+				console.log("Creating track");
+				let doc = await trackModel.create({
+					Title: tracks[i]['title'],
+					URI: tracks[i]['vid'],
+					Artist: tracks[i]['author'],
+					Language: patient.language,
+					Genre: null,
+					ImageURL: tracks[i]['thumb'],
+				})
+				tracks[i] = doc;
+			}
+		}
+		tracks.forEach(t => patient.trackRatings.push({ track: t._id, rating: 3 }));
+	});
+		
 
 	await patient.save();
     
