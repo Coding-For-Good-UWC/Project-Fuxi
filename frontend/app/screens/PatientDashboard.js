@@ -25,7 +25,7 @@ function PatientDashboard({ route, navigation })
     const [patientData, setPatientData] = useState();
     const [institute, setInstitute] = useState({email: ""}); 
 
-    useFocusEffect(
+   useFocusEffect(
         React.useCallback(() => {
             const loadPatients = async () => {
                 setIsLoading(true);
@@ -56,7 +56,7 @@ function PatientDashboard({ route, navigation })
 
     const selectPatient = (patientId) => {
         const patient = patientData.find((patient) => patient._id === patientId);
-        console.log(patient);
+        // console.log(patient);
 
         navigation.navigate("PrePlayer", { patient });
     };

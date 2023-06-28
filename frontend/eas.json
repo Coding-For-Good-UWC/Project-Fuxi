@@ -1,0 +1,31 @@
+{
+  "cli": {
+    "version": ">= 3.14.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "BACKEND_HOST": "http://localhost:8080"
+      }
+    },
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      },
+      "distribution": "internal",
+      "env": {
+        "BACKEND_HOST": "https://project-fuxi-fsugt.ondigitalocean.app"
+      }
+    },
+    "production": {
+      "env": {
+        "BACKEND_HOST": "https://project-fuxi-fsugt.ondigitalocean.app"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

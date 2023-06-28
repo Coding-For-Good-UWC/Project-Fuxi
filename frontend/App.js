@@ -24,6 +24,8 @@ import './firebaseConfig';
 
 const Stack = createNativeStackNavigator();
 
+// import { config } from 'dotenv';
+
 export default function App() 
 {
   const [isLoading, setIsLoading] = useState(false);
