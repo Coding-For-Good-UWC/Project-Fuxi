@@ -18,7 +18,7 @@ const MyListComponent = ({ data }) => {
     const [searchText, setSearchText] = useState('');
     const [selectedIds, setSelectedIds] = useState([]);
     const [selectedTitles, setSelectedTitles] = useState([]);
-    console.log("DATA"+data[0].Title);
+    // console.log("DATA"+data[0].Title);
 
     const filteredData = data.filter(item => {
       if (!item || !item.Title) {
@@ -28,42 +28,42 @@ const MyListComponent = ({ data }) => {
       return (item.Title.toLowerCase()).includes(searchText.toLowerCase());
     });
     
-    const handleSelectTitle = (id, title) => {
+    const handleSelectTitle = (id, title, uri) => {
       setSelectedTitles((prevSelectedTitles) => {
-        if (prevSelectedTitles.some((item) => item.id === id)) {
-          return prevSelectedTitles.filter((item) => item.id !== id);
+        if (prevSelectedTitles.some((item) => item.id === uri)) {
+          return prevSelectedTitles.filter((item) => item.id !== uri);
         } else {
-          return [...prevSelectedTitles, { id: id, title: title }];
+          return [...prevSelectedTitles, { id: uri, title: title }];
         }
       });
     };
     
     const renderItem = ({ item }) => {
-      const isSelected = selectedTitles.some((selectedItem) => selectedItem.id === item._id);
+      const isSelected = selectedTitles.some((selectedItem) => selectedItem.id === item.URI);
     
       return (
-          <>
-           <TouchableOpacity onPress={() => {
-        handleSelectTitle(item._id, item.Title);
-      }} key={'touchable-' + item._id}>
-        <View style={{ 
-          flexDirection: 'row', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          padding: 16,
-          borderRadius: 10,
-          marginVertical: 8,
-          borderColor: '#0000FF',
-          borderWidth: 1,
-          backgroundColor: isSelected ? '#CCCCCC' : '#FFFFFF',
-        }} key={'view-' + item._id}>
-          <Text style={{ color: '#333333' }}>{item.Title}</Text>
-        </View>
-    </TouchableOpacity>
-    <View key={'separator1-' + item._id.toString()} style={{height: 1, backgroundColor: '#CCCCCC'}} />
-    <View key={'separator2-' + item._id.toString()} style={{height: 1, backgroundColor: '#CCCCCC'}} />
-          </>
-        );
+        <>
+          <TouchableOpacity onPress={() => {
+            handleSelectTitle(item.URI, item.Title, item.URI);
+          }} key={'touchable-' + item._id}>
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              padding: 16,
+              borderRadius: 10,
+              marginVertical: 8,
+              borderColor: '#0000FF',
+              borderWidth: 1,
+              backgroundColor: isSelected ? '#CCCCCC' : '#FFFFFF',
+            }} key={'view-' + item._id}>
+              <Text style={{ color: '#333333' }}>{item.Title}</Text>
+            </View>
+          </TouchableOpacity>
+          <View key={'separator1-' + item._id.toString()} style={{ height: 1, backgroundColor: '#CCCCCC' }} />
+          <View key={'separator2-' + item._id.toString()} style={{ height: 1, backgroundColor: '#CCCCCC' }} />
+        </>
+      );
     };
     
     
@@ -114,4 +114,3 @@ const MyListComponent = ({ data }) => {
   };
   
   export default MyListComponent;
-  
