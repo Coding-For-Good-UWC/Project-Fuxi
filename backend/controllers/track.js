@@ -64,7 +64,6 @@ const getNextTrackId = async (req, res) => {
         if (!patientId)
             return res.status(400).json({ status: "ERROR", message: "Patient id required" });
 
-
         const trackRatings = patient.trackRatings.reduce(
             (acc, { track, rating }) => ({
                 ...acc,
@@ -85,18 +84,6 @@ const getNextTrackId = async (req, res) => {
 
         const patient = await patientModel.findById(patientId);
 
-
-        if (!patient)
-            return res.status(404).json({ status: "ERROR", message: "No patient by id " + patientId });
-
-        const trackRatings = patient.trackRatings.reduce(
-            (acc, { track, rating }) => ({
-                ...acc,
-                [track]: acc[track] !== undefined ? acc[track] + rating : rating,
-            }),
-            {}
-        );
-
         await patient.save();
         const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
 
@@ -105,11 +92,10 @@ const getNextTrackId = async (req, res) => {
             status: "OK",
             message: "No positive tracks, returning a random track based on patient's genre preferences (" + genres.join(", ") +")",
         });
-    }
 
-    const positiveTracks = Object.entries(trackRatings)
-        .filter(([track, rating]) => rating != -1)
-        .map(([track, rating]) => ({ track, rating: rating + 1 }));
+		const positiveTracks = Object.entries(trackRatings)
+			.filter(([track, rating]) => rating != -1)
+			.map(([track, rating]) => ({ track, rating: rating + 1 }));
 
 
         if (Object.values(trackRatings).every((rating) => rating <= 0)) {
@@ -130,10 +116,6 @@ const getNextTrackId = async (req, res) => {
                     ")",
             });
         }
-
-        const positiveTracks = Object.entries(trackRatings)
-            .filter(([track, rating]) => rating != -1)
-            .map(([track, rating]) => ({ track, rating: rating + 1 }));
 
         const totalScore = positiveTracks.reduce(
             (acc, { track, rating }) => acc + rating,
