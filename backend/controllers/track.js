@@ -12,8 +12,6 @@ const api = new YoutubeMusicApi();
 api.initalize();
 
 const generatePrompts = (patient) => {
-	console.log("Scraping tracks");
-	console.log(patient.birthdate.getTime());
 	const era = Math.floor((patient.birthdate.getTime()/(1000 * 60 * 60 * 24 * 365) + 18) / 10) * 10 + 1970;
 	return [ patient.ethnicity + " " + patient.language + " songs",
 			 patient.language + " " + patient.genres.join(" ") + " songs",
@@ -119,8 +117,7 @@ const getNextTrackId = async (req, res) => {
             return res.json({
                 track: trackObj,
                 status: "OK",
-                message:
-                    "Returning a random track based on weighted average of weightings",
+                message: "Returning a random track based on weighted average of weightings",
             });
         }
     }
@@ -174,6 +171,24 @@ const getTrack = async (req, res) => {
 //     });
 // });
 
+const filterTrack = (track) => { // async (track) => {
+	
+	// Filter duration < 5mins
+	// video_metadata = await ytdl.getInfo(track.vid);
+	// if (video_metadata.length_seconds > 300) {
+	// 	return false;
+
+	const negativeWords = ["mix", "mashup", "compilation", "medley", "best", "top", "mashup", "nonstop"]
+	// TODO: ChatGPT filter
+	// Filter by negative keywords
+	console.log(track.name.toLowerCase())
+	for (let word of negativeWords) 
+		if (track.name.toLowerCase().includes(word)) 
+			return false;
+	
+	return true;
+}
+
 const scrapeTracks = async (req, res) =>
 {
 	console.log("Scraping tracks");
@@ -181,50 +196,50 @@ const scrapeTracks = async (req, res) =>
 	const patient = await patientModel.findById(patientId);
 		
 	const queries = generatePrompts(patient);
-	console.log(queries);
 
 	queries.forEach(async (query) => {
 		console.log("Query: " + query);
+
 		let response = await api.search(query, "song");
 
 		let tracks = Array(response.content.length);
 		for (let i=0; i<response.content.length; i++) {
 			let tmp = response.content[i];
-			console.log(tmp);
-			tracks[i] = {
-			  title: tmp.name,
-			  vid: tmp.videoId,
-			  thumb: tmp.thumbnails ? tmp.thumbnails[0].url : '',
-			  author: tmp.artist ? tmp.artist.name : '',
-			  year: tmp.year || ''
-			};
+			if (await filterTrack(tmp)) {
+				tracks[i] = {
+				  title: tmp.name,
+				  vid: tmp.videoId,
+				  thumb: tmp.thumbnails ? tmp.thumbnails[0].url : '',
+				  author: tmp.artist ? tmp.artist.name : '',
+				  year: tmp.year || ''
+				};
+			}
 		}
-		
-		console.log("IEGBEIBIEHB!")
-		console.log(tracks);
 
 		for (let i = 0; i < tracks.length; i++) {
 			// Try and find the track in the database if it already exists by its URI
-			const track = await trackModel.findOne({ URI: tracks[i]['vid'] });
-			if (track) {
-				console.log ("Found track");
-				tracks[i] = track;
-			} else {
-				console.log("Creating track");
-				let doc = await trackModel.create({
-					Title: tracks[i]['title'],
-					URI: tracks[i]['vid'],
-					Artist: tracks[i]['author'],
-					Language: patient.language,
-					Genre: null,
-					ImageURL: tracks[i]['thumb'],
-				})
-				tracks[i] = doc;
+			if (tracks[i]) { 
+				const track = await trackModel.findOne({ URI: tracks[i]['vid'] });
+				if (track) {
+					console.log ("Found track");
+					console.log(track);
+					tracks[i] = track;
+				} else {
+					console.log("Creating track");
+					let doc = await trackModel.create({
+						Title: tracks[i]['title'],
+						URI: tracks[i]['vid'],
+						Artist: tracks[i]['author'],
+						Language: patient.language,
+						Genre: null,
+						ImageURL: tracks[i]['thumb'],
+					})
+					tracks[i] = doc;
+					patient.trackRatings.push({ track: doc._id, rating: 3 });
+				}
 			}
 		}
-		tracks.forEach(t => patient.trackRatings.push({ track: t._id, rating: 3 }));
 	});
-		
 
 	await patient.save();
     
