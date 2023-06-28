@@ -18,7 +18,7 @@ def search(query):
                 'author': x['artists'][0]['name'],
                 'year': x['year']
             } 
-            for x in ytmusic.search(query, filter="songs", limit=2)
+            for x in ytmusic.search(query, filter="songs", limit=3)
             # if x['videoDetails']['lengthSeconds'] < 600
         ]
     }

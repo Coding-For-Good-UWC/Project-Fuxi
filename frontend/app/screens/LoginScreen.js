@@ -48,6 +48,7 @@ function LoginScreen({ navigation }) {
             console.log(error);
             setIsLoading(false);
             Alert.alert("Error", "Invalid email or password");
+            
         }
     };
     
