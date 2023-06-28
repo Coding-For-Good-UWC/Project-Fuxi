@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import {
     StyleSheet,
     View,
@@ -24,30 +25,34 @@ function PatientDashboard({ route, navigation })
     const [patientData, setPatientData] = useState();
     const [institute, setInstitute] = useState({email: ""}); 
 
-    useEffect(() => {
-        const loadPatients = async () => {
-            setIsLoading(true);
+    useFocusEffect(
+        React.useCallback(() => {
+            const loadPatients = async () => {
+                setIsLoading(true);
 
-            const institute = await getInstitute();
-            console.log("INSTITUTE:");
-            console.log(institute);
+                const institute = await getInstitute();
+                console.log("INSTITUTE:");
+                console.log(institute);
 
-            setInstitute (institute);
+                setInstitute (institute);
 
-            const patients = await getPatients(); 
+                const patients = await getPatients(); 
 
-            console.log("PATIENTS:");
-            patients.forEach((patient) => {
-                console.log(patient.name);
-            });
+                console.log("PATIENTS:");
+                patients.forEach((patient) => {
+                    console.log(patient.name);
+                });
 
-            setPatientData(patients);
+                setPatientData(patients);
 
-            setIsLoading(false);
-        };
+                setIsLoading(false);
+            };
 
-        loadPatients();
-    }, []);
+            loadPatients();
+            // Optionally return a cleanup function
+            // return () => console.log('Screen was unfocused');
+        }, [])
+    );
 
     const selectPatient = (patientId) => {
         const patient = patientData.find((patient) => patient._id === patientId);
@@ -67,7 +72,7 @@ function PatientDashboard({ route, navigation })
                 <Text>Loading...</Text>
             </View>
         );
-
+            
     return (
         <View style={styles.container}>
             <BackButton navigation={navigation} />

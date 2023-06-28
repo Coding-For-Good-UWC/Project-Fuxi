@@ -50,6 +50,17 @@ const schema = new Schema ({
             required: true
         }
     }], 
+    manualPlayset: 
+    [{
+        id: { 
+            type: String, 
+            required: true 
+        }, 
+        rating: { 
+            type: Number, 
+            required: true
+        }
+    }], 
     requestedSongs:
     [{
         type: String
