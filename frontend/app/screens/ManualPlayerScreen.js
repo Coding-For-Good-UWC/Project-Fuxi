@@ -26,6 +26,7 @@ import {
 import { Audio } from "expo-av";
 import BackButton from "../components/BackButton.js";
 import {getTrackTitles} from '../components/MyListComponent.js'
+import Constants from 'expo-constants'
 
 import colours from "../config/colours.js";
 let x;
@@ -42,7 +43,7 @@ let x;
     };
   
     try {
-      const response = await fetch(`http://localhost:8080/patient/manual`, {
+      const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/manual`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +68,7 @@ let x;
     async function fetchTitles(ids) {
       // console.log("DIS"+ids)
       const response = await fetch(
-        `http://localhost:8080/track/titles?ids=${ids.join(",")}`
+        `${Constants.expoConfig.extra.apiUrl}/track/titles?ids=${ids.join(",")}`
       );
       const data = await response.json();
       setIsLoading(false)

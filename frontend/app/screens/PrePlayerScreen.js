@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
-
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+import React from "react";
 
 import BackButton from "../components/BackButton.js";
 
@@ -8,29 +6,14 @@ import {
     StyleSheet,
     View,
     Text,
-    TouchableOpacity,
-    Image,
-    StatusBar,
+    TouchableOpacity
 } from "react-native";
-import Slider from "@react-native-community/slider";
-import {
-    faPlay,
-    faPause,
-    faBackward,
-    faForward,
-    faRepeat,
-    faThumbsDown
-} from "@fortawesome/free-solid-svg-icons";
-
-import { Audio } from "expo-av";
-import LoadingContext from "../store/LoadingContext.js";
-// import BackButton from "../components/BackButton.js";
 
 import colours from "../config/colours.js";
 
 function PrePlayerScreen({ route, navigation }) {
     const { patient } = route.params;
-    console.log(patient);
+
     return (
       <View style={styles.container}>
         <BackButton navigation={navigation}/>

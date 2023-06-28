@@ -8,6 +8,6 @@ router.post ("/get", controller.getTrack);
 router.get ("/titles", controller.getTitles); 
 router.post ("/scrape", controller.scrapeTracks);
 router.post ("/scrapeyt", controller.scrapeYtTrack);
-// router.get('/audio-url', controller.playTrack);
-
+router.get('/audio-url', controller.playTrack);
+router.post ("/rating", controller.updateTrackRating);
 module.exports = router; 
