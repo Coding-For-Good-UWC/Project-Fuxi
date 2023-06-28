@@ -1,3 +1,4 @@
+
 const fetch = require("node-fetch");
 const YoutubeMusicApi = require("youtube-music-api");
 const ytdl = require("ytdl-core");
@@ -89,8 +90,10 @@ const updateTrackRating = async (req, res) => {
             status: "ERROR",
             message: "Something went wrong",
         });
+
     }
 };
+
 
 const getNextTrackId = async (req, res) => {
     console.log("CALLED GET NEXT TRACK ID");
@@ -152,47 +155,43 @@ const getNextTrackId = async (req, res) => {
 };
 
 // Async function that returns the track object given its id
-const getTrack = async (req, res) => {
+const getTrack = async (req, res) =>
+{
     const { id } = req.body;
 
     if (!id)
-        return res
-            .status(400)
-            .json({ status: "ERROR", message: "Track id required" });
+        return res.status(400).json({ status: "ERROR", message: "Track id required" });
 
     const track = await trackModel.findById(id);
-    return res
-        .status(200)
-        .json({ track, status: "OK", message: "Found track by id " + id });
-};
 
-// const scrapeQuery = (req, res) => {
-//     api.search(query, "song").then(result => {
-//         const tracks = result.content.map(x => {
-//             return {
-//                 title: x.name,
-//                 vid: x.videoId,
-//                 thumb: x.thumbnails ? x.thumbnails[0].url : '',
-//                 author: x.artist ? x.artist[0].name : '',
-//                 year: x.year || ''
-//             }
-//         });
-//         const results = {tracks: tracks};
-//         console.log("RESULTS: ", results);
-//         res.json(results);
-//     }).catch(error => {
-//         res.json({error: error.message});
-//     });
-// });
+    
+    console.log ("FOUND TRACK " + track);
+    return res.status(200).json({ track, status: "OK", message: "Found track by id " + id });
+}
+const getTitles = async (req, res) => {
+    const test = req.query
+    console.log(test)
+    const ids = req.query.ids.split(',');
+    console.log("PRINTITN IDS")
+    console.log(ids);
+    console.log(test);
+    let titles = [];
+    let x;
+    for(let i=0;i<ids.length;i++){
+        const myObjectId = new ObjectId(ids[i]);
 
-// app.get('/api/song/:id', (req, res) => {
-//     const id = req.params.id;
-//     api.getSong(id).then(result => {
-//         res.json(result);
-//     }).catch(error => {
-//         res.json({error: error.message});
-//     });
-// });
+        const result = await trackModel.findOne({_id: myObjectId});
+        console.log("VALUES")
+        console.log(result)
+        titles.push(result)
+        // console.log(result.Title);
+
+    }
+    return res.status(200).json({ titles, status: "OK", message: "Found titles"});
+  };
+
+
+ 
 
 const filterTrack = (track) => {
     // async (track) => {
@@ -281,9 +280,34 @@ const scrapeTracksFn = async (patientId) => {
 					patient.trackRatings.push({ track: doc._id, rating: 3 });
 				}
 			}
+
 		}
 		console.log(newTrackRatings);
 	}
+
+
+	await patient.save();
+    
+    return res.status(200).json({ status: "OK", message: "Found tracks for patient: " + patientId });
+}
+
+const scrapeYtTrack = async (req, res) =>
+{// Todo: change from flask
+	console.log("Scraping tracks");
+    console.log(req.body.searchQuery)
+
+	// console.log(patient.trackRatings);
+    const query = req.body.searchQuery;
+    const patientinfo = req.body.patientInfo;
+	let response = await fetch("http://127.0.0.1:5000/api/search/"+query).then(res => res.json())
+    const tracks = response.tracks.slice(0, 5);
+
+    console.log("Creating track");
+
+    return(res.json({ status: 'success, updated to db', tracks }));
+   
+}
+
 
 	console.log(newTrackRatings);
 
@@ -364,4 +388,6 @@ module.exports = {
     playTrack,
     scrapeTracks,
     updateTrackRating,
+  getTitles,
+  scrapeYtTrack
 };
