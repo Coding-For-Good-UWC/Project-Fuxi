@@ -9,6 +9,7 @@ import {
     Platform,
     Alert
 } from "react-native";
+import Constants from "expo-constants";
 
 import colours from "../config/colours.js";
 import LoadingContext from "../store/LoadingContext.js";
@@ -30,12 +31,12 @@ function LoginScreen({ navigation }) {
         try {
             const auth = getAuth();
 
-            // await signInWithEmailAndPassword(auth, email, password);
-            await signInWithEmailAndPassword(auth, "new@gmail.com", "secret1234");
+            await signInWithEmailAndPassword(auth, email, password);
+            // await signInWithEmailAndPassword(auth, "apex@gmail.com", "Supersecret1");
     
             const idToken = await auth.currentUser.getIdToken();
     
-            const response = await fetch("http://localhost:8080/institute/verify", {
+            const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", token: idToken },
             });

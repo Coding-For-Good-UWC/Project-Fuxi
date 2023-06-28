@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import Constants from 'expo-constants'
 
 import GenreToggleButton from "../components/GenreToggleButton";
 import BackButton from "../components/BackButton";
@@ -76,7 +77,7 @@ function PatientMusicForm({ route, navigation })
 
         console.log(newPatientData);
 
-        const response = await fetch("http://localhost:8080/patient/new", {
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/new`, {
             body: JSON.stringify(newPatientData),
             headers: { "Content-Type": "application/json" },
             method: "POST",
@@ -95,7 +96,7 @@ function PatientMusicForm({ route, navigation })
             console.log(data.patient);
             console.log(data.patient._id);
 
-			let res = await fetch("http://localhost:8080/track/scrape", {
+			let res = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/scrape`, {
 				body: JSON.stringify({ patientId: data.patient._id }),
 				headers: { "Content-Type": "application/json" },
 				method: "POST",
