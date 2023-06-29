@@ -74,7 +74,6 @@ function PatientRegistration({ route, navigation }) {
 
     const onSelectEthnicity = (ethnicity) => {
         setEthnicity(ethnicity);
-        console.log("SELECTED ETHNICITY " + ethnicity);
         setEthnicityModalVisible(false);
     };
 

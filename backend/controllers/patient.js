@@ -47,17 +47,6 @@ const newPatient = async (req, res) => {
                 .status(400)
                 .json({ status: "ERROR", message: "help required fields" });
 
-        console.log("Patient data:", {
-            name,
-            age,
-            ethnicity,
-            birthdate,
-            birthplace,
-            language,
-            genres,
-            instituteId,
-        });
-
         const newPatient = await patientModel.create({
             name,
             age,
@@ -93,7 +82,6 @@ const editManualPlayset = async (req, res) => {
   
     try {
       await patientModel.updateOne(query, update);
-      console.log("Updated to the database successfully");
       return res.status(200).json({ status: "OK", message: "Updated to the database successfully" });
     } catch (err) {
       console.log(err);
@@ -106,12 +94,8 @@ const editManualPlayset = async (req, res) => {
 
   const editManualPlaysetYt = async (req, res) => {
     const vals = req.body.array[0].item;
-    console.log("vals"+vals)
     const patientinfo = req.body.patientInfo;
-    console.log("id thing"+patientinfo._id)
     const query = { _id: ObjectId(patientinfo._id) };
-    console.log("thing to update"+vals['title'])
-//ADD TO TRACKSDB
 
 	let doc = await trackModel.create({
 				Title: vals['name'],
@@ -127,7 +111,6 @@ const editManualPlayset = async (req, res) => {
             //ADD TO PERSONS MANUAL PLAYSET
             try {
               await patientModel.updateOne(query, update);
-              console.log("Updated to the database successfully");
               return res.status(200).json({ status: "OK", message: "Updated to the database successfully" });
             } catch (err) {
               console.log(err);

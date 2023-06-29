@@ -59,8 +59,6 @@ function SignupScreen({ navigation })
             method: "POST",
         });
         const data = await response.json();
-        // console.log ("CREATED INSTITUTE:")
-        // console.log (data);
 
         const idToken = await auth.currentUser.getIdToken();
 
@@ -69,8 +67,6 @@ function SignupScreen({ navigation })
             headers: { "Content-Type": "application/json", token: idToken },
         });
         const data2 = await response2.json();
-        // console.log ("VERIFIED INSTITUTE:")
-        // console.log (data2);
 
         setIsLoading(false);
         navigation.navigate("Dashboard");

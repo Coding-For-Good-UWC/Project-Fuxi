@@ -191,7 +191,6 @@ const PlayerScreen = ({ route, navigation }) => {
     }, [audio, isLooping]);  // add audio and isLooping as dependency
 
     const handleRatingValueChange = (value) => {
-        console.log ("Setting rating to " + value) // This will log the new value
         setRating(value);
         ratingRef.current = value; // Add this line
         setRatingColor(RATING_COLORS[value - 1]);

@@ -31,9 +31,6 @@ const signup = async (req, res) =>
     try
     {
         const { uid, email, name } = req.body;
-
-        console.log ("Save uid " + uid);
-
         if (!uid)
             return res.status(400).json({ status: "ERROR", message: "Missing required fields" });
 
