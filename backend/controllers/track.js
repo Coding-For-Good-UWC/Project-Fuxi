@@ -5,6 +5,7 @@ const ytdl = require("ytdl-core");
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const path = require("path");
+const ObjectId = require('mongoose').Types.ObjectId;
 
 const trackModel = require("../models/track");
 const patientModel = require("../models/patient");
@@ -288,32 +289,22 @@ const scrapeTracksFn = async (patientId) => {
 
 	await patient.save();
     
-    return res.status(200).json({ status: "OK", message: "Found tracks for patient: " + patientId });
 }
 
 const scrapeYtTrack = async (req, res) =>
 {// Todo: change from flask
 	console.log("Scraping tracks");
-    console.log(req.body.searchQuery)
+    // console.log(req.body.searchQuery)
 
 	// console.log(patient.trackRatings);
     const query = req.body.searchQuery;
     const patientinfo = req.body.patientInfo;
-	let response = await fetch("http://127.0.0.1:5000/api/search/"+query).then(res => res.json())
-    const tracks = response.tracks.slice(0, 5);
-
-    console.log("Creating track");
-
-    return(res.json({ status: 'success, updated to db', tracks }));
-   
+	let response = await api.search(query, "song");
+    const tracks = response.content.slice(0,5);
+    console.log(tracks)
+    return(res.json({ tracks: tracks }));
 }
 
-
-	console.log(newTrackRatings);
-
-    await patient.save();
-    return newTrackRatings;
-};
 
 // Async function that serves the audio stream of a YouTube video given its URL
 // Temporary audio files are saved in the temp folder
@@ -388,6 +379,6 @@ module.exports = {
     playTrack,
     scrapeTracks,
     updateTrackRating,
-  getTitles,
-  scrapeYtTrack
+    getTitles,
+    scrapeYtTrack
 };

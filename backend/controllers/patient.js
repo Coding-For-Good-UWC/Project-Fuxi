@@ -111,20 +111,20 @@ const editManualPlayset = async (req, res) => {
     console.log("id thing"+patientinfo._id)
     const query = { _id: ObjectId(patientinfo._id) };
     console.log("thing to update"+vals['title'])
-
+//ADD TO TRACKSDB
 
 	let doc = await trackModel.create({
-				Title: vals['title'],
-				URI: vals['vid'],
-				Artist: vals['author'],
+				Title: vals['name'],
+				URI: vals['videoId'],
+				Artist: vals['artist'].name,
 				Language: patientinfo.language,
 				Genre: patientinfo.genres[0],
-				ImageURL: vals['thumb'],
+				ImageURL: vals.thumbnails[0].url
 			})
     
-            const playsetUpdate = { id: vals['vid'], rating: 3 };
+            const playsetUpdate = { id: vals['videoId'], rating: 3 };
             const update = { $push: { manualPlayset: playsetUpdate } };
-            
+            //ADD TO PERSONS MANUAL PLAYSET
             try {
               await patientModel.updateOne(query, update);
               console.log("Updated to the database successfully");

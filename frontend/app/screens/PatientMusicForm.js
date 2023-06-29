@@ -152,9 +152,9 @@ const styles = StyleSheet.create({
         backgroundColor: colours.bg,
     },
     titleContainer: {
-        marginTop: 100,
+        marginTop: 80,
         alignItems: "center",
-        marginBottom: 20,
+        marginBottom: 10,
     },
     bodyContainer: {
         flex: 0.9,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: colours.primaryText,
         textAlign: "center",
-        marginBottom: 20,
+        marginBottom: 10,
     },
     rightContainer: {
         flex: 1,

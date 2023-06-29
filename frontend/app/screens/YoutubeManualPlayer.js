@@ -22,7 +22,7 @@ function YoutubeManual({ route, navigation }) {
   function searchYoutube() {
     const url = 'http://localhost:8080/track/scrapeyt';
     const postData = { searchQuery: searchQuery,patientInfo:patient};
-    console.log("patientinfo"+patient.language)
+    // console.log("patientinfo"+patient.language)
 
     fetch(url, {
       method: 'POST',
@@ -33,21 +33,18 @@ function YoutubeManual({ route, navigation }) {
   })
       .then(response => response.json())
       .then(fetchedData => {
-          // console.log(fetchedData);
-          setData(fetchedData);
+          console.log("Fethced"+fetchedData.tracks);
+          setData(fetchedData.tracks);
           showAlert(fetchedData);
       })
       .catch((error) => {
           console.error('Error:', error);
       });
-  
-  
     
     }
     function showAlert(fetchedData) {
-      // console.log(fetchedData);
       const options = fetchedData.tracks.map(item => ({
-          text: `${item.title} By: ${item.author}`,
+          text: `${item.name} By: ${item.artist.name}`,
           onPress: () => printSelected(item)
       }));
       options.push({ text: 'Cancel', style: 'cancel' });
@@ -78,7 +75,7 @@ function YoutubeManual({ route, navigation }) {
     };
     
     // console.log(requestPayload)
-    console.log("PATIENT")
+    // console.log("PATIENT")
   
     try {
       const response = await fetch(`http://localhost:8080/patient/manualyt`, {
