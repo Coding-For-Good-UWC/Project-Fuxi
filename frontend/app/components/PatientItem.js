@@ -7,7 +7,7 @@ import GenreTag from "./GenreTag";
 import colours from "../config/colours";
 
 function PatientItem(props) {
-    const { name, age, language, genres }  = props.patient;
+    const { name, age, genres }  = props.patient;
     return (
         <View style={styles.container}>
             <View style={styles.info}>
