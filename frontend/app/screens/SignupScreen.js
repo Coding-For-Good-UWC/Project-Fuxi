@@ -121,12 +121,12 @@ function SignupScreen({ navigation })
                 />
             </View>
 
-            <TouchableOpacity onPress={handleSignUp}>
-                <Text style={styles.clickableText}>Sign Up</Text>
+            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                <Text style={styles.clickableText}>Log in to an existing account</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
                 <Text style={styles.clickableText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity
                 style={styles.buttonContainer}
                 onPress={handleSignUp}

@@ -82,12 +82,12 @@ function LoginScreen({ navigation }) {
                 />
             </View>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
                 <Text style={styles.clickableText}>Sign Up</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
                 <Text style={styles.clickableText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity
                 style={styles.buttonContainer}
                 onPress={handleLogin}
