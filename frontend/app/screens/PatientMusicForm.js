@@ -111,26 +111,25 @@ function PatientMusicForm({ route, navigation })
             </View>
             <View style={styles.info}>
                 <Text style={styles.info}>
-                    Please select the genre(s) for your patient
+                    What did your patient listen to in their teen years?
                 </Text>
             </View>
             <View style={styles.bodyContainer}>
                 <View style={styles.rightContainer}>
-                    {genres.map((genre, index) => (
-                        <GenreToggleButton
-                            genre={genre}
-                            key={index}
-                            updatePreferences={() => updatePreferences(index)}
-                        />
-                    ))}
-
-                    <TouchableOpacity
-                        style={styles.submitButton}
-                        onPress={submitHandler}
-                    >
-                        <Text style={styles.submitButtonText}>Submit</Text>
-                    </TouchableOpacity>
+                {genres.map((genre, index) => (
+                    <GenreToggleButton
+                        genre={genre}
+                        key={index}
+                        updatePreferences={() => updatePreferences(index)}
+                    />
+                ))}
                 </View>
+                <TouchableOpacity
+                    style={styles.submitButton}
+                    onPress={submitHandler}
+                >
+                    <Text style={styles.submitButtonText}>Submit</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -144,27 +143,30 @@ const styles = StyleSheet.create({
         backgroundColor: colours.bg,
     },
     titleContainer: {
-        marginTop: 80,
+        marginTop: 20,
         alignItems: "center",
         marginBottom: 10,
     },
     bodyContainer: {
-        flex: 0.9,
-        flexDirection: "column",
+        flex: 0.55,
         width: "100%",
-        paddingHorizontal: "10%",
+        alignItems: "center",
     },
     info: {
         fontSize: 18,
         color: colours.primaryText,
         textAlign: "center",
-        marginBottom: 10,
+        marginBottom: 30,
+        paddingRight: 20,
+        paddingLeft: 20,
     },
     rightContainer: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-    },
+        flexDirection: "row",
+        flexWrap: "wrap"
+    },    
     title: {
         color: colours.primaryText,
         fontSize: 32,
@@ -207,7 +209,7 @@ const styles = StyleSheet.create({
         paddingRight: 10,
         fontSize: 18,
         fontWeight: "450",
-    },
+    }
 });
 
 export default PatientMusicForm;

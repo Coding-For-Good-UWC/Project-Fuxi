@@ -7,8 +7,6 @@ import {
     TouchableOpacity,
     ScrollView,
 } from "react-native";
-// import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-// import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 
 import LoadingContext from "../store/LoadingContext.js";
 import BackButton from "../components/BackButton.js";
@@ -35,6 +33,8 @@ function PatientDashboard({ route, navigation })
                 setInstitute (institute);
 
                 const patients = await getPatients(); 
+
+                console.log (patientData)
 
                 setPatientData(patients);
 
@@ -70,12 +70,6 @@ function PatientDashboard({ route, navigation })
                 <Text style={styles.titleText}>Dashboard</Text>
                 <Text style={styles.subtitleText}>{institute.name}</Text>
             </View>
-            {/* <TouchableOpacity
-                style={styles.editButton}
-                onPress={() => navigation.navigate("PatientRegistration")}
-            >
-                <FontAwesomeIcon icon={faPencilAlt} size={24} color="white" />
-            </TouchableOpacity> */}
             <ScrollView style={styles.patientList}>
                 {patientData && patientData.map((patient) => (
                     <TouchableOpacity
@@ -120,18 +114,6 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         fontWeight: "500",
     },
-    // editButton: {
-    //     backgroundColor: colours.primary,
-    //     borderRadius: 25, 
-    //     width: 50, 
-    //     height: 50, 
-    //     alignItems: 'center',
-    //     justifyContent: 'center',
-    //     position: 'absolute',
-    //     top: 60, 
-    //     right: 30, 
-    //     zIndex: 1, 
-    // },
     patientList: {
         width: "100%",
         paddingHorizontal: 30,
