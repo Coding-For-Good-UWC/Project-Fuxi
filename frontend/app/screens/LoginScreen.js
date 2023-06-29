@@ -31,8 +31,8 @@ function LoginScreen({ navigation }) {
         try {
             const auth = getAuth();
 
-            await signInWithEmailAndPassword(auth, "new@gmail.com", "secret1234");
-            // await signInWithEmailAndPassword(auth, "apex@gmail.com", "Supersecret1");
+            // await signInWithEmailAndPassword(auth, "new@gmail.com", "secret1234");
+            await signInWithEmailAndPassword(auth, "apex@gmail.com", "Supersecret1");
     
             const idToken = await auth.currentUser.getIdToken();
     
@@ -41,8 +41,6 @@ function LoginScreen({ navigation }) {
                 headers: { "Content-Type": "application/json", token: idToken },
             });
             const data = await response.json();
-            // console.log("LOG IN SUCCESSFUL");
-            // console.log(data);
 
             setIsLoading(false);
             navigation.navigate("Dashboard");

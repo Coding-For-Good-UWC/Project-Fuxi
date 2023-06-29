@@ -75,8 +75,6 @@ function PatientMusicForm({ route, navigation })
             instituteId: institute._id,
         };
 
-        console.log(newPatientData);
-
         const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/new`, {
             body: JSON.stringify(newPatientData),
             headers: { "Content-Type": "application/json" },
@@ -87,15 +85,9 @@ function PatientMusicForm({ route, navigation })
         if (data.status === "ERROR") 
         {
             setIsLoading(false);
-            console.log(data.message);
         }
         else 
         {
-            console.log("Patient created");
-            console.log(">>>>>>>>>>>>>");
-            console.log(data.patient);
-            console.log(data.patient._id);
-
 			let res = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/scrape`, {
 				body: JSON.stringify({ patientId: data.patient._id }),
 				headers: { "Content-Type": "application/json" },

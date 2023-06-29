@@ -52,7 +52,6 @@ let x;
       });
   
       const data = await response.json();
-      console.log(data); //  successful update!
       Alert.alert("Update Succesful");
     } catch (error) {
       Alert.alert("Update Unsuccesful, Please try again.");
@@ -61,12 +60,10 @@ let x;
   }
   
   useEffect(() => {
-    console.log("ratings"+patient.trackRatings)
     let trackids = patient.trackRatings.map((rating) => rating.track);
     setIsLoading(true)
     
     async function fetchTitles(ids) {
-      // console.log("DIS"+ids)
       const response = await fetch(
         `${Constants.expoConfig.extra.apiUrl}/track/titles?ids=${ids.join(",")}`
       );
@@ -75,7 +72,7 @@ let x;
       return data.titles;
       
     }
-console.log("RATINGS"+patient.trackRatings)
+    
     fetchTitles(trackids)
     .then((titles) => {
       let uniqueTitles = titles
@@ -98,7 +95,7 @@ console.log("RATINGS"+patient.trackRatings)
 
   function SaveData() {
     let m = getTrackTitles();
-    console.log("ma"+m)
+
     const selectedTrackRatings = [];
   
     m.forEach((item) => {
@@ -110,7 +107,6 @@ console.log("RATINGS"+patient.trackRatings)
   
     });
   
-    // console.log("Selected Track Ratings:", selectedTrackRatings);
     updateDB(selectedTrackRatings,patient._id);
   }
   
@@ -145,7 +141,6 @@ function goToPlayer(){
   navigation.navigate("Player",{patient});
 }
  
-  console.log("PATIENT ID"+patient._id);
   return (
     
     <View style={styles.container}>

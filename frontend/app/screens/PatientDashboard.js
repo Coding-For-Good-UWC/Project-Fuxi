@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import { useFocusEffect } from '@react-navigation/native';
 import {
     StyleSheet,
@@ -7,8 +7,8 @@ import {
     TouchableOpacity,
     ScrollView,
 } from "react-native";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
+// import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+// import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 
 import LoadingContext from "../store/LoadingContext.js";
 import BackButton from "../components/BackButton.js";
@@ -31,17 +31,10 @@ function PatientDashboard({ route, navigation })
                 setIsLoading(true);
 
                 const institute = await getInstitute();
-                console.log("INSTITUTE:");
-                console.log(institute);
 
                 setInstitute (institute);
 
                 const patients = await getPatients(); 
-
-                console.log("PATIENTS:");
-                patients.forEach((patient) => {
-                    console.log(patient.name);
-                });
 
                 setPatientData(patients);
 
@@ -49,14 +42,11 @@ function PatientDashboard({ route, navigation })
             };
 
             loadPatients();
-            // Optionally return a cleanup function
-            // return () => console.log('Screen was unfocused');
         }, [])
     );
 
     const selectPatient = (patientId) => {
         const patient = patientData.find((patient) => patient._id === patientId);
-        // console.log(patient);
 
         navigation.navigate("PrePlayer", { patient });
     };
@@ -80,12 +70,12 @@ function PatientDashboard({ route, navigation })
                 <Text style={styles.titleText}>Dashboard</Text>
                 <Text style={styles.subtitleText}>{institute.name}</Text>
             </View>
-            <TouchableOpacity
+            {/* <TouchableOpacity
                 style={styles.editButton}
                 onPress={() => navigation.navigate("PatientRegistration")}
             >
                 <FontAwesomeIcon icon={faPencilAlt} size={24} color="white" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <ScrollView style={styles.patientList}>
                 {patientData && patientData.map((patient) => (
                     <TouchableOpacity
@@ -130,18 +120,18 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         fontWeight: "500",
     },
-    editButton: {
-        backgroundColor: colours.primary,
-        borderRadius: 25, 
-        width: 50, 
-        height: 50, 
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'absolute',
-        top: 60, 
-        right: 30, 
-        zIndex: 1, 
-    },
+    // editButton: {
+    //     backgroundColor: colours.primary,
+    //     borderRadius: 25, 
+    //     width: 50, 
+    //     height: 50, 
+    //     alignItems: 'center',
+    //     justifyContent: 'center',
+    //     position: 'absolute',
+    //     top: 60, 
+    //     right: 30, 
+    //     zIndex: 1, 
+    // },
     patientList: {
         width: "100%",
         paddingHorizontal: 30,

@@ -15,14 +15,9 @@ function YoutubeManual({ route, navigation }) {
   const [searchQuery, setQuery] = useState(""); // State for search text
   const [data, setData] = useState([]); // State for fetched data
 
-  const handleAdd = () => {
-    console.log(searchQuery); // Print the search text to the console
-  };
-
   function searchYoutube() {
     const url = 'http://localhost:8080/track/scrapeyt';
     const postData = { searchQuery: searchQuery,patientInfo:patient};
-    // console.log("patientinfo"+patient.language)
 
     fetch(url, {
       method: 'POST',
@@ -33,7 +28,6 @@ function YoutubeManual({ route, navigation }) {
   })
       .then(response => response.json())
       .then(fetchedData => {
-          console.log("Fethced"+fetchedData.tracks);
           setData(fetchedData.tracks);
           showAlert(fetchedData);
       })
@@ -58,12 +52,10 @@ function YoutubeManual({ route, navigation }) {
   }
   
   function printSelected(item) {
-      console.log(item);
       updateDB(item)
   }
   
   async function updateDB(item) {
-    console.log("item"+item)
     const requestPayload = {
       array: [
         { 
@@ -73,9 +65,6 @@ function YoutubeManual({ route, navigation }) {
       ],
       patientInfo: patient
     };
-    
-    // console.log(requestPayload)
-    // console.log("PATIENT")
   
     try {
       const response = await fetch(`http://localhost:8080/patient/manualyt`, {
@@ -87,7 +76,6 @@ function YoutubeManual({ route, navigation }) {
       });
   
       const data = await response.json();
-      console.log(data); //  successful update!
       Alert.alert("Update Succesful");
     } catch (error) {
       Alert.alert("Update Unsuccesful, Please try again.");

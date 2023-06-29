@@ -4,8 +4,6 @@ import { MaterialIcons } from '@expo/vector-icons';
 import colours from "../config/colours.js";
 let accvals;
 export function getTrackTitles(){
-    // console.log("in gettracktitles"+accvals)
-    console.log("IN GETTRACKTITLES"+accvals)
     return(accvals)
 
 }
@@ -18,11 +16,9 @@ const MyListComponent = ({ data }) => {
     const [searchText, setSearchText] = useState('');
     const [selectedIds, setSelectedIds] = useState([]);
     const [selectedTitles, setSelectedTitles] = useState([]);
-    // console.log("DATA"+data[0].Title);
 
     const filteredData = data.filter(item => {
       if (!item || !item.Title) {
-        console.log("Missing Title: ", item);
         return false;
       }
       return (item.Title.toLowerCase()).includes(searchText.toLowerCase());
@@ -66,8 +62,6 @@ const MyListComponent = ({ data }) => {
       );
     };
     
-    
-    // console.log(selectedTitles);
     updateTitles(selectedTitles)
     
     return (

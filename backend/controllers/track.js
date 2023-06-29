@@ -29,12 +29,8 @@ const generatePrompts = (patient) => {
 };
 
 const updateTrackRating = async (req, res) => {
-    console.log("CALLED UPDATE TRACK RATING");
-
     try {
         const { patientId, trackId, rating } = req.body;
-
-        console.log(req.body);
 
         if (!patientId || !trackId || rating === undefined)
             return res
@@ -70,17 +66,6 @@ const updateTrackRating = async (req, res) => {
         ).rating += rating;
         await patient.save();
 
-        console.log(
-            "Increased rating for trackid " +
-                trackId +
-                " by " +
-                rating +
-                ", so it is now " +
-                patient.trackRatings.find(
-                    (trackRating) => trackRating.track == trackId
-                ).rating
-        );
-
         res.status(200).json({
             status: "OK",
             message: "Track rating updated successfully",
@@ -97,7 +82,6 @@ const updateTrackRating = async (req, res) => {
 
 
 const getNextTrackId = async (req, res) => {
-    console.log("CALLED GET NEXT TRACK ID");
     try {
         const { patientId } = req.body;
 
@@ -107,14 +91,10 @@ const getNextTrackId = async (req, res) => {
                 .json({ status: "ERROR", message: "Patient id required" });
 
         const patient = await patientModel.findById(patientId);
-        console.log(patient.trackRatings);
 
         let updated = false;
         if (patient.trackRatings.length <= 15)
             updated = await scrapeTracksFn(patientId);
-
-		console.log("UPDATED: " + updated);
-		console.log(updated);
 
         const trackRatings = (updated ? updated : patient.trackRatings).reduce(
             (acc, { track, rating }) => ({
@@ -124,8 +104,6 @@ const getNextTrackId = async (req, res) => {
             }),
             {}
         );
-
-        console.log(trackRatings);
 
         const positiveTracks = Object.entries(trackRatings)
             .filter(([track, rating]) => rating != -1)
@@ -165,28 +143,17 @@ const getTrack = async (req, res) =>
 
     const track = await trackModel.findById(id);
 
-    
-    console.log ("FOUND TRACK " + track);
     return res.status(200).json({ track, status: "OK", message: "Found track by id " + id });
 }
 const getTitles = async (req, res) => {
     const test = req.query
-    console.log(test)
     const ids = req.query.ids.split(',');
-    console.log("PRINTITN IDS")
-    console.log(ids);
-    console.log(test);
     let titles = [];
     let x;
     for(let i=0;i<ids.length;i++){
         const myObjectId = new ObjectId(ids[i]);
 
         const result = await trackModel.findOne({_id: myObjectId});
-        console.log("VALUES")
-        console.log(result)
-        titles.push(result)
-        // console.log(result.Title);
-
     }
     return res.status(200).json({ titles, status: "OK", message: "Found titles"});
   };
@@ -283,7 +250,6 @@ const scrapeTracksFn = async (patientId) => {
 			}
 
 		}
-		console.log(newTrackRatings);
 	}
 
 
@@ -292,16 +258,12 @@ const scrapeTracksFn = async (patientId) => {
 }
 
 const scrapeYtTrack = async (req, res) =>
-{// Todo: change from flask
-	console.log("Scraping tracks");
-    // console.log(req.body.searchQuery)
-
-	// console.log(patient.trackRatings);
+{
     const query = req.body.searchQuery;
-    const patientinfo = req.body.patientInfo;
+
 	let response = await api.search(query, "song");
+
     const tracks = response.content.slice(0,5);
-    console.log(tracks)
     return(res.json({ tracks: tracks }));
 }
 
