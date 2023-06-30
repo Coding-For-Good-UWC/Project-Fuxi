@@ -46,11 +46,19 @@ function SignupScreen({ navigation })
         setIsLoading(true);
 
         const auth = getAuth();
-        const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
+		try {
+			const userCredential = await createUserWithEmailAndPassword(
+				auth,
+				email,
+				password
+			);
+		} catch (error) {
+			console.log(error);
+			Alert.alert("Error", error.message);
+			setIsLoading(false);
+			// Reload the page
+			return;
+		}
 
         const user = userCredential.user;
         const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/signup`, {
@@ -58,6 +66,7 @@ function SignupScreen({ navigation })
             headers: { "Content-Type": "application/json" },
             method: "POST",
         });
+
         const data = await response.json();
 
         const idToken = await auth.currentUser.getIdToken();
