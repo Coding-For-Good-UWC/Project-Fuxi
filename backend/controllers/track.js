@@ -1,17 +1,33 @@
-
+require("dotenv").config();
 const fetch = require("node-fetch");
+
 const YoutubeMusicApi = require("youtube-music-api");
+
 const ytdl = require("ytdl-core");
 const ffmpeg = require("fluent-ffmpeg");
+
 const fs = require("fs");
 const path = require("path");
+
+// const { OpenAI } = require("langchain/llms/openai");
+// const { initializeAgentExecutorWithOptions } = require("langchain/agents");
+
 const ObjectId = require('mongoose').Types.ObjectId;
 
 const trackModel = require("../models/track");
 const patientModel = require("../models/patient");
 
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
 const api = new YoutubeMusicApi();
 api.initalize();
+
+// const llm = OpenAI({ temperature: 0.9 });
+// const executor = initializeAgentExecutorWithOptions({[], llm, {
+// 	agentType: "zero-shot-react-description",
+// 	verbose: true,
+// });
+
 
 const generatePrompts = (patient) => {
     const era =
@@ -96,7 +112,8 @@ const getNextTrackId = async (req, res) => {
         if (patient.trackRatings.length <= 15)
             patient.trackRatings = await scrapeTracksFn(patientId);
 		
-		patient.trackRatings = patient.trackRatings.filter(trackRating => trackRating.track != prevTrackId);
+		if (prevTrackId)
+			patient.trackRatings = patient.trackRatings.filter(trackRating => trackRating.track != prevTrackId);
 
         const trackRatings = patient.trackRatings.reduce(
             (acc, { track, rating }) => ({
