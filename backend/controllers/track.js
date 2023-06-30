@@ -83,7 +83,7 @@ const updateTrackRating = async (req, res) => {
 
 const getNextTrackId = async (req, res) => {
     try {
-        const { patientId } = req.body;
+        const { patientId, prevTrackId } = req.body;
 
         if (!patientId)
             return res
@@ -94,9 +94,11 @@ const getNextTrackId = async (req, res) => {
 
         let updated = false;
         if (patient.trackRatings.length <= 15)
-            updated = await scrapeTracksFn(patientId);
+            patient.trackRatings = await scrapeTracksFn(patientId);
+		
+		patient.trackRatings = patient.trackRatings.filter(trackRating => trackRating.track != prevTrackId);
 
-        const trackRatings = (updated ? updated : patient.trackRatings).reduce(
+        const trackRatings = patient.trackRatings.reduce(
             (acc, { track, rating }) => ({
                 ...acc,
                 [track]:
@@ -104,6 +106,7 @@ const getNextTrackId = async (req, res) => {
             }),
             {}
         );
+
 
         const positiveTracks = Object.entries(trackRatings)
             .filter(([track, rating]) => rating != -1)

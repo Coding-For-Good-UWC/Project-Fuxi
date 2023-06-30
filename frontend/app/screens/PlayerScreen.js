@@ -114,8 +114,7 @@ const PlayerScreen = ({ route, navigation }) => {
 
         const payload = {
             patientId: patient._id,
-            // trackId: currentlyPlaying,
-            // rating: finalRating,
+			prevTrackId: currentlyPlaying,
         };
 
         const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/next`, {
@@ -136,7 +135,7 @@ const PlayerScreen = ({ route, navigation }) => {
         currentlyPlaying = track._id;
 
         const newSongInfo = {
-            title: `${track.Title} - ${track.Artist}`,
+			title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
             imgUri: track.ImageURL,
         };
 
