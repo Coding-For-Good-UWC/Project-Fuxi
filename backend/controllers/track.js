@@ -142,7 +142,7 @@ const getNextTrackId = async (req, res) => {
                 }
             }
             
-            if (trackSelectedId === prevTrackId) {
+            if (prevTrackId !== -1 && trackSelectedId === prevTrackId) {
                 console.log("Same track selected, rerolling");
                 sameTrackCounter += 1;
             }

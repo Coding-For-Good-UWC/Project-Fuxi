@@ -180,12 +180,6 @@ const PlayerScreen = ({ route, navigation }) => {
         }
     };  
 
-    useEffect(() => {
-        if (!isLoading) {
-            nextTrack();
-        }
-    }, [isLoading]);    
-
     const loadPreloadedTrack = async () => {
         if (preloadedSound) {
             setAudio(preloadedSound);
@@ -203,7 +197,7 @@ const PlayerScreen = ({ route, navigation }) => {
         {
             console.log("Still preloading...");
             setIsLoading(true);
-            return;
+            // TODO: WAIT UNTIL PRELOADING IS DONE
         }
 
         if (audio) {
