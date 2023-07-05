@@ -32,8 +32,8 @@ function LoginScreen({ navigation }) {
             const auth = getAuth();
 
             // await signInWithEmailAndPassword(auth, "new@gmail.com", "secret1234");
-            // await signInWithEmailAndPassword(auth, "apex@gmail.com", "Supersecret1");
-			await signInWithEmailAndPassword(auth, email, password);
+            await signInWithEmailAndPassword(auth, "apex@gmail.com", "Supersecret1");
+			// await signInWithEmailAndPassword(auth, email, password);
 
     
             const idToken = await auth.currentUser.getIdToken();

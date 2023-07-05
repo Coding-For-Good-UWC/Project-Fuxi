@@ -47,9 +47,8 @@ const PlayerScreen = ({ route, navigation }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
     const [position, setPosition] = useState(0);
-    const [isFirstPlay, setIsFirstPlay] = useState(true);
 
-    const { isLoading, setIsLoading } = useContext(LoadingContext);
+    const { setIsLoading } = useContext(LoadingContext);
 
     const [songInfo, setSongInfo] = useState(DEFAULT_SONG_INFO);
 
@@ -145,6 +144,8 @@ const PlayerScreen = ({ route, navigation }) => {
         data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}&patientId=${patient._id}`);
 
         const { audioURL } = await data.json();
+
+        console.log(audioURL);
 
         if (audio)
             await audio.unloadAsync();

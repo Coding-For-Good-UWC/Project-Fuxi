@@ -281,46 +281,85 @@ const playTrack = async (req, res) => {
     try {
         deleteFilesWithPrefix(`${patientId}_`);
 
-        const info = await ytdl.getInfo(videoUrl);
-        const audioURL = ytdl.chooseFormat(info.formats, {
-            filter: "audioonly",
-        }).url;
-
         const outputFilePath = path.join(
             __dirname,
             "../temp",
-            `${patientId}_${Date.now()}.mp3`
+            `${patientId}_${Date.now()}.webm`
         );
 
-        // Create a writable stream to save the converted audio
+        // Create a writable stream to save the downloaded audio
         const writeStream = fs.createWriteStream(outputFilePath);
 
-        // Use FFmpeg to convert the audio format
-        ffmpeg()
-            .input(audioURL)
-            .format("mp3")
-            .audioCodec("libmp3lame")
+        ytdl(videoUrl, {
+            quality: "highestaudio",
+            filter: "audioonly",
+        })
+            .on("progress", (chunkLength, downloaded, total) => {
+                if (downloaded === total) {
+                    res.json({
+                        audioURL: `${req.protocol}://${req.get(
+                            "host"
+                        )}/temp/${path.basename(outputFilePath)}`,
+                    });
+                }
+            })
+            .on("error", (error) => {
+                console.error("Error during audio streaming:", error);
+                res.status(500).json({ error: "Error during audio streaming" });
+            })
             .pipe(writeStream);
-
-        // When the conversion is done, send the URL of the converted file
-        writeStream.on("finish", () => {
-            res.json({
-                audioURL: `${req.protocol}://${req.get(
-                    "host"
-                )}/temp/${path.basename(outputFilePath)}`,
-            });
-        });
-
-        // Handle errors during the conversion
-        writeStream.on("error", (error) => {
-            console.error("Error during audio conversion:", error);
-            res.status(500).json({ error: "Error during audio conversion" });
-        });
     } catch (error) {
         console.error("Error fetching audio URL:", error);
         res.status(500).json({ error: "Error fetching audio URL" });
     }
-};
+};  
+
+// const playTrack = async (req, res) => {
+//     const videoUrl = req.query.videoUrl;
+//     const patientId = req.query.patientId;
+//     try {
+//         deleteFilesWithPrefix(`${patientId}_`);
+
+//         const info = await ytdl.getInfo(videoUrl);
+//         const audioURL = ytdl.chooseFormat(info.formats, {
+//             filter: "audioonly",
+//         }).url;
+
+//         const outputFilePath = path.join(
+//             __dirname,
+//             "../temp",
+//             `${patientId}_${Date.now()}.mp3`
+//         );
+
+//         // Create a writable stream to save the converted audio
+//         const writeStream = fs.createWriteStream(outputFilePath);
+
+//         // Use FFmpeg to convert the audio format
+//         ffmpeg()
+//             .input(audioURL)
+//             .format("mp3")
+//             .audioCodec("libmp3lame")
+//             .pipe(writeStream);
+
+//         // When the conversion is done, send the URL of the converted file
+//         writeStream.on("finish", () => {
+//             res.json({
+//                 audioURL: `${req.protocol}://${req.get(
+//                     "host"
+//                 )}/temp/${path.basename(outputFilePath)}`,
+//             });
+//         });
+
+//         // Handle errors during the conversion
+//         writeStream.on("error", (error) => {
+//             console.error("Error during audio conversion:", error);
+//             res.status(500).json({ error: "Error during audio conversion" });
+//         });
+//     } catch (error) {
+//         console.error("Error fetching audio URL:", error);
+//         res.status(500).json({ error: "Error fetching audio URL" });
+//     }
+// };
 
 // Delete files in the temp folder with the specified prefix
 const deleteFilesWithPrefix = (prefix) => {
