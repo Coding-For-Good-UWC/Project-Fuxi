@@ -39,13 +39,11 @@ const RATING_COLORS = [
 ];
 
 let currentlyPlaying = -1;
-let nextPlaying = -1;
 
 const PlayerScreen = ({ route, navigation }) => {
     const { patient } = route.params;
 
     const [audio, setAudio] = useState(null);
-    const [nextAudio, setNextAudio] = useState(null); // preload next track
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
     const [position, setPosition] = useState(0);
@@ -53,7 +51,6 @@ const PlayerScreen = ({ route, navigation }) => {
     const { setIsLoading } = useContext(LoadingContext);
 
     const [songInfo, setSongInfo] = useState(DEFAULT_SONG_INFO);
-    const [nextTrackInfo, setNextTrackInfo] = useState(DEFAULT_SONG_INFO);
 
     const [rating, setRating] = useState(3);
     const [ratingColor, setRatingColor] = useState(RATING_COLORS[rating - 1]);
@@ -66,7 +63,6 @@ const PlayerScreen = ({ route, navigation }) => {
 
     useEffect(() => {
         updateSong();
-        preloadNextTrack(); 
     }, []);
 
     const togglePlayPause = async () => {
@@ -106,7 +102,7 @@ const PlayerScreen = ({ route, navigation }) => {
 
     const updateSong = async () => {
         setIsLoading(true);
-    
+
         await Audio.setAudioModeAsync({
             allowsRecordingIOS: false,
             staysActiveInBackground: false,
@@ -114,89 +110,35 @@ const PlayerScreen = ({ route, navigation }) => {
             shouldDuckAndroid: true,
             playThroughEarpieceAndroid: false,
         });
-    
+
         const payload = {
             patientId: patient._id,
-            prevTrackId: currentlyPlaying,
+			prevTrackId: currentlyPlaying,
         };
-    
-        const response = await fetch(`${Constants.manifest.extra.apiUrl}/track/next`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
-    
-        if (!response.ok) {
-            alert("Something went wrong!");
-            setIsLoading(false);
-            return;
-        }
-    
-        let data = await response.json();
-        const { track } = data;
-    
-        currentlyPlaying = track._id;
-    
-        const newSongInfo = {
-            title: `${track.Title} - ${track.Artist ? track.Artist : "Unknown"}`,
-            imgUri: track.ImageURL,
-        };
-    
-        setSongInfo(newSongInfo);
-    
-        const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
-        data = await fetch(
-            `${Constants.manifest.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(
-                youtubeUrl
-            )}&patientId=${patient._id}`
-        );
-    
-        const { audioURL } = await data.json();
-    
-        if (audio) {
-            const status = await audio.getStatusAsync();
-            if (status.isPlaying) {
-                await audio.stopAsync();
-            }
-            await audio.unloadAsync();
-        }
-    
-        const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
-    
-        setAudio(sound);
-        setDuration(status.durationMillis);
-        setElapsedTime("0:00");
-    
-        setIsLoading(false);
-    };
-
-    const preloadNextTrack = async () => {
-        if (nextAudio != null) {
-            await nextAudio.unloadAsync();
-        }
 
         const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/next`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ patientId: patient._id, prevTrackId: currentlyPlaying })
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
             alert('Something went wrong!');
+            setIsLoading(false);
             return; 
         }
 
         let data = await response.json();
-        const track = data.track;
+        const { track } = data;
         
-        nextPlaying = track._id;
+        currentlyPlaying = track._id;
 
-        const newNextTrackInfo = {
-            title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
+        const newSongInfo = {
+			title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
             imgUri: track.ImageURL,
         };
 
-        setNextTrackInfo(newNextTrackInfo);
+        setSongInfo(newSongInfo);
 
         const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
         data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}&patientId=${patient._id}`);
@@ -205,26 +147,21 @@ const PlayerScreen = ({ route, navigation }) => {
 
         console.log(audioURL);
 
-        const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL }, { shouldPlay: false });
-        setNextAudio(sound);
-    }; 
+        if (audio)
+            await audio.unloadAsync();
+
+        const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
+    
+        setAudio(sound);
+        setDuration(status.durationMillis);
+        setElapsedTime("0:00");
+
+        setIsLoading(false);
+    };  
  
     const nextTrack = async () => {
-        if (audio) {
-            await audio.stopAsync();
-            await audio.unloadAsync();
-        }
         await updateTrackRating();
-        const { sound: newSound, status: newStatus } = await Audio.Sound.createAsync(
-            { uri: nextTrackInfo.audioURL },
-            { shouldPlay: true }
-        );
-        setAudio(newSound);
-        setDuration(newStatus.durationMillis);
-        setElapsedTime("0:00");
-        setSongInfo(nextTrackInfo);
-        setIsPlaying(true);
-        await preloadNextTrack();
+        await updateSong();
     };
     
     useEffect(() => {

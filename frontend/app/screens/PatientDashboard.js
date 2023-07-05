@@ -13,7 +13,7 @@ import BackButton from "../components/BackButton.js";
 import colours from "../config/colours.js";
 import PatientItem from "../components/PatientItem.js";
 
-import { getPatients } from  '../api/patients'; 
+import { getPatients } from  '../api/patients'; 
 import { getInstitute } from "../api/institutes";
 
 function PatientDashboard({ route, navigation }) 
@@ -27,17 +27,11 @@ function PatientDashboard({ route, navigation })
         React.useCallback(() => {
             const loadPatients = async () => {
                 setIsLoading(true);
-   useFocusEffect(
-        React.useCallback(() => {
-            const loadPatients = async () => {
-                setIsLoading(true);
 
-                const institute = await getInstitute();
-                const institute = await getInstitute();
+                const fetchedInstitute = await getInstitute();
+                setInstitute(fetchedInstitute);
 
-                    setInstitute (institute);
-
-                    const patients = await getPatients(); 
+                const patients = await getPatients(); 
 
             // console.log("PATIENTS:");
             // patients.forEach((patient) => {
@@ -46,11 +40,10 @@ function PatientDashboard({ route, navigation })
 
             setPatientData(patients);
             setIsLoading(false);
-        };
+            };
 
-                loadPatients();
-            }, [])
-    )
+            loadPatients();
+        }, [])
     );
 
     const selectPatient = (patientId) => {

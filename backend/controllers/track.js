@@ -110,9 +110,6 @@ const getNextTrackId = async (req, res) => {
         if (patient.trackRatings.length <= 15)
             updated = await scrapeTracksFn(patientId);
 
-		console.log("UPDATED: " + updated);
-		console.log(updated);
-
         const trackRatings = patient.trackRatings.reduce(
             (acc, { track, rating }) => ({
                 ...acc,
