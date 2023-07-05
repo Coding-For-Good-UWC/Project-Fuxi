@@ -199,7 +199,13 @@ const PlayerScreen = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            <BackButton navigation={navigation} />
+            <BackButton navigation={navigation} onClick={
+                async () => {
+                    if (audio) {
+                        await audio.unloadAsync();
+                    }
+                }
+            } />
             <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
             <View style={styles.topContainer}>
                 <Text style={styles.title}>Project FUXI</Text>
