@@ -106,7 +106,6 @@ const getNextTrackId = async (req, res) => {
 
         const patient = await patientModel.findById(patientId);
 
-        let updated = false;
         if (patient.trackRatings.length <= 15)
             updated = await scrapeTracksFn(patientId);
 
@@ -119,7 +118,6 @@ const getNextTrackId = async (req, res) => {
             {}
         );
 
-
         const positiveTracks = Object.entries(trackRatings)
             .filter(([track, rating]) => rating != -1)
             .map(([track, rating]) => ({ track, rating: rating + 1 }));
@@ -129,19 +127,33 @@ const getNextTrackId = async (req, res) => {
             0
         );
 
-        let diceRoll = Math.floor(Math.random() * totalScore);
-        for (let { track, rating } of positiveTracks) {
-            diceRoll -= rating;
-
-            if (diceRoll <= 0) {
-                const trackObj = await trackModel.findById(track);
-                return res.json({
-                    track: trackObj,
-                    status: "OK",
-                    message: "Returning a random track weightings",
-                });
+        let trackObj;
+        let trackSelectedId;
+        let sameTrackCounter = 0;
+        do {
+            let diceRoll = Math.floor(Math.random() * totalScore);
+            for (let { track, rating } of positiveTracks) {
+                diceRoll -= rating;
+    
+                if (diceRoll <= 0) {
+                    trackObj = await trackModel.findById(track);
+                    trackSelectedId = track;
+                    break;
+                }
             }
-        }
+            
+            if (trackSelectedId === prevTrackId) {
+                console.log("Same track selected, rerolling");
+                sameTrackCounter += 1;
+            }
+        } while (prevTrackId === trackSelectedId && sameTrackCounter < 5);
+
+        return res.json({
+            track: trackObj,
+            status: "OK",
+            message: "Returning a random track weightings",
+        });
+
     } catch (err) {
         console.log(err);
         res.status(500).json({ status: "ERROR", message: "Server error" });

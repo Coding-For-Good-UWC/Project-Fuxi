@@ -52,7 +52,7 @@ const PlayerScreen = ({ route, navigation }) => {
 
     const [isPreloading, setIsPreloading] = useState(false);
 
-    const { setIsLoading } = useContext(LoadingContext);
+    const { isLoading, setIsLoading } = useContext(LoadingContext);
 
     const [songInfo, setSongInfo] = useState(DEFAULT_SONG_INFO);
     const [nextSongInfo, setNextSongInfo] = useState(DEFAULT_SONG_INFO);
@@ -157,12 +157,6 @@ const PlayerScreen = ({ route, navigation }) => {
         console.log("isPreloading: " + isPreloading);
         console.log ("audioURL: " + audioURL);
 
-        // if (!isPreloading)
-        // {
-        //     if (audio)
-        //         await audio.unloadAsync();
-        // }
-
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
         
         if (!isPreloading)
@@ -180,31 +174,48 @@ const PlayerScreen = ({ route, navigation }) => {
         if (!isPreloading)
             setIsLoading(false);
         else
+        {
             setIsPreloading(false);
+            setIsLoading(false);
+        }
     };  
 
+    useEffect(() => {
+        if (!isLoading) {
+            nextTrack();
+        }
+    }, [isLoading]);    
+
     const loadPreloadedTrack = async () => {
-        if (preloadedSound)
-        {
+        if (preloadedSound) {
             setAudio(preloadedSound);
             setDuration(nextDuration);
             setElapsedTime("0:00");
-        }
-        else
-        {
+            setIsPlaying(true);
+            await preloadedSound.playAsync(); 
+        } else {
             await updateSong(true);
         }
-    }
+    }    
  
     const nextTrack = async () => {
+        if (isPreloading)
+        {
+            console.log("Still preloading...");
+            setIsLoading(true);
+            return;
+        }
+
         if (audio) {
             await audio.unloadAsync();
         }
-
+    
         await updateTrackRating();
-
+        
         await loadPreloadedTrack();
-
+    
+        setIsPlaying(true); 
+    
         updateSong(true);
     };
     
