@@ -39,11 +39,13 @@ const RATING_COLORS = [
 ];
 
 let currentlyPlaying = -1;
+let nextPlaying = -1;
 
 const PlayerScreen = ({ route, navigation }) => {
     const { patient } = route.params;
 
     const [audio, setAudio] = useState(null);
+    const [nextAudio, setNextAudio] = useState(null); // preload next track
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
     const [position, setPosition] = useState(0);
@@ -51,6 +53,7 @@ const PlayerScreen = ({ route, navigation }) => {
     const { setIsLoading } = useContext(LoadingContext);
 
     const [songInfo, setSongInfo] = useState(DEFAULT_SONG_INFO);
+    const [nextTrackInfo, setNextTrackInfo] = useState(DEFAULT_SONG_INFO);
 
     const [rating, setRating] = useState(3);
     const [ratingColor, setRatingColor] = useState(RATING_COLORS[rating - 1]);
@@ -63,6 +66,7 @@ const PlayerScreen = ({ route, navigation }) => {
 
     useEffect(() => {
         updateSong();
+        preloadNextTrack(); 
     }, []);
 
     const togglePlayPause = async () => {
@@ -158,10 +162,58 @@ const PlayerScreen = ({ route, navigation }) => {
 
         setIsLoading(false);
     };  
+
+    const preloadNextTrack = async () => {
+        if (nextAudio != null) {
+            await nextAudio.unloadAsync();
+        }
+
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/next`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ patientId: patient._id, prevTrackId: currentlyPlaying })
+        });
+
+        if (!response.ok) {
+            alert('Something went wrong!');
+            return; 
+        }
+
+        let data = await response.json();
+        const track = data.track;
+        
+        nextPlaying = track._id;
+
+        const newNextTrackInfo = {
+            title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
+            imgUri: track.ImageURL,
+        };
+
+        setNextTrackInfo(newNextTrackInfo);
+
+        const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
+        data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}&patientId=${patient._id}`);
+
+        const { audioURL } = await data.json();
+
+        console.log(audioURL);
+
+        const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL }, { shouldPlay: false });
+        setNextAudio(sound);
+    }; 
  
     const nextTrack = async () => {
+        if (audio) {
+            await audio.stopAsync();
+            await audio.unloadAsync();
+        }
         await updateTrackRating();
-        await updateSong();
+        setAudio(nextAudio);
+        setSongInfo(nextTrackInfo);
+        await preloadNextTrack();
+        const playbackStatus = await nextAudio.playAsync();
+        setPosition(playbackStatus.positionMillis);
+        setIsPlaying(true);
     };
     
     useEffect(() => {

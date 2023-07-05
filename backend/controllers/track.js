@@ -280,7 +280,7 @@ const playTrack = async (req, res) => {
     const patientId = req.query.patientId;
 
     try {
-        deleteFilesWithPrefix(`${patientId}_`);
+        // deleteFilesWithPrefix(`${patientId}_`);
 
         const outputFilePath = path.join(
             __dirname,
