@@ -67,9 +67,7 @@ function SignupScreen({ navigation })
             headers: { "Content-Type": "application/json" },
             method: "POST",
         });
-
         const data = await response.json();
-
         const idToken = await auth.currentUser.getIdToken();
 
         const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
@@ -77,7 +75,6 @@ function SignupScreen({ navigation })
             headers: { "Content-Type": "application/json", token: idToken },
         });
         const data2 = await response2.json();
-
         setIsLoading(false);
         navigation.navigate("Dashboard");
     };

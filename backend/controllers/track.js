@@ -1,17 +1,32 @@
-
+require("dotenv").config();
 const fetch = require("node-fetch");
+
 const YoutubeMusicApi = require("youtube-music-api");
+
 const ytdl = require("ytdl-core");
 const ffmpeg = require("fluent-ffmpeg");
+
 const fs = require("fs");
 const path = require("path");
 const ObjectId = require('mongoose').Types.ObjectId;
 
+// const { OpenAI } = require("langchain/llms/openai");
+// const { initializeAgentExecutorWithOptions } = require("langchain/agents");
+
 const trackModel = require("../models/track");
 const patientModel = require("../models/patient");
 
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
 const api = new YoutubeMusicApi();
 api.initalize();
+
+// const llm = OpenAI({ temperature: 0.9 });
+// const executor = initializeAgentExecutorWithOptions({[], llm, {
+// 	agentType: "zero-shot-react-description",
+// 	verbose: true,
+// });
+
 
 const generatePrompts = (patient) => {
     const era =
@@ -76,7 +91,6 @@ const updateTrackRating = async (req, res) => {
             status: "ERROR",
             message: "Something went wrong",
         });
-
     }
 };
 
@@ -94,9 +108,10 @@ const getNextTrackId = async (req, res) => {
 
         let updated = false;
         if (patient.trackRatings.length <= 15)
-            patient.trackRatings = await scrapeTracksFn(patientId);
-		
-		patient.trackRatings = patient.trackRatings.filter(trackRating => trackRating.track != prevTrackId);
+            updated = await scrapeTracksFn(patientId);
+
+		console.log("UPDATED: " + updated);
+		console.log(updated);
 
         const trackRatings = patient.trackRatings.reduce(
             (acc, { track, rating }) => ({

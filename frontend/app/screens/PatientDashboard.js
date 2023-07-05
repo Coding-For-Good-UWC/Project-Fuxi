@@ -27,20 +27,30 @@ function PatientDashboard({ route, navigation })
         React.useCallback(() => {
             const loadPatients = async () => {
                 setIsLoading(true);
+   useFocusEffect(
+        React.useCallback(() => {
+            const loadPatients = async () => {
+                setIsLoading(true);
 
                 const institute = await getInstitute();
+                const institute = await getInstitute();
 
-                setInstitute (institute);
+                    setInstitute (institute);
 
-                const patients = await getPatients(); 
+                    const patients = await getPatients(); 
 
-                setPatientData(patients);
+            // console.log("PATIENTS:");
+            // patients.forEach((patient) => {
+            //     console.log(patient.name);
+            // });
 
-                setIsLoading(false);
-            };
+            setPatientData(patients);
+            setIsLoading(false);
+        };
 
-            loadPatients();
-        }, [])
+                loadPatients();
+            }, [])
+    )
     );
 
     const selectPatient = (patientId) => {
@@ -60,7 +70,7 @@ function PatientDashboard({ route, navigation })
                 <Text>Loading...</Text>
             </View>
         );
-            
+                        
     return (
         <View style={styles.container}>
             <BackButton navigation={navigation} />
