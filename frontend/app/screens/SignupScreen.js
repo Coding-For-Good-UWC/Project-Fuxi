@@ -45,9 +45,10 @@ function SignupScreen({ navigation })
 
         setIsLoading(true);
 
+        let userCredential; 
         const auth = getAuth();
 		try {
-			const userCredential = await createUserWithEmailAndPassword(
+			userCredential = await createUserWithEmailAndPassword(
 				auth,
 				email,
 				password
