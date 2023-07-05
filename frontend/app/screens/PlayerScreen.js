@@ -106,7 +106,7 @@ const PlayerScreen = ({ route, navigation }) => {
 
     const updateSong = async () => {
         setIsLoading(true);
-
+    
         await Audio.setAudioModeAsync({
             allowsRecordingIOS: false,
             staysActiveInBackground: false,
@@ -114,54 +114,61 @@ const PlayerScreen = ({ route, navigation }) => {
             shouldDuckAndroid: true,
             playThroughEarpieceAndroid: false,
         });
-
+    
         const payload = {
             patientId: patient._id,
-			prevTrackId: currentlyPlaying,
+            prevTrackId: currentlyPlaying,
         };
-
-        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/next`, {
+    
+        const response = await fetch(`${Constants.manifest.extra.apiUrl}/track/next`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
         });
-
+    
         if (!response.ok) {
-            alert('Something went wrong!');
+            alert("Something went wrong!");
             setIsLoading(false);
-            return; 
+            return;
         }
-
+    
         let data = await response.json();
         const { track } = data;
-        
+    
         currentlyPlaying = track._id;
-
+    
         const newSongInfo = {
-			title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
+            title: `${track.Title} - ${track.Artist ? track.Artist : "Unknown"}`,
             imgUri: track.ImageURL,
         };
-
+    
         setSongInfo(newSongInfo);
-
+    
         const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
-        data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}&patientId=${patient._id}`);
-
+        data = await fetch(
+            `${Constants.manifest.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(
+                youtubeUrl
+            )}&patientId=${patient._id}`
+        );
+    
         const { audioURL } = await data.json();
-
-        console.log(audioURL);
-
-        if (audio)
+    
+        if (audio) {
+            const status = await audio.getStatusAsync();
+            if (status.isPlaying) {
+                await audio.stopAsync();
+            }
             await audio.unloadAsync();
-
+        }
+    
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
     
         setAudio(sound);
         setDuration(status.durationMillis);
         setElapsedTime("0:00");
-
+    
         setIsLoading(false);
-    };  
+    };
 
     const preloadNextTrack = async () => {
         if (nextAudio != null) {
@@ -208,12 +215,16 @@ const PlayerScreen = ({ route, navigation }) => {
             await audio.unloadAsync();
         }
         await updateTrackRating();
-        setAudio(nextAudio);
+        const { sound: newSound, status: newStatus } = await Audio.Sound.createAsync(
+            { uri: nextTrackInfo.audioURL },
+            { shouldPlay: true }
+        );
+        setAudio(newSound);
+        setDuration(newStatus.durationMillis);
+        setElapsedTime("0:00");
         setSongInfo(nextTrackInfo);
-        await preloadNextTrack();
-        const playbackStatus = await nextAudio.playAsync();
-        setPosition(playbackStatus.positionMillis);
         setIsPlaying(true);
+        await preloadNextTrack();
     };
     
     useEffect(() => {
