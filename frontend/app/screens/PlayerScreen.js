@@ -38,19 +38,24 @@ const RATING_COLORS = [
     colours.voteUp,
 ];
 
-let currentlyPlaying = -1;
+let currentTrackId = -1;
 
 const PlayerScreen = ({ route, navigation }) => {
     const { patient } = route.params;
 
     const [audio, setAudio] = useState(null);
+    const [preloadedSound, setPreloadedSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
+    const [nextDuration, setNextDuration] = useState(0);
     const [position, setPosition] = useState(0);
+
+    const [isPreloading, setIsPreloading] = useState(false);
 
     const { setIsLoading } = useContext(LoadingContext);
 
     const [songInfo, setSongInfo] = useState(DEFAULT_SONG_INFO);
+    const [nextSongInfo, setNextSongInfo] = useState(DEFAULT_SONG_INFO);
 
     const [rating, setRating] = useState(3);
     const [ratingColor, setRatingColor] = useState(RATING_COLORS[rating - 1]);
@@ -62,7 +67,8 @@ const PlayerScreen = ({ route, navigation }) => {
     const ratingRef = useRef(rating);
 
     useEffect(() => {
-        updateSong();
+        updateSong(false); 
+        updateSong(true);
     }, []);
 
     const togglePlayPause = async () => {
@@ -87,7 +93,7 @@ const PlayerScreen = ({ route, navigation }) => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 patientId: patient._id,
-                trackId: currentlyPlaying,
+                trackId: currentTrackId,
                 rating: ratingRef.current - 3
             }),
         });
@@ -100,8 +106,11 @@ const PlayerScreen = ({ route, navigation }) => {
         }
     };
 
-    const updateSong = async () => {
-        setIsLoading(true);
+    const updateSong = async (isPreloading=true) => { // get audio file for a track based on algorithm // isNextTrack true means preloading next track
+        if (!isPreloading)
+            setIsLoading(true);
+        else
+            setIsPreloading(true);
 
         await Audio.setAudioModeAsync({
             allowsRecordingIOS: false,
@@ -113,7 +122,7 @@ const PlayerScreen = ({ route, navigation }) => {
 
         const payload = {
             patientId: patient._id,
-			prevTrackId: currentlyPlaying,
+			prevTrackId: currentTrackId,
         };
 
         const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/next`, {
@@ -131,7 +140,7 @@ const PlayerScreen = ({ route, navigation }) => {
         let data = await response.json();
         const { track } = data;
         
-        currentlyPlaying = track._id;
+        currentTrackId = track._id;
 
         const newSongInfo = {
 			title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
@@ -145,23 +154,58 @@ const PlayerScreen = ({ route, navigation }) => {
 
         const { audioURL } = await data.json();
 
-        console.log(audioURL);
+        console.log("isPreloading: " + isPreloading);
+        console.log ("audioURL: " + audioURL);
 
-        if (audio)
-            await audio.unloadAsync();
+        // if (!isPreloading)
+        // {
+        //     if (audio)
+        //         await audio.unloadAsync();
+        // }
 
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
-    
-        setAudio(sound);
-        setDuration(status.durationMillis);
-        setElapsedTime("0:00");
+        
+        if (!isPreloading)
+        {
+            setAudio(sound);
+            setDuration(status.durationMillis);
+            setElapsedTime("0:00");
+        }
+        else
+        {
+            setPreloadedSound(sound);
+            setNextDuration(status.durationMillis);
+        }
 
-        setIsLoading(false);
+        if (!isPreloading)
+            setIsLoading(false);
+        else
+            setIsPreloading(false);
     };  
+
+    const loadPreloadedTrack = async () => {
+        if (preloadedSound)
+        {
+            setAudio(preloadedSound);
+            setDuration(nextDuration);
+            setElapsedTime("0:00");
+        }
+        else
+        {
+            await updateSong(true);
+        }
+    }
  
     const nextTrack = async () => {
+        if (audio) {
+            await audio.unloadAsync();
+        }
+
         await updateTrackRating();
-        await updateSong();
+
+        await loadPreloadedTrack();
+
+        updateSong(true);
     };
     
     useEffect(() => {
