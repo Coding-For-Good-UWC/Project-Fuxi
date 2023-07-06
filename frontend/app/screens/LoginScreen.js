@@ -35,6 +35,9 @@ function LoginScreen({ navigation }) {
 			// await signInWithEmailAndPassword(auth, email, password);
     
             const idToken = await auth.currentUser.getIdToken();
+
+            console.log ("SIUUU")
+            console.log (Constants.expoConfig.extra.apiUrl);
     
             const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
                 method: "POST",

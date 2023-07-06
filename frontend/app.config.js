@@ -32,7 +32,7 @@ export default {
       favicon: "./app/assets/favicon.png",
     },
     extra: {
-      apiUrl: process.env.BACKEND_HOST || "http://localhost:8080",
+      apiUrl: process.env.BACKEND_HOST || "http://127.0.0.1:8080",
       eas: {
         projectId: "770075d4-9321-43db-8805-322192b9c91e",
       },

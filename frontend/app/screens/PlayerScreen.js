@@ -67,8 +67,8 @@ const PlayerScreen = ({ route, navigation }) => {
     const ratingRef = useRef(rating);
 
     useEffect(() => {
-        updateSong(false); 
-        updateSong(true);
+        updateSong(false, true); 
+        updateSong(true, true);
     }, []);
 
     const togglePlayPause = async () => {
@@ -106,7 +106,9 @@ const PlayerScreen = ({ route, navigation }) => {
         }
     };
 
-    const updateSong = async (isPreloading=true) => { // get audio file for a track based on algorithm // isNextTrack true means preloading next track
+    const updateSong = async (isPreloading=true, isFirstLoad=false) => { // get audio file for a track based on algorithm // isNextTrack true means preloading next track
+        console.log("isPreloading: " + isPreloading);
+
         if (!isPreloading)
             setIsLoading(true);
         else
@@ -147,14 +149,16 @@ const PlayerScreen = ({ route, navigation }) => {
             imgUri: track.ImageURL,
         };
 
-        setSongInfo(newSongInfo);
+        if (!isPreloading)
+            setSongInfo(newSongInfo);
+        else
+            setNextSongInfo(newSongInfo);
 
         const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
         data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}&patientId=${patient._id}`);
 
         const { audioURL } = await data.json();
 
-        console.log("isPreloading: " + isPreloading);
         console.log ("audioURL: " + audioURL);
 
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
@@ -176,7 +180,9 @@ const PlayerScreen = ({ route, navigation }) => {
         else
         {
             setIsPreloading(false);
-            setIsLoading(false);
+
+            if (!isFirstLoad)
+                setIsLoading(false);
         }
     };  
 
@@ -195,9 +201,9 @@ const PlayerScreen = ({ route, navigation }) => {
     const nextTrack = async () => {
         if (isPreloading)
         {
-            console.log("Still preloading...");
+            alert("Please wait a moment...");
             setIsLoading(true);
-            // TODO: WAIT UNTIL PRELOADING IS DONE
+            return;
         }
 
         if (audio) {
@@ -205,6 +211,10 @@ const PlayerScreen = ({ route, navigation }) => {
         }
     
         await updateTrackRating();
+
+        setSongInfo(nextSongInfo);
+
+        setRating(3);
         
         await loadPreloadedTrack();
     
