@@ -146,14 +146,19 @@ const ShuffleManual = ({ route, navigation }) => {
   };
 
   const getManualPlayset = async () => {
-    const response = await fetch(
-      `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`
-    );
-    const data = await response.json();
-    console.log(data);
-    setPlayset(data);
-    playSong(data);
+    try {
+      const response = await fetch(
+        `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`
+      );
+      const data = await response.json();
+      console.log(data);
+      setPlayset(data);
+      playSong(data);
+    } catch (error) {
+      console.error('Error fetching manual playset:', error);
+    }
   };
+  
 
   const handleView = async () => {
     // Create a string of song names
@@ -205,7 +210,13 @@ const prevSong = ()=>{
 
   return (
     <View style={styles.container}>
-    <BackButton navigation={navigation}/>
+     <BackButton navigation={navigation} onClick={
+                async () => {
+                    if (audio) {
+                        await audio.unloadAsync();
+                    }
+                }
+            } />
     <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
     <View style={styles.topContainer}>
     <Text style={styles.title}>Project FUXI</Text>
