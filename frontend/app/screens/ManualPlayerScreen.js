@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import MyListComponent from "../components/MyListComponent.js";
+import LoadingContext from "../store/LoadingContext.js";
+import LoadingScreen from "../components/LoadingScreen.js";
+
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import {
     StyleSheet,
@@ -21,15 +24,16 @@ import {
     faThumbsDown
 } from "@fortawesome/free-solid-svg-icons";
 import { Audio } from "expo-av";
-import LoadingContext from "../store/LoadingContext.js";
 import BackButton from "../components/BackButton.js";
 import {getTrackTitles} from '../components/MyListComponent.js'
+import Constants from 'expo-constants'
 
 import colours from "../config/colours.js";
 let x;
 
 
  function ManualPlayerScreen({ route, navigation }) {
+  const { isLoading, setIsLoading } = useContext(LoadingContext);
   const { patient } = route.params;
   const [titles, setTitles] = useState([]);
   async function updateDB(selectedTrackRatings, id) {
@@ -39,7 +43,7 @@ let x;
     };
   
     try {
-      const response = await fetch(`http://localhost:8080/patient/manual`, {
+      const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/manual`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -48,26 +52,27 @@ let x;
       });
   
       const data = await response.json();
-      console.log(data); // Handle successful update
+      Alert.alert("Update Succesful");
     } catch (error) {
-      console.error(error); // Handle error
+      Alert.alert("Update Unsuccesful, Please try again.");
+      console.error(error); 
     }
   }
   
-  useEffect(() => {x
+  useEffect(() => {
     let trackids = patient.trackRatings.map((rating) => rating.track);
-    // console.log(patient.trackRatings);
-    // console.log("trackids", trackids);
-
+    setIsLoading(true)
+    
     async function fetchTitles(ids) {
       const response = await fetch(
-        `http://localhost:8080/track/titles?ids=${ids.join(",")}`
+        `${Constants.expoConfig.extra.apiUrl}/track/titles?ids=${ids.join(",")}`
       );
       const data = await response.json();
-
+      setIsLoading(false)
       return data.titles;
+      
     }
-
+    
     fetchTitles(trackids)
     .then((titles) => {
       let uniqueTitles = titles
@@ -90,40 +95,39 @@ let x;
 
   function SaveData() {
     let m = getTrackTitles();
-  
+
     const selectedTrackRatings = [];
   
     m.forEach((item) => {
-      const matchingRating = patient.trackRatings.find((rating) => rating.track === item.id);
-  
-      if (matchingRating) {
+
         selectedTrackRatings.push({
           id: item.id,
-          rating: matchingRating.rating,
+          rating: 3,
         });
-      }
+  
     });
   
-    console.log("Selected Track Ratings:", selectedTrackRatings);
     updateDB(selectedTrackRatings,patient._id);
   }
   
 
 const handleSelectedIdsChange = (ids) => {
     setSelectedIds(ids);
-    // console.log('Selected IDs:', ids);
   };
 
   const handleSelectedTitlesChange = (selectedtitles) => {
     setSelectedTitles(selectedTitles);
-    // console.log('Selected IDs:', selectedtitles);
   };
 function ViewSelectedTitles(){
     x = getTrackTitles();
-    // console.log(x);
     const titles = x.map(item => item.title);
     Alert.alert('Selected Playset', titles.join('\n \n'));
     
+}
+
+function goToYoutubeManualPlayer(){
+  navigation.navigate("YoutubeManual",{patient});
+
 }
 
 const [modalVisible, setModalVisible] = useState(false);
@@ -132,8 +136,11 @@ const [modalVisible, setModalVisible] = useState(false);
 const handleModalClose = () => {
   setModalVisible(false);
 };
-  // console.log("PRINTING TITLES TO GO "+titles)
-  console.log("PATIENT ID"+patient._id);
+
+function goToPlayer(){
+  navigation.navigate("Player",{patient});
+}
+ 
   return (
     
     <View style={styles.container}>
@@ -150,7 +157,15 @@ const handleModalClose = () => {
         <TouchableOpacity style={styles.buttonSave}onPress={SaveData} >
             <Text style={styles.buttonTextSave} >Save</Text>
         </TouchableOpacity>
-     
+        <Text></Text>
+        <TouchableOpacity style={styles.buttonPlay}onPress={goToYoutubeManualPlayer} >
+            <Text style={styles.buttonTextsmall} >Search from Youtube</Text>
+        </TouchableOpacity>
+        <Text></Text>
+        <Text></Text>
+        <TouchableOpacity style={styles.buttonPlay}onPress={goToPlayer} >
+            <Text style={styles.buttonTextSave} >Play</Text>
+        </TouchableOpacity>
       
       </View>
  
@@ -200,9 +215,24 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
     },
+    buttonPlay: {
+      backgroundColor: colours.genreTV,
+      padding: 10,
+      borderRadius: 5,
+      width: '30%',
+      height: '7%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     buttonTextSave: {
       color: "#FFFFFF",
       fontSize: 15,
+      alignContent:"center"
+    },
+    buttonTextsmall:{
+
+      color: "#FFFFFF",
+      fontSize: 12,
       alignContent:"center"
     }
   });

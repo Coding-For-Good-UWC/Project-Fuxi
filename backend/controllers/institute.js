@@ -31,15 +31,8 @@ const signup = async (req, res) =>
     try
     {
         const { uid, email, name } = req.body;
-
-        console.log ("Save uid " + uid);
-
         if (!uid)
             return res.status(400).json({ status: "ERROR", message: "Missing required fields" });
-
-        const existingInstitute = await instituteModel.findOne({ $or: [{ email }, { name }] });
-        if (existingInstitute)
-            return res.status(400).json({ status: "ERROR", message: "Institute already exists" });
 
         const newInstitute = await instituteModel.create({ uid, email, name }); 
 

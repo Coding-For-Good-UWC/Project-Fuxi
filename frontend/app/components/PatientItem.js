@@ -10,9 +10,8 @@ function PatientItem(props) {
     const { name, age, genres }  = props.patient;
     return (
         <View style={styles.container}>
-            <Image style={styles.image} source={{ uri: "https://picsum.photos/200" }} />
             <View style={styles.info}>
-                <Text style={styles.name}>{name} (M), {age}</Text>
+                <Text style={styles.name}>{name}, {age}</Text>
                 <View style={styles.genreTags}>
                     {genres.map((genre, index) => {
                         return <GenreTag key={index} genre={genre} />;
@@ -29,19 +28,12 @@ const styles = StyleSheet.create({
         backgroundColor: colours.secondary,
         alignItems: "center",
         justifyContent: "flex-start",
-        paddingHorizontal: 10,
+        paddingHorizontal: 30,
+        paddingVertical: 10,
         width: "100%",
-        height: 100,
+        minHeight: 100,
         marginBottom: 10,
         borderRadius: 10,
-        // borderWidth: 1,
-        // borderColor: colours.primaryText,
-    },
-    image: {
-        height: 80,
-        width: 80,
-        borderRadius: 10,
-        marginRight: 10,
     },
     info: {
         flexDirection: "column",

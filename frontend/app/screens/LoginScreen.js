@@ -9,6 +9,7 @@ import {
     Platform,
     Alert
 } from "react-native";
+import Constants from "expo-constants";
 
 import colours from "../config/colours.js";
 import LoadingContext from "../store/LoadingContext.js";
@@ -30,18 +31,16 @@ function LoginScreen({ navigation }) {
         try {
             const auth = getAuth();
 
-            // await signInWithEmailAndPassword(auth, email, password);
             await signInWithEmailAndPassword(auth, "apex@gmail.com", "Supersecret1");
+			// await signInWithEmailAndPassword(auth, email, password);
     
             const idToken = await auth.currentUser.getIdToken();
-    
-            const response = await fetch("http://localhost:8080/institute/verify", {
+
+            const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", token: idToken },
             });
             const data = await response.json();
-            // console.log("LOG IN SUCCESSFUL");
-            // console.log(data);
 
             setIsLoading(false);
             navigation.navigate("Dashboard");
@@ -82,12 +81,12 @@ function LoginScreen({ navigation }) {
                 />
             </View>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
                 <Text style={styles.clickableText}>Sign Up</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
                 <Text style={styles.clickableText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity
                 style={styles.buttonContainer}
                 onPress={handleLogin}

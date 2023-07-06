@@ -33,6 +33,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         borderRadius: 10,
         borderWidth: 2,
+        marginHorizontal: 6,
     },
     genreText: {
         color: colours.primaryText,

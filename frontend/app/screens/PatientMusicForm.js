@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import Constants from 'expo-constants'
 
 import GenreToggleButton from "../components/GenreToggleButton";
 import BackButton from "../components/BackButton";
@@ -74,9 +75,7 @@ function PatientMusicForm({ route, navigation })
             instituteId: institute._id,
         };
 
-        console.log(newPatientData);
-
-        const response = await fetch("http://localhost:8080/patient/new", {
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/new`, {
             body: JSON.stringify(newPatientData),
             headers: { "Content-Type": "application/json" },
             method: "POST",
@@ -86,16 +85,10 @@ function PatientMusicForm({ route, navigation })
         if (data.status === "ERROR") 
         {
             setIsLoading(false);
-            console.log(data.message);
         }
         else 
         {
-            console.log("Patient created");
-            console.log(">>>>>>>>>>>>>");
-            console.log(data.patient);
-            console.log(data.patient._id);
-
-			let res = await fetch("http://localhost:8080/track/scrape", {
+			let res = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/scrape`, {
 				body: JSON.stringify({ patientId: data.patient._id }),
 				headers: { "Content-Type": "application/json" },
 				method: "POST",
@@ -118,26 +111,25 @@ function PatientMusicForm({ route, navigation })
             </View>
             <View style={styles.info}>
                 <Text style={styles.info}>
-                    Please select the genre(s) for your patient
+                    What did your patient listen to in their teen years?
                 </Text>
             </View>
             <View style={styles.bodyContainer}>
                 <View style={styles.rightContainer}>
-                    {genres.map((genre, index) => (
-                        <GenreToggleButton
-                            genre={genre}
-                            key={index}
-                            updatePreferences={() => updatePreferences(index)}
-                        />
-                    ))}
-
-                    <TouchableOpacity
-                        style={styles.submitButton}
-                        onPress={submitHandler}
-                    >
-                        <Text style={styles.submitButtonText}>Submit</Text>
-                    </TouchableOpacity>
+                {genres.map((genre, index) => (
+                    <GenreToggleButton
+                        genre={genre}
+                        key={index}
+                        updatePreferences={() => updatePreferences(index)}
+                    />
+                ))}
                 </View>
+                <TouchableOpacity
+                    style={styles.submitButton}
+                    onPress={submitHandler}
+                >
+                    <Text style={styles.submitButtonText}>Submit</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -151,27 +143,30 @@ const styles = StyleSheet.create({
         backgroundColor: colours.bg,
     },
     titleContainer: {
-        marginTop: 100,
+        marginTop: 20,
         alignItems: "center",
-        marginBottom: 20,
+        marginBottom: 10,
     },
     bodyContainer: {
-        flex: 0.9,
-        flexDirection: "column",
+        flex: 0.55,
         width: "100%",
-        paddingHorizontal: "10%",
+        alignItems: "center",
     },
     info: {
         fontSize: 18,
         color: colours.primaryText,
         textAlign: "center",
-        marginBottom: 20,
+        marginBottom: 30,
+        paddingRight: 20,
+        paddingLeft: 20,
     },
     rightContainer: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-    },
+        flexDirection: "row",
+        flexWrap: "wrap"
+    },    
     title: {
         color: colours.primaryText,
         fontSize: 32,
@@ -214,7 +209,7 @@ const styles = StyleSheet.create({
         paddingRight: 10,
         fontSize: 18,
         fontWeight: "450",
-    },
+    }
 });
 
 export default PatientMusicForm;

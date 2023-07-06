@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
 import LoadingContext from "../store/LoadingContext.js";
+import Constants from 'expo-constants'
 
 import colours from "../config/colours.js";
 import BackButton from "../components/BackButton.js";
@@ -44,33 +45,36 @@ function SignupScreen({ navigation })
 
         setIsLoading(true);
 
+        let userCredential; 
         const auth = getAuth();
-        const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
+		try {
+			userCredential = await createUserWithEmailAndPassword(
+				auth,
+				email,
+				password
+			);
+		} catch (error) {
+			console.log(error);
+			Alert.alert("Error", error.message);
+			setIsLoading(false);
+			// Reload the page
+			return;
+		}
 
         const user = userCredential.user;
-        const response = await fetch("http://localhost:8080/institute/signup", {
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/signup`, {
             body: JSON.stringify({ uid: user.uid, email: user.email, name }),
             headers: { "Content-Type": "application/json" },
             method: "POST",
         });
         const data = await response.json();
-        // console.log ("CREATED INSTITUTE:")
-        // console.log (data);
-
         const idToken = await auth.currentUser.getIdToken();
 
-        const response2 = await fetch("http://localhost:8080/institute/verify", {
+        const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
             method: "POST",
             headers: { "Content-Type": "application/json", token: idToken },
         });
         const data2 = await response2.json();
-        // console.log ("VERIFIED INSTITUTE:")
-        // console.log (data2);
-
         setIsLoading(false);
         navigation.navigate("Dashboard");
     };
@@ -124,12 +128,12 @@ function SignupScreen({ navigation })
                 />
             </View>
 
-            <TouchableOpacity onPress={handleSignUp}>
-                <Text style={styles.clickableText}>Sign Up</Text>
+            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                <Text style={styles.clickableText}>Log in to an existing account</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
                 <Text style={styles.clickableText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity
                 style={styles.buttonContainer}
                 onPress={handleSignUp}

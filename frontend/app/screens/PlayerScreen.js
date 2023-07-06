@@ -16,6 +16,7 @@ import {
     faForward,
     faRepeat,
 } from "@fortawesome/free-solid-svg-icons";
+import Constants from 'expo-constants'
 
 import { Audio } from "expo-av";
 import LoadingContext from "../store/LoadingContext.js";
@@ -37,20 +38,26 @@ const RATING_COLORS = [
     colours.voteUp,
 ];
 
-let currentlyPlaying = -1;
+let currentTrackId = -1;
+let currAudioFile = "";
+let nextAudioFile = "";
 
 const PlayerScreen = ({ route, navigation }) => {
     const { patient } = route.params;
 
     const [audio, setAudio] = useState(null);
+    const [preloadedSound, setPreloadedSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
+    const [nextDuration, setNextDuration] = useState(0);
     const [position, setPosition] = useState(0);
-    const [isFirstPlay, setIsFirstPlay] = useState(true);
+
+    const [isPreloading, setIsPreloading] = useState(false);
 
     const { isLoading, setIsLoading } = useContext(LoadingContext);
 
     const [songInfo, setSongInfo] = useState(DEFAULT_SONG_INFO);
+    const [nextSongInfo, setNextSongInfo] = useState(DEFAULT_SONG_INFO);
 
     const [rating, setRating] = useState(3);
     const [ratingColor, setRatingColor] = useState(RATING_COLORS[rating - 1]);
@@ -62,7 +69,8 @@ const PlayerScreen = ({ route, navigation }) => {
     const ratingRef = useRef(rating);
 
     useEffect(() => {
-        updateSong();
+        updateSong(false, true); 
+        updateSong(true, true);
     }, []);
 
     const togglePlayPause = async () => {
@@ -81,18 +89,13 @@ const PlayerScreen = ({ route, navigation }) => {
         }
     };
 
-    const updateTrackRating = async () => 
-    {
-        console.log (ratingRef.current) 
-        console.log (ratingRef.current - 3)
-        
-        const response = await fetch("http://localhost:8080/track/rating", 
-        {
+    const updateTrackRating = async () => {
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/rating`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 patientId: patient._id,
-                trackId: currentlyPlaying,
+                trackId: currentTrackId,
                 rating: ratingRef.current - 3
             }),
         });
@@ -105,8 +108,36 @@ const PlayerScreen = ({ route, navigation }) => {
         }
     };
 
-    const updateSong = async () => {
-        setIsLoading(true);
+    const cleanTempFolder = async (fileName, isPreloading) => 
+    {    
+        nextAudioFile = fileName;
+
+        const payload = {
+            patientId: patient._id,
+            keepFiles: [currAudioFile, nextAudioFile]
+        };
+
+        console.log("payload: " + JSON.stringify(payload));
+
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/clean`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) 
+        {
+            alert('Something went wrong!');
+        }
+    };
+
+    const updateSong = async (isPreloading=true, isFirstLoad=false) => { // get audio file for a track based on algorithm // isNextTrack true means preloading next track
+        console.log("isPreloading: " + isPreloading);
+
+        if (!isPreloading)
+            setIsLoading(true);
+        else
+            setIsPreloading(true);
 
         await Audio.setAudioModeAsync({
             allowsRecordingIOS: false,
@@ -118,11 +149,10 @@ const PlayerScreen = ({ route, navigation }) => {
 
         const payload = {
             patientId: patient._id,
-            // trackId: currentlyPlaying,
-            // rating: finalRating,
+			prevTrackId: currentTrackId,
         };
 
-        const response = await fetch ("http://localhost:8080/track/next", {
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/next`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -137,35 +167,97 @@ const PlayerScreen = ({ route, navigation }) => {
         let data = await response.json();
         const { track } = data;
         
-        currentlyPlaying = track._id;
+        currentTrackId = track._id;
 
         const newSongInfo = {
-            title: `${track.Title} - ${track.Artist}`,
+			title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
             imgUri: track.ImageURL,
         };
 
-        setSongInfo(newSongInfo);
+        if (!isPreloading)
+            setSongInfo(newSongInfo);
+        else
+            setNextSongInfo(newSongInfo);
 
         const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
-        data = await fetch(`http://localhost:8080/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}&patientId=${patient._id}`);
+        data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}&patientId=${patient._id}`);
 
         const { audioURL } = await data.json();
 
-        if (audio)
-            await audio.unloadAsync();
+        console.log ("audioURL: " + audioURL);
 
+        const fileName = audioURL.split("/").pop();
+
+        if (isFirstLoad)
+        {
+            if (!isPreloading)
+                currAudioFile = fileName;
+            else
+                nextAudioFile = fileName;
+        }
+        else
+            await cleanTempFolder(fileName, isPreloading); 
+        
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
-    
-        setAudio(sound);
-        setDuration(status.durationMillis);
-        setElapsedTime("0:00");
+        
+        if (!isPreloading)
+        {
+            setAudio(sound);
+            setDuration(status.durationMillis);
+            setElapsedTime("0:00");
+        }
+        else
+        {
+            setPreloadedSound(sound);
+            setNextDuration(status.durationMillis);
+        }
 
-        setIsLoading(false);
+        if (!isPreloading)
+            setIsLoading(false);
+        else
+            setIsPreloading(false);
     };  
+
+    const loadPreloadedTrack = async () => {
+        if (preloadedSound) {
+            setAudio(preloadedSound);
+            setDuration(nextDuration);
+            setElapsedTime("0:00");
+            setIsPlaying(true);
+            await preloadedSound.playAsync(); 
+        } else {
+            await updateSong(true);
+        }
+    }    
  
     const nextTrack = async () => {
+        if (isPreloading)
+        {
+            alert("Please wait a moment...");
+            return;
+        }
+
+        if (audio) {
+            await audio.unloadAsync();
+        }
+    
         await updateTrackRating();
-        await updateSong();
+
+        setSongInfo(nextSongInfo);
+
+        setRating(3);
+        ratingRef.current = 3;
+        setRatingColor(RATING_COLORS[2]);
+        setRatingText(RATING_VALUES[2]);
+
+        currAudioFile = nextAudioFile;
+        nextAudioFile = "";
+        
+        await loadPreloadedTrack();
+    
+        setIsPlaying(true); 
+    
+        updateSong(true);
     };
     
     useEffect(() => {
@@ -185,9 +277,7 @@ const PlayerScreen = ({ route, navigation }) => {
                         audio.replayAsync(); // Replay track if isLooping is true
                     }
                     else {
-                        // Get the next track and set the rating of the current track to the rating slider value
                         nextTrack(); 
-                        setIsPlaying(false);
                     }
                 }
             });
@@ -195,7 +285,6 @@ const PlayerScreen = ({ route, navigation }) => {
     }, [audio, isLooping]);  // add audio and isLooping as dependency
 
     const handleRatingValueChange = (value) => {
-        console.log ("Setting rating to " + value) // This will log the new value
         setRating(value);
         ratingRef.current = value; // Add this line
         setRatingColor(RATING_COLORS[value - 1]);
@@ -204,7 +293,13 @@ const PlayerScreen = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            <BackButton navigation={navigation} />
+            <BackButton navigation={navigation} onClick={
+                async () => {
+                    if (audio) {
+                        await audio.unloadAsync();
+                    }
+                }
+            } />
             <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
             <View style={styles.topContainer}>
                 <Text style={styles.title}>Project FUXI</Text>

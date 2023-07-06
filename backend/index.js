@@ -9,7 +9,6 @@ const path = require('path');
 
 var admin = require("firebase-admin");
 
-// var serviceAccount = require("./.firebase.json");
 
 const { FIREBASE_PRIVATE_KEY_ID, FIREBASE_PRIVATE_KEY, FIREBASE_CLIENT_EMAIL, FIREBASE_CLIENT_ID, FIREBASE_AUTH_PROVIDER_X509_CERT_URL, FIREBASE_CLIENT_X509_CERT_URL } = process.env;
 
@@ -25,6 +24,7 @@ var serviceAccount = {
   auth_provider_x509_cert_url: FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
   client_x509_cert_url: FIREBASE_CLIENT_X509_CERT_URL
 }
+
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)

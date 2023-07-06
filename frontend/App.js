@@ -8,6 +8,7 @@ import ManualPlayerScreen from './app/screens/ManualPlayerScreen'
 import SignupScreen from './app/screens/SignupScreen';
 import PlayerScreen from './app/screens/PlayerScreen';
 import PrePlayerScreen from './app/screens/PrePlayerScreen';
+import YoutubeManual from './app/screens/YoutubeManualPlayer'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -97,6 +98,11 @@ export default function App()
       <Stack.Screen 
           name="ManualPlayer" 
           component={ManualPlayerScreen} 
+          options={{ headerShown: false }}
+        />
+         <Stack.Screen 
+          name="YoutubeManual" 
+          component={YoutubeManual} 
           options={{ headerShown: false }}
         />
 

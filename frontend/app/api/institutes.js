@@ -1,11 +1,12 @@
 import { getAuth } from "firebase/auth";
+import Constants from 'expo-constants'
 
 const getInstitute = async () => 
 {
     const idToken = await getAuth().currentUser.getIdToken(); // id token
 
     const response = await fetch(
-        `http://localhost:8080/institute/`,
+        `${Constants.expoConfig.extra.apiUrl}/institute/`,
         {
             method: "GET",
             headers: { "Content-Type": "application/json", token: idToken },
