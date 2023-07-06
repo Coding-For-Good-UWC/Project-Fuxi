@@ -75,6 +75,8 @@ const PlayerScreen = ({ route, navigation }) => {
     }, []);
 
     const togglePlayPause = async () => {
+        if (!audio) return;
+    
         if (isPlaying) {
             await audio.pauseAsync();
         } else {
@@ -82,7 +84,7 @@ const PlayerScreen = ({ route, navigation }) => {
             setPosition(playbackStatus.positionMillis);
         }
         setIsPlaying(!isPlaying);
-    };
+    };    
 
     const handleSliderValueChange = async (value) => {
         if (audio) {
@@ -220,18 +222,23 @@ const PlayerScreen = ({ route, navigation }) => {
     };  
 
     const loadPreloadedTrack = async () => {
-        if (preloadedSound) {
-            setAudio(preloadedSound);
-            setDuration(nextDuration);
-            setElapsedTime("0:00");
-            setIsPlaying(true);
-            await preloadedSound.playAsync(); 
-        } else {
+        try {
+            if (preloadedSound) {
+                setAudio(preloadedSound);
+                setDuration(nextDuration);
+                setElapsedTime("0:00");
+                setIsPlaying(true);
+                await preloadedSound.playAsync(); 
+            } else {
+                throw new Error("Preloaded sound is not ready.");
+            }
+        } catch (error) {
+            console.log("Preloaded sound was not ready. Loading next track.", error); // TODO: BUG WHEN SLIDER REACHES END OF SONG AND GETS STUCK
             await updateSong(true);
         }
-    }    
+    };    
 
-    useEffect(() => {
+    useEffect(() => { 
         if (usePreloadedImmediately)
         {
             nextTrack();
@@ -241,35 +248,33 @@ const PlayerScreen = ({ route, navigation }) => {
     }, [isPreloading]);
  
     const nextTrack = async () => {
-        if (isPreloading)
-        {
+        if (isPreloading) {
+            console.log("WAITING FOR PRELOADING TO FINISH");
             setUsePreloadedImmediately(true);
             setIsLoading(true);
             return;
         }
-
+    
+        console.log("NEXT TRACK");
+    
         if (audio) {
             await audio.unloadAsync();
         }
-    
+      
         await updateTrackRating();
-
+    
         setSongInfo(nextSongInfo);
-
+    
         setRating(3);
         ratingRef.current = 3;
-        setRatingColor(RATING_COLORS[2]);
-        setRatingText(RATING_VALUES[2]);
-
-        currAudioFile = nextAudioFile;
-        nextAudioFile = "";
         
-        await loadPreloadedTrack();
+        // Load and play the preloaded track.
+        await loadPreloadedTrack();  
     
-        setIsPlaying(true); 
-    
-        updateSong(true);
+        // Now start preloading the next track.
+        await updateSong(true);  
     };
+    
     
     useEffect(() => {
         if (audio) 
@@ -288,7 +293,7 @@ const PlayerScreen = ({ route, navigation }) => {
                         audio.replayAsync(); // Replay track if isLooping is true
                     }
                     else {
-                        nextTrack(); 
+                        nextTrack();
                     }
                 }
             });
