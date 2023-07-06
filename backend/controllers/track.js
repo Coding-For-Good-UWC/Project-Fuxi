@@ -160,6 +160,47 @@ const getNextTrackId = async (req, res) => {
     }
 };
 
+
+
+
+
+
+
+
+
+const getNextTrackIdRandom = async (req, res) => {
+    try {
+        const { patientId } = req.body;
+
+        if (!patientId)
+            return res
+                .status(400)
+                .json({ status: "ERROR", message: "Patient id required" });
+
+        const patient = await patientModel.findById(patientId);
+        console.log(patient)
+
+        let updated = false;
+        if (patient.manualPlayset.length <= 5)
+        return res.status(500).json({ status: "ERROR", message: "songs" });
+
+        const randomIndex = Math.floor(Math.random() * patient.manualPlayset.length);
+        console.log(randomIndex)
+        const trackObj =  patient.manualPlayset[randomIndex]
+        console.log("track"+trackObj)
+        return res.json({
+            track: trackObj,
+            status: "OK",
+            message: "Returning a random track from patient's manual playset",
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ status: "ERROR", message: "Server error" });
+    }
+};
+
+
+
 // Async function that returns the track object given its id
 const getTrack = async (req, res) =>
 {
@@ -175,12 +216,13 @@ const getTrack = async (req, res) =>
 const getTitles = async (req, res) => {
     const test = req.query
     const ids = req.query.ids.split(',');
+    console.log(ids)
     let titles = [];
     let x;
     for(let i=0;i<ids.length;i++){
         const myObjectId = new ObjectId(ids[i]);
-
         const result = await trackModel.findOne({_id: myObjectId});
+        titles.push(result)
     }
     return res.status(200).json({ titles, status: "OK", message: "Found titles"});
   };
@@ -342,24 +384,34 @@ const playTrack = async (req, res) => {
     }
 };
 
-const cleanTempFolder = (req, res) => {
-    try
-    {
-        const { keepFiles, patientId } = req.body;
+const playTrackShuffle = async (req, res) => {
+    const videoUrl = req.body
+    const patientId = req.query.patientId;
+    try {
 
-        console.log ("CLEANING TEMP FOLDER BUT KEEPING FILES")
-        console.log (keepFiles)
+        const info = await ytdl.getInfo(videoUrl);
+        const audioURL = ytdl.chooseFormat(info.formats, {
+            filter: "audioonly",
+        }).url;
 
-        deleteFilesWithPrefix(`${patientId}_`, keepFiles);
+        // Use FFmpeg to convert the audio format
+        ffmpeg()
+            .input(audioURL)
+            .format("mp3")
+            .audioCodec("libmp3lame")
+            .pipe(writeStream);
 
-        res.status(200).json({ status: "OK", message: "Temp folder cleaned" });
+    
+        // Handle errors during the conversion
+        writeStream.on("error", (error) => {
+            console.error("Error during audio conversion:", error);
+            res.status(500).json({ error: "Error during audio conversion" });
+        });
+    } catch (error) {
+        console.error("Error fetching audio URL:", error);
+        res.status(500).json({ error: "Error fetching audio URL" });
     }
-    catch (error)
-    {
-        console.error("Error cleaning temp folder:", error);
-        res.status(500).json({ error: "Error cleaning temp folder" });
-    }
-}
+};
 
 // To clean up the temp folder
 const deleteFilesWithPrefix = (prefix, keepFiles) => {
@@ -379,6 +431,7 @@ const deleteFilesWithPrefix = (prefix, keepFiles) => {
 
 module.exports = {
     getNextTrackId,
+    getNextTrackIdRandom,
     getTrack,
     playTrack,
     scrapeTracks,

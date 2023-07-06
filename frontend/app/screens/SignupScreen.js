@@ -67,6 +67,7 @@ function SignupScreen({ navigation })
             headers: { "Content-Type": "application/json" },
             method: "POST",
         });
+
         const data = await response.json();
         const idToken = await auth.currentUser.getIdToken();
 

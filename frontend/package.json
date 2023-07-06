@@ -17,13 +17,14 @@
     "@react-native-community/datetimepicker": "6.2.0",
     "@react-native-community/hooks": "^2.8.1",
     "@react-native-community/slider": "4.2.3",
-    "@react-native-picker/picker": "2.4.2",
+    "@react-native-picker/picker": "^2.4.10",
     "@react-navigation/native": "^6.0.13",
     "@react-navigation/native-stack": "^6.9.0",
     "axios": "^1.2.2",
     "dotenv": "^16.3.1",
     "expo": "~46.0.9",
     "expo-av": "~12.0.4",
+    "expo-constants": "~13.2.4",
     "expo-linear-gradient": "~11.4.0",
     "expo-status-bar": "~1.4.0",
     "firebase": "^9.21.0",
@@ -47,8 +48,7 @@
     "react-native-snap-carousel": "^3.9.1",
     "react-native-svg": "12.3.0",
     "react-native-web": "^0.18.9",
-    "react-parallax": "^3.5.1",
-    "expo-constants": "~13.2.4"
+    "react-parallax": "^3.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

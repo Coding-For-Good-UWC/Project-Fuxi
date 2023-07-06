@@ -52,7 +52,23 @@ let x;
       });
   
       const data = await response.json();
-      Alert.alert("Update Succesful");
+      console.log(data)
+      if(data.message=="repeats"){
+        console.log("REPEATED")
+        console.log(data.existingValues)
+        let trackNames = data.existingValues.map(item => item.name).join('\n');
+
+        // display an alert
+        Alert.alert(
+          "Duplicate Tracks",
+          "These tracks are already in the playlist: \n \n" + trackNames
+        );
+
+      }
+      else{
+        Alert.alert("Update Succesful");
+      }
+
     } catch (error) {
       Alert.alert("Update Unsuccesful, Please try again.");
       console.error(error); 
@@ -62,12 +78,13 @@ let x;
   useEffect(() => {
     let trackids = patient.trackRatings.map((rating) => rating.track);
     setIsLoading(true)
-    
+    console.log(trackids)
     async function fetchTitles(ids) {
       const response = await fetch(
         `${Constants.expoConfig.extra.apiUrl}/track/titles?ids=${ids.join(",")}`
       );
       const data = await response.json();
+      // console.log(data.titles)
       setIsLoading(false)
       return data.titles;
       
@@ -97,12 +114,12 @@ let x;
     let m = getTrackTitles();
 
     const selectedTrackRatings = [];
-  
-    m.forEach((item) => {
 
+    m.forEach((item) => {
         selectedTrackRatings.push({
           id: item.id,
           rating: 3,
+          name:item.title
         });
   
     });
@@ -138,7 +155,7 @@ const handleModalClose = () => {
 };
 
 function goToPlayer(){
-  navigation.navigate("Player",{patient});
+  navigation.navigate("ShuffleManual",{patient});
 }
  
   return (
@@ -146,7 +163,7 @@ function goToPlayer(){
     <View style={styles.container}>
       <View style={styles.topContainer}>    
       <Text style={styles.title}>Project Fuxi</Text>
-      <Text style={styles.subhead}> Current Playset</Text>
+      <Text style={styles.subhead}> Select tracks for your Playset</Text>
       <BackButton navigation={navigation} />
       {titles.length > 0 && <MyListComponent data={titles} />}
       <Text></Text>
@@ -158,14 +175,18 @@ function goToPlayer(){
             <Text style={styles.buttonTextSave} >Save</Text>
         </TouchableOpacity>
         <Text></Text>
-        <TouchableOpacity style={styles.buttonPlay}onPress={goToYoutubeManualPlayer} >
-            <Text style={styles.buttonTextsmall} >Search from Youtube</Text>
-        </TouchableOpacity>
-        <Text></Text>
-        <Text></Text>
-        <TouchableOpacity style={styles.buttonPlay}onPress={goToPlayer} >
-            <Text style={styles.buttonTextSave} >Play</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <Text></Text>
+          <Text></Text>
+        
+  <TouchableOpacity style={styles.buttonPlay} onPress={goToYoutubeManualPlayer}>
+    <Text style={styles.buttonTextsmall}>Search from Youtube</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity style={styles.buttonPlay} onPress={goToPlayer}>
+    <Text style={styles.buttonTextSave}>Play</Text>
+  </TouchableOpacity>
+</View>
       
       </View>
  
@@ -215,14 +236,21 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
     },
+    buttonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',  // Use this if you want some space between the buttons
+      width: '100%',  // Use this to stretch the container across the screen width
+      paddingHorizontal: 40,  // Use this to give some horizontal padding
+    },
     buttonPlay: {
       backgroundColor: colours.genreTV,
       padding: 10,
       borderRadius: 5,
-      width: '30%',
-      height: '7%',
+      flex: 1,  // Use this to make the buttons take up equal space in the container
       justifyContent: 'center',
       alignItems: 'center',
+      paddingVertical:13,
+      marginHorizontal: 5,  // Use this to give some horizontal margin
     },
     buttonTextSave: {
       color: "#FFFFFF",
@@ -233,7 +261,8 @@ const styles = StyleSheet.create({
 
       color: "#FFFFFF",
       fontSize: 12,
-      alignContent:"center"
+      alignContent:"center",
+      textAlign:'center'
     }
   });
   

@@ -33,11 +33,7 @@ function PatientDashboard({ route, navigation })
 
                 const patients = await getPatients(); 
 
-            // console.log("PATIENTS:");
-            // patients.forEach((patient) => {
-            //     console.log(patient.name);
-            // });
-
+                setPatientData(patients);
             setPatientData(patients);
             setIsLoading(false);
             };
