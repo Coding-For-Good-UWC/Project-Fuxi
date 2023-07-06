@@ -45,16 +45,17 @@ function SignupScreen({ navigation })
 
         setIsLoading(true);
 
+        let userCredential; 
         const auth = getAuth();
 		try {
-			const userCredential = await createUserWithEmailAndPassword(
+			userCredential = await createUserWithEmailAndPassword(
 				auth,
 				email,
 				password
 			);
 		} catch (error) {
 			console.log(error);
-			Alert.alert("Error logging in. Do you aldready have an account? If so, please proceed to Sign in instead");
+			Alert.alert("Error", error.message);
 			setIsLoading(false);
 			// Reload the page
 			return;
@@ -68,7 +69,6 @@ function SignupScreen({ navigation })
         });
 
         const data = await response.json();
-
         const idToken = await auth.currentUser.getIdToken();
 
         const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
@@ -76,7 +76,6 @@ function SignupScreen({ navigation })
             headers: { "Content-Type": "application/json", token: idToken },
         });
         const data2 = await response2.json();
-
         setIsLoading(false);
         navigation.navigate("Dashboard");
     };

@@ -13,7 +13,7 @@ import BackButton from "../components/BackButton.js";
 import colours from "../config/colours.js";
 import PatientItem from "../components/PatientItem.js";
 
-import { getPatients } from  '../api/patients'; 
+import { getPatients } from  '../api/patients'; 
 import { getInstitute } from "../api/institutes";
 
 function PatientDashboard({ route, navigation }) 
@@ -28,16 +28,14 @@ function PatientDashboard({ route, navigation })
             const loadPatients = async () => {
                 setIsLoading(true);
 
-                const institute = await getInstitute();
-
-                setInstitute (institute);
+                const fetchedInstitute = await getInstitute();
+                setInstitute(fetchedInstitute);
 
                 const patients = await getPatients(); 
 
-
                 setPatientData(patients);
-
-                setIsLoading(false);
+            setPatientData(patients);
+            setIsLoading(false);
             };
 
             loadPatients();
@@ -61,7 +59,7 @@ function PatientDashboard({ route, navigation })
                 <Text>Loading...</Text>
             </View>
         );
-            
+                        
     return (
         <View style={styles.container}>
             <BackButton navigation={navigation} />

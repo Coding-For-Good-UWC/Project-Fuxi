@@ -4,11 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 
 import colours from '../config/colours.js';
 
-function BackButton({ navigation }) {
+function BackButton({ navigation, onClick }) {
     return (
         <TouchableOpacity
             style={styles.buttonContainer}
-            onPress={() => navigation.goBack()}
+            onPress={() => {
+                navigation.goBack()
+                if (onClick) onClick();
+            }}
         >
             <Ionicons name="arrow-back" size={24} color={colours.primaryText} />
         </TouchableOpacity>

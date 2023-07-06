@@ -1,17 +1,32 @@
-
+require("dotenv").config();
 const fetch = require("node-fetch");
+
 const YoutubeMusicApi = require("youtube-music-api");
+
 const ytdl = require("ytdl-core");
 const ffmpeg = require("fluent-ffmpeg");
+
 const fs = require("fs");
 const path = require("path");
 const ObjectId = require('mongoose').Types.ObjectId;
 
+// const { OpenAI } = require("langchain/llms/openai");
+// const { initializeAgentExecutorWithOptions } = require("langchain/agents");
+
 const trackModel = require("../models/track");
 const patientModel = require("../models/patient");
 
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
 const api = new YoutubeMusicApi();
 api.initalize();
+
+// const llm = OpenAI({ temperature: 0.9 });
+// const executor = initializeAgentExecutorWithOptions({[], llm, {
+// 	agentType: "zero-shot-react-description",
+// 	verbose: true,
+// });
+
 
 const generatePrompts = (patient) => {
     const era =
@@ -76,7 +91,6 @@ const updateTrackRating = async (req, res) => {
             status: "ERROR",
             message: "Something went wrong",
         });
-
     }
 };
 
@@ -92,11 +106,8 @@ const getNextTrackId = async (req, res) => {
 
         const patient = await patientModel.findById(patientId);
 
-        let updated = false;
         if (patient.trackRatings.length <= 15)
-            patient.trackRatings = await scrapeTracksFn(patientId);
-		
-		patient.trackRatings = patient.trackRatings.filter(trackRating => trackRating.track != prevTrackId);
+            updated = await scrapeTracksFn(patientId);
 
         const trackRatings = patient.trackRatings.reduce(
             (acc, { track, rating }) => ({
@@ -107,7 +118,6 @@ const getNextTrackId = async (req, res) => {
             {}
         );
 
-
         const positiveTracks = Object.entries(trackRatings)
             .filter(([track, rating]) => rating != -1)
             .map(([track, rating]) => ({ track, rating: rating + 1 }));
@@ -117,19 +127,33 @@ const getNextTrackId = async (req, res) => {
             0
         );
 
-        let diceRoll = Math.floor(Math.random() * totalScore);
-        for (let { track, rating } of positiveTracks) {
-            diceRoll -= rating;
-
-            if (diceRoll <= 0) {
-                const trackObj = await trackModel.findById(track);
-                return res.json({
-                    track: trackObj,
-                    status: "OK",
-                    message: "Returning a random track weightings",
-                });
+        let trackObj;
+        let trackSelectedId;
+        let sameTrackCounter = 0;
+        do {
+            let diceRoll = Math.floor(Math.random() * totalScore);
+            for (let { track, rating } of positiveTracks) {
+                diceRoll -= rating;
+    
+                if (diceRoll <= 0) {
+                    trackObj = await trackModel.findById(track);
+                    trackSelectedId = track;
+                    break;
+                }
             }
-        }
+            
+            if (prevTrackId !== -1 && trackSelectedId === prevTrackId) {
+                console.log("Same track selected, rerolling");
+                sameTrackCounter += 1;
+            }
+        } while (prevTrackId === trackSelectedId && sameTrackCounter < 5);
+
+        return res.json({
+            track: trackObj,
+            status: "OK",
+            message: "Returning a random track weightings",
+        });
+
     } catch (err) {
         console.log(err);
         res.status(500).json({ status: "ERROR", message: "Server error" });
@@ -320,14 +344,8 @@ const scrapeYtTrack = async (req, res) =>
 const playTrack = async (req, res) => {
     const videoUrl = req.query.videoUrl;
     const patientId = req.query.patientId;
+
     try {
-        deleteFilesWithPrefix(`${patientId}_`);
-
-        const info = await ytdl.getInfo(videoUrl);
-        const audioURL = ytdl.chooseFormat(info.formats, {
-            filter: "audioonly",
-        }).url;
-
         const outputFilePath = path.join(
             __dirname,
             "../temp",
@@ -337,34 +355,34 @@ const playTrack = async (req, res) => {
         // Create a writable stream to save the converted audio
         const writeStream = fs.createWriteStream(outputFilePath);
 
+        const audioStream = ytdl(videoUrl, {
+            quality: "highestaudio",
+            filter: (format) => format.container === "webm" && !format.encoding,
+        });
+
         // Use FFmpeg to convert the audio format
-        ffmpeg()
-            .input(audioURL)
-            .format("mp3")
+        ffmpeg(audioStream)
             .audioCodec("libmp3lame")
-            .pipe(writeStream);
-
-        // When the conversion is done, send the URL of the converted file
-        writeStream.on("finish", () => {
-            res.json({
-                audioURL: `${req.protocol}://${req.get(
-                    "host"
-                )}/temp/${path.basename(outputFilePath)}`,
-            });
-        });
-
-        // Handle errors during the conversion
-        writeStream.on("error", (error) => {
-            console.error("Error during audio conversion:", error);
-            res.status(500).json({ error: "Error during audio conversion" });
-        });
+            .format("mp3")
+            .on("end", () => {
+                res.json({
+                    audioURL: `${req.protocol}://${req.get(
+                        "host"
+                    )}/temp/${path.basename(outputFilePath)}`,
+                });
+            })
+            .on("error", (error) => {
+                console.error("Error during audio conversion:", error);
+                res.status(500).json({
+                    error: "Error during audio conversion",
+                });
+            })
+            .pipe(writeStream, { end: true });
     } catch (error) {
         console.error("Error fetching audio URL:", error);
         res.status(500).json({ error: "Error fetching audio URL" });
     }
 };
-
-
 
 const playTrackShuffle = async (req, res) => {
     const videoUrl = req.body
@@ -375,8 +393,6 @@ const playTrackShuffle = async (req, res) => {
         const audioURL = ytdl.chooseFormat(info.formats, {
             filter: "audioonly",
         }).url;
-
-       
 
         // Use FFmpeg to convert the audio format
         ffmpeg()
@@ -397,16 +413,14 @@ const playTrackShuffle = async (req, res) => {
     }
 };
 
-
-
-// Delete files in the temp folder with the specified prefix
-const deleteFilesWithPrefix = (prefix) => {
+// To clean up the temp folder
+const deleteFilesWithPrefix = (prefix, keepFiles) => {
     const tempFolderPath = path.join(__dirname, "../temp");
     fs.readdir(tempFolderPath, (err, files) => {
         if (err) throw err;
 
         files.forEach((file) => {
-            if (file.startsWith(prefix)) {
+            if (file.startsWith(prefix) && !keepFiles.includes(file)) {
                 fs.unlink(path.join(tempFolderPath, file), (err) => {
                     if (err) throw err;
                 });
@@ -423,5 +437,6 @@ module.exports = {
     scrapeTracks,
     updateTrackRating,
     getTitles,
-    scrapeYtTrack
+    scrapeYtTrack,
+    cleanTempFolder,
 };
