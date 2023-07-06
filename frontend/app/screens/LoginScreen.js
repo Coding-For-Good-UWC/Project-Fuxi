@@ -36,9 +36,6 @@ function LoginScreen({ navigation }) {
     
             const idToken = await auth.currentUser.getIdToken();
 
-            console.log ("SIUUU")
-            console.log (Constants.expoConfig.extra.apiUrl);
-    
             const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", token: idToken },

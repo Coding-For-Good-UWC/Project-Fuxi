@@ -39,6 +39,8 @@ const RATING_COLORS = [
 ];
 
 let currentTrackId = -1;
+let currAudioFile = "";
+let nextAudioFile = "";
 
 const PlayerScreen = ({ route, navigation }) => {
     const { patient } = route.params;
@@ -106,6 +108,29 @@ const PlayerScreen = ({ route, navigation }) => {
         }
     };
 
+    const cleanTempFolder = async (fileName, isPreloading) => 
+    {    
+        nextAudioFile = fileName;
+
+        const payload = {
+            patientId: patient._id,
+            keepFiles: [currAudioFile, nextAudioFile]
+        };
+
+        console.log("payload: " + JSON.stringify(payload));
+
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/clean`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) 
+        {
+            alert('Something went wrong!');
+        }
+    };
+
     const updateSong = async (isPreloading=true, isFirstLoad=false) => { // get audio file for a track based on algorithm // isNextTrack true means preloading next track
         console.log("isPreloading: " + isPreloading);
 
@@ -161,6 +186,18 @@ const PlayerScreen = ({ route, navigation }) => {
 
         console.log ("audioURL: " + audioURL);
 
+        const fileName = audioURL.split("/").pop();
+
+        if (isFirstLoad)
+        {
+            if (!isPreloading)
+                currAudioFile = fileName;
+            else
+                nextAudioFile = fileName;
+        }
+        else
+            await cleanTempFolder(fileName, isPreloading); 
+        
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
         
         if (!isPreloading)
@@ -178,12 +215,7 @@ const PlayerScreen = ({ route, navigation }) => {
         if (!isPreloading)
             setIsLoading(false);
         else
-        {
             setIsPreloading(false);
-
-            if (!isFirstLoad)
-                setIsLoading(false);
-        }
     };  
 
     const loadPreloadedTrack = async () => {
@@ -202,7 +234,6 @@ const PlayerScreen = ({ route, navigation }) => {
         if (isPreloading)
         {
             alert("Please wait a moment...");
-            setIsLoading(true);
             return;
         }
 
@@ -215,6 +246,12 @@ const PlayerScreen = ({ route, navigation }) => {
         setSongInfo(nextSongInfo);
 
         setRating(3);
+        ratingRef.current = 3;
+        setRatingColor(RATING_COLORS[2]);
+        setRatingText(RATING_VALUES[2]);
+
+        currAudioFile = nextAudioFile;
+        nextAudioFile = "";
         
         await loadPreloadedTrack();
     
@@ -240,9 +277,7 @@ const PlayerScreen = ({ route, navigation }) => {
                         audio.replayAsync(); // Replay track if isLooping is true
                     }
                     else {
-                        // Get the next track and set the rating of the current track to the rating slider value
                         nextTrack(); 
-                        setIsPlaying(false);
                     }
                 }
             });
