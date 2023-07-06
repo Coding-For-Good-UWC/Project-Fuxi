@@ -53,6 +53,7 @@ const PlayerScreen = ({ route, navigation }) => {
     const [position, setPosition] = useState(0);
 
     const [isPreloading, setIsPreloading] = useState(false);
+    const [usePreloadedImmediately, setUsePreloadedImmediately] = useState(false); // if true, use preloaded track immediately
 
     const { isLoading, setIsLoading } = useContext(LoadingContext);
 
@@ -229,11 +230,21 @@ const PlayerScreen = ({ route, navigation }) => {
             await updateSong(true);
         }
     }    
+
+    useEffect(() => {
+        if (usePreloadedImmediately)
+        {
+            nextTrack();
+            setIsLoading(false);
+            setUsePreloadedImmediately(false);
+        }
+    }, [isPreloading]);
  
     const nextTrack = async () => {
         if (isPreloading)
         {
-            alert("Please wait a moment...");
+            setUsePreloadedImmediately(true);
+            setIsLoading(true);
             return;
         }
 
