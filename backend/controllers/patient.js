@@ -76,10 +76,76 @@ const newPatient = async (req, res) => {
 };
 
 const editManualPlayset = async (req, res) => {
-    const vals = req.body;
-    const query = { _id: ObjectId(vals.patientID) };
-    const update = { $push: { manualPlayset: vals.array } };
+  const { array, patientID } = req.body;
+  const query = { _id: ObjectId(patientID) };
+
+  // Fetch the existing manualPlayset array for the patient
+  const existingPatient = await patientModel.findOne(query);
+  const existingManualPlayset = existingPatient.manualPlayset || [];
+
+  // Filter out duplicate items from the incoming array and keep track of them
+  const duplicates = [];
+  const filteredArray = array.filter((item) => {
+    const isAlreadyAdded = existingManualPlayset.some(
+      (existingItem) => existingItem.id === item.id
+    );
+    if (isAlreadyAdded) {
+      duplicates.push(item);
+    }
+    return !isAlreadyAdded;
+  });
+
+  // If no new items to add, return a response
+  if (filteredArray.length === 0) {
+    return res.status(200).json({
+      status: "OK",
+      message: "repeats",
+      existingValues: duplicates
+    });
+  }
+
+  const update = { $push: { manualPlayset: { $each: filteredArray } } };
+
+  try {
+    await patientModel.updateOne(query, update);
+    return res
+      .status(200)
+      .json({ status: "OK", message: "Updated to the database successfully" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Internal server error",
+    });
+  }
+};
+
+
+
+
+
+const editManualPlaysetYt = async (req, res) => {
+  const vals = req.body.array[0].item;
+  const patientinfo = req.body.patientInfo;
+  const query = { _id: ObjectId(patientinfo._id) };
+
+  let doc = await trackModel.create({
+    Title: vals['name'],
+    URI: vals['videoId'],
+    Artist: vals['artist'].name,
+    Language: patientinfo.language,
+    Genre: patientinfo.genres[0],
+    ImageURL: vals.thumbnails[0].url
+  })
   
+  const playsetUpdate = { id: vals['videoId'], rating: 3, name: vals['name']};
+
+  // Check if the value already exists in the manualPlayset array
+  const isAlreadyAdded = patientinfo.manualPlayset.some(item => item.id === playsetUpdate.id);
+
+  if (!isAlreadyAdded) {
+    const update = { $push: { manualPlayset: playsetUpdate } };
+    // ADD TO PERSON'S MANUAL PLAYSET
     try {
       await patientModel.updateOne(query, update);
       return res.status(200).json({ status: "OK", message: "Updated to the database successfully" });
@@ -90,37 +156,30 @@ const editManualPlayset = async (req, res) => {
         message: "Internal server error",
       });
     }
-  };
+  } else {
+    // Get the existing values
+    const existingValues = patientinfo.manualPlayset.filter(item => item.id === playsetUpdate.id);
+    return res.status(200).json({ status: "OK", message: "repeats", existingValues: existingValues });
+  }
+}
 
-  const editManualPlaysetYt = async (req, res) => {
-    const vals = req.body.array[0].item;
-    const patientinfo = req.body.patientInfo;
-    const query = { _id: ObjectId(patientinfo._id) };
+        
 
-	let doc = await trackModel.create({
-				Title: vals['name'],
-				URI: vals['videoId'],
-				Artist: vals['artist'].name,
-				Language: patientinfo.language,
-				Genre: patientinfo.genres[0],
-				ImageURL: vals.thumbnails[0].url
-			})
-    
-            const playsetUpdate = { id: vals['videoId'], rating: 3 };
-            const update = { $push: { manualPlayset: playsetUpdate } };
-            //ADD TO PERSONS MANUAL PLAYSET
-            try {
-              await patientModel.updateOne(query, update);
-              return res.status(200).json({ status: "OK", message: "Updated to the database successfully" });
-            } catch (err) {
-              console.log(err);
-              return res.status(500).json({
-                status: "ERROR",
-                message: "Internal server error",
-              });
-            }
-        }            
+        const getManual = async (req, res) => {
+          const patientid = req.query
+          console.log(patientid)
+          try{
+            const query = { _id: ObjectId(patientid) };
+            const patient = await patientModel.findOne(query);
+            console.log(patient.manualPlayset)
+            return res.status(200).json(patient.manualPlayset);
+          }
+          catch(error){
+
+          }
+      
+              }  
 
 
 
-module.exports = { newPatient,editManualPlayset, editManualPlaysetYt};
+module.exports = { newPatient,editManualPlayset, editManualPlaysetYt, getManual};
