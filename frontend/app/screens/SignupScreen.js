@@ -54,7 +54,7 @@ function SignupScreen({ navigation })
 			);
 		} catch (error) {
 			console.log(error);
-			Alert.alert("Error", error.message);
+			Alert.alert("Error logging in. Do you aldready have an account? If so, please proceed to Sign in instead");
 			setIsLoading(false);
 			// Reload the page
 			return;

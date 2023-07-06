@@ -123,27 +123,36 @@ const editManualPlayset = async (req, res) => {
 
 
 
-
 const editManualPlaysetYt = async (req, res) => {
   const vals = req.body.array[0].item;
   const patientinfo = req.body.patientInfo;
   const query = { _id: ObjectId(patientinfo._id) };
 
-  let doc = await trackModel.create({
+  let doc;
+try {
+  doc = await trackModel.create({
     Title: vals['name'],
     URI: vals['videoId'],
     Artist: vals['artist'].name,
     Language: patientinfo.language,
     Genre: patientinfo.genres[0],
     ImageURL: vals.thumbnails[0].url
-  })
-  
-  const playsetUpdate = { id: vals['videoId'], rating: 3, name: vals['name']};
+  });
+} catch (err) {
+  if (err.code === 11000) {
+    return res.status(200).json({ status: "OK", message: "Track already exists in database" });
+  } else {
+    return res.status(500).json({ status: "ERROR", message: "Internal server error" });
+  }
+}
+
+
+  const playsetUpdate = { id: vals['videoId'], rating: 3, name: vals['name'] };
 
   // Check if the value already exists in the manualPlayset array
-  const isAlreadyAdded = patientinfo.manualPlayset.some(item => item.id === playsetUpdate.id);
+  const isAlreadyAdded = await patientinfo.manualPlayset.some(item => item.id === playsetUpdate.id);
 
-  if (!isAlreadyAdded) {
+    if (!isAlreadyAdded) {
     const update = { $push: { manualPlayset: playsetUpdate } };
     // ADD TO PERSON'S MANUAL PLAYSET
     try {
@@ -151,6 +160,7 @@ const editManualPlaysetYt = async (req, res) => {
       return res.status(200).json({ status: "OK", message: "Updated to the database successfully" });
     } catch (err) {
       console.log(err);
+      if(err)
       return res.status(500).json({
         status: "ERROR",
         message: "Internal server error",
@@ -161,7 +171,7 @@ const editManualPlaysetYt = async (req, res) => {
     const existingValues = patientinfo.manualPlayset.filter(item => item.id === playsetUpdate.id);
     return res.status(200).json({ status: "OK", message: "repeats", existingValues: existingValues });
   }
-}
+};
 
         
 
