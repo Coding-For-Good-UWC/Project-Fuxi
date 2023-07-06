@@ -44,8 +44,11 @@ const generatePrompts = (patient) => {
 };
 
 const updateTrackRating = async (req, res) => {
+    console.log("updateTrackRating");
     try {
         const { patientId, trackId, rating } = req.body;
+
+        console.log(req.body);
 
         if (!patientId || !trackId || rating === undefined)
             return res
@@ -93,7 +96,6 @@ const updateTrackRating = async (req, res) => {
         });
     }
 };
-
 
 const getNextTrackId = async (req, res) => {
     try {
@@ -413,6 +415,25 @@ const playTrackShuffle = async (req, res) => {
     }
 };
 
+const cleanTempFolder = (req, res) => {
+    try
+    {
+        const { keepFiles, patientId } = req.body;
+
+        console.log ("CLEANING TEMP FOLDER BUT KEEPING FILES")
+        console.log (keepFiles)
+
+        deleteFilesWithPrefix(`${patientId}_`, keepFiles);
+
+        res.status(200).json({ status: "OK", message: "Temp folder cleaned" });
+    }
+    catch (error)
+    {
+        console.error("Error cleaning temp folder:", error);
+        res.status(500).json({ error: "Error cleaning temp folder" });
+    }
+}
+
 // To clean up the temp folder
 const deleteFilesWithPrefix = (prefix, keepFiles) => {
     const tempFolderPath = path.join(__dirname, "../temp");
@@ -438,5 +459,5 @@ module.exports = {
     updateTrackRating,
     getTitles,
     scrapeYtTrack,
-    cleanTempFolder,
+    cleanTempFolder
 };
