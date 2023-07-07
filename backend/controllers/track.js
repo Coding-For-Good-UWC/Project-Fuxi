@@ -29,19 +29,22 @@ api.initalize();
 
 
 const generatePrompts = (patient) => {
-    const era =
-        Math.floor(
-            (patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) /
-                10
-        ) *
-            10 +
-        1970;
+    const era = Math.floor((patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) / 10 ) * 10 + 1960;
     return [
         // patient.ethnicity + " " + patient.language + " songs",
         // patient.language + " " + patient.genres.join(" ") + " songs",
         patient.language + " songs from the " + era + "'s",
     ];
 };
+
+const generateGenrePrompts = (patient, genre) => {
+    const era = Math.floor((patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) / 10 ) * 10 + 1960;
+	return [
+		patient.language + " " + genre + " songs",
+		genre + " " + patient.language + " songs from the " + era + "'s",
+	];
+}
+
 
 const updateTrackRating = async (req, res) => {
     console.log("updateTrackRating");
@@ -162,14 +165,6 @@ const getNextTrackId = async (req, res) => {
     }
 };
 
-
-
-
-
-
-
-
-
 const getNextTrackIdRandom = async (req, res) => {
     try {
         const { patientId } = req.body;
@@ -215,6 +210,7 @@ const getTrack = async (req, res) =>
 
     return res.status(200).json({ track, status: "OK", message: "Found track by id " + id });
 }
+
 const getTitles = async (req, res) => {
     const test = req.query
     const ids = req.query.ids.split(',');
@@ -227,10 +223,7 @@ const getTitles = async (req, res) => {
         titles.push(result)
     }
     return res.status(200).json({ titles, status: "OK", message: "Found titles"});
-  };
-
-
- 
+};
 
 const filterTrack = (track) => {
     // async (track) => {
@@ -262,7 +255,13 @@ const filterTrack = (track) => {
 
 const scrapeTracks = async (req, res) => {
     const { patientId } = req.body;
-    await scrapeTracksFn(patientId);
+
+	const patient = await patientModel.findById(patientId);
+	const era = Math.floor((patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) / 10 ) * 10 + 1960;
+	const tracks = await trackModel.find({ Language: patient.language, Genre: era+"'s", Sample: true });
+	tracks.forEach((track) => { patient.trackRatings.push({ track: track._id, rating: 3 }) });
+	await patient.save();
+
     return res
         .status(200)
         .json({
@@ -274,8 +273,6 @@ const scrapeTracks = async (req, res) => {
 const scrapeTracksFn = async (patientId) => {
     const patient = await patientModel.findById(patientId);
     const queries = generatePrompts(patient);
-
-    var newTrackRatings = [];
 
 	for (let query of queries) {
 
@@ -303,7 +300,6 @@ const scrapeTracksFn = async (patientId) => {
 				});
 				if (track) {
 					tracks[i] = track;
-					newTrackRatings.push({ track: track._id, rating: 3 });
 					patient.trackRatings.push({ track: track._id, rating: 3 });
 				} else {
 					let doc = await trackModel.create({
@@ -315,7 +311,6 @@ const scrapeTracksFn = async (patientId) => {
 						ImageURL: tracks[i]["thumb"],
 					});
 					tracks[i] = doc;
-					newTrackRatings.push({ track: doc._id, rating: 3 });
 					patient.trackRatings.push({ track: doc._id, rating: 3 });
 				}
 			}
