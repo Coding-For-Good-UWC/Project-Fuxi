@@ -258,7 +258,19 @@ const scrapeTracks = async (req, res) => {
 
 	const patient = await patientModel.findById(patientId);
 	const era = Math.floor((patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) / 10 ) * 10 + 1960;
-	const tracks = await trackModel.find({ Language: patient.language, Genre: era+"'s", Sample: true });
+	// Era is the decade of the patient's ideal music e.g. 1950
+	// Get 15 songs from the range of the era's decade e.g. 1960 to 1969 for an era of 1960
+	const tracks = await trackModel.find({ language: patient.language, era: { $gte: era, $lt: era + 10 } });
+	// if less than 15 songs,
+	if (tracks.length < 15) {
+		// sort the songs by distance to the era
+		const sortedTracks = trackModel.find({ language: patient.language })
+									   .sort((a, b) => Math.abs(a.era - era) - Math.abs(b.era - era));
+		// and add the remaining songs from the start of the sorted list
+		for (let i = 0; i < 15 - tracks.length; i++)
+			tracks.push(sortedTracks[i]);
+	}
+
 	tracks.forEach((track) => { patient.trackRatings.push({ track: track._id, rating: 3 }) });
 	await patient.save();
 

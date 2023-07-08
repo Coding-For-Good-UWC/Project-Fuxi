@@ -38,7 +38,13 @@ const schema = new Schema ({
         type: String,
         unique: false,
         required: true
-    }
+    },
+	Era:
+	{
+		type: Number,
+		unique: false,
+		required: false
+	}
 })
 
 module.exports = model ("tracks", schema); 
