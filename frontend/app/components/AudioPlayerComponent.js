@@ -1,0 +1,181 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
+
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    Image,
+    StatusBar
+} from "react-native";
+
+import Slider from '@react-native-community/slider';
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+
+import {
+    faPlay,
+    faPause,
+    faBackward,
+    faForward,
+    faRepeat,
+} from "@fortawesome/free-solid-svg-icons";
+
+import colours from "../config/colours.js";
+import { styles } from "../styles/playerStyles.js";
+
+function AudioPlayerComponent(props) 
+{
+    const { 
+        audio, 
+        songInfo,
+        duration,
+        isPlaying,
+        setIsPlaying,
+        elapsedTime,
+        setElapsedTime,
+        onTrackFinish
+    } = props;
+
+    const [position, setPosition] = useState(0);
+    const [isLooping, setIsLooping] = useState(false);
+
+    // INTERNAL
+    // duration
+    // position
+    // elapsedTime
+    // isLooping
+    // togglePlayPause
+    // handleSliderValueChange
+    // setIsLooping
+    
+    // PROPS
+    // audio
+    // songInfo
+    // isPlaying
+    // nextTrack (when song ends and isLooping is false)
+
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                audio?.stopAsync();
+                setIsPlaying(false); 
+            };
+        }, [audio])
+    );
+
+    const togglePlayPause = async () => {
+        if (!audio) return;
+    
+        if (isPlaying) {
+            await audio.pauseAsync();
+        } else {
+            const playbackStatus = await audio.playAsync();
+            setPosition(playbackStatus.positionMillis);
+        }
+        setIsPlaying(!isPlaying);
+    }; 
+
+    const handleSliderValueChange = async (value) => {
+        if (audio) {
+            await audio.setPositionAsync(value);
+        }
+    };
+
+    useEffect(() => {
+        if (audio) 
+        {
+            audio.setOnPlaybackStatusUpdate((status) => {
+                setPosition(status.positionMillis);
+    
+                const totalSeconds = Math.floor(status.positionMillis / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                setElapsedTime(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+    
+                if (status.didJustFinish) {
+                    if (isLooping) {
+                        // TODO: increase rating for this track by 1
+                        audio.replayAsync(); // Replay track if isLooping is true
+                    }
+                    else {
+                        // nextTrack();
+                        onTrackFinish();
+                    }
+                }
+            });
+        }
+    }, [audio, isLooping]);  // add audio and isLooping as dependency
+
+    return (
+        <View style={styles.topContainer}>
+            <Text style={styles.title}>Project FUXI</Text>
+            <View style={styles.musicInfoContainer}>
+                <Image
+                    style={styles.coverImage}
+                    source={{ uri: songInfo.imgUri }}
+                />
+                <Text style={styles.songName} numberOfLines={1}>
+                    {songInfo.title}
+                </Text>
+                <View style={styles.progressBarContainer}>
+                    <Slider
+                        style={styles.slider}
+                        minimumValue={0}
+                        maximumValue={duration}
+                        value={position}
+                        onSlidingComplete={handleSliderValueChange}
+                        minimumTrackTintColor="#3d5875"
+                        maximumTrackTintColor="#d3d3d3"
+                        thumbTintColor="#3d5875"
+                    />
+                    <Text style={styles.elapsedTime}>{elapsedTime}</Text>
+                </View>
+                <View style={styles.controlsContainer}>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={() => console.log("BACK")}
+                    >
+                        <FontAwesomeIcon icon={faBackward} size={20} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={() => {
+                            setIsLooping(!isLooping);
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faRepeat} size={20} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={togglePlayPause}
+                    >
+                        <FontAwesomeIcon
+                            icon={isPlaying ? faPause : faPlay}
+                            size={20}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={onTrackFinish}
+                    >
+                        <FontAwesomeIcon icon={faForward} size={20} />
+                    </TouchableOpacity>
+                </View>
+                <Text
+                    style={[
+                        {
+                            color: isLooping
+                                ? colours.primary
+                                : colours.secondary,
+                        },
+                        styles.loopText,
+                    ]}
+                >
+                    Loop: {isLooping ? "On" : "Off"}
+                </Text>
+            </View>
+        </View>
+    );
+}
+
+export default AudioPlayerComponent;

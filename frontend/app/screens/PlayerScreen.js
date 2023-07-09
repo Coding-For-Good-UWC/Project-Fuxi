@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from "react";
 import {
-    StyleSheet,
     View,
     Text,
     TouchableOpacity,
@@ -23,6 +22,8 @@ import { Audio } from "expo-av";
 import LoadingContext from "../store/LoadingContext.js";
 
 import colours from "../config/colours.js";
+import { styles } from "../styles/playerStyles.js";
+import AudioPlayerComponent from "../components/AudioPlayerComponent.js";
 
 const DEFAULT_SONG_INFO = {
     title: "Track Name",
@@ -43,14 +44,13 @@ let currAudioFile = "";
 let nextAudioFile = "";
 
 const PlayerScreen = ({ route, navigation }) => {
+    const [audio, setAudio] = useState(null);
     const { patient } = route.params;
 
-    const [audio, setAudio] = useState(null);
     const [preloadedSound, setPreloadedSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
     const [nextDuration, setNextDuration] = useState(0);
-    const [position, setPosition] = useState(0);
 
     const [isPreloading, setIsPreloading] = useState(false);
     const [usePreloadedImmediately, setUsePreloadedImmediately] = useState(false); // if true, use preloaded track immediately
@@ -65,41 +65,13 @@ const PlayerScreen = ({ route, navigation }) => {
     const [ratingText, setRatingText] = useState(RATING_VALUES[rating - 1]);
 
     const [elapsedTime, setElapsedTime] = useState("0:00");
-    const [isLooping, setIsLooping] = useState(false);
 
     const ratingRef = useRef(rating);
-
-    useFocusEffect(
-        useCallback(() => {
-            return () => {
-                audio?.stopAsync();
-                setIsPlaying(false); 
-            };
-        }, [audio])
-    );
 
     useEffect(() => {
         updateSong(false, true); 
         updateSong(true, true);
     }, []);
-
-    const togglePlayPause = async () => {
-        if (!audio) return;
-    
-        if (isPlaying) {
-            await audio.pauseAsync();
-        } else {
-            const playbackStatus = await audio.playAsync();
-            setPosition(playbackStatus.positionMillis);
-        }
-        setIsPlaying(!isPlaying);
-    };    
-
-    const handleSliderValueChange = async (value) => {
-        if (audio) {
-            await audio.setPositionAsync(value);
-        }
-    };
 
     const updateTrackRating = async () => {
         const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/rating`, {
@@ -284,30 +256,7 @@ const PlayerScreen = ({ route, navigation }) => {
         // Now start preloading the next track.
         await updateSong(true);  
     };
-    
-    useEffect(() => {
-        if (audio) 
-        {
-            audio.setOnPlaybackStatusUpdate((status) => {
-                setPosition(status.positionMillis);
-    
-                const totalSeconds = Math.floor(status.positionMillis / 1000);
-                const minutes = Math.floor(totalSeconds / 60);
-                const seconds = totalSeconds % 60;
-                setElapsedTime(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
-    
-                if (status.didJustFinish) {
-                    if (isLooping) {
-                        // TODO: increase rating for this track by 1
-                        audio.replayAsync(); // Replay track if isLooping is true
-                    }
-                    else {
-                        nextTrack();
-                    }
-                }
-            });
-        }
-    }, [audio, isLooping]);  // add audio and isLooping as dependency
+
 
     const handleRatingValueChange = (value) => {
         setRating(value);
@@ -319,75 +268,17 @@ const PlayerScreen = ({ route, navigation }) => {
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
-            <View style={styles.topContainer}>
-                <Text style={styles.title}>Project FUXI</Text>
-                <View style={styles.musicInfoContainer}>
-                    <Image
-                        style={styles.coverImage}
-                        source={{ uri: songInfo.imgUri }}
-                    />
-                    <Text style={styles.songName} numberOfLines={1}>
-                        {songInfo.title}
-                    </Text>
-                    <View style={styles.progressBarContainer}>
-                        <Slider
-                            style={styles.slider}
-                            minimumValue={0}
-                            maximumValue={duration}
-                            value={position}
-                            onSlidingComplete={handleSliderValueChange}
-                            minimumTrackTintColor="#3d5875"
-                            maximumTrackTintColor="#d3d3d3"
-                            thumbTintColor="#3d5875"
-                        />
-                        <Text style={styles.elapsedTime}>{elapsedTime}</Text>
-                    </View>
-                    <View style={styles.ratingContainer}>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => console.log("BACK")}
-                        >
-                            <FontAwesomeIcon icon={faBackward} size={20} />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => {
-                                setIsLooping(!isLooping);
-                            }}
-                        >
-                            <FontAwesomeIcon icon={faRepeat} size={20} />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={togglePlayPause}
-                        >
-                            <FontAwesomeIcon
-                                icon={isPlaying ? faPause : faPlay}
-                                size={20}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => nextTrack()}
-                        >
-                            <FontAwesomeIcon icon={faForward} size={20} />
-                        </TouchableOpacity>
-                    </View>
-                    <Text
-                        style={[
-                            {
-                                color: isLooping
-                                    ? colours.primary
-                                    : colours.secondary,
-                            },
-                            styles.loopText,
-                        ]}
-                    >
-                        Loop: {isLooping ? "On" : "Off"}
-                    </Text>
-                </View>
-            </View>
-            <View style={styles.bottomContainer}>
+            <AudioPlayerComponent 
+                audio={audio}
+                songInfo={songInfo}
+                duration={duration}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+                elapsedTime={elapsedTime}
+                setElapsedTime={setElapsedTime}
+                onTrackFinish={nextTrack}
+            />
+            <View style={styles.ratingContainer}>
                 <View style={styles.sliderContainer}>
                 <Slider
                     style={styles.ratingSlider}
@@ -414,120 +305,5 @@ const PlayerScreen = ({ route, navigation }) => {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colours.bg,
-        paddingHorizontal: 20,
-    },
-    topContainer: {
-        flex: 2,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingTop: 130,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: "bold",
-        color: colours.primaryText,
-        marginBottom: 20,
-    },
-    musicInfoContainer: {
-        alignItems: "center",
-    },
-    coverImage: {
-        width: 200,
-        height: 200,
-        borderRadius: 20,
-        marginBottom: 20,
-    },
-    songName: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: colours.primaryText,
-        marginTop: 10,
-    },
-    progressBarContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        marginVertical: 20,
-    },
-    elapsedTime: {
-        fontSize: 14,
-        color: colours.primaryText,
-        paddingHorizontal: 8,
-    },
-    button: {
-        alignItems: "center",
-        justifyContent: "center",
-        paddingHorizontal: 8,
-    },
-    progressBar: {
-        flex: 1,
-        height: 5,
-        backgroundColor: colours.secondary,
-        borderRadius: 3,
-        marginRight: 10,
-    },
-    progressBarFill: {
-        backgroundColor: colours.primary,
-        borderRadius: 3,
-    },
-    playPauseButton: {
-        alignSelf: "center",
-        marginBottom: 30,
-    },
-    bottomContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingBottom: 120,
-    },
-    sliderContainer: {
-        alignItems: "center",
-    },
-    slider: {
-        flex: 1,
-        marginRight: 10,
-    },
-    ratingSlider: {
-        width: 300,
-        marginBottom: 10,
-    },
-    sliderValues: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        width: "100%",
-    },    
-    sliderValue: {
-        fontSize: 12,
-        color: "gray",
-    },
-    ratingText: {
-        fontSize: 18,
-        fontWeight: "bold",
-        textAlign: "center",
-        marginTop: 5,
-    },
-    ratingContainer: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center",
-        width: "80%",
-        marginTop: 10,
-        marginBottom: 20,
-        backgroundColor: colours.bg,
-        borderRadius: 25,
-        paddingVertical: 5,
-    },
-    loopText: {
-        fontSize: 16,
-        marginTop: 10,
-        color: colours.primaryText,
-    },
-});
 
 export default PlayerScreen;
