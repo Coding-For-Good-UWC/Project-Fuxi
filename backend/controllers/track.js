@@ -28,57 +28,37 @@ api.initalize();
 // });
 
 
-const buildYtQueries = (patient) => 
-{
+const buildYtQueries = (patient) => {
     const era = Math.floor((patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) / 10 ) * 10 + 1960;
+    const queryEraRange = Array.from({length: 3}, (_, i) => era + (i - 1) * 50); // generates an array of eras from era - 50 to era + 50 in steps of 10.
+    let queries = [];
 
-    let queries = [patient.language + " songs from the " + era + "'s"];
+    const queryFormats = [
+        (attr, era) => `${attr} songs from the ${era}'s`,
+        (attr, era) => `${era}'s ${attr} music`,
+        (attr, era) => `${era}'s ${attr} songs`,
+        (attr, era) => `${attr} music from the ${era}'s`,
+        (attr, era) => `${attr} tunes from the ${era}'s`,
+        (attr, era) => `songs from the ${era}'s in ${attr}`,
+        (attr, era) => `music from the ${era}'s in ${attr}`,
+        (attr, era) => `${era}'s songs in ${attr}`,
+        (attr, era) => `${era}'s music in ${attr}`,
+        (attr, era) => `tunes from the ${era}'s in ${attr}`
+    ];
 
-    patient.genres.forEach((genre) => {
-        queries.push(genre + " songs from the " + era + "'s");
-    })
+    const generateQueries = (era, attribute) => {
+        const format = queryFormats[Math.floor(Math.random() * queryFormats.length)];
+        return format(attribute, era);
+    }
 
-    queries.push(patient.birthplace + " songs from the " + era + "'s");
-    queries.push(patient.ethnicity + " songs from the " + era + "'s");
+    queryEraRange.forEach((era) => {
+        queries.push(generateQueries(era, patient.language));
+        queries.push(generateQueries(era, patient.genres.join(" ")));
+        queries.push(generateQueries(era, (patient.birthplace + patient.ethnicity)));
+    });
 
-    queries.push (patient.language + " songs from the " + (era - 10) + "'s");
+    console.log(queries);
 
-    patient.genres.forEach((genre) => {
-        queries.push(genre + " songs from the " + (era - 10) + "'s");
-    })
-
-    queries.push(patient.birthplace + " songs from the " + (era - 10) + "'s");
-    queries.pish(patient.ethnicity + " songs from the " + (era - 10) + "'s");
-
-    queries.push (patient.language + " songs from the " + (era + 10) + "'s");
-
-    patient.genres.forEach((genre) => {
-        queries.push(genre + " songs from the " + (era + 10) + "'s");
-    })
-
-    queries.push(patient.birthplace + " songs from the " + (era + 10) + "'s");
-    queries.push(patient.ethnicity + " songs from the " + (era + 10) + "'s");
-
-    queries.push (patient.language + " songs from the " + (era - 20) + "'s");
-
-    patient.genres.forEach((genre) => {
-        queries.push(genre + " songs from the " + (era - 20) + "'s");
-    })
-
-    queries.push(patient.birthplace + " songs from the " + (era - 20) + "'s");
-    queries.push(patient.ethnicity + " songs from the " + (era - 20) + "'s");
-
-    queries.push (patient.language + " songs from the " + (era + 20) + "'s");
-
-    patient.genres.forEach((genre) => {
-        queries.push(genre + " songs from the " + (era + 20) + "'s");
-    })
-
-    queries.push(patient.birthplace + " songs from the " + (era + 20) + "'s");
-    queries.push(patient.ethnicity + " songs from the " + (era + 20) + "'s");
-
-    console.log (queries);
-    
     return queries;
 };
 
