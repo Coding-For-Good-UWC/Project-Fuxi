@@ -127,7 +127,7 @@ const getNextTrackId = async (req, res) => {
         const patient = await patientModel.findById(patientId);
 
         // Count how many tracks have a rating above 0
-        const validTracks = patient.trackRatings.filter(
+        let validTracks = patient.trackRatings.filter(
             (trackRating) => trackRating.rating > 0
         );
 
@@ -135,10 +135,29 @@ const getNextTrackId = async (req, res) => {
 
         if (validTracks.length < 15)
         {
-            console.log ("LESS THAN 15 VALID TRACKS, SCRAPING MORE")
-            // Less than 15 tracks, scrape more
-            updated = await scrapeTracksFn(patientId, 15 - validTracks);
+            console.log ("LESS THAN 15 VALID TRACKS, FIRST CHECKING SAMPLES")
+            // first we see if there are samples that we can add that aren't already in the playset
+            const sampleTracks = await trackModel.find({ Sample: true, Language: patient.language, _id: { $nin: patient.manualPlayset } });
+            
+            // we randomly select 15 - validTracks.length sample tracks
+            const sampleTracksToAdd = sampleTracks.sort(() => Math.random() - 0.5).slice(0, 15 - validTracks.length);
 
+            // add them to the patient's trackRatings array
+
+            sampleTracksToAdd.forEach((track) =>
+            {
+                patient.trackRatings.push({ track: track._id, rating: 3 })
+            });
+        }
+
+        validTracks = patient.trackRatings.filter(
+            (trackRating) => trackRating.rating > 0
+        );
+
+        if (validTracks.length < 15) // if still less than 15 tracks, scrape from yt
+        {
+            console.log ("STILL LESS THAN 15 VALID TRACKS, SCRAPING YT")
+            await scrapeTracksFn(patientId, 15 - validTracks);
             // BUG: Yt scraper returns the exact same tracks every time. May not be able to add more tracks.
         }
 
@@ -295,6 +314,13 @@ const scrapeTracks = async (req, res) => {
     
     // Get 15 songs from the range of the era's decade e.g. 1960 to 1969 for an era of 1960
     let tracks = await trackModel.find({ Sample: true, Language: patient.language, Era: { $gte: era, $lt: era + 10 } });
+
+    // If length of tracks is more than 15, randomly select 15 tracks
+    if (tracks.length > 15)
+    {
+        tracks = tracks.sort(() => Math.random() - 0.5).slice(0, 15);
+    }
+
     console.log ("TRACKS 1")
     console.log (tracks)
 
