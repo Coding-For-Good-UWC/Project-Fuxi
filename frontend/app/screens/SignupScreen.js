@@ -14,7 +14,7 @@ import LoadingContext from "../store/LoadingContext.js";
 import Constants from 'expo-constants'
 
 import colours from "../config/colours.js";
-import BackButton from "../components/BackButton.js";
+import StyledButton from "../components/StyledButton.js";
 
 function SignupScreen({ navigation }) 
 {
@@ -23,12 +23,18 @@ function SignupScreen({ navigation })
     const [password, setPassword] = useState("");
     const [confirmedPassword, setConfirmedPassword] = useState("");
 
-    const { isLoading, setIsLoading } = useContext(LoadingContext);
+    const { setIsLoading } = useContext(LoadingContext);
 
     const passwordRegex = /^(?=.*\d)[A-Za-z\d]{8,}$/;
 
     let handleSignUp = async (evt) => {
         evt.preventDefault();
+
+        // Check if user has entered all fields
+        if (!name || !email || !password || !confirmedPassword) {
+            Alert.alert("Error", "Please fill in all fields");
+            return;
+        }
 
         if (password !== confirmedPassword) {
             Alert.alert("Error", "Passwords do not match");
@@ -57,7 +63,6 @@ function SignupScreen({ navigation })
 			console.log(error);
 			Alert.alert("Error", error.message);
 			setIsLoading(false);
-			// Reload the page
 			return;
 		}
 
@@ -68,6 +73,13 @@ function SignupScreen({ navigation })
             method: "POST",
         });
         const data = await response.json();
+
+        if (data.status === "ERROR") {
+            Alert.alert("Error", data.message);
+            setIsLoading(false);
+            return;
+        }
+
         const idToken = await auth.currentUser.getIdToken();
 
         const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
@@ -81,9 +93,7 @@ function SignupScreen({ navigation })
 
     return (
         <View style={styles.container}>
-            <BackButton navigation={navigation} />
             <View style={styles.titleContainer}>
-                <Text style={styles.titleText}>Project FUXI</Text>
                 <Text style={styles.titleText}>Signup</Text>
             </View>
             <Image
@@ -131,16 +141,7 @@ function SignupScreen({ navigation })
             <TouchableOpacity onPress={() => navigation.navigate("Login")}>
                 <Text style={styles.clickableText}>Log in to an existing account</Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity>
-                <Text style={styles.clickableText}>Forgot Password?</Text>
-            </TouchableOpacity> */}
-            <TouchableOpacity
-                style={styles.buttonContainer}
-                onPress={handleSignUp}
-                underlayColor={colours.highlight}
-            >
-                <Text style={styles.buttonText}>Sign Up</Text>
-            </TouchableOpacity>
+            <StyledButton text="Signup" onPress={handleSignUp} />
         </View>
     );
 }
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     titleContainer: {
         borderBottomWidth: 2,
         borderBottomColor: colours.primary,
-        marginBottom: 20,
+        marginBottom: 30,
     },
     titleText: {
         fontSize: 32,
@@ -187,23 +188,6 @@ const styles = StyleSheet.create({
         color: colours.primary,
         textDecorationLine: "underline",
         marginBottom: 10,
-    },
-    buttonContainer: {
-        backgroundColor: colours.primary,
-        borderRadius: 10,
-        width: 100,
-        height: 40,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    buttonText: {
-        color: colours.bg,
-        textAlign: "center",
-        paddingLeft: 10,
-        paddingRight: 10,
-        fontSize: 18,
-        fontWeight: "450",
     },
 });
 

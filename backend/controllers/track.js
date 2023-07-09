@@ -28,19 +28,38 @@ api.initalize();
 // });
 
 
-const generatePrompts = (patient) => {
-    const era =
-        Math.floor(
-            (patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) /
-                10
-        ) *
-            10 +
-        1970;
-    return [
-        // patient.ethnicity + " " + patient.language + " songs",
-        // patient.language + " " + patient.genres.join(" ") + " songs",
-        patient.language + " songs from the " + era + "'s",
+const buildYtQueries = (patient) => {
+    const era = Math.floor((patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) / 10 ) * 10 + 1960;
+    const queryEraRange = Array.from({length: 3}, (_, i) => era + (i - 1) * 50); // generates an array of eras from era - 50 to era + 50 in steps of 10.
+    let queries = [];
+
+    const queryFormats = [
+        (attr, era) => `${attr} songs from the ${era}'s`,
+        (attr, era) => `${era}'s ${attr} music`,
+        (attr, era) => `${era}'s ${attr} songs`,
+        (attr, era) => `${attr} music from the ${era}'s`,
+        (attr, era) => `${attr} tunes from the ${era}'s`,
+        (attr, era) => `songs from the ${era}'s in ${attr}`,
+        (attr, era) => `music from the ${era}'s in ${attr}`,
+        (attr, era) => `${era}'s songs in ${attr}`,
+        (attr, era) => `${era}'s music in ${attr}`,
+        (attr, era) => `tunes from the ${era}'s in ${attr}`
     ];
+
+    const generateQueries = (era, attribute) => {
+        const format = queryFormats[Math.floor(Math.random() * queryFormats.length)];
+        return format(attribute, era);
+    }
+
+    queryEraRange.forEach((era) => {
+        queries.push(generateQueries(era, patient.language));
+        queries.push(generateQueries(era, patient.genres.join(" ")));
+        queries.push(generateQueries(era, (patient.birthplace + patient.ethnicity)));
+    });
+
+    console.log(queries);
+
+    return queries;
 };
 
 const updateTrackRating = async (req, res) => {
@@ -94,9 +113,10 @@ const updateTrackRating = async (req, res) => {
     }
 };
 
-
 const getNextTrackId = async (req, res) => {
     try {
+        console.log ("GETTING NEXT TRACK ID")
+        
         const { patientId, prevTrackId } = req.body;
 
         if (!patientId)
@@ -106,8 +126,40 @@ const getNextTrackId = async (req, res) => {
 
         const patient = await patientModel.findById(patientId);
 
-        if (patient.trackRatings.length <= 15)
-            updated = await scrapeTracksFn(patientId);
+        // Count how many tracks have a rating above 0
+        let validTracks = patient.trackRatings.filter(
+            (trackRating) => trackRating.rating > 0
+        );
+
+        console.log ("validTrackCount: " + validTracks.length)
+
+        if (validTracks.length < 15)
+        {
+            console.log ("LESS THAN 15 VALID TRACKS, FIRST CHECKING SAMPLES")
+            // first we see if there are samples that we can add that aren't already in the playset
+            const sampleTracks = await trackModel.find({ Sample: true, Language: patient.language, _id: { $nin: patient.manualPlayset } });
+            
+            // we randomly select 15 - validTracks.length sample tracks
+            const sampleTracksToAdd = sampleTracks.sort(() => Math.random() - 0.5).slice(0, 15 - validTracks.length);
+
+            // add them to the patient's trackRatings array
+
+            sampleTracksToAdd.forEach((track) =>
+            {
+                patient.trackRatings.push({ track: track._id, rating: 3 })
+            });
+        }
+
+        validTracks = patient.trackRatings.filter(
+            (trackRating) => trackRating.rating > 0
+        );
+
+        if (validTracks.length < 15) // if still less than 15 tracks, scrape from yt
+        {
+            console.log ("STILL LESS THAN 15 VALID TRACKS, SCRAPING YT")
+            await scrapeTracksFn(patientId, 15 - validTracks);
+            // BUG: Yt scraper returns the exact same tracks every time. May not be able to add more tracks.
+        }
 
         const trackRatings = patient.trackRatings.reduce(
             (acc, { track, rating }) => ({
@@ -160,6 +212,35 @@ const getNextTrackId = async (req, res) => {
     }
 };
 
+const getNextTrackIdRandom = async (req, res) => {
+    try {
+        const { patientId } = req.body;
+
+        if (!patientId)
+            return res
+                .status(400)
+                .json({ status: "ERROR", message: "Patient id required" });
+
+        const patient = await patientModel.findById(patientId);
+
+        if (patient.manualPlayset.length <= 5)
+            return res.status(500).json({ status: "ERROR", message: "songs" });
+
+        const randomIndex = Math.floor(Math.random() * patient.manualPlayset.length);
+        console.log(randomIndex)
+        const trackObj =  patient.manualPlayset[randomIndex]
+        console.log("track"+trackObj)
+        return res.json({
+            track: trackObj,
+            status: "OK",
+            message: "Returning a random track from patient's manual playset",
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ status: "ERROR", message: "Server error" });
+    }
+};
+
 // Async function that returns the track object given its id
 const getTrack = async (req, res) =>
 {
@@ -172,29 +253,28 @@ const getTrack = async (req, res) =>
 
     return res.status(200).json({ track, status: "OK", message: "Found track by id " + id });
 }
+
 const getTitles = async (req, res) => {
     const test = req.query
     const ids = req.query.ids.split(',');
+    console.log(ids)
     let titles = [];
     let x;
     for(let i=0;i<ids.length;i++){
         const myObjectId = new ObjectId(ids[i]);
-
         const result = await trackModel.findOne({_id: myObjectId});
+        titles.push(result)
     }
     return res.status(200).json({ titles, status: "OK", message: "Found titles"});
-  };
+};
 
-
- 
-
-const filterTrack = (track) => {
-    // async (track) => {
-
-    // Filter duration < 5mins
-    // video_metadata = await ytdl.getInfo(track.vid);
-    // if (video_metadata.length_seconds > 300) {
-    // 	return false;
+const filterTrack = (track) => 
+{
+    if (track.duration > (1000 * 60 * 10)) // 10 minutes
+    {
+        console.log ("FILTERED TRACK: " + track.name + " BECAUSE OF DURATION");
+        return false;
+    }
 
     const negativeWords = [
         "mix",
@@ -208,17 +288,68 @@ const filterTrack = (track) => {
 		"lofi",
 		"hits",
     ];
-    // TODO: ChatGPT filter
     // Filter by negative keywords
-    for (let word of negativeWords)
-        if (track.name.toLowerCase().includes(word)) return false;
+    for (let word of negativeWords) 
+    {
+        if (track.name.toLowerCase().includes(word))
+        {
+            console.log ("FILTERED TRACK: " + track.name + " BECAUSE OF " + word);
+            return false;
+        }
+    }
 
     return true;
 };
 
+// Scrape tracks for patient's initial automatic lpayset
+// It is a 3 pass process:
+// 1. Search for 15 sample songs from the range of the era's decade e.g. 1960 to 1969 for an era of 1960 for the given language
+// 2. If less than 15 songs, retrieve all sample tracks for the language, ignoring era, and sort by distance from the era
+// 3. If still less than 15 songs, search youtube and filter the results. If a yt track already exists in the database, use that instead. If not, create a new track in the database
 const scrapeTracks = async (req, res) => {
     const { patientId } = req.body;
-    await scrapeTracksFn(patientId);
+
+    const patient = await patientModel.findById(patientId);
+    const era = Math.floor((patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) / 10 ) * 10 + 1960;
+    
+    // Get 15 songs from the range of the era's decade e.g. 1960 to 1969 for an era of 1960
+    let tracks = await trackModel.find({ Sample: true, Language: patient.language, Era: { $gte: era, $lt: era + 10 } });
+
+    // If length of tracks is more than 15, randomly select 15 tracks
+    if (tracks.length > 15)
+    {
+        tracks = tracks.sort(() => Math.random() - 0.5).slice(0, 15);
+    }
+
+    console.log ("TRACKS 1")
+    console.log (tracks)
+
+    // if less than 15 songs
+    if (tracks.length < 15) 
+    {
+        // Retrieve all tracks, ignoring era
+        const allTracks = await trackModel.find({ Language: patient.language, Sample: true });
+
+        // Sort by distance from the era
+        const sortedTracks = allTracks.sort((a, b) => Math.abs(a.Era - era) - Math.abs(b.Era - era));
+
+        // Add the remaining songs from the start of the sorted list
+        for (let i = 0; i < 15 - tracks.length; i++)
+            tracks.push(sortedTracks[i]);
+    }
+
+    tracks.forEach((track) => 
+    { 
+        patient.trackRatings.push({ track: track._id, rating: 3 }) 
+    });
+
+    if (tracks.length < 15) 
+    {
+        await scrapeTracksFn(patientId, 15 - tracks.length);
+    }
+
+    await patient.save();
+
     return res
         .status(200)
         .json({
@@ -227,61 +358,58 @@ const scrapeTracks = async (req, res) => {
         });
 };
 
-const scrapeTracksFn = async (patientId) => {
+const scrapeTracksFn = async (patientId, numOfTracksToAdd) => 
+{
     const patient = await patientModel.findById(patientId);
-    const queries = generatePrompts(patient);
+    const queries = buildYtQueries(patient);
 
-    var newTrackRatings = [];
+    const newTracks = [];
 
-	for (let query of queries) {
+    for (let query of queries) // will go through each query until we have enough tracks
+    {
+        console.log ("QUERYING YOUTUBE WITH QUERY: " + query)
+        let response = await api.search(query, "song");
+        console.log (response.content.length + " RESULTS FROM YOUTUBE")
+        let ytTracks = response.content.filter(track => filterTrack(track));
+        ytTracks = ytTracks.slice(0, numOfTracksToAdd);
+        
+        for (let ytTrack of ytTracks) 
+        {
+            // Check if a track with the same URI already exists in the database
+            const track = await trackModel.findOne({ URI: ytTrack.videoId });
+            if (track)
+            {
+                console.log ("YT TRACK ALREADY FOUND IN DB: " + track.Title);
+                newTracks.push(track);
+            }
+            else
+            {
+                console.log ("ADDING NEW TRACK FROM YOUTUBE: " + ytTrack.name);
 
-		let response = await api.search(query, "song");
+                const track = await trackModel.create
+                ({
+                    Title: ytTrack.name,
+                    URI: ytTrack.videoId,
+                    Artist: ytTrack.artist ? ytTrack.artist.name : "",
+                    Language: patient.language,
+                    Genre: null,
+                    ImageURL: ytTrack.thumbnails ? ytTrack.thumbnails[0].url : "",
+                    Year: ytTrack.year || "",
+                });
+                newTracks.push(track);
+            }
+        }
 
-		let tracks = Array(response.content.length);
-		for (let i = 0; i < response.content.length; i++) {
-			let tmp = response.content[i];
-			if (await filterTrack(tmp)) {
-				tracks[i] = {
-					title: tmp.name,
-					vid: tmp.videoId,
-					thumb: tmp.thumbnails ? tmp.thumbnails[0].url : "",
-					author: tmp.artist ? tmp.artist.name : "",
-					year: tmp.year || "",
-				};
-			}
-		}
+        if (newTracks.length >= numOfTracksToAdd)
+            break;
+    }
 
-		for (let i = 0; i < tracks.length; i++) {
-			// Try and find the track in the database if it already exists by its URI
-			if (tracks[i]) {
-				const track = await trackModel.findOne({
-					URI: tracks[i]["vid"],
-				});
-				if (track) {
-					tracks[i] = track;
-					newTrackRatings.push({ track: track._id, rating: 3 });
-					patient.trackRatings.push({ track: track._id, rating: 3 });
-				} else {
-					let doc = await trackModel.create({
-						Title: tracks[i]["title"],
-						URI: tracks[i]["vid"],
-						Artist: tracks[i]["author"],
-						Language: patient.language,
-						Genre: null,
-						ImageURL: tracks[i]["thumb"],
-					});
-					tracks[i] = doc;
-					newTrackRatings.push({ track: doc._id, rating: 3 });
-					patient.trackRatings.push({ track: doc._id, rating: 3 });
-				}
-			}
+    newTracks.forEach((track) =>
+    {
+        patient.trackRatings.push({ track: track._id, rating: 3 })
+    });
 
-		}
-	}
-
-
-	await patient.save();
-    
+    await patient.save();    
 }
 
 const scrapeYtTrack = async (req, res) =>
@@ -289,6 +417,7 @@ const scrapeYtTrack = async (req, res) =>
     const query = req.body.searchQuery;
 
 	let response = await api.search(query, "song");
+    console.log (response.content.length + " FROM YOUTUBE")
 
     const tracks = response.content.slice(0,5);
     return(res.json({ tracks: tracks }));
@@ -342,13 +471,39 @@ const playTrack = async (req, res) => {
     }
 };
 
+const playTrackShuffle = async (req, res) => {
+    const videoUrl = req.body
+    const patientId = req.query.patientId;
+    try {
+
+        const info = await ytdl.getInfo(videoUrl);
+        const audioURL = ytdl.chooseFormat(info.formats, {
+            filter: "audioonly",
+        }).url;
+
+        // Use FFmpeg to convert the audio format
+        ffmpeg()
+            .input(audioURL)
+            .format("mp3")
+            .audioCodec("libmp3lame")
+            .pipe(writeStream);
+
+    
+        // Handle errors during the conversion
+        writeStream.on("error", (error) => {
+            console.error("Error during audio conversion:", error);
+            res.status(500).json({ error: "Error during audio conversion" });
+        });
+    } catch (error) {
+        console.error("Error fetching audio URL:", error);
+        res.status(500).json({ error: "Error fetching audio URL" });
+    }
+};
+
 const cleanTempFolder = (req, res) => {
     try
     {
         const { keepFiles, patientId } = req.body;
-
-        console.log ("CLEANING TEMP FOLDER BUT KEEPING FILES")
-        console.log (keepFiles)
 
         deleteFilesWithPrefix(`${patientId}_`, keepFiles);
 
@@ -379,11 +534,12 @@ const deleteFilesWithPrefix = (prefix, keepFiles) => {
 
 module.exports = {
     getNextTrackId,
+    getNextTrackIdRandom,
     getTrack,
     playTrack,
     scrapeTracks,
     updateTrackRating,
     getTitles,
     scrapeYtTrack,
-    cleanTempFolder,
+    cleanTempFolder
 };

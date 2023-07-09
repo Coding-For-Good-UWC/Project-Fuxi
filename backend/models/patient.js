@@ -59,6 +59,10 @@ const schema = new Schema ({
         rating: { 
             type: Number, 
             required: true
+        },
+        name:{
+            type:String,
+            required:true
         }
     }], 
     requestedSongs:

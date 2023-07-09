@@ -20,7 +20,6 @@ import Constants from 'expo-constants'
 
 import { Audio } from "expo-av";
 import LoadingContext from "../store/LoadingContext.js";
-import BackButton from "../components/BackButton.js";
 
 import colours from "../config/colours.js";
 
@@ -53,6 +52,7 @@ const PlayerScreen = ({ route, navigation }) => {
     const [position, setPosition] = useState(0);
 
     const [isPreloading, setIsPreloading] = useState(false);
+    const [usePreloadedImmediately, setUsePreloadedImmediately] = useState(false); // if true, use preloaded track immediately
 
     const { isLoading, setIsLoading } = useContext(LoadingContext);
 
@@ -74,6 +74,8 @@ const PlayerScreen = ({ route, navigation }) => {
     }, []);
 
     const togglePlayPause = async () => {
+        if (!audio) return;
+    
         if (isPlaying) {
             await audio.pauseAsync();
         } else {
@@ -81,7 +83,7 @@ const PlayerScreen = ({ route, navigation }) => {
             setPosition(playbackStatus.positionMillis);
         }
         setIsPlaying(!isPlaying);
-    };
+    };    
 
     const handleSliderValueChange = async (value) => {
         if (audio) {
@@ -219,45 +221,58 @@ const PlayerScreen = ({ route, navigation }) => {
     };  
 
     const loadPreloadedTrack = async () => {
-        if (preloadedSound) {
-            setAudio(preloadedSound);
-            setDuration(nextDuration);
-            setElapsedTime("0:00");
-            setIsPlaying(true);
-            await preloadedSound.playAsync(); 
-        } else {
+        try {
+            if (preloadedSound) {
+                setAudio(preloadedSound);
+                setDuration(nextDuration);
+                setElapsedTime("0:00");
+                setIsPlaying(true);
+                await preloadedSound.playAsync(); 
+            } else {
+                throw new Error("Preloaded sound is not ready.");
+            }
+        } catch (error) {
+            console.log("Preloaded sound was not ready. Loading next track.", error); // TODO: BUG WHEN SLIDER REACHES END OF SONG AND GETS STUCK
             await updateSong(true);
         }
-    }    
+    };    
+
+    useEffect(() => { 
+        if (usePreloadedImmediately)
+        {
+            nextTrack();
+            setIsLoading(false);
+            setUsePreloadedImmediately(false);
+        }
+    }, [isPreloading]);
  
     const nextTrack = async () => {
-        if (isPreloading)
-        {
-            alert("Please wait a moment...");
+        if (isPreloading) {
+            console.log("WAITING FOR PRELOADING TO FINISH");
+            setUsePreloadedImmediately(true);
+            setIsLoading(true);
             return;
         }
-
+    
+        console.log("NEXT TRACK");
+    
         if (audio) {
             await audio.unloadAsync();
         }
-    
+      
         await updateTrackRating();
-
+    
         setSongInfo(nextSongInfo);
-
         setRating(3);
         ratingRef.current = 3;
         setRatingColor(RATING_COLORS[2]);
         setRatingText(RATING_VALUES[2]);
-
-        currAudioFile = nextAudioFile;
-        nextAudioFile = "";
         
-        await loadPreloadedTrack();
+        // Load and play the preloaded track.
+        await loadPreloadedTrack();  
     
-        setIsPlaying(true); 
-    
-        updateSong(true);
+        // Now start preloading the next track.
+        await updateSong(true);  
     };
     
     useEffect(() => {
@@ -277,7 +292,7 @@ const PlayerScreen = ({ route, navigation }) => {
                         audio.replayAsync(); // Replay track if isLooping is true
                     }
                     else {
-                        nextTrack(); 
+                        nextTrack();
                     }
                 }
             });
@@ -293,13 +308,13 @@ const PlayerScreen = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            <BackButton navigation={navigation} onClick={
+            {/* <BackButton navigation={navigation} onClick={
                 async () => {
                     if (audio) {
                         await audio.unloadAsync();
                     }
                 }
-            } />
+            } /> */}
             <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
             <View style={styles.topContainer}>
                 <Text style={styles.title}>Project FUXI</Text>
