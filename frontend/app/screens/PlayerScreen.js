@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useContext, useRef} from "react";
+import React, { useState, useEffect, useContext, useRef, useCallback } from "react";
 import {
     StyleSheet,
     View,
     Text,
     TouchableOpacity,
     Image,
-    StatusBar,
+    StatusBar
 } from "react-native";
+import { useFocusEffect } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -54,7 +55,7 @@ const PlayerScreen = ({ route, navigation }) => {
     const [isPreloading, setIsPreloading] = useState(false);
     const [usePreloadedImmediately, setUsePreloadedImmediately] = useState(false); // if true, use preloaded track immediately
 
-    const { isLoading, setIsLoading } = useContext(LoadingContext);
+    const { setIsLoading } = useContext(LoadingContext);
 
     const [songInfo, setSongInfo] = useState(DEFAULT_SONG_INFO);
     const [nextSongInfo, setNextSongInfo] = useState(DEFAULT_SONG_INFO);
@@ -67,6 +68,15 @@ const PlayerScreen = ({ route, navigation }) => {
     const [isLooping, setIsLooping] = useState(false);
 
     const ratingRef = useRef(rating);
+
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                audio?.stopAsync();
+                setIsPlaying(false); 
+            };
+        }, [audio])
+    );
 
     useEffect(() => {
         updateSong(false, true); 
@@ -308,13 +318,6 @@ const PlayerScreen = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            {/* <BackButton navigation={navigation} onClick={
-                async () => {
-                    if (audio) {
-                        await audio.unloadAsync();
-                    }
-                }
-            } /> */}
             <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
             <View style={styles.topContainer}>
                 <Text style={styles.title}>Project FUXI</Text>
