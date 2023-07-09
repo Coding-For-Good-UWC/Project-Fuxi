@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Constants from 'expo-constants'
 
 import GenreToggleButton from "../components/GenreToggleButton";
-import BackButton from "../components/BackButton";
 import LoadingContext from "../store/LoadingContext";
 
 import colours from "../config/colours.js";
@@ -12,7 +11,7 @@ import { getInstitute } from "../api/institutes";
 
 function PatientMusicForm({ route, navigation }) 
 {
-    const { isLoading, setIsLoading } = useContext(LoadingContext);
+    const { setIsLoading } = useContext(LoadingContext);
 
     const { name, age, ethnicity, birthdate, birthplace, language } = route.params;
 
@@ -105,7 +104,6 @@ function PatientMusicForm({ route, navigation })
 
     return (
         <View style={styles.container}>
-            <BackButton navigation={navigation} />
             <View style={styles.titleContainer}>
                 <Text style={styles.title}>Genres</Text>
             </View>

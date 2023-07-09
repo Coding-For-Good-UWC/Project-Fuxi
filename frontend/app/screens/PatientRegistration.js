@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, Alert, TextInput, TouchableOpacity } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import DatePickerModal from '../components/DatePickerModal';
-import BackButton from '../components/BackButton';
 import colours from '../config/colours.js';
+import StyledButton from '../components/StyledButton';
 
 const PatientRegistration = ({ route, navigation }) => {
     const countries = [ "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea, North", "Korea, South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"];
@@ -56,7 +56,6 @@ const PatientRegistration = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            <BackButton navigation={navigation} />
             <View style={styles.titleContainer}>
                 <Text style={styles.title}>New Patient</Text>
             </View>
@@ -97,10 +96,7 @@ const PatientRegistration = ({ route, navigation }) => {
                     <View style={styles.inputContainer}>
                         {renderPickerSelect("Select Language", (value) => handleChange(value, 'language'), languages)}
                     </View>
-
-                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                        <Text style={styles.submitButtonText}>Next</Text>
-                    </TouchableOpacity>
+                    <StyledButton text="Next" onPress={handleSubmit} style={styles.submitButton} />
                 </View>
             </View>
 
@@ -145,10 +141,10 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         backgroundColor: colours.secondary,
-        borderRadius: 8,
+        borderRadius: "100%",
         width: 250,
-        height: 45,
-        marginBottom: 12,
+        height: 50,
+        marginBottom: 10,
     },
     input: {
         flex: 1,
@@ -157,24 +153,6 @@ const styles = StyleSheet.create({
         marginLeft: 20,
         marginRight: 20,
         color: colours.primaryText,
-    },
-    submitButton: {
-        backgroundColor: colours.primary,
-        borderRadius: 10,
-        width: 100,
-        height: 40,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 20,
-    },
-    submitButtonText: {
-        color: colours.bg,
-        textAlign: "center",
-        paddingLeft: 10,
-        paddingRight: 10,
-        fontSize: 18,
-        fontWeight: "450",
     },
     pickerSelectStyles: {
         inputAndroid: {
@@ -185,7 +163,7 @@ const styles = StyleSheet.create({
             textAlign: "center",
             marginTop: 13,
         }
-    },
+    }
 });
 
 export default PatientRegistration;

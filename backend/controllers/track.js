@@ -177,7 +177,6 @@ const getNextTrackIdRandom = async (req, res) => {
         const patient = await patientModel.findById(patientId);
         console.log(patient)
 
-        let updated = false;
         if (patient.manualPlayset.length <= 5)
         return res.status(500).json({ status: "ERROR", message: "songs" });
 
@@ -195,8 +194,6 @@ const getNextTrackIdRandom = async (req, res) => {
         return res.status(500).json({ status: "ERROR", message: "Server error" });
     }
 };
-
-
 
 // Async function that returns the track object given its id
 const getTrack = async (req, res) =>
@@ -225,13 +222,13 @@ const getTitles = async (req, res) => {
     return res.status(200).json({ titles, status: "OK", message: "Found titles"});
 };
 
-const filterTrack = (track) => {
-    // async (track) => {
-
-    // Filter duration < 5mins
-    // video_metadata = await ytdl.getInfo(track.vid);
-    // if (video_metadata.length_seconds > 300) {
-    // 	return false;
+const filterTrack = (track) => 
+{
+    if (track.duration > (1000 * 60 * 10)) // 10 minutes
+    {
+        console.log ("FILTERED TRACK: " + track.name + " BECAUSE OF DURATION");
+        return false;
+    }
 
     const negativeWords = [
         "mix",
@@ -245,34 +242,98 @@ const filterTrack = (track) => {
 		"lofi",
 		"hits",
     ];
-    // TODO: ChatGPT filter
     // Filter by negative keywords
-    for (let word of negativeWords)
-        if (track.name.toLowerCase().includes(word)) return false;
+    for (let word of negativeWords) 
+    {
+        if (track.name.toLowerCase().includes(word))
+        {
+            console.log ("FILTERED TRACK: " + track.name + " BECAUSE OF " + word);
+            return false;
+        }
+    }
 
     return true;
 };
 
+// Scrape tracks for patient's initial automatic lpayset
+// It is a 3 pass process:
+// 1. Search for 15 sample songs from the range of the era's decade e.g. 1960 to 1969 for an era of 1960 for the given language
+// 2. If less than 15 songs, retrieve all sample tracks for the language, ignoring era, and sort by distance from the era
+// 3. If still less than 15 songs, search youtube and filter the results. If a yt track already exists in the database, use that instead. If not, create a new track in the database
 const scrapeTracks = async (req, res) => {
     const { patientId } = req.body;
 
-	const patient = await patientModel.findById(patientId);
-	const era = Math.floor((patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) / 10 ) * 10 + 1960;
-	// Era is the decade of the patient's ideal music e.g. 1950
-	// Get 15 songs from the range of the era's decade e.g. 1960 to 1969 for an era of 1960
-	const tracks = await trackModel.find({ language: patient.language, era: { $gte: era, $lt: era + 10 } });
-	// if less than 15 songs,
-	if (tracks.length < 15) {
-		// sort the songs by distance to the era
-		const sortedTracks = trackModel.find({ language: patient.language })
-									   .sort((a, b) => Math.abs(a.era - era) - Math.abs(b.era - era));
-		// and add the remaining songs from the start of the sorted list
-		for (let i = 0; i < 15 - tracks.length; i++)
-			tracks.push(sortedTracks[i]);
-	}
+    const patient = await patientModel.findById(patientId);
+    const era = Math.floor((patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) / 10 ) * 10 + 1960;
+    
+    // Get 15 songs from the range of the era's decade e.g. 1960 to 1969 for an era of 1960
+    let tracks = await trackModel.find({ Sample: true, Language: patient.language, Era: { $gte: era, $lt: era + 10 } });
+    console.log ("TRACKS 1")
+    console.log (tracks)
 
-	tracks.forEach((track) => { patient.trackRatings.push({ track: track._id, rating: 3 }) });
-	await patient.save();
+    // if less than 15 songs
+    if (tracks.length < 15) 
+    {
+        // Retrieve all tracks, ignoring era
+        const allTracks = await trackModel.find({ Language: patient.language, Sample: true });
+
+        // Sort by distance from the era
+        const sortedTracks = allTracks.sort((a, b) => Math.abs(a.Era - era) - Math.abs(b.Era - era));
+
+        // Add the remaining songs from the start of the sorted list
+        for (let i = 0; i < 15 - tracks.length; i++)
+            tracks.push(sortedTracks[i]);
+    }
+
+    if (tracks.length < 15) 
+    {
+        const queries = generatePrompts(patient);
+
+        for (let query of queries) 
+        {
+            console.log ("QUERYING YOUTUBE WITH QUERY: " + query)
+            let response = await api.search(query, "song");
+            let ytTracks = response.content.filter(track => filterTrack(track));
+            ytTracks = ytTracks.slice(0, 15 - tracks.length);
+            
+            for (let ytTrack of ytTracks) 
+            {
+                // Check if a track with the same URI already exists in the database
+                const track = await trackModel.findOne({ URI: ytTrack.videoId });
+                if (track)
+                {
+                    console.log ("YT TRACK ALREADY FOUND IN DB: " + track.Title);
+                    tracks.push(track);
+                }
+                else
+                {
+                    console.log ("ADDING NEW TRACK FROM YOUTUBE: " + ytTrack.name);
+
+                    const track = await trackModel.create
+                    ({
+                        Title: ytTrack.name,
+                        URI: ytTrack.videoId,
+                        Artist: ytTrack.artist ? ytTrack.artist.name : "",
+                        Language: patient.language,
+                        Genre: null,
+                        ImageURL: ytTrack.thumbnails ? ytTrack.thumbnails[0].url : "",
+                        Year: ytTrack.year || "",
+                    });
+                    tracks.push(track);
+                }
+            }
+
+            if (tracks.length >= 15)
+                break;
+        }
+    }
+
+    tracks.forEach((track) => 
+    { 
+        patient.trackRatings.push({ track: track._id, rating: 3 }) 
+    });
+
+    await patient.save();
 
     return res
         .status(200)

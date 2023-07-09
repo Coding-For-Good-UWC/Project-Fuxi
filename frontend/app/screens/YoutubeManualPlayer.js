@@ -8,7 +8,6 @@ import {
   Alert,
 } from "react-native";
 
-import BackButton from "../components/BackButton.js";
 
 function YoutubeManual({ route, navigation }) {
   const { patient } = route.params;
@@ -86,7 +85,6 @@ function YoutubeManual({ route, navigation }) {
     <View style={styles.container}>
       <View style={styles.topContainer}>
         <Text style={styles.title}>Project Fuxi</Text>
-        <BackButton navigation={navigation} />
         <Text style={styles.subhead}>Search for the Song you Want from Youtube</Text>
         {/* Search bar */}
         <TextInput

@@ -9,12 +9,12 @@ import {
 } from "react-native";
 
 import LoadingContext from "../store/LoadingContext.js";
-import BackButton from "../components/BackButton.js";
 import colours from "../config/colours.js";
 import PatientItem from "../components/PatientItem.js";
 
 import { getPatients } from  '../api/patients'; 
 import { getInstitute } from "../api/institutes";
+import StyledButton from "../components/StyledButton.js";
 
 function PatientDashboard({ route, navigation }) 
 {
@@ -62,7 +62,6 @@ function PatientDashboard({ route, navigation })
                         
     return (
         <View style={styles.container}>
-            <BackButton navigation={navigation} />
             <View style={styles.titleContainer}>
                 <Text style={styles.titleText}>Dashboard</Text>
                 <Text style={styles.subtitleText}>{institute.name}</Text>
@@ -77,12 +76,11 @@ function PatientDashboard({ route, navigation })
                     </TouchableOpacity>
                 ))}
             </ScrollView>
-            <TouchableOpacity
-                style={styles.newButton}
+            <StyledButton
+                text="Add Patient"
                 onPress={addPatient}
-            >
-                <Text style={styles.newText}>Add Patient</Text>
-            </TouchableOpacity>
+                style={styles.addButton}
+            />
         </View>
     );
 }
@@ -115,23 +113,6 @@ const styles = StyleSheet.create({
         width: "100%",
         paddingHorizontal: 30,
         flexGrow: 1,
-    },
-    newButton: {
-        backgroundColor: colours.primary,
-        borderRadius: 10,
-        width: 130,
-        height: 40,
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: 20,
-    },
-    newText: {
-        color: colours.bg,
-        textAlign: "center",
-        paddingLeft: 10,
-        paddingRight: 10,
-        fontSize: 18,
-        fontWeight: "450",
     },
 });
 

@@ -21,7 +21,6 @@ import {
 import Constants from "expo-constants";
 import { Audio } from "expo-av";
 import LoadingContext from "../store/LoadingContext.js";
-import BackButton from "../components/BackButton.js";
 import colours from "../config/colours.js";
 let songIndex =0;
 const DEFAULT_SONG_INFO = {
@@ -210,13 +209,13 @@ const prevSong = ()=>{
 
   return (
     <View style={styles.container}>
-     <BackButton navigation={navigation} onClick={
-                async () => {
-                    if (audio) {
-                        await audio.unloadAsync();
-                    }
-                }
-            } />
+     {/* <BackButton navigation={navigation} onClick={
+          async () => {
+              if (audio) {
+                  await audio.unloadAsync();
+              }
+          }
+      } /> */}
     <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
     <View style={styles.topContainer}>
     <Text style={styles.title}>Project FUXI</Text>

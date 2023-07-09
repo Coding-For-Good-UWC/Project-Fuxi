@@ -20,7 +20,6 @@ import Constants from 'expo-constants'
 
 import { Audio } from "expo-av";
 import LoadingContext from "../store/LoadingContext.js";
-import BackButton from "../components/BackButton.js";
 
 import colours from "../config/colours.js";
 
@@ -264,9 +263,10 @@ const PlayerScreen = ({ route, navigation }) => {
         await updateTrackRating();
     
         setSongInfo(nextSongInfo);
-    
         setRating(3);
         ratingRef.current = 3;
+        setRatingColor(RATING_COLORS[2]);
+        setRatingText(RATING_VALUES[2]);
         
         // Load and play the preloaded track.
         await loadPreloadedTrack();  
@@ -274,7 +274,6 @@ const PlayerScreen = ({ route, navigation }) => {
         // Now start preloading the next track.
         await updateSong(true);  
     };
-    
     
     useEffect(() => {
         if (audio) 
@@ -309,13 +308,13 @@ const PlayerScreen = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            <BackButton navigation={navigation} onClick={
+            {/* <BackButton navigation={navigation} onClick={
                 async () => {
                     if (audio) {
                         await audio.unloadAsync();
                     }
                 }
-            } />
+            } /> */}
             <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
             <View style={styles.topContainer}>
                 <Text style={styles.title}>Project FUXI</Text>

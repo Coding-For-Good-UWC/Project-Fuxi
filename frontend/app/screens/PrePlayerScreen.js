@@ -1,5 +1,4 @@
 import React from "react";
-import BackButton from "../components/BackButton.js";
 import {
     StyleSheet,
     View,
@@ -59,7 +58,6 @@ function PrePlayerScreen({ route, navigation }) {
         }
     return (
         <View style={styles.container}>
-            <BackButton navigation={navigation}/>
             <View style={styles.topContainer}>
                 <Text style={styles.title}>How would you like to listen?</Text>
             </View>
