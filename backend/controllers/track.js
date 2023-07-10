@@ -54,7 +54,7 @@ const buildYtQueries = (patient) => {
     queryEraRange.forEach((era) => {
         queries.push(generateQueries(era, patient.language));
         queries.push(generateQueries(era, patient.genres.join(" ")));
-        queries.push(generateQueries(era, (patient.birthplace + patient.ethnicity)));
+        queries.push(generateQueries(era, (patient.birthplace + " " + patient.ethnicity)));
     });
 
     console.log(queries);
@@ -143,9 +143,7 @@ const getNextTrackId = async (req, res) => {
             const sampleTracksToAdd = sampleTracks.sort(() => Math.random() - 0.5).slice(0, 15 - validTracks.length);
 
             // add them to the patient's trackRatings array
-
-            sampleTracksToAdd.forEach((track) =>
-            {
+            sampleTracksToAdd.forEach((track) => {
                 patient.trackRatings.push({ track: track._id, rating: 3 })
             });
         }
@@ -287,6 +285,11 @@ const filterTrack = (track) =>
         "nonstop",
 		"lofi",
 		"hits",
+		"100",
+		"25",
+		"20",
+		"10",
+		"5"
     ];
     // Filter by negative keywords
     for (let word of negativeWords) 
@@ -301,7 +304,7 @@ const filterTrack = (track) =>
     return true;
 };
 
-// Scrape tracks for patient's initial automatic lpayset
+// Scrape tracks for patient's initial automatic playset
 // It is a 3 pass process:
 // 1. Search for 15 sample songs from the range of the era's decade e.g. 1960 to 1969 for an era of 1960 for the given language
 // 2. If less than 15 songs, retrieve all sample tracks for the language, ignoring era, and sort by distance from the era
