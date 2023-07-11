@@ -10,7 +10,7 @@ import {
   Alert,
 } from "react-native";
 import Constants from "expo-constants";
-
+import { Feather } from "@expo/vector-icons";
 import colours from "../config/colours.js";
 import LoadingContext from "../store/LoadingContext.js";
 import StyledButton from "../components/StyledButton.js";
@@ -22,6 +22,7 @@ import {
 
 function LoginScreen({ navigation }) {
     const { setIsLoading } = useContext(LoadingContext);
+    const [showPassword, setShowPassword] = useState(false);
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -59,6 +60,10 @@ function LoginScreen({ navigation }) {
             Alert.alert("Error", "Invalid email or password");
         }
     };
+    const togglePasswordVisibility = () => {
+      setShowPassword(!showPassword);
+    };
+  
     
     return (
         <View style={styles.container}>
@@ -78,16 +83,22 @@ function LoginScreen({ navigation }) {
                     onChangeText={(email) => setEmail(email)}
                 />
             </View>
+            
 
             <View style={styles.inputContainer}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Password"
-                    secureTextEntry={true}
-                    onChangeText={(password) => setPassword(password)}
-                />
-            </View>
-
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry={!showPassword}
+          onChangeText={(password) => setPassword(password)}
+        />
+        <TouchableOpacity
+          style={styles.passwordToggle}
+          onPress={togglePasswordVisibility}
+        >
+          <Feather name={showPassword ? "eye" : "eye-off"} size={24} color={colours.primary} />
+        </TouchableOpacity>
+      </View>
             <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
                 <Text style={styles.clickableText}>Sign up</Text>
             </TouchableOpacity>
@@ -106,7 +117,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     borderBottomWidth: 2,
     borderBottomColor: colours.primary,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   titleText: {
     fontSize: 32,
@@ -140,6 +151,23 @@ const styles = StyleSheet.create({
     color: colours.primary,
     textDecorationLine: "underline",
     marginBottom: 10,
+  },
+  buttonContainer: {
+    backgroundColor: colours.primary,
+    borderRadius: 10,
+    width: 100,
+    height: 40,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
+    color: colours.bg,
+    textAlign: "center",
+    paddingLeft: 10,
+    paddingRight: 10,
+    fontSize: 18,
+    fontWeight: "450",
   },
   passwordToggle: {
     marginRight: 10,
