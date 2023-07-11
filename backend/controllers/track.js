@@ -1,4 +1,4 @@
-require("dotenv").config();
+	require("dotenv").config();
 const fetch = require("node-fetch");
 
 const YoutubeMusicApi = require("youtube-music-api");
@@ -140,12 +140,18 @@ const getNextTrackId = async (req, res) => {
             const sampleTracks = await trackModel.find({ Sample: true, Language: patient.language, _id: { $nin: patient.manualPlayset } });
             
             // we randomly select 15 - validTracks.length sample tracks
-            const sampleTracksToAdd = sampleTracks.sort(() => Math.random() - 0.5).slice(0, 15 - validTracks.length);
+            let sampleTracksToAdd = [];
 
-            // add them to the patient's trackRatings array
-            sampleTracksToAdd.forEach((track) => {
-                patient.trackRatings.push({ track: track._id, rating: 3 })
-            });
+			while (sampleTracksToAdd.length < 15 - validTracks.length && sampleTracks.length > 0)
+			{
+				const randomIndex = Math.floor(Math.random() * sampleTracks.length);
+				const randomTrack = sampleTracks[randomIndex];
+				if (!patient.manualPlayset.includes(randomTrack._id.toString()))
+				{
+					sampleTracksToAdd.push(randomTrack);
+					sampleTracks.splice(randomIndex, 1);
+				}
+			}
         }
 
         validTracks = patient.trackRatings.filter(
@@ -405,7 +411,53 @@ const scrapeTracksFn = async (patientId, numOfTracksToAdd) =>
 
         if (newTracks.length >= numOfTracksToAdd)
             break;
+		else {
+			// Query playlists
+			for (let query of queries) {
+				console.log ("QUERYING YOUTUBE WITH QUERY: " + query)
+				let response = await api.search(query, "playlist");
+				console.log (response.content.length + " RESULTS FROM YOUTUBE")
+				// Take top 5 playlists
+				let ytPlaylists = response.content.slice(0, 5);
+				for (let ytPlaylist of ytPlaylists) {
+					// Take 1/5th and 1/queries.length of the new tracks needed from each playlist
+					let numOfTracksFromPlaylist = Math.ceil(numOfTracksToAdd / 5 / queries.length);
+					let playlistTracks = await api.getPlaylist(ytPlaylist.id).content.slice(0, numOfTracksFromPlaylist);
+					console.log(JSON.stringify(playlistTracks));
+					playlistTracks = playlistTracks.filter(track => filterTrack(track));
+					playlistTracks = playlistTracks.slice(0, numOfTracksFromPlaylist);
+					for (let ytTrack of playlistTracks) {
+						const track = await trackModel.findOne({ URI: ytTrack.videoId });
+						if (track) {
+							console.log ("YT TRACK ALREADY FOUND IN DB: " + track.Title);
+							newTracks.push(track);
+						} else {
+							console.log ("ADDING NEW TRACK FROM YOUTUBE: " + ytTrack.name);
+							const track = await trackModel.create({
+								Title: ytTrack.name,
+								URI: ytTrack.videoId,
+								Artist: ytTrack.artist ? ytTrack.artist.name : "",
+								Language: patient.language,
+								Genre: null,
+								ImageURL: ytTrack.thumbnails ? ytTrack.thumbnails[0].url : "",
+								Year: ytTrack.year || "",
+							});
+							newTracks.push(track);
+						}
+					}
+				}
+				if (newTracks.length >= numOfTracksToAdd)
+					break;
+			}
+		}
     }
+
+	// throw new Error("No tracks found");
+	if (newTracks.length == 0)
+		return;
+
+	if (newTracks.length < numOfTracksToAdd)
+		console.log ("WARNING: ADDING LESS TRACKS THAN REQUESTED: " + newTracks.length + " < " + numOfTracksToAdd);
 
     newTracks.forEach((track) =>
     {
