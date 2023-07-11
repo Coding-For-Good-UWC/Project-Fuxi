@@ -173,6 +173,28 @@ try {
   }
 };
 
+
+const deletefromManual = async(req,res)=>{
+  const id_to_delete = req.body.trackid
+  const patientid = req.body.patientid
+  const patient = await patientModel.findOne({_id: patientid});
+  console.log(patientid,id_to_delete)
+
+  if (!patient) {
+    // Handle case where patient is not found
+    return res.status(404).send('Patient not found');
+  }
+
+  // Filter out the item with the id_to_delete
+  patient.manualPlayset = patient.manualPlayset.filter(item => item.id !== id_to_delete);
+  console.log(patient.manualPlayset)
+  // Save the updated patient
+  await patient.save();
+
+  // Send a response
+  res.status(200).send('Item deleted from manual playset');
+}
+
         
 
         const getManual = async (req, res) => {
@@ -192,4 +214,4 @@ try {
 
 
 
-module.exports = { newPatient,editManualPlayset, editManualPlaysetYt, getManual};
+module.exports = { newPatient,editManualPlayset, editManualPlaysetYt, getManual, deletefromManual};

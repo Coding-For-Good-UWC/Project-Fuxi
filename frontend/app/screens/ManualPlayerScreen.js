@@ -15,52 +15,12 @@ import Constants from "expo-constants";
 import colours from "../config/colours.js";
 let x;
 
+
 function ManualPlayerScreen({ route, navigation }) {
     const { setIsLoading } = useContext(LoadingContext);
     const { patient } = route.params;
     const [titles, setTitles] = useState([]);
-    async function updateDB(selectedTrackRatings, id) {
-        const requestPayload = {
-            array: selectedTrackRatings,
-            patientID: id,
-        };
-
-        try {
-            const response = await fetch(
-                `${Constants.expoConfig.extra.apiUrl}/patient/manual`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(requestPayload),
-                }
-            );
-
-            const data = await response.json();
-            console.log(data);
-            if (data.message == "repeats") {
-                console.log("REPEATED");
-                console.log(data.existingValues);
-                let trackNames = data.existingValues
-                    .map((item) => item.name)
-                    .join("\n");
-
-                // display an alert
-                Alert.alert(
-                    "Duplicate Tracks",
-                    "These tracks are already in the playlist: \n \n" +
-                        trackNames
-                );
-            } else {
-                Alert.alert("Update Succesful");
-            }
-        } catch (error) {
-            Alert.alert("Update Unsuccesful, Please try again.");
-            console.error(error);
-        }
-    }
-
+   
     useEffect(() => {
         let trackids = patient.trackRatings.map((rating) => rating.track);
         setIsLoading(true);
@@ -96,35 +56,46 @@ function ManualPlayerScreen({ route, navigation }) {
                 console.error(error);
             });
     }, []);
-
-    function SaveData() {
-        let m = getTrackTitles();
-
-        const selectedTrackRatings = [];
-
-        m.forEach((item) => {
-            selectedTrackRatings.push({
-                id: item.id,
-                rating: 3,
-                name: item.title,
-            });
-        });
-
-        updateDB(selectedTrackRatings, patient._id);
+    const getPlayset = async () => {
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`);
+        const data = await response.json();
+        return data
     }
 
-    const handleSelectedIdsChange = (ids) => {
-        setSelectedIds(ids);
-    };
+    async function viewTitles(){
+        try {
+          const response = await fetch(
+            `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`
+          );
+          const songNames = await response.json();
+          const songNamesString = songNames.map((item, index) => `${index + 1}. ${item.name}`).join("\n \n");
+      
+          // Show the alert
+          if(songNamesString==""){
+            Alert.alert("Playset is currently empty!")
 
-    const handleSelectedTitlesChange = (selectedtitles) => {
-        setSelectedTitles(selectedTitles);
-    };
-    function ViewSelectedTitles() {
-        x = getTrackTitles();
-        const titles = x.map((item) => item.title);
-        Alert.alert("Selected Playset", titles.join("\n \n"));
+          }
+          else{
+            Alert.alert(
+                "Current Playset",
+                songNamesString,
+                [
+                  {
+                    text: "OK",
+                  },
+                ],
+                { cancelable: false }
+              );
+            }
+
+          }
+        
+        catch(error){
+          console.log(error)
+        }
     }
+    
+
 
     function goToYoutubeManualPlayer() {
         navigation.navigate("YoutubeManual", { patient });
@@ -136,8 +107,15 @@ function ManualPlayerScreen({ route, navigation }) {
         setModalVisible(false);
     };
 
-    function goToPlayer() {
-        navigation.navigate("ShuffleManual", { patient });
+   async function goToPlayer() {
+        const x = await getPlayset(); // await the result of getPlayset
+        console.log("playset" + x);
+        if (x.length < 5) {
+          Alert.alert("Please add more songs before playing! You have less than 5 songs in the playset currently");
+        }
+        else {
+          navigation.navigate("ShuffleManual", { patient });
+        }
     }
 
     return (
@@ -148,18 +126,15 @@ function ManualPlayerScreen({ route, navigation }) {
                     {" "}
                     Select tracks for your Playset
                 </Text>
-                {titles.length > 0 && <MyListComponent data={titles} />}
+                {titles.length > 0 && <MyListComponent data={titles} patientId={patient._id} />}
                 <Text></Text>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={ViewSelectedTitles}
+                    onPress={viewTitles}
                 >
                     <Text style={styles.buttonText}>View Selected Playset</Text>
                 </TouchableOpacity>
                 <Text></Text>
-                <TouchableOpacity style={styles.buttonSave} onPress={SaveData}>
-                    <Text style={styles.buttonTextSave}>Save</Text>
-                </TouchableOpacity>
                 <Text></Text>
                 <View style={styles.buttonContainer}>
                     <Text></Text>

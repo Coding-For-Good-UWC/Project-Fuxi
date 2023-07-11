@@ -1,41 +1,141 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, FlatList, TouchableOpacity, ScrollView,Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import colours from "../config/colours.js";
+import Constants from "expo-constants";
 let accvals;
-export function getTrackTitles(){
-    return(accvals)
 
-}
+
 const updateTitles = (selectedTitles) =>{
     accvals = selectedTitles;
     
 }
 
-const MyListComponent = ({ data }) => {
+
+
+const MyListComponent = ({ data, patientId }) => {
+
+  const getPlayset = async () => {
+    const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patientId}`);
+    const data = await response.json();
+    return data
+}
+const [currentPlayset, setCurrentPlayset] = useState([]);
+
+useEffect(() => {
+  getPlayset().then(playset => {
+    setCurrentPlayset(playset);
+    const initialSelectedTitles = playset.map(item => ({ id: item.id, title: item.name }));
+    setSelectedTitles(initialSelectedTitles);
+  });
+}, []);
+
+  
     const [searchText, setSearchText] = useState('');
     const [selectedIds, setSelectedIds] = useState([]);
     const [selectedTitles, setSelectedTitles] = useState([]);
 
+    async function updateDB(selectedTrackRatings) {
+      const requestPayload = {
+          array: selectedTrackRatings,
+          patientID: patientId,
+      };
+
+      try {
+          const response = await fetch(
+              `${Constants.expoConfig.extra.apiUrl}/patient/manual`,
+              {
+                  method: "PUT",
+                  headers: {
+                      "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(requestPayload),
+              }
+          );
+
+          const data = await response.json();
+          console.log(data);
+          if (data.message == "repeats") {
+              console.log("REPEATED");
+              console.log(data.existingValues);
+              let trackNames = data.existingValues
+                  .map((item) => item.name)
+                  .join("\n");
+
+              // display an alert
+              Alert.alert(
+                  "Duplicate Tracks",
+                  "These tracks are already in the playlist: \n \n" +
+                      trackNames
+              );
+          } 
+      } catch (error) {
+          Alert.alert("Update Unsuccesful, Please try again.");
+          console.error(error);
+      }
+  }
+
+
+
+
+  async function deletefromDB(uri) {
+    const requestPayload = {
+        trackid: uri,
+        patientid: patientId,
+    };
+
+    try {
+        const response = await fetch(
+            `${Constants.expoConfig.extra.apiUrl}/patient/deletemanual`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(requestPayload),
+            }
+        );
+
+        const data = await response.text()
+        console.log(data);
+    } catch (error) {
+        Alert.alert("Update Unsuccesful, Please try again.");
+        console.error(error);
+    }
+}
+
+  
     const filteredData = data.filter(item => {
       if (!item || !item.Title) {
         return false;
       }
       return (item.Title.toLowerCase()).includes(searchText.toLowerCase());
     });
-    
     const handleSelectTitle = (id, title, uri) => {
       setSelectedTitles((prevSelectedTitles) => {
         if (prevSelectedTitles.some((item) => item.id === uri)) {
+          console.log(`Item deselected: ${title}`);
+          deletefromDB(uri);
+          setCurrentPlayset((prevCurrentPlayset) => prevCurrentPlayset.filter((item) => item.id !== uri));
           return prevSelectedTitles.filter((item) => item.id !== uri);
         } else {
+          console.log(`Item selected: ${title}`);
+          const valuetoUpdate = []
+          valuetoUpdate.push({
+            id: uri,
+            rating: 3,
+            name: title,
+          });
+          updateDB(valuetoUpdate); // Call updateDB when item is selected
           return [...prevSelectedTitles, { id: uri, title: title }];
         }
       });
     };
     
+    
     const renderItem = ({ item }) => {
-      const isSelected = selectedTitles.some((selectedItem) => selectedItem.id === item.URI);
+      const isSelected = selectedTitles.some((selectedItem) => selectedItem.id === item.URI) || currentPlayset.some((playsetItem) => playsetItem.id === item.URI);
+
     
       return (
         <>
@@ -92,13 +192,15 @@ const MyListComponent = ({ data }) => {
       style={{ flex: 1 }}
     />
   </View>
+  <View style={{ height: 300, width:290}}>
   <FlatList
     data={filteredData}
     keyExtractor={item => item._id.toString()}
     renderItem={renderItem}
     extraData={selectedTitles}
-    style={{ flex: 1 }} 
   />
+</View>
+
 </View>
 
       <View>
