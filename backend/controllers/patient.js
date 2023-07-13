@@ -2,6 +2,7 @@ const patientModel = require("../models/patient");
 const ObjectId = require('mongoose').Types.ObjectId;
 const trackModel = require("../models/track"); 
 const MongoClient = require('mongodb').MongoClient;
+let trackid;
 // const database = client.db('Project_Fuxi');
 // const users = database.collection('patients');
 
@@ -122,49 +123,54 @@ const editManualPlayset = async (req, res) => {
 
 
 
-
 const editManualPlaysetYt = async (req, res) => {
   const vals = req.body.array[0].item;
   const patientinfo = req.body.patientInfo;
   const query = { _id: ObjectId(patientinfo._id) };
-
   let doc;
-try {
-  doc = await trackModel.create({
-    Title: vals['name'],
-    URI: vals['videoId'],
-    Artist: vals['artist'].name,
-    Language: patientinfo.language,
-    Genre: patientinfo.genres[0],
-    ImageURL: vals.thumbnails[0].url
-  });
-} catch (err) {
-  if (err.code === 11000) {
-    return res.status(200).json({ status: "OK", message: "Track already exists in database" });
-  } else {
-    return res.status(500).json({ status: "ERROR", message: "Internal server error" });
+  let track;
+  
+  try {
+    doc = await trackModel.create({
+      Title: vals['name'],
+      URI: vals['videoId'],
+      Artist: vals['artist'].name,
+      Language: patientinfo.language,
+      Genre: patientinfo.genres[0],
+      ImageURL: vals.thumbnails[0].url
+    });
+    track = doc;
+  } catch (err) {
+    if (err.code === 11000) {
+      track = await trackModel.findOne({URI:vals['videoId']});
+    } else {
+      return res.status(500).json({ status: "ERROR", message: "Internal server error" });
+    }
   }
-}
 
+  console.log("Track ID:", track._id.toString());  //Print track ID
 
   const playsetUpdate = { id: vals['videoId'], rating: 3, name: vals['name'] };
+  const trackratingsUpdate = { track: ObjectId(track._id.toString()), rating: 3};
 
   // Check if the value already exists in the manualPlayset array
   const isAlreadyAdded = await patientinfo.manualPlayset.some(item => item.id === playsetUpdate.id);
 
-    if (!isAlreadyAdded) {
+  if (!isAlreadyAdded) {
     const update = { $push: { manualPlayset: playsetUpdate } };
+    const updatetrackratings = { $push: { trackRatings: trackratingsUpdate } };
     // ADD TO PERSON'S MANUAL PLAYSET
     try {
       await patientModel.updateOne(query, update);
+      await patientModel.updateOne(query,updatetrackratings)
       return res.status(200).json({ status: "OK", message: "Updated to the database successfully" });
     } catch (err) {
       console.log(err);
       if(err)
-      return res.status(500).json({
-        status: "ERROR",
-        message: "Internal server error",
-      });
+        return res.status(500).json({
+          status: "ERROR",
+          message: "Internal server error",
+        });
     }
   } else {
     // Get the existing values

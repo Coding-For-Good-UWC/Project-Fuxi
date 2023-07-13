@@ -8,7 +8,7 @@ import {
   StatusBar,
   Alert,
 } from "react-native";
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused,useFocusEffect } from '@react-navigation/native';
 import Slider from "@react-native-community/slider";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -77,6 +77,15 @@ const ShuffleManual = ({ route, navigation }) => {
       audio.unloadAsync();
     }
   }, [isFocused]);
+
+  useFocusEffect(
+    useCallback(() => {
+        return () => {
+            audio?.stopAsync();
+            setIsPlaying(false); 
+        };
+    }, [audio])
+);
 
   const playSong = async (playset) => {
     setIsLoading(true);

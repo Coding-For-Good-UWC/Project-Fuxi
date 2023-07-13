@@ -77,7 +77,7 @@ function PatientDashboard({ route, navigation })
                 ))}
             </ScrollView>
             <StyledButton
-                text="Add Patient"
+                text="Add User"
                 onPress={addPatient}
                 style={styles.addButton}
             />

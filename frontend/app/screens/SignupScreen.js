@@ -9,7 +9,7 @@ import {
     Platform,
     Alert,
 } from "react-native";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth"
 import LoadingContext from "../store/LoadingContext.js";
 import Constants from 'expo-constants'
 
@@ -48,9 +48,8 @@ function SignupScreen({ navigation })
             );
             return;
         }
-
+        
         setIsLoading(true);
-
         let userCredential; 
         const auth = getAuth();
 		try {

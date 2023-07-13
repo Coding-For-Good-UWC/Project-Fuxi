@@ -57,7 +57,7 @@ const PatientRegistration = ({ route, navigation }) => {
     return (
         <View style={styles.container}>
             <View style={styles.titleContainer}>
-                <Text style={styles.title}>New Patient</Text>
+                <Text style={styles.title}>New User</Text>
             </View>
             <View style={styles.bodyContainer}>
                 <View style={styles.rightContainer}>

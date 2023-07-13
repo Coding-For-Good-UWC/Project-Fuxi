@@ -25,25 +25,27 @@ const getPatients = async (req, res) =>
         res.status(500).json({ status: "ERROR", message: "Server error" });
     }
 }
-
-const signup = async (req, res) =>
-{
-    try
-    {
-        const { uid, email, name } = req.body;
-        if (!uid)
-            return res.status(400).json({ status: "ERROR", message: "Missing required fields" });
-
-        const newInstitute = await instituteModel.create({ uid, email, name }); 
-
-        res.status(200).json({ status: "OK", message: "Institute created", institute: newInstitute }); 
-    }
-    catch (err)
-    {
-        console.log (err); 
+const signup = async (req, res) => {
+    try {
+      const { uid, email, name } = req.body;
+      if (!uid) {
+        return res.status(400).json({ status: "ERROR", message: "Missing required fields" });
+      }
+  
+      const newInstitute = await instituteModel.create({ uid, email, name });
+  
+      res.status(200).json({ status: "OK", message: "Institute created", institute: newInstitute });
+    } catch (err) {
+      console.log(err);
+  
+      if (err.code === "auth/email-already-in-use" || err.code === "auth/credential-already-in-use") {
+        res.status(400).json({ status: "ERROR", message: "Repeat email" });
+      } else {
         res.status(500).json({ status: "ERROR", message: "Server error" });
+      }
     }
-}
+  };
+  
 
 const getInstitute = async (req, res) => 
 {
