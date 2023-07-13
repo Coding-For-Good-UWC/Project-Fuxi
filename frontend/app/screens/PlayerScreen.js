@@ -29,6 +29,9 @@ const RATING_COLORS = [
 ];
 
 let currentTrackId = -1;
+let nextTrackId = -1;
+let ratingTrackId = -1; 
+
 let currAudioFile = "";
 let nextAudioFile = "";
 
@@ -74,7 +77,7 @@ const PlayerScreen = ({ route, navigation }) => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 patientId: patient._id,
-                trackId: currentTrackId,
+                trackId: ratingTrackId,
                 rating: ratingRef.current - 3
             }),
         });
@@ -148,7 +151,16 @@ const PlayerScreen = ({ route, navigation }) => {
         let data = await response.json();
         const { track } = data;
         
-        currentTrackId = track._id;
+        if (isPreloading) {
+            nextTrackId = track._id;
+        } else {
+            currentTrackId = track._id;
+        }
+
+        if (isFirstLoad)
+        {
+            ratingTrackId = currentTrackId;
+        }
 
         const newSongInfo = {
 			title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
@@ -240,7 +252,8 @@ const PlayerScreen = ({ route, navigation }) => {
         if (audio) {
             await audio.unloadAsync();
         }
-      
+        
+        currentTrackId = nextTrackId; // Update the currentTrackId to nextTrackId before rating
         await updateTrackRating();
     
         setSongInfo(nextSongInfo);
@@ -248,6 +261,8 @@ const PlayerScreen = ({ route, navigation }) => {
         ratingRef.current = 3;
         setRatingColor(RATING_COLORS[2]);
         setRatingText(RATING_VALUES[2]);
+
+        ratingTrackId = nextTrackId;
         
         // Load and play the preloaded track.
         await loadPreloadedTrack();  
