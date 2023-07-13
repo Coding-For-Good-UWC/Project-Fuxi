@@ -2,20 +2,9 @@ import React, { useState, useEffect, useContext, useRef, useCallback } from "rea
 import {
     View,
     Text,
-    TouchableOpacity,
-    Image,
     StatusBar
 } from "react-native";
-import { useFocusEffect } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-    faPlay,
-    faPause,
-    faBackward,
-    faForward,
-    faRepeat,
-} from "@fortawesome/free-solid-svg-icons";
 import Constants from 'expo-constants'
 
 import { Audio } from "expo-av";
@@ -68,9 +57,15 @@ const PlayerScreen = ({ route, navigation }) => {
 
     const ratingRef = useRef(rating);
 
-    useEffect(() => {
-        updateSong(false, true); 
-        updateSong(true, true);
+    useEffect(() => 
+    {
+        const init = async () =>
+        {
+            await updateSong(false, true); 
+            await updateSong(true, true);
+        }
+        
+        init();
     }, []);
 
     const updateTrackRating = async () => {
@@ -93,7 +88,9 @@ const PlayerScreen = ({ route, navigation }) => {
     };
 
     const cleanTempFolder = async (fileName, isPreloading) => 
-    {    
+    { 
+        console.log ("CLEANING TEMP FOLDER")
+
         nextAudioFile = fileName;
 
         const payload = {
@@ -206,10 +203,12 @@ const PlayerScreen = ({ route, navigation }) => {
         try {
             if (preloadedSound) {
                 setAudio(preloadedSound);
+
+                await preloadedSound.playAsync(); 
                 setDuration(nextDuration);
                 setElapsedTime("0:00");
+
                 setIsPlaying(true);
-                await preloadedSound.playAsync(); 
             } else {
                 throw new Error("Preloaded sound is not ready.");
             }
@@ -252,7 +251,7 @@ const PlayerScreen = ({ route, navigation }) => {
         
         // Load and play the preloaded track.
         await loadPreloadedTrack();  
-    
+
         // Now start preloading the next track.
         await updateSong(true);  
     };

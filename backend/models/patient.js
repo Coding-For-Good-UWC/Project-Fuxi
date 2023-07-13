@@ -64,10 +64,6 @@ const schema = new Schema ({
             type:String,
             required:true
         }
-    }], 
-    requestedSongs:
-    [{
-        type: String
     }],
     institute: 
     {

@@ -96,7 +96,7 @@ function LoginScreen({ navigation }) {
           style={styles.passwordToggle}
           onPress={togglePasswordVisibility}
         >
-          <Feather name={showPassword ? "eye" : "eye-off"} size={24} color={colours.primary} />
+          <Feather name={showPassword ? "eye" : "eye-off"} size={18} color={colours.primary} style={{paddingRight: 8}}/>
         </TouchableOpacity>
       </View>
             <TouchableOpacity onPress={() => navigation.navigate("Signup")}>

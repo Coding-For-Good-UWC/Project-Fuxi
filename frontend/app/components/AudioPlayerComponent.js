@@ -6,7 +6,7 @@ import {
     Text,
     TouchableOpacity,
     Image,
-    StatusBar
+
 } from "react-native";
 
 import Slider from '@react-native-community/slider';
@@ -39,29 +39,14 @@ function AudioPlayerComponent(props)
     const [position, setPosition] = useState(0);
     const [isLooping, setIsLooping] = useState(false);
 
-    // INTERNAL
-    // duration
-    // position
-    // elapsedTime
-    // isLooping
-    // togglePlayPause
-    // handleSliderValueChange
-    // setIsLooping
-    
-    // PROPS
-    // audio
-    // songInfo
-    // isPlaying
-    // nextTrack (when song ends and isLooping is false)
-
     useFocusEffect(
         useCallback(() => {
             return () => {
                 audio?.stopAsync();
                 setIsPlaying(false); 
             };
-        }, [audio])
-    );
+        }, [])
+    );    
 
     const togglePlayPause = async () => {
         if (!audio) return;

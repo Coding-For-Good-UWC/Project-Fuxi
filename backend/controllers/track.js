@@ -1,6 +1,4 @@
-	require("dotenv").config();
-const fetch = require("node-fetch");
-
+require("dotenv").config();
 const YoutubeMusicApi = require("youtube-music-api");
 
 const ytdl = require("ytdl-core");
@@ -10,23 +8,11 @@ const fs = require("fs");
 const path = require("path");
 const ObjectId = require('mongoose').Types.ObjectId;
 
-// const { OpenAI } = require("langchain/llms/openai");
-// const { initializeAgentExecutorWithOptions } = require("langchain/agents");
-
 const trackModel = require("../models/track");
 const patientModel = require("../models/patient");
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
 const api = new YoutubeMusicApi();
 api.initalize();
-
-// const llm = OpenAI({ temperature: 0.9 });
-// const executor = initializeAgentExecutorWithOptions({[], llm, {
-// 	agentType: "zero-shot-react-description",
-// 	verbose: true,
-// });
-
 
 const buildYtQueries = (patient) => {
     const era = Math.floor((patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) / 10 ) * 10 + 1960;
@@ -86,6 +72,9 @@ const updateTrackRating = async (req, res) => {
 
         const track = await trackModel.findById(trackId);
 
+        console.log ("UPDATING RATING FOR SONG: " + track.Title)
+        console.log ("RATING INPUT: " + rating)
+
         if (!track)
             return res
                 .status(404)
@@ -95,10 +84,13 @@ const updateTrackRating = async (req, res) => {
                 });
 
         // update the rating in the patient's trackRatings array. it should be the old rating + rating (change in rating)
-        patient.trackRatings.find(
-            (trackRating) => trackRating.track == trackId
-        ).rating += rating;
+        let oldRating = patient.trackRatings.find(trackRating => trackRating.track == trackId).rating;
+        console.log ("OLD RATING: " + oldRating)
+
+        patient.trackRatings.find(trackRating => trackRating.track == trackId).rating = oldRating + rating;
         await patient.save();
+
+        console.log ("NEW RATING: " + patient.trackRatings.find(trackRating => trackRating.track == trackId).rating)
 
         res.status(200).json({
             status: "OK",
@@ -259,9 +251,7 @@ const getTrack = async (req, res) =>
 }
 
 const getTitles = async (req, res) => {
-    const test = req.query
     const ids = req.query.ids.split(',');
-    console.log(ids)
     let titles = [];
     let x;
     for(let i=0;i<ids.length;i++){
@@ -457,7 +447,7 @@ const scrapeTracksFn = async (patientId, numOfTracksToAdd) =>
 		return;
 
 	if (newTracks.length < numOfTracksToAdd)
-		console.log ("WARNING: ADDING LESS TRACKS THAN REQUESTED: " + newTracks.length + " < " + numOfTracksToAdd);
+		console.warn ("WARNING: ADDING LESS TRACKS THAN REQUESTED: " + newTracks.length + " < " + numOfTracksToAdd);
 
     newTracks.forEach((track) =>
     {
@@ -520,35 +510,6 @@ const playTrack = async (req, res) => {
                 });
             })
             .pipe(writeStream, { end: true });
-    } catch (error) {
-        console.error("Error fetching audio URL:", error);
-        res.status(500).json({ error: "Error fetching audio URL" });
-    }
-};
-
-const playTrackShuffle = async (req, res) => {
-    const videoUrl = req.body
-    const patientId = req.query.patientId;
-    try {
-
-        const info = await ytdl.getInfo(videoUrl);
-        const audioURL = ytdl.chooseFormat(info.formats, {
-            filter: "audioonly",
-        }).url;
-
-        // Use FFmpeg to convert the audio format
-        ffmpeg()
-            .input(audioURL)
-            .format("mp3")
-            .audioCodec("libmp3lame")
-            .pipe(writeStream);
-
-    
-        // Handle errors during the conversion
-        writeStream.on("error", (error) => {
-            console.error("Error during audio conversion:", error);
-            res.status(500).json({ error: "Error during audio conversion" });
-        });
     } catch (error) {
         console.error("Error fetching audio URL:", error);
         res.status(500).json({ error: "Error fetching audio URL" });
