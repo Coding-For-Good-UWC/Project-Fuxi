@@ -38,6 +38,7 @@ function AudioPlayerComponent(props)
 
     const [position, setPosition] = useState(0);
     const [isLooping, setIsLooping] = useState(false);
+    const [trackFinished, setTrackFinished] = useState(false); // New state to track if the track has finished
 
     useFocusEffect(
         useCallback(() => {
@@ -47,24 +48,6 @@ function AudioPlayerComponent(props)
             };
         }, [])
     );    
-
-    const togglePlayPause = async () => {
-        if (!audio) return;
-    
-        if (isPlaying) {
-            await audio.pauseAsync();
-        } else {
-            const playbackStatus = await audio.playAsync();
-            setPosition(playbackStatus.positionMillis);
-        }
-        setIsPlaying(!isPlaying);
-    }; 
-
-    const handleSliderValueChange = async (value) => {
-        if (audio) {
-            await audio.setPositionAsync(value);
-        }
-    };
 
     useEffect(() => {
         if (audio) 
@@ -83,13 +66,37 @@ function AudioPlayerComponent(props)
                         audio.replayAsync(); // Replay track if isLooping is true
                     }
                     else {
-                        // nextTrack();
-                        onTrackFinish();
+                        setTrackFinished(true); // Set trackFinished to true if the track has finished
                     }
                 }
             });
         }
     }, [audio, isLooping]);  // add audio and isLooping as dependency
+
+    useEffect(() => {
+        if (trackFinished) {
+            onTrackFinish(); // Call onTrackFinish when trackFinished is true
+            setTrackFinished(false); // Reset trackFinished to false
+        }
+    }, [trackFinished, onTrackFinish]);
+
+    const togglePlayPause = async () => {
+        if (!audio) return;
+    
+        if (isPlaying) {
+            await audio.pauseAsync();
+        } else {
+            const playbackStatus = await audio.playAsync();
+            setPosition(playbackStatus.positionMillis);
+        }
+        setIsPlaying(!isPlaying);
+    }; 
+
+    const handleSliderValueChange = async (value) => {
+        if (audio) {
+            await audio.setPositionAsync(value);
+        }
+    };
 
     return (
         <View style={styles.topContainer}>
@@ -141,7 +148,7 @@ function AudioPlayerComponent(props)
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={onTrackFinish}
+                        onPress={() => onTrackFinish()} // Call onTrackFinish directly instead of using a flag
                     >
                         <FontAwesomeIcon icon={faForward} size={20} />
                     </TouchableOpacity>

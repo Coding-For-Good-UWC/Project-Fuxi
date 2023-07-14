@@ -78,15 +78,6 @@ const ShuffleManual = ({ route, navigation }) => {
     }
   }, [isFocused]);
 
-  useFocusEffect(
-    useCallback(() => {
-        return () => {
-            audio?.stopAsync();
-            setIsPlaying(false); 
-        };
-    }, [audio])
-);
-
   const playSong = async (playset) => {
     setIsLoading(true);
   

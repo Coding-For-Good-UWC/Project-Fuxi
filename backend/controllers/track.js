@@ -1,9 +1,9 @@
 require("dotenv").config();
 const YoutubeMusicApi = require("youtube-music-api");
-
+const ffmpegPath = require("ffmpeg-static");
 const ytdl = require("ytdl-core");
 const ffmpeg = require("fluent-ffmpeg");
-
+ffmpeg.setFfmpegPath(ffmpegPath);
 const fs = require("fs");
 const path = require("path");
 const ObjectId = require('mongoose').Types.ObjectId;
@@ -474,9 +474,10 @@ const scrapeYtTrack = async (req, res) =>
 // Using ytdl to get the audio URL and ffmpeg to convert the audio format
 // Frontend example can be found here: https://github.com/antoinekllee/youtube-audio-streamer/blob/main/App.js
 const playTrack = async (req, res) => {
+
     const videoUrl = req.query.videoUrl;
     const patientId = req.query.patientId;
-
+    console.log("in playtrack"+videoUrl,patientId)
     try {
         const outputFilePath = path.join(
             __dirname,
@@ -495,8 +496,10 @@ const playTrack = async (req, res) => {
         // Use FFmpeg to convert the audio format
         ffmpeg(audioStream)
             .audioCodec("libmp3lame")
+            .outputOptions(["-preset fast"])
             .format("mp3")
             .on("end", () => {
+                console.log("going back")
                 res.json({
                     audioURL: `${req.protocol}://${req.get(
                         "host"
@@ -515,6 +518,8 @@ const playTrack = async (req, res) => {
         res.status(500).json({ error: "Error fetching audio URL" });
     }
 };
+
+
 
 const cleanTempFolder = (req, res) => {
     try

@@ -43,6 +43,7 @@ const PlayerScreen = ({ route, navigation }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
     const [nextDuration, setNextDuration] = useState(0);
+    const [isDone, setIsDone] = useState(false);
 
     const [isPreloading, setIsPreloading] = useState(false);
     const [usePreloadedImmediately, setUsePreloadedImmediately] = useState(false); // if true, use preloaded track immediately
@@ -87,31 +88,6 @@ const PlayerScreen = ({ route, navigation }) => {
         if (data.status === "ERROR") {
             console.error("ERROR: " + data.message);
             return;
-        }
-    };
-
-    const cleanTempFolder = async (fileName, isPreloading) => 
-    { 
-        console.log ("CLEANING TEMP FOLDER")
-
-        nextAudioFile = fileName;
-
-        const payload = {
-            patientId: patient._id,
-            keepFiles: [currAudioFile, nextAudioFile]
-        };
-
-        console.log("payload: " + JSON.stringify(payload));
-
-        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/clean`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) 
-        {
-            alert('Something went wrong!');
         }
     };
 
@@ -211,6 +187,31 @@ const PlayerScreen = ({ route, navigation }) => {
             setIsPreloading(false);
     };  
 
+    const cleanTempFolder = async (fileName, isPreloading) => 
+    { 
+        console.log("CLEANING TEMP FOLDER")
+
+        nextAudioFile = fileName;
+
+        const payload = {
+            patientId: patient._id,
+            keepFiles: [currAudioFile, nextAudioFile]
+        };
+
+        console.log("payload: " + JSON.stringify(payload));
+
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/clean`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) 
+        {
+            alert('Something went wrong!');
+        }
+    };
+
     const loadPreloadedTrack = async () => {
         try {
             if (preloadedSound) {
@@ -279,6 +280,10 @@ const PlayerScreen = ({ route, navigation }) => {
         setRatingText(RATING_VALUES[value - 1]);
     };    
 
+    const handleTrackFinish = () => {
+        nextTrack();
+    };
+
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
@@ -290,7 +295,7 @@ const PlayerScreen = ({ route, navigation }) => {
                 setIsPlaying={setIsPlaying}
                 elapsedTime={elapsedTime}
                 setElapsedTime={setElapsedTime}
-                onTrackFinish={nextTrack}
+                onTrackFinish={handleTrackFinish} // Pass the onTrackFinish callback
             />
             <View style={styles.ratingContainer}>
                 <View style={styles.sliderContainer}>
