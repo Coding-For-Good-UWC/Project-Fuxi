@@ -109,7 +109,7 @@ function PatientMusicForm({ route, navigation })
             </View>
             <View style={styles.info}>
                 <Text style={styles.info}>
-                    What did your patient listen to in their teen years?
+                    What do you think the listener would have heard during their teen years?
                 </Text>
             </View>
             <View style={styles.bodyContainer}>

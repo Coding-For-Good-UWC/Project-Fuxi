@@ -38,7 +38,8 @@ let nextAudioFile = "";
 const PlayerScreen = ({ route, navigation }) => {
     const [audio, setAudio] = useState(null);
     const { patient } = route.params;
-
+    const [prevAudioURL, setPrevAudioURL] = useState(null);
+    const [currentaudio, setcurrentaudio] = useState(null);
     const [preloadedSound, setPreloadedSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
@@ -56,7 +57,6 @@ const PlayerScreen = ({ route, navigation }) => {
     const [rating, setRating] = useState(3);
     const [ratingColor, setRatingColor] = useState(RATING_COLORS[rating - 1]);
     const [ratingText, setRatingText] = useState(RATING_VALUES[rating - 1]);
-
     const [elapsedTime, setElapsedTime] = useState("0:00");
 
     const ratingRef = useRef(rating);
@@ -154,13 +154,16 @@ const PlayerScreen = ({ route, navigation }) => {
         const { audioURL } = await data.json();
 
         console.log ("audioURL: " + audioURL);
+         setcurrentaudio(audioURL);
 
         const fileName = audioURL.split("/").pop();
 
         if (isFirstLoad)
         {
-            if (!isPreloading)
+            if (!isPreloading){
+            
                 currAudioFile = fileName;
+            }
             else
                 nextAudioFile = fileName;
         }
@@ -239,13 +242,21 @@ const PlayerScreen = ({ route, navigation }) => {
             setUsePreloadedImmediately(false);
         }
     }, [isPreloading]);
+
+    useEffect(() => {
+        // This function is triggered every time 'prevAudioURL' changes.
+        // Here, you can implement the logic to use the updated 'prevAudioURL' value.
+      }, [prevAudioURL]);
+      
  
     const nextTrack = async () => {
+        setPrevAudioURL(currentaudio)
+        console.log("prev"+prevAudioURL)
         if (isPreloading) {
             console.log("WAITING FOR PRELOADING TO FINISH");
             setUsePreloadedImmediately(true);
             setIsLoading(true);
-            return;
+            return
         }
     
         console.log("NEXT TRACK");
@@ -296,6 +307,7 @@ const PlayerScreen = ({ route, navigation }) => {
                 elapsedTime={elapsedTime}
                 setElapsedTime={setElapsedTime}
                 onTrackFinish={handleTrackFinish} // Pass the onTrackFinish callback
+                onBack={prevAudioURL}
             />
             <View style={styles.ratingContainer}>
                 <View style={styles.sliderContainer}>

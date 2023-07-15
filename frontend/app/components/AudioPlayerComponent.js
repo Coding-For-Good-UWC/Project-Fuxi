@@ -5,7 +5,8 @@ import {
     View,
     Text,
     TouchableOpacity,
-    Image,
+    Image
+
 
 } from "react-native";
 
@@ -33,7 +34,8 @@ function AudioPlayerComponent(props)
         setIsPlaying,
         elapsedTime,
         setElapsedTime,
-        onTrackFinish
+        onTrackFinish,
+        onBack
     } = props;
 
     const [position, setPosition] = useState(0);
@@ -125,7 +127,7 @@ function AudioPlayerComponent(props)
                 <View style={styles.controlsContainer}>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={() => console.log("BACK")}
+                        onPress={() =>console.log("BACKS"+onBack)}
                     >
                         <FontAwesomeIcon icon={faBackward} size={20} />
                     </TouchableOpacity>
