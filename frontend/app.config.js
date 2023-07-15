@@ -33,9 +33,17 @@ export default {
     },
     extra: {
       apiUrl: process.env.BACKEND_HOST || "http://127.0.0.1:8080",
+      serviceacc: process.env.SERVICE_ACCOUNT_EMAILJS || "service_2ltnpw6", 
+      templateid:process.env.TEMPLATE_ID_EMAILJS || "template_v3e5qxl",
+      publicapikey:process.env.PUBLIC_API_KEY_EMAILJS || "Pqb-hgicf_LaXv1mp",
       eas: {
         projectId: "770075d4-9321-43db-8805-322192b9c91e",
       },
     },
   },
 };
+
+
+// SERVICE_ACCOUNT_EMAILJS= service_2ltnpw6
+// TEMPLATE_ID_EMAILJS = template_v3e5qxl
+// PUBLIC_API_KEY_EMAILJS = Pqb-hgicf_LaXv1mp

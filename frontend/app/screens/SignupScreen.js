@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+
 import {
     StyleSheet,
     Text,
@@ -11,12 +12,11 @@ import {
 } from "react-native";
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth"
 import LoadingContext from "../store/LoadingContext.js";
-import Constants from 'expo-constants'
 import emailjs from '@emailjs/browser'
 import colours from "../config/colours.js";
 import StyledButton from "../components/StyledButton.js";
 import prompt from 'react-native-prompt-android';
-
+import Constants from 'expo-constants';
 function SignupScreen({ navigation }) 
 {
     let pass;
@@ -36,14 +36,14 @@ function SignupScreen({ navigation })
         return pass;
     }
     
+
     function SendEmail(name, email, pass){
         var params = {
             to_name: name,
             to_email: email,
             password: pass
         };
-        console.log("pass"+pass)
-        emailjs.send("service_2ltnpw6","template_v3e5qxl",params,"Pqb-hgicf_LaXv1mp");
+        emailjs.send(Constants.expoConfig.extra.serviceacc,Constants.expoConfig.extra.templateid,params,Constants.expoConfig.extra.publicapikey);
     }
     
     function Verifyemail(){
@@ -167,32 +167,26 @@ function SignupScreen({ navigation })
             let userCredential; 
             const auth = getAuth();
             try {
-                userCredential = await createUserWithEmailAndPassword(
-                    auth,
-                    email,
-                    password
-                );
+                userCredential = await createUserWithEmailAndPassword(auth, email, password);
             } catch (error) {
                 console.log(error);
-                Alert.alert("Error", error.message);
+                if (error.code === 'auth/email-already-in-use') {
+                    Alert.alert(
+                        "Error",
+                        "Email is already in use. Please login instead.",
+                        [
+                            {
+                                text: "Go to Login",
+                                onPress: () => navigation.navigate("Login")
+                            }
+                        ]
+                    );
+                } else {
+                    Alert.alert("Error", error.message);
+                }
                 setIsLoading(false);
                 return;
             }
-    
-            const user = userCredential.user;
-            const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/signup`, {
-                body: JSON.stringify({ uid: user.uid, email: user.email, name }),
-                headers: { "Content-Type": "application/json" },
-                method: "POST",
-            });
-            const data = await response.json();
-    
-            if (data.status === "ERROR") {
-                Alert.alert("Error", data.message);
-                setIsLoading(false);
-                return;
-            }
-    
             const idToken = await auth.currentUser.getIdToken();
     
             const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
