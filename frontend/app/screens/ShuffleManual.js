@@ -85,13 +85,14 @@ const ShuffleManual = ({ route, navigation }) => {
     console.log(songIndex)
   
     const newSongInfo = {
-      title: track.name,
+      title: track.Title,
       imgUri:
-        "https://png.pngtree.com/background/20211217/original/pngtree-note-music-logo-watercolor-background-picture-image_1589075.jpg",
+       track.ImageURL,
+       artist: track.Artist
     };
   
     setSongInfo(newSongInfo);
-    const youtubeUrl = `https://www.youtube.com/watch?v=${track.id}`;
+    const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
     const data = await fetch(
       `${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(
         youtubeUrl
@@ -162,7 +163,7 @@ const ShuffleManual = ({ route, navigation }) => {
   const handleView = async () => {
     // Create a string of song names
     const songNames = playset
-      .map((item, index) => `${index + 1}. ${item.name}`)
+      .map((item, index) => `${index + 1}. ${item.Title}`)
       .join("\n \n");
 
     // Show the alert
@@ -225,8 +226,8 @@ const prevSong = ()=>{
     source={{ uri: songInfo.imgUri }}
     />
     <Text style={styles.songName} numberOfLines={1}>
-    {songInfo.title}
-    </Text>
+  {songInfo.title} {songInfo.artist && `- ${songInfo.artist}`}
+</Text>
     <View style={styles.progressBarContainer}>
     </View>
     <View style={styles.ratingContainer}>

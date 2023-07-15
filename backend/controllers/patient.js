@@ -202,21 +202,39 @@ const deletefromManual = async(req,res)=>{
 }
 
         
+const getManual = async (req, res) => {
+  const patientid = req.query;
+  console.log(patientid);
 
-        const getManual = async (req, res) => {
-          const patientid = req.query
-          console.log(patientid)
-          try{
-            const query = { _id: ObjectId(patientid) };
-            const patient = await patientModel.findOne(query);
-            console.log(patient.manualPlayset)
-            return res.status(200).json(patient.manualPlayset);
-          }
-          catch(error){
+  try{
+      const query = { _id: ObjectId(patientid) };
+      const patient = await patientModel.findOne(query);
 
-          }
+      if (!patient || !patient.manualPlayset) {
+          return res.status(404).json({ message: 'Patient or Manual Playset not found' });
+      }
+
+
+
+      let trackModelArray = [];
+
+      for (let i = 0; i < patient.manualPlayset.length; i++) {
+          const trackId = patient.manualPlayset[i].id;
+          const track = await trackModel.findOne({ URI: trackId });
       
-              }  
+          if (track) {
+              trackModelArray.push(track);
+          }
+      }
+      console.log(trackModelArray);
+      return res.status(200).json(trackModelArray);
+  }
+  catch(error){
+      console.error(error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+
 
 
 
