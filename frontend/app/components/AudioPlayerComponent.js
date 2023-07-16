@@ -1,16 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from "@react-navigation/native";
 
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    Image
+import { View, Text, TouchableOpacity, Image } from "react-native";
 
-
-} from "react-native";
-
-import Slider from '@react-native-community/slider';
+import Slider from "@react-native-community/slider";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 
 import {
@@ -24,10 +17,9 @@ import {
 import colours from "../config/colours.js";
 import { styles } from "../styles/playerStyles.js";
 
-function AudioPlayerComponent(props) 
-{
-    const { 
-        audio, 
+function AudioPlayerComponent(props) {
+    const {
+        audio,
         songInfo,
         duration,
         isPlaying,
@@ -35,7 +27,7 @@ function AudioPlayerComponent(props)
         elapsedTime,
         setElapsedTime,
         onTrackFinish,
-        onBack
+        onTrackPrev
     } = props;
 
     const [position, setPosition] = useState(0);
@@ -46,34 +38,34 @@ function AudioPlayerComponent(props)
         useCallback(() => {
             return () => {
                 audio?.stopAsync();
-                setIsPlaying(false); 
+                setIsPlaying(false);
             };
         }, [])
-    );    
+    );
 
     useEffect(() => {
-        if (audio) 
-        {
+        if (audio) {
             audio.setOnPlaybackStatusUpdate((status) => {
                 setPosition(status.positionMillis);
-    
+
                 const totalSeconds = Math.floor(status.positionMillis / 1000);
                 const minutes = Math.floor(totalSeconds / 60);
                 const seconds = totalSeconds % 60;
-                setElapsedTime(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
-    
+                setElapsedTime(
+                    `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`
+                );
+
                 if (status.didJustFinish) {
                     if (isLooping) {
                         // TODO: increase rating for this track by 1
                         audio.replayAsync(); // Replay track if isLooping is true
-                    }
-                    else {
+                    } else {
                         setTrackFinished(true); // Set trackFinished to true if the track has finished
                     }
                 }
             });
         }
-    }, [audio, isLooping]);  // add audio and isLooping as dependency
+    }, [audio, isLooping]); // add audio and isLooping as dependency
 
     useEffect(() => {
         if (trackFinished) {
@@ -84,7 +76,7 @@ function AudioPlayerComponent(props)
 
     const togglePlayPause = async () => {
         if (!audio) return;
-    
+
         if (isPlaying) {
             await audio.pauseAsync();
         } else {
@@ -92,12 +84,10 @@ function AudioPlayerComponent(props)
             setPosition(playbackStatus.positionMillis);
         }
         setIsPlaying(!isPlaying);
-    }; 
+    };
 
     const handleSliderValueChange = async (value) => {
-        if (audio) {
-            await audio.setPositionAsync(value);
-        }
+        if (audio) await audio.setPositionAsync(value);
     };
 
     return (
@@ -127,7 +117,7 @@ function AudioPlayerComponent(props)
                 <View style={styles.controlsContainer}>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={() =>console.log("BACKS"+onBack)}
+                        onPress={() => onTrackPrev()}
                     >
                         <FontAwesomeIcon icon={faBackward} size={20} />
                     </TouchableOpacity>
@@ -150,7 +140,10 @@ function AudioPlayerComponent(props)
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={() => onTrackFinish()} // Call onTrackFinish directly instead of using a flag
+                        onPress={() => {
+                            if (isLooping) audio.replayAsync();
+                            else onTrackFinish();
+                        }} // Call onTrackFinish directly instead of using a flag
                     >
                         <FontAwesomeIcon icon={faForward} size={20} />
                     </TouchableOpacity>

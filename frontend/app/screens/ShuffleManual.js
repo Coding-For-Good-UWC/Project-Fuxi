@@ -8,6 +8,7 @@ import {
   StatusBar,
   Alert,
 } from "react-native";
+import AudioPlayerComponent from "../components/AudioPlayerComponent.js";
 import { useIsFocused,useFocusEffect } from '@react-navigation/native';
 import Slider from "@react-native-community/slider";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -79,6 +80,9 @@ const ShuffleManual = ({ route, navigation }) => {
   }, [isFocused]);
 
   const playSong = async (playset) => {
+    if (audio) {
+      await audio.unloadAsync();
+    }
     setIsLoading(true);
   
     const track = await getNextTrack(playset);
@@ -92,7 +96,7 @@ const ShuffleManual = ({ route, navigation }) => {
     };
   
     setSongInfo(newSongInfo);
-    const youtubeUrl = `https://www.youtube.com/watch?v=${track.YtId}`;
+    const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
     const data = await fetch(
       `${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(
         youtubeUrl
@@ -100,9 +104,9 @@ const ShuffleManual = ({ route, navigation }) => {
     );
     const { audioURL } = await data.json();
   
-    if (audio) {
-      await audio.unloadAsync();
-    }
+    // if (audio) {
+    //   await audio.unloadAsync();
+    // }
   
     const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
   
@@ -210,75 +214,21 @@ const prevSong = ()=>{
 
   return (
     <View style={styles.container}>
-     {/* <BackButton navigation={navigation} onClick={
-          async () => {
-              if (audio) {
-                  await audio.unloadAsync();
-              }
-          }
-      } /> */}
-    <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
-    <View style={styles.topContainer}>
-    <Text style={styles.title}>Project FUXI</Text>
-    <View style={styles.musicInfoContainer}>
-    <Image
-    style={styles.coverImage}
-    source={{ uri: songInfo.imgUri }}
-    />
-    <Text style={styles.songName} numberOfLines={1}>
-  {songInfo.title} {songInfo.artist && `- ${songInfo.artist}`}
-</Text>
-    <View style={styles.progressBarContainer}>
-    </View>
-    <View style={styles.ratingContainer}>
-    <TouchableOpacity
-    style={styles.button}
-    onPress={() => {prevSong()}}
-    >
-    <FontAwesomeIcon icon={faBackward} size={20} />
-    </TouchableOpacity>
-    <TouchableOpacity
-    style={styles.button}
-    onPress={togglePlayPause}
-    >
-    <FontAwesomeIcon
-    icon={isPlaying ? faPause : faPlay}
-    size={20}
-    />
-    </TouchableOpacity>
-    <TouchableOpacity
-    style={styles.button}
-    onPress={async () => {
-      setIsPlaying(false);
-      if (audio) {
-        await audio.stopAsync();
-      }
-      playSong(playset);
-    }}
-    >
-    <FontAwesomeIcon icon={faForward} size={20} />
-    </TouchableOpacity>
-    
-    </View>
-    
-    <Text></Text>
-    
-    <Text></Text>
-  
-    </View>
-    </View>
-    <View style={styles.progressBarContainer}>
-      <Text style={styles.elapsedTime}>{elapsedTime}</Text>
-      <Slider
-        style={styles.slider}
-        value={progress}
-        onSlidingStart={handleSlidingStart}
-        onSlidingComplete={handleSlidingComplete}
-        minimumTrackTintColor={colours.primary}
-        maximumTrackTintColor={colours.secondary}
-        thumbTintColor={colours.primary}
+ 
+     <AudioPlayerComponent
+        audio={audio}
+        songInfo={songInfo}
+        duration={duration}
+        isPlaying={isPlaying}
+        setIsPlaying={setIsPlaying}
+        elapsedTime={elapsedTime}
+        setElapsedTime={setElapsedTime}
+        onTrackFinish={() => playSong(playset)}
+        onTrackPrev={prevSong}
       />
-    </View>
+      <Text>
+      </Text>
+
     
     <View style={styles.bottomContainer}>
     <TouchableOpacity
