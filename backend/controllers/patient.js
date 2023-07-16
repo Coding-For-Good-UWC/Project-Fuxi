@@ -133,7 +133,7 @@ const editManualPlaysetYt = async (req, res) => {
   try {
     doc = await trackModel.create({
       Title: vals['name'],
-      URI: vals['videoId'],
+      YtId: vals['videoId'],
       Artist: vals['artist'].name,
       Language: patientinfo.language,
       Genre: patientinfo.genres[0],
@@ -142,7 +142,7 @@ const editManualPlaysetYt = async (req, res) => {
     track = doc;
   } catch (err) {
     if (err.code === 11000) {
-      track = await trackModel.findOne({URI:vals['videoId']});
+      track = await trackModel.findOne({YtId:vals['videoId']});
     } else {
       return res.status(500).json({ status: "ERROR", message: "Internal server error" });
     }
@@ -220,7 +220,7 @@ const getManual = async (req, res) => {
 
       for (let i = 0; i < patient.manualPlayset.length; i++) {
           const trackId = patient.manualPlayset[i].id;
-          const track = await trackModel.findOne({ URI: trackId });
+          const track = await trackModel.findOne({ YtId: trackId });
       
           if (track) {
               trackModelArray.push(track);

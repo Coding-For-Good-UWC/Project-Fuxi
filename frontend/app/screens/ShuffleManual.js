@@ -92,7 +92,7 @@ const ShuffleManual = ({ route, navigation }) => {
     };
   
     setSongInfo(newSongInfo);
-    const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
+    const youtubeUrl = `https://www.youtube.com/watch?v=${track.YtId}`;
     const data = await fetch(
       `${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(
         youtubeUrl

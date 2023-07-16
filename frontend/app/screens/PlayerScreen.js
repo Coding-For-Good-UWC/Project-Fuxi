@@ -148,7 +148,7 @@ const PlayerScreen = ({ route, navigation }) => {
         else
             setNextSongInfo(newSongInfo);
 
-        const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
+        const youtubeUrl = `https://www.youtube.com/watch?v=${track.YtId}`;
         data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}&patientId=${patient._id}`);
 
         const { audioURL } = await data.json();

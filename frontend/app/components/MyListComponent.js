@@ -134,13 +134,12 @@ useEffect(() => {
     
     
     const renderItem = ({ item }) => {
-      const isSelected = selectedTitles.some((selectedItem) => selectedItem.id === item.URI) || currentPlayset.some((playsetItem) => playsetItem.id === item.URI);
-
+      const isSelected = selectedTitles.some((selectedItem) => selectedItem.id === item.YtId) || currentPlayset.some((playsetItem) => playsetItem.id === item.YtId);
     
       return (
         <>
           <TouchableOpacity onPress={() => {
-            handleSelectTitle(item.URI, item.Title, item.URI);
+            handleSelectTitle(item.YtId, item.Title, item.YtId);
           }} key={'touchable-' + item._id}>
             <View style={{ 
               flexDirection: 'row', 

@@ -9,7 +9,7 @@ const schema = new Schema ({
         unique: false,
         required: true
     },
-    URI:
+    YtId:
     {
         type: String,
         unique: true, 

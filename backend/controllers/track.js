@@ -374,8 +374,8 @@ const scrapeTracksFn = async (patientId, numOfTracksToAdd) =>
         
         for (let ytTrack of ytTracks) 
         {
-            // Check if a track with the same URI already exists in the database
-            const track = await trackModel.findOne({ URI: ytTrack.videoId });
+            // Check if a track with the same YtId already exists in the database
+            const track = await trackModel.findOne({ YtId: ytTrack.videoId });
             if (track)
             {
                 console.log ("YT TRACK ALREADY FOUND IN DB: " + track.Title);
@@ -388,7 +388,7 @@ const scrapeTracksFn = async (patientId, numOfTracksToAdd) =>
                 const track = await trackModel.create
                 ({
                     Title: ytTrack.name,
-                    URI: ytTrack.videoId,
+                    YtId: ytTrack.videoId,
                     Artist: ytTrack.artist ? ytTrack.artist.name : "",
                     Language: patient.language,
                     Genre: null,
@@ -417,7 +417,7 @@ const scrapeTracksFn = async (patientId, numOfTracksToAdd) =>
 					playlistTracks = playlistTracks.filter(track => filterTrack(track));
 					playlistTracks = playlistTracks.slice(0, numOfTracksFromPlaylist);
 					for (let ytTrack of playlistTracks) {
-						const track = await trackModel.findOne({ URI: ytTrack.videoId });
+						const track = await trackModel.findOne({ YtId: ytTrack.videoId });
 						if (track) {
 							console.log ("YT TRACK ALREADY FOUND IN DB: " + track.Title);
 							newTracks.push(track);
@@ -425,7 +425,7 @@ const scrapeTracksFn = async (patientId, numOfTracksToAdd) =>
 							console.log ("ADDING NEW TRACK FROM YOUTUBE: " + ytTrack.name);
 							const track = await trackModel.create({
 								Title: ytTrack.name,
-								URI: ytTrack.videoId,
+								YtId: ytTrack.videoId,
 								Artist: ytTrack.artist ? ytTrack.artist.name : "",
 								Language: patient.language,
 								Genre: null,
