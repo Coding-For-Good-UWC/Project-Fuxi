@@ -68,7 +68,7 @@ function ManualPlayerScreen({ route, navigation }) {
             `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`
           );
           const songNames = await response.json();
-          const songNamesString = songNames.map((item, index) => `${index + 1}. ${item.name}`).join("\n \n");
+          const songNamesString = songNames.map((item, index) => `${index + 1}. ${item.Title}`).join("\n \n");
       
           // Show the alert
           if(songNamesString==""){

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef, useCallback } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import {
     View,
     Text,
@@ -35,8 +35,6 @@ let ratingTrackId = -1;
 const PlayerScreen = ({ route, navigation }) => {
     const [audio, setAudio] = useState(null);
     const { patient } = route.params;
-    const [prevAudioURL, setPrevAudioURL] = useState(null);
-    const [currentAudio, setCurrentAudio] = useState(null);
     const [preloadedSound, setPreloadedSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
@@ -54,6 +52,8 @@ const PlayerScreen = ({ route, navigation }) => {
     const [ratingColor, setRatingColor] = useState(RATING_COLORS[rating - 1]);
     const [ratingText, setRatingText] = useState(RATING_VALUES[rating - 1]);
     const [elapsedTime, setElapsedTime] = useState("0:00");
+
+    const [prevTracks, setPrevTracks] = useState([]);
 
     const ratingRef = useRef(rating);
 
@@ -87,7 +87,7 @@ const PlayerScreen = ({ route, navigation }) => {
         }
     };
 
-    const updateSong = async (isPreloading=true, isFirstLoad=false) => { // get audio file for a track based on algorithm // isNextTrack true means preloading next track
+    const updateSong = async (isPreloading=true, isFirstLoad=false) => { // get audio file for a track based on algorithm // isNextTrack true means preloading next track 
         console.log("isPreloading: " + isPreloading);
 
         if (!isPreloading)
@@ -162,7 +162,6 @@ const PlayerScreen = ({ route, navigation }) => {
         const { audioURL } = data2;
 
         console.log ("audioURL: " + audioURL);
-        setCurrentAudio(audioURL);
 
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
         
@@ -177,6 +176,11 @@ const PlayerScreen = ({ route, navigation }) => {
             setPreloadedSound(sound);
             setNextDuration(status.durationMillis);
         }
+
+        // push new song to prevTracks
+        const newPrevTracks = [...prevTracks];
+        newPrevTracks.push(track);
+        setPrevTracks(newPrevTracks);
 
         if (!isPreloading)
             setIsLoading(false);
@@ -211,16 +215,8 @@ const PlayerScreen = ({ route, navigation }) => {
             setUsePreloadedImmediately(false);
         }
     }, [isPreloading]);
-
-    useEffect(() => {
-        // This function is triggered every time 'prevAudioURL' changes.
-        // Here, you can implement the logic to use the updated 'prevAudioURL' value.
-      }, [prevAudioURL]);
-      
  
     const nextTrack = async () => {
-        setPrevAudioURL(currentAudio)
-        console.log("prev"+prevAudioURL)
         if (isPreloading) {
             console.log("WAITING FOR PRELOADING TO FINISH");
             setUsePreloadedImmediately(true);
@@ -264,6 +260,99 @@ const PlayerScreen = ({ route, navigation }) => {
         nextTrack();
     };
 
+    const onTrackPrev = async () => 
+    {
+        // Cancel preload
+        if (isPreloading) {
+            console.log("CANCEL PRELOAD");
+            setUsePreloadedImmediately(false);
+            setIsLoading(false);
+            setIsPreloading(false);
+        }
+    
+        if (audio) {
+            await audio.unloadAsync();
+        }
+        
+        currentTrackId = nextTrackId; // Update the currentTrackId to nextTrackId before rating
+        await updateTrackRating();
+    
+        setSongInfo(nextSongInfo);
+        setRating(3);
+        ratingRef.current = 3;
+        setRatingColor(RATING_COLORS[2]);
+        setRatingText(RATING_VALUES[2]);
+
+        ratingTrackId = nextTrackId;
+        
+        setIsLoading(true);
+
+        await Audio.setAudioModeAsync({ // TODO: separate function with all common code with updateSong
+            allowsRecordingIOS: false,
+            staysActiveInBackground: false,
+            playsInSilentModeIOS: true,
+            shouldDuckAndroid: true,
+            playThroughEarpieceAndroid: false,
+        });
+
+        const track = prevTracks[prevTracks.length - 1];
+
+        if (!track) {
+            // load next track as per usual
+            nextTrack(); 
+        }
+        
+        // remove last track from prevTracks
+        const newPrevTracks = [...prevTracks];
+        newPrevTracks.pop();
+        setPrevTracks(newPrevTracks);
+    
+        currentTrackId = track._id;
+
+        // if (isFirstLoad)
+        //     ratingTrackId = currentTrackId; 
+
+        const newSongInfo = {
+			title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
+            imgUri: track.ImageURL,
+        };
+
+        setSongInfo(newSongInfo);
+
+        // Make a post request to audio-url and pass the track objet and patient id
+        const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify
+            ({
+                track: track,
+                patientId: patient._id
+            })
+        });
+
+        if (response2.status === "ERROR") {
+            alert('Something went wrong!');
+            setIsLoading(false);
+            return;
+        }
+
+        const data2 = await response2.json();
+
+        const { audioURL } = data2;
+
+        console.log ("audioURL: " + audioURL);
+        const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
+        
+        setAudio(sound);
+        setDuration(status.durationMillis);
+        setElapsedTime("0:00");
+
+        await sound.playAsync();
+        setIsPlaying(true);
+
+        setIsLoading(false);
+    };
+
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
@@ -275,8 +364,16 @@ const PlayerScreen = ({ route, navigation }) => {
                 setIsPlaying={setIsPlaying}
                 elapsedTime={elapsedTime}
                 setElapsedTime={setElapsedTime}
-                onTrackFinish={handleTrackFinish} // Pass the onTrackFinish callback
-                onBack={prevAudioURL}
+                onTrackFinish={() => {
+                    const prevTrackNames = prevTracks.map((track) => track.Title);
+                    console.log(prevTrackNames);
+                    handleTrackFinish();
+                }}
+                onTrackPrev={() => {
+                    const prevTrackNames = prevTracks.map((track) => track.Title);
+                    console.log(prevTrackNames);
+                    onTrackPrev();
+                }}
             />
             <View style={styles.ratingContainer}>
                 <View style={styles.sliderContainer}>

@@ -25,7 +25,7 @@ const [currentPlayset, setCurrentPlayset] = useState([]);
 useEffect(() => {
   getPlayset().then(playset => {
     setCurrentPlayset(playset);
-    const initialSelectedTitles = playset.map(item => ({ id: item.id, title: item.name }));
+    const initialSelectedTitles = playset.map(item => ({ id: item.id, title: item.Title }));
     setSelectedTitles(initialSelectedTitles);
   });
 }, []);
@@ -59,7 +59,7 @@ useEffect(() => {
               console.log("REPEATED");
               console.log(data.existingValues);
               let trackNames = data.existingValues
-                  .map((item) => item.name)
+                  .map((item) => item.Title)
                   .join("\n");
 
               // display an alert

@@ -34,14 +34,14 @@ function AudioPlayerComponent(props) {
     const [isLooping, setIsLooping] = useState(false);
     const [trackFinished, setTrackFinished] = useState(false); // New state to track if the track has finished
 
-    useFocusEffect(
-        useCallback(() => {
-            return () => {
-                audio?.stopAsync();
-                setIsPlaying(false);
-            };
-        }, [])
-    );
+    // useFocusEffect(
+    //     useCallback(() => {
+    //         return () => {
+    //             audio?.stopAsync();
+    //             setIsPlaying(false);
+    //         };
+    //     }, [])
+    // );
 
     useEffect(() => {
         if (audio) {
