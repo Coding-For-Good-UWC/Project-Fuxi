@@ -44,6 +44,3 @@ export default {
 };
 
 
-// SERVICE_ACCOUNT_EMAILJS= service_2ltnpw6
-// TEMPLATE_ID_EMAILJS = template_v3e5qxl
-// PUBLIC_API_KEY_EMAILJS = Pqb-hgicf_LaXv1mp
