@@ -32,9 +32,6 @@ let currentTrackId = -1;
 let nextTrackId = -1;
 let ratingTrackId = -1; 
 
-let currAudioFile = "";
-let nextAudioFile = "";
-
 const PlayerScreen = ({ route, navigation }) => {
     const [audio, setAudio] = useState(null);
     const { patient } = route.params;
@@ -126,16 +123,13 @@ const PlayerScreen = ({ route, navigation }) => {
         let data = await response.json();
         const { track } = data;
         
-        if (isPreloading) {
+        if (isPreloading) 
             nextTrackId = track._id;
-        } else {
+        else
             currentTrackId = track._id;
-        }
 
         if (isFirstLoad)
-        {
             ratingTrackId = currentTrackId;
-        }
 
         const newSongInfo = {
 			title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
@@ -170,20 +164,6 @@ const PlayerScreen = ({ route, navigation }) => {
         console.log ("audioURL: " + audioURL);
         setCurrentAudio(audioURL);
 
-        // const fileName = audioURL.split("/").pop();
-
-        // if (isFirstLoad)
-        // {
-        //     if (!isPreloading){
-            
-        //         currAudioFile = fileName;
-        //     }
-        //     else
-        //         nextAudioFile = fileName;
-        // }
-        // else
-            // await cleanTempFolder(fileName, isPreloading); 
-        
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
         
         if (!isPreloading)
@@ -203,31 +183,6 @@ const PlayerScreen = ({ route, navigation }) => {
         else
             setIsPreloading(false);
     };  
-
-    const cleanTempFolder = async (fileName, isPreloading) => 
-    { 
-        console.log("CLEANING TEMP FOLDER")
-
-        nextAudioFile = fileName;
-
-        const payload = {
-            patientId: patient._id,
-            keepFiles: [currAudioFile, nextAudioFile]
-        };
-
-        console.log("payload: " + JSON.stringify(payload));
-
-        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/clean`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) 
-        {
-            alert('Something went wrong!');
-        }
-    };
 
     const loadPreloadedTrack = async () => {
         try {

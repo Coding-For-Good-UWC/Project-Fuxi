@@ -609,38 +609,6 @@ const playTrack = async (req, res) =>
     }
 };
 
-const cleanTempFolder = (req, res) => {
-    try
-    {
-        const { keepFiles, patientId } = req.body;
-
-        deleteFilesWithPrefix(`${patientId}_`, keepFiles);
-
-        res.status(200).json({ status: "OK", message: "Temp folder cleaned" });
-    }
-    catch (error)
-    {
-        console.error("Error cleaning temp folder:", error);
-        res.status(500).json({ error: "Error cleaning temp folder" });
-    }
-}
-
-// To clean up the temp folder
-const deleteFilesWithPrefix = (prefix, keepFiles) => {
-    const tempFolderPath = path.join(__dirname, "../temp");
-    fs.readdir(tempFolderPath, (err, files) => {
-        if (err) throw err;
-
-        files.forEach((file) => {
-            if (file.startsWith(prefix) && !keepFiles.includes(file)) {
-                fs.unlink(path.join(tempFolderPath, file), (err) => {
-                    if (err) throw err;
-                });
-            }
-        });
-    });
-};
-
 module.exports = {
     getNextTrackId,
     getNextTrackIdRandom,
@@ -649,6 +617,5 @@ module.exports = {
     scrapeTracks,
     updateTrackRating,
     getTitles,
-    scrapeYtTrack,
-    cleanTempFolder
+    scrapeYtTrack
 };
