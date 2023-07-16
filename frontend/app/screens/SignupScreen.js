@@ -43,7 +43,7 @@ function SignupScreen({ navigation })
             to_email: email,
             password: pass
         };
-        emailjs.send(Constants.expoConfig.extra.serviceacc,Constants.expoConfig.extra.templateid,params,Constants.expoConfig.extra.publicapikey);
+        // emailjs.send(Constants.expoConfig.extra.serviceacc,Constants.expoConfig.extra.templateid,params,Constants.expoConfig.extra.publicapikey);
     }
     
     function Verifyemail(){
@@ -187,7 +187,17 @@ function SignupScreen({ navigation })
                 setIsLoading(false);
                 return;
             }
-            const idToken = await auth.currentUser.getIdToken();
+
+            const user = userCredential.user;
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/signup`, {
+            body: JSON.stringify({ uid: user.uid, email: user.email, name }),
+            headers: { "Content-Type": "application/json" },
+            method: "POST",
+        });
+
+        const data = await response.json();
+
+        const idToken = await auth.currentUser.getIdToken();
     
             const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
                 method: "POST",
