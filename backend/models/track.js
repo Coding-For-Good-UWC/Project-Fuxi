@@ -44,7 +44,13 @@ const schema = new Schema ({
 		type: Number,
 		unique: false,
 		required: false
-	}
+	},
+    URI: // store uri to loaded mp3 file from s3 bucket
+    {
+        type: String,
+        unique: false,
+        required: false
+    }
 })
 
 module.exports = model ("tracks", schema); 

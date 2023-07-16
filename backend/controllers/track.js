@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 const YoutubeMusicApi = require("youtube-music-api");
 const ffmpegPath = require("ffmpeg-static");
 const ytdl = require("ytdl-core");
@@ -6,10 +7,19 @@ const ffmpeg = require("fluent-ffmpeg");
 ffmpeg.setFfmpegPath(ffmpegPath);
 const fs = require("fs");
 const path = require("path");
-const ObjectId = require('mongoose').Types.ObjectId;
 
 const trackModel = require("../models/track");
 const patientModel = require("../models/patient");
+const ObjectId = require('mongoose').Types.ObjectId;
+
+const AWS = require('aws-sdk');
+const { AWS_REGION, AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY } = process.env;
+AWS.config.update({
+    region: AWS_REGION,
+    accessKeyId: AWS_ACCESS_KEY,
+    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+});
+const s3 = new AWS.S3();
 
 const api = new YoutubeMusicApi();
 api.initalize();
@@ -385,16 +395,15 @@ const scrapeTracksFn = async (patientId, numOfTracksToAdd) =>
             {
                 console.log ("ADDING NEW TRACK FROM YOUTUBE: " + ytTrack.name);
 
-                const track = await trackModel.create
-                ({
-                    Title: ytTrack.name,
-                    YtId: ytTrack.videoId,
-                    Artist: ytTrack.artist ? ytTrack.artist.name : "",
-                    Language: patient.language,
-                    Genre: null,
-                    ImageURL: ytTrack.thumbnails ? ytTrack.thumbnails[0].url : "",
-                    Year: ytTrack.year || "",
-                });
+                const track = addNewTrack (
+                    ytTrack.name,
+                    ytTrack.videoId,
+                    ytTrack.artist ? ytTrack.artist.name : "",
+                    patient.language,
+                    null,
+                    ytTrack.thumbnails ? ytTrack.thumbnails[0].url : "",
+                    ytTrack.year || ""
+                );
                 newTracks.push(track);
             }
         }
@@ -423,15 +432,15 @@ const scrapeTracksFn = async (patientId, numOfTracksToAdd) =>
 							newTracks.push(track);
 						} else {
 							console.log ("ADDING NEW TRACK FROM YOUTUBE: " + ytTrack.name);
-							const track = await trackModel.create({
-								Title: ytTrack.name,
-								YtId: ytTrack.videoId,
-								Artist: ytTrack.artist ? ytTrack.artist.name : "",
-								Language: patient.language,
-								Genre: null,
-								ImageURL: ytTrack.thumbnails ? ytTrack.thumbnails[0].url : "",
-								Year: ytTrack.year || "",
-							});
+                            const track = addNewTrack (
+                                ytTrack.name,
+                                ytTrack.videoId,
+                                ytTrack.artist ? ytTrack.artist.name : "",
+                                patient.language,
+                                null,
+                                ytTrack.thumbnails ? ytTrack.thumbnails[0].url : "",
+                                ytTrack.year || ""
+                            );
 							newTracks.push(track);
 						}
 					}
@@ -457,6 +466,21 @@ const scrapeTracksFn = async (patientId, numOfTracksToAdd) =>
     await patient.save();    
 }
 
+const addNewTrack = async(title, ytId, artist, language, genre, imageUrl, year) =>
+{
+    const track = await trackModel.create
+    ({
+        Title: title,
+        YtId: ytId,
+        Artist: artist,
+        Language: language,
+        Genre: genre,
+        ImageURL: imageUrl,
+        Year: year,
+    });
+    return track;
+}
+
 const scrapeYtTrack = async (req, res) =>
 {
     const query = req.body.searchQuery;
@@ -468,58 +492,122 @@ const scrapeYtTrack = async (req, res) =>
     return(res.json({ tracks: tracks }));
 }
 
+const uploadToS3 = (filePath, bucketName, contentType = "audio/mpeg") => {
+    return new Promise((resolve, reject) => {
+        const fileContent = fs.readFileSync(filePath);
+
+        const params = {
+            Bucket: bucketName,
+            Key: path.basename(filePath),
+            Body: fileContent,
+            ContentType: contentType,
+        };
+
+        s3.upload(params, function (err, data) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data.Location);
+            }
+        });
+    });
+};
 
 // Async function that serves the audio stream of a YouTube video given its URL
 // Temporary audio files are saved in the temp folder
 // Using ytdl to get the audio URL and ffmpeg to convert the audio format
 // Frontend example can be found here: https://github.com/antoinekllee/youtube-audio-streamer/blob/main/App.js
-const playTrack = async (req, res) => {
+const getTrackFromYt = async (videoUrl, patientId) => {
+    return new Promise((resolve, reject) => { // Wrap function body in a promise
+        try {
+            const outputFilePath = path.join(
+                __dirname,
+                "../temp",
+                `${patientId}_${Date.now()}.mp3`
+            );
 
-    const videoUrl = req.query.videoUrl;
-    const patientId = req.query.patientId;
-    console.log("in playtrack"+videoUrl,patientId)
-    try {
-        const outputFilePath = path.join(
-            __dirname,
-            "../temp",
-            `${patientId}_${Date.now()}.mp3`
-        );
+            // Create a writable stream to save the converted audio
+            const writeStream = fs.createWriteStream(outputFilePath);
 
-        // Create a writable stream to save the converted audio
-        const writeStream = fs.createWriteStream(outputFilePath);
+            const audioStream = ytdl(videoUrl, {
+                quality: "highestaudio",
+                filter: (format) => format.container === "webm" && !format.encoding,
+            });
 
-        const audioStream = ytdl(videoUrl, {
-            quality: "highestaudio",
-            filter: (format) => format.container === "webm" && !format.encoding,
-        });
-
-        // Use FFmpeg to convert the audio format
-        ffmpeg(audioStream)
-            .audioCodec("libmp3lame")
-            .outputOptions(["-preset fast"])
-            .format("mp3")
-            .on("end", () => {
-                console.log("going back")
-                res.json({
-                    audioURL: `${req.protocol}://${req.get(
-                        "host"
-                    )}/temp/${path.basename(outputFilePath)}`,
-                });
-            })
-            .on("error", (error) => {
-                console.error("Error during audio conversion:", error);
-                res.status(500).json({
-                    error: "Error during audio conversion",
-                });
-            })
-            .pipe(writeStream, { end: true });
-    } catch (error) {
-        console.error("Error fetching audio URL:", error);
-        res.status(500).json({ error: "Error fetching audio URL" });
-    }
+            // Use FFmpeg to convert the audio format
+            ffmpeg(audioStream)
+                .audioCodec("libmp3lame")
+                .outputOptions(["-preset fast"])
+                .format("mp3")
+                .on("end", async () => {
+                    try {
+                        setTimeout(async () => {
+                            const s3Url = await uploadToS3 (outputFilePath, "project-fuxi-audio");
+                            fs.unlinkSync(outputFilePath); // Delete local file
+                            resolve(s3Url); // Remember to resolve the promise here, not return
+                        }, 1000); // delay for 1 second
+                    } catch (error) {
+                        console.error("Error during file upload:", error);
+                        reject(error);
+                    }
+                })                
+                .on("error", (error) => {
+                    console.error("Error during audio conversion:", error);
+                    reject(error);
+                })
+                .pipe(writeStream, { end: true });
+        } catch (error) {
+            console.error("Error fetching audio URL:", error);
+            reject(error);
+        }
+    });
 };
 
+const playTrack = async (req, res) => 
+{
+    try
+    {
+        const { track, patientId } = req.body;
 
+        if (!track || !patientId)
+            return res.status(400).json({ status: "ERROR", message: "Track and patient id required" });
+
+        // retrieve the track from the database
+        const trackObj = await trackModel.findById(track);
+
+        if (!trackObj)
+            return res.status(404).json({ status: "ERROR", message: "No track by id " + track });
+
+        console.log(trackObj);
+
+        // if the track has a URI, it means it has already been converted to mp3 and uploaded to s3
+        // track objects in the db will either not have a URI property or it will be an empty string or it will be a valid s3 url
+        if (!trackObj.URI || trackObj.URI === "")
+        {
+            // if the track is not in s3, we need to convert it from youtube and upload it to s3
+            let youtubeUrl = `https://www.youtube.com/watch?v=${trackObj.YtId}`;
+            youtubeUrl = encodeURI(youtubeUrl);
+                
+            const s3Url = await getTrackFromYt(youtubeUrl, patientId);
+
+            trackObj.URI = s3Url;
+            await trackObj.save();
+
+            console.log ("TRACK CONVERTED AND UPLOADED TO S3: " + trackObj.Title);
+            res.status(200).json({ audioURL: s3Url, status: "OK", message: "Track converted and uploaded to s3" });
+        }
+        else
+        {
+            console.log ("TRACK ALREADY IN S3: " + trackObj.Title);
+            res.status(200).json({ audioURL: trackObj.URI, status: "OK", message: "Track already in s3" });
+        }
+    }
+    catch (error)
+    {
+        console.error("Error playing track:", error);
+        res.status(500).json({ error: "Error playing track" });
+    }
+};
 
 const cleanTempFolder = (req, res) => {
     try

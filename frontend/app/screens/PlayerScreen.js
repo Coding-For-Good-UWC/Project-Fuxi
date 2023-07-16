@@ -39,12 +39,11 @@ const PlayerScreen = ({ route, navigation }) => {
     const [audio, setAudio] = useState(null);
     const { patient } = route.params;
     const [prevAudioURL, setPrevAudioURL] = useState(null);
-    const [currentaudio, setcurrentaudio] = useState(null);
+    const [currentAudio, setCurrentAudio] = useState(null);
     const [preloadedSound, setPreloadedSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
     const [nextDuration, setNextDuration] = useState(0);
-    const [isDone, setIsDone] = useState(false);
 
     const [isPreloading, setIsPreloading] = useState(false);
     const [usePreloadedImmediately, setUsePreloadedImmediately] = useState(false); // if true, use preloaded track immediately
@@ -148,27 +147,42 @@ const PlayerScreen = ({ route, navigation }) => {
         else
             setNextSongInfo(newSongInfo);
 
-        const youtubeUrl = `https://www.youtube.com/watch?v=${track.YtId}`;
-        data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}&patientId=${patient._id}`);
+        // Make a post request to audio-url and pass the track objet and patient id
+        const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                track: track,
+                patientId: patient._id
+            })
+        });
 
-        const { audioURL } = await data.json();
+        if (response2.status === "ERROR") {
+            alert('Something went wrong!');
+            setIsLoading(false);
+            return;
+        }
+
+        const data2 = await response2.json();
+
+        const { audioURL } = data2;
 
         console.log ("audioURL: " + audioURL);
-         setcurrentaudio(audioURL);
+        setCurrentAudio(audioURL);
 
-        const fileName = audioURL.split("/").pop();
+        // const fileName = audioURL.split("/").pop();
 
-        if (isFirstLoad)
-        {
-            if (!isPreloading){
+        // if (isFirstLoad)
+        // {
+        //     if (!isPreloading){
             
-                currAudioFile = fileName;
-            }
-            else
-                nextAudioFile = fileName;
-        }
-        else
-            await cleanTempFolder(fileName, isPreloading); 
+        //         currAudioFile = fileName;
+        //     }
+        //     else
+        //         nextAudioFile = fileName;
+        // }
+        // else
+            // await cleanTempFolder(fileName, isPreloading); 
         
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
         
@@ -250,7 +264,7 @@ const PlayerScreen = ({ route, navigation }) => {
       
  
     const nextTrack = async () => {
-        setPrevAudioURL(currentaudio)
+        setPrevAudioURL(currentAudio)
         console.log("prev"+prevAudioURL)
         if (isPreloading) {
             console.log("WAITING FOR PRELOADING TO FINISH");
