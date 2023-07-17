@@ -219,6 +219,9 @@ const PlayerScreen = ({ route, navigation }) => {
     const nextTrack = async () => {
         if (isPreloading) {
             console.log("WAITING FOR PRELOADING TO FINISH");
+            if (audio) {
+                audio.stopAsync();
+            }
             setUsePreloadedImmediately(true);
             setIsLoading(true);
             return

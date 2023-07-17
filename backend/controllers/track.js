@@ -62,6 +62,10 @@ const updateTrackRating = async (req, res) => {
     try {
         const { patientId, trackId, rating } = req.body;
 
+        console.log ("patientId: " + patientId)
+        console.log ("trackId: " + trackId)
+        console.log ("rating: " + rating)
+
         if (!patientId || !trackId || rating === undefined)
             return res
                 .status(400)

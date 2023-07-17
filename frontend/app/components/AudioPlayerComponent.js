@@ -34,14 +34,35 @@ function AudioPlayerComponent(props) {
     const [isLooping, setIsLooping] = useState(false);
     const [trackFinished, setTrackFinished] = useState(false); // New state to track if the track has finished
 
-    // useFocusEffect(
-    //     useCallback(() => {
-    //         return () => {
-    //             audio?.stopAsync();
-    //             setIsPlaying(false);
-    //         };
-    //     }, [])
-    // );
+    useEffect(() => {
+        if (audio) {
+            audio.setOnPlaybackStatusUpdate((status) => {
+                setPosition(status.positionMillis);
+    
+                const totalSeconds = Math.floor(status.positionMillis / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                setElapsedTime(
+                    `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`
+                );
+    
+                if (status.didJustFinish) {
+                    if (isLooping) {
+                        // TODO: increase rating for this track by 1
+                        audio.replayAsync(); // Replay track if isLooping is true
+                    } else {
+                        setTrackFinished(true); // Set trackFinished to true if the track has finished
+                    }
+                }
+            });
+    
+            return async () => {
+                // This is the cleanup function that React will run when the component unmounts
+                await audio.stopAsync();
+                await audio.unloadAsync();
+            };
+        }
+    }, [audio, isLooping]);
 
     useEffect(() => {
         if (audio) {
