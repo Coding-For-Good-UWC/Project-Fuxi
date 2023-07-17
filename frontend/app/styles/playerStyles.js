@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
         flex: 2,
         justifyContent: "center",
         alignItems: "center",
-        paddingTop: 130,
+        paddingTop: 100,
     },
     title: {
         fontSize: 28,
@@ -69,7 +69,8 @@ export const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        paddingBottom: 120,
+        // paddingTop: 20,
+        // paddingBottom: 120,
     },
     sliderContainer: {
         alignItems: "center",

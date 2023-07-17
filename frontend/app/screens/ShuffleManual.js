@@ -24,40 +24,11 @@ const ShuffleManual = ({ route, navigation }) => {
     const [audio, setAudio] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
-    const [position, setPosition] = useState(0);
-    const { isLoading, setIsLoading } = useContext(LoadingContext);
+    const { setIsLoading } = useContext(LoadingContext);
     const [songInfo, setSongInfo] = useState(DEFAULT_SONG_INFO);
     const [playset, setPlayset] = useState(null);
     const [elapsedTime, setElapsedTime] = useState("0:00");
-    const [isLooping, setIsLooping] = useState(false);
-    const [isSeeking, setIsSeeking] = useState(false);
-    const [shouldPlayAtEndOfSeek, setShouldPlayAtEndOfSeek] = useState(false);
-    const [seekPosition, setSeekPosition] = useState(0);
     const isFocused = useIsFocused();
-
-    const handleSlidingStart = () => {
-        if (isPlaying) {
-            setShouldPlayAtEndOfSeek(true);
-        } else {
-            setShouldPlayAtEndOfSeek(false);
-        }
-        setIsSeeking(true);
-        setIsPlaying(false);
-        audio.pauseAsync();
-    };
-
-    const handleSlidingComplete = async (value) => {
-        const seekPositionMillis = value * duration;
-        if (audio) {
-            await audio.setPositionAsync(seekPositionMillis);
-        }
-        setIsSeeking(false);
-        setPosition(seekPositionMillis);
-        if (shouldPlayAtEndOfSeek) {
-            setIsPlaying(true);
-            audio.playAsync();
-        }
-    };
 
     useEffect(() => {
         getManualPlayset();
@@ -103,28 +74,7 @@ const ShuffleManual = ({ route, navigation }) => {
 
         const { audioURL } = data2;
 
-        // if (audio) {
-        //   await audio.unloadAsync();
-        // }
-
-        const { sound, status } = await Audio.Sound.createAsync({
-            uri: audioURL,
-        });
-
-        sound.setOnPlaybackStatusUpdate((playbackStatus) => {
-            if (playbackStatus.isLoaded && !isSeeking) {
-                setPosition(playbackStatus.positionMillis);
-                const min = Math.floor(playbackStatus.positionMillis / 60000);
-                const sec = Math.floor(
-                    (playbackStatus.positionMillis % 60000) / 1000
-                );
-                setElapsedTime(`${min}:${sec < 10 ? "0" : ""}${sec}`);
-            }
-            if (playbackStatus.didJustFinish) {
-                // The playback just finished, play the next song
-                playSong(playset);
-            }
-        });
+        const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
 
         setAudio(sound);
         setDuration(status.durationMillis);
@@ -132,20 +82,6 @@ const ShuffleManual = ({ route, navigation }) => {
         setIsLoading(false);
         setIsPlaying(true);
         await sound.playAsync(); // Start playing the song
-    };
-
-    const togglePlayPause = async () => {
-        try {
-            if (isPlaying) {
-                await audio.pauseAsync();
-            } else {
-                const playbackStatus = await audio.playAsync();
-                setPosition(playbackStatus.positionMillis);
-            }
-            setIsPlaying(!isPlaying);
-        } catch (error) {
-            console.error(error);
-        }
     };
 
     const getManualPlayset = async () => {
@@ -208,8 +144,6 @@ const ShuffleManual = ({ route, navigation }) => {
         }
     };
 
-    const progress = position / duration || 0;
-
     return (
         <View style={styles.container}>
             <AudioPlayerComponent
@@ -229,7 +163,8 @@ const ShuffleManual = ({ route, navigation }) => {
                 <TouchableOpacity
                     style={{
                         backgroundColor: colours.primary,
-                        height: 60,
+                        height: 50,
+                        width: 120,
                         justifyContent: "center",
                         alignItems: "center",
                         margin: 10,
@@ -253,12 +188,12 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colours.bg,
         paddingHorizontal: 20,
+        paddingTop: 100,
     },
     topContainer: {
         flex: 2,
         justifyContent: "center",
         alignItems: "center",
-        paddingTop: 130,
     },
     title: {
         fontSize: 28,
@@ -316,7 +251,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        paddingBottom: 120,
+        paddingBottom: 80,
     },
     sliderContainer: {
         alignItems: "center",
