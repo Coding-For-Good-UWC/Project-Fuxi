@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useFocusEffect } from "@react-navigation/native";
-
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { View, Text, TouchableOpacity, Image } from "react-native";
 
 import Slider from "@react-native-community/slider";
@@ -32,37 +31,24 @@ function AudioPlayerComponent(props) {
 
     const [position, setPosition] = useState(0);
     const [isLooping, setIsLooping] = useState(false);
-    const [trackFinished, setTrackFinished] = useState(false); // New state to track if the track has finished
+    const [trackFinished, setTrackFinished] = useState(false); 
 
-    useEffect(() => {
-        if (audio) {
-            audio.setOnPlaybackStatusUpdate((status) => {
-                setPosition(status.positionMillis);
-    
-                const totalSeconds = Math.floor(status.positionMillis / 1000);
-                const minutes = Math.floor(totalSeconds / 60);
-                const seconds = totalSeconds % 60;
-                setElapsedTime(
-                    `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`
-                );
-    
-                if (status.didJustFinish) {
-                    if (isLooping) {
-                        // TODO: increase rating for this track by 1
-                        audio.replayAsync(); // Replay track if isLooping is true
-                    } else {
-                        setTrackFinished(true); // Set trackFinished to true if the track has finished
+    const isFocused = useIsFocused();
+
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                const stopAudio = async () => {
+                    if(audio && isPlaying) {
+                        await audio.pauseAsync();
+                        setIsPlaying(false);
                     }
                 }
-            });
-    
-            return async () => {
-                // This is the cleanup function that React will run when the component unmounts
-                await audio.stopAsync();
-                await audio.unloadAsync();
+                stopAudio();
             };
-        }
-    }, [audio, isLooping]);
+        }, [audio, isPlaying, isFocused])
+    );
+
 
     useEffect(() => {
         if (audio) {

@@ -492,6 +492,8 @@ const scrapeYtTrack = async (req, res) =>
 	let response = await api.search(query, "song");
     console.log (response.content.length + " FROM YOUTUBE")
 
+    response.content = response.content.filter(track => filterTrack(track));
+
     const tracks = response.content.slice(0,5);
     return(res.json({ tracks: tracks }));
 }
@@ -552,16 +554,19 @@ const getTrackFromYt = async (videoUrl, patientId) => {
                         }, 1000); // delay for 1 second
                     } catch (error) {
                         console.error("Error during file upload:", error);
+                        fs.unlinkSync(outputFilePath);
                         reject(error);
                     }
                 })                
                 .on("error", (error) => {
                     console.error("Error during audio conversion:", error);
+                    fs.unlinkSync(outputFilePath);
                     reject(error);
                 })
                 .pipe(writeStream, { end: true });
         } catch (error) {
             console.error("Error fetching audio URL:", error);
+            fs.unlinkSync(outputFilePath);
             reject(error);
         }
     });

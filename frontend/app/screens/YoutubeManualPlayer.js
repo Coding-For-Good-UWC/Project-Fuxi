@@ -43,7 +43,7 @@ function YoutubeManual({ route, navigation }) {
       options.push({ text: 'Cancel', style: 'cancel' });
   
       Alert.alert(
-          'Select a video',
+          'Select a song',
           '',
           options,
           { cancelable: true },

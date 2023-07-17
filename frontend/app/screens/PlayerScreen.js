@@ -29,31 +29,22 @@ const RATING_COLORS = [
 ];
 
 let currentTrackId = -1;
-let nextTrackId = -1;
-let ratingTrackId = -1; 
 
 const PlayerScreen = ({ route, navigation }) => {
     const [audio, setAudio] = useState(null);
     const { patient } = route.params;
-    const [preloadedSound, setPreloadedSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
-    const [nextDuration, setNextDuration] = useState(0);
-
-    const [isPreloading, setIsPreloading] = useState(false);
-    const [usePreloadedImmediately, setUsePreloadedImmediately] = useState(false); // if true, use preloaded track immediately
-
     const { setIsLoading } = useContext(LoadingContext);
-
     const [songInfo, setSongInfo] = useState(DEFAULT_SONG_INFO);
-    const [nextSongInfo, setNextSongInfo] = useState(DEFAULT_SONG_INFO);
-
     const [rating, setRating] = useState(3);
     const [ratingColor, setRatingColor] = useState(RATING_COLORS[rating - 1]);
     const [ratingText, setRatingText] = useState(RATING_VALUES[rating - 1]);
     const [elapsedTime, setElapsedTime] = useState("0:00");
-
     const [prevTracks, setPrevTracks] = useState([]);
+
+    const [canSkip, setCanSkip] = useState(false);
+    const isSkipping = useRef(false);
 
     const ratingRef = useRef(rating);
 
@@ -61,12 +52,19 @@ const PlayerScreen = ({ route, navigation }) => {
     {
         const init = async () =>
         {
-            await updateSong(false, true); 
-            await updateSong(true, true);
+            setIsLoading(true);
+            await updateSong();
+            setIsLoading(false);
         }
-        
+
         init();
     }, []);
+
+    useEffect(() => 
+    {
+        const prevTrackNames = prevTracks.map((track) => track.Title);
+        console.log(prevTrackNames);
+    }, [prevTracks]);
 
     const updateTrackRating = async () => {
         const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/rating`, {
@@ -74,7 +72,7 @@ const PlayerScreen = ({ route, navigation }) => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 patientId: patient._id,
-                trackId: ratingTrackId,
+                trackId: currentTrackId, // TODO: MAKE SURE UPDATING RATING OF RIGHT TRACK
                 rating: ratingRef.current - 3
             }),
         });
@@ -87,13 +85,8 @@ const PlayerScreen = ({ route, navigation }) => {
         }
     };
 
-    const updateSong = async (isPreloading=true, isFirstLoad=false) => { // get audio file for a track based on algorithm // isNextTrack true means preloading next track 
-        console.log("isPreloading: " + isPreloading);
-
-        if (!isPreloading)
-            setIsLoading(true);
-        else
-            setIsPreloading(true);
+    const updateSong = async () => { // get audio file for a track based on algorithm 
+        setCanSkip(false);
 
         await Audio.setAudioModeAsync({
             allowsRecordingIOS: false,
@@ -116,30 +109,21 @@ const PlayerScreen = ({ route, navigation }) => {
 
         if (!response.ok) {
             alert('Something went wrong!');
-            setIsLoading(false);
+            setCanSkip(true);
             return; 
         }
 
         let data = await response.json();
         const { track } = data;
         
-        if (isPreloading) 
-            nextTrackId = track._id;
-        else
-            currentTrackId = track._id;
-
-        if (isFirstLoad)
-            ratingTrackId = currentTrackId;
+        currentTrackId = track._id;
 
         const newSongInfo = {
 			title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
             imgUri: track.ImageURL,
         };
 
-        if (!isPreloading)
-            setSongInfo(newSongInfo);
-        else
-            setNextSongInfo(newSongInfo);
+        setSongInfo(newSongInfo);
 
         // Make a post request to audio-url and pass the track objet and patient id
         const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url`, {
@@ -153,7 +137,7 @@ const PlayerScreen = ({ route, navigation }) => {
 
         if (response2.status === "ERROR") {
             alert('Something went wrong!');
-            setIsLoading(false);
+            setCanSkip(true);
             return;
         }
 
@@ -164,93 +148,47 @@ const PlayerScreen = ({ route, navigation }) => {
         console.log ("audioURL: " + audioURL);
 
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
+
+        setAudio(sound);
+        setDuration(status?.durationMillis);
+        setElapsedTime("0:00");
         
-        if (!isPreloading)
-        {
-            setAudio(sound);
-            setDuration(status.durationMillis);
-            setElapsedTime("0:00");
-        }
-        else
-        {
-            setPreloadedSound(sound);
-            setNextDuration(status.durationMillis);
-        }
+        await sound.playAsync();
+        setIsPlaying(true);
 
         // push new song to prevTracks
         const newPrevTracks = [...prevTracks];
         newPrevTracks.push(track);
         setPrevTracks(newPrevTracks);
 
-        if (!isPreloading)
-            setIsLoading(false);
-        else
-            setIsPreloading(false);
+        setCanSkip(true);
     };  
 
-    const loadPreloadedTrack = async () => {
-        try {
-            if (preloadedSound) {
-                setAudio(preloadedSound);
-
-                await preloadedSound.playAsync(); 
-                setDuration(nextDuration);
-                setElapsedTime("0:00");
-
-                setIsPlaying(true);
-            } else {
-                throw new Error("Preloaded sound is not ready.");
-            }
-        } catch (error) {
-            console.log("Preloaded sound was not ready. Loading next track.", error); // TODO: BUG WHEN SLIDER REACHES END OF SONG AND GETS STUCK
-            await updateSong(true);
+    const nextTrack = async () => 
+    {
+        if (isSkipping.current) {
+            return;
         }
-    };    
+        
+        isSkipping.current = true;
 
-    useEffect(() => { 
-        if (usePreloadedImmediately)
-        {
-            nextTrack();
-            setIsLoading(false);
-            setUsePreloadedImmediately(false);
-        }
-    }, [isPreloading]);
- 
-    const nextTrack = async () => {
-        if (isPreloading) {
-            console.log("WAITING FOR PRELOADING TO FINISH");
-            if (audio) {
-                audio.stopAsync();
-            }
-            setUsePreloadedImmediately(true);
-            setIsLoading(true);
-            return
-        }
-    
         console.log("NEXT TRACK");
     
         if (audio) {
             await audio.unloadAsync();
         }
         
-        currentTrackId = nextTrackId; // Update the currentTrackId to nextTrackId before rating
         await updateTrackRating();
     
-        setSongInfo(nextSongInfo);
         setRating(3);
         ratingRef.current = 3;
         setRatingColor(RATING_COLORS[2]);
         setRatingText(RATING_VALUES[2]);
 
-        ratingTrackId = nextTrackId;
-        
-        // Load and play the preloaded track.
-        await loadPreloadedTrack();  
+        await updateSong();  
 
-        // Now start preloading the next track.
-        await updateSong(true);  
+        isSkipping.current = false;
     };
-
 
     const handleRatingValueChange = (value) => {
         setRating(value);
@@ -259,37 +197,21 @@ const PlayerScreen = ({ route, navigation }) => {
         setRatingText(RATING_VALUES[value - 1]);
     };    
 
-    const handleTrackFinish = () => {
-        nextTrack();
-    };
-
     const onTrackPrev = async () => 
     {
-        // Cancel preload
-        if (isPreloading) {
-            console.log("CANCEL PRELOAD");
-            setUsePreloadedImmediately(false);
-            setIsLoading(false);
-            setIsPreloading(false);
-        }
-    
         if (audio) {
             await audio.unloadAsync();
         }
         
-        currentTrackId = nextTrackId; // Update the currentTrackId to nextTrackId before rating
         await updateTrackRating();
     
-        setSongInfo(nextSongInfo);
         setRating(3);
         ratingRef.current = 3;
         setRatingColor(RATING_COLORS[2]);
         setRatingText(RATING_VALUES[2]);
 
-        ratingTrackId = nextTrackId;
+        setCanSkip(false);
         
-        setIsLoading(true);
-
         await Audio.setAudioModeAsync({ // TODO: separate function with all common code with updateSong
             allowsRecordingIOS: false,
             staysActiveInBackground: false,
@@ -297,11 +219,10 @@ const PlayerScreen = ({ route, navigation }) => {
             shouldDuckAndroid: true,
             playThroughEarpieceAndroid: false,
         });
-
+        
         const track = prevTracks[prevTracks.length - 1];
-
+        
         if (!track) {
-            // load next track as per usual
             nextTrack(); 
         }
         
@@ -311,9 +232,6 @@ const PlayerScreen = ({ route, navigation }) => {
         setPrevTracks(newPrevTracks);
     
         currentTrackId = track._id;
-
-        // if (isFirstLoad)
-        //     ratingTrackId = currentTrackId; 
 
         const newSongInfo = {
 			title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
@@ -335,7 +253,7 @@ const PlayerScreen = ({ route, navigation }) => {
 
         if (response2.status === "ERROR") {
             alert('Something went wrong!');
-            setIsLoading(false);
+            setCanSkip(true);
             return;
         }
 
@@ -347,13 +265,14 @@ const PlayerScreen = ({ route, navigation }) => {
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
         
         setAudio(sound);
+
+        await sound.playAsync();
         setDuration(status.durationMillis);
         setElapsedTime("0:00");
 
-        await sound.playAsync();
         setIsPlaying(true);
 
-        setIsLoading(false);
+        setCanSkip(true);
     };
 
     return (
@@ -367,16 +286,8 @@ const PlayerScreen = ({ route, navigation }) => {
                 setIsPlaying={setIsPlaying}
                 elapsedTime={elapsedTime}
                 setElapsedTime={setElapsedTime}
-                onTrackFinish={() => {
-                    const prevTrackNames = prevTracks.map((track) => track.Title);
-                    console.log(prevTrackNames);
-                    handleTrackFinish();
-                }}
-                onTrackPrev={() => {
-                    const prevTrackNames = prevTracks.map((track) => track.Title);
-                    console.log(prevTrackNames);
-                    onTrackPrev();
-                }}
+                onTrackFinish={nextTrack}
+                onTrackPrev={onTrackPrev}
             />
             <View style={styles.ratingContainer}>
                 <View style={styles.sliderContainer}>
