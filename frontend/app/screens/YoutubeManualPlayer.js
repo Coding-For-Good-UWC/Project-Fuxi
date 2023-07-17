@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Constants from "expo-constants";
 import {
   StyleSheet,
   View,
@@ -15,7 +16,7 @@ function YoutubeManual({ route, navigation }) {
   const [data, setData] = useState([]); // State for fetched data
 
   function searchYoutube() {
-    const url = 'http://localhost:8080/track/scrapeyt';
+    const url = `${Constants.expoConfig.extra.apiUrl}/track/scrapeyt`;
     const postData = { searchQuery: searchQuery,patientInfo:patient};
 
     fetch(url, {
@@ -66,7 +67,7 @@ function YoutubeManual({ route, navigation }) {
     };
   
     try {
-      const response = await fetch(`http://localhost:8080/patient/manualyt`, {
+      const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/manualyt`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
