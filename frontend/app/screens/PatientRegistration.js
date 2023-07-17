@@ -29,26 +29,29 @@ const [filteredLanguages, setFilteredLanguages] = useState(languages);
     const handleChange = (value, name) => {
         setFormData(prevState => ({ ...prevState, [name]: value }));
     
-        if (name === 'ethnicity') {
-            setEthnicityQuery(value);
-            const filtered = ethnicities.filter(item =>
-                item.toLowerCase().includes(value.toLowerCase())
-            );
-            setFilteredEthnicities(filtered);
-        } else if (name === 'birthplace') {
-            setBirthplaceQuery(value);
-            const filtered = countries.filter(item =>
-                item.toLowerCase().includes(value.toLowerCase())
-            );
-            setFilteredBirthplaces(filtered);
-        } else if (name === 'language') {
-            setLanguageQuery(value);
-            const filtered = languages.filter(item =>
-                item.toLowerCase().includes(value.toLowerCase())
-            );
-            setFilteredLanguages(filtered);
+        if (value) {
+            if (name === 'ethnicity') {
+                setEthnicityQuery(value);
+                const filtered = ethnicities.filter(item =>
+                    item.toLowerCase().includes(value.toLowerCase())
+                );
+                setFilteredEthnicities(filtered);
+            } else if (name === 'birthplace') {
+                setBirthplaceQuery(value);
+                const filtered = countries.filter(item =>
+                    item.toLowerCase().includes(value.toLowerCase())
+                );
+                setFilteredBirthplaces(filtered);
+            } else if (name === 'language') {
+                setLanguageQuery(value);
+                const filtered = languages.filter(item =>
+                    item.toLowerCase().includes(value.toLowerCase())
+                );
+                setFilteredLanguages(filtered);
+            }
         }
     };
+    
     
 
     const handleSubmit = (evt) => {

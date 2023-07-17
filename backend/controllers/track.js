@@ -587,9 +587,9 @@ const playTrack = async (req, res) =>
             // if the track is not in s3, we need to convert it from youtube and upload it to s3
             let youtubeUrl = `https://www.youtube.com/watch?v=${trackObj.YtId}`;
             youtubeUrl = encodeURI(youtubeUrl);
-                
+          
             const s3Url = await getTrackFromYt(youtubeUrl, patientId);
-
+            console.log(s3Url)
             trackObj.URI = s3Url;
             await trackObj.save();
 

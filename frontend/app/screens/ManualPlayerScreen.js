@@ -68,6 +68,7 @@ function ManualPlayerScreen({ route, navigation }) {
             `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`
           );
           const songNames = await response.json();
+          console.log("getmanual"+songNames)
           const songNamesString = songNames.map((item, index) => `${index + 1}. ${item.Title}`).join("\n \n");
       
           // Show the alert
@@ -117,7 +118,7 @@ function ManualPlayerScreen({ route, navigation }) {
           navigation.navigate("ShuffleManual", { patient });
         }
     }
-
+    console.log(titles)
     return (
         <View style={styles.container}>
             <View style={styles.topContainer}>

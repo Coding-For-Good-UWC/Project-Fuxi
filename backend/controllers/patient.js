@@ -79,7 +79,7 @@ const newPatient = async (req, res) => {
 const editManualPlayset = async (req, res) => {
   const { array, patientID } = req.body;
   const query = { _id: ObjectId(patientID) };
-
+  console.log(array)
   // Fetch the existing manualPlayset array for the patient
   const existingPatient = await patientModel.findOne(query);
   const existingManualPlayset = existingPatient.manualPlayset || [];
@@ -88,7 +88,7 @@ const editManualPlayset = async (req, res) => {
   const duplicates = [];
   const filteredArray = array.filter((item) => {
     const isAlreadyAdded = existingManualPlayset.some(
-      (existingItem) => existingItem.id === item.id
+      (existingItem) => existingItem.trackid === item.trackid
     );
     if (isAlreadyAdded) {
       duplicates.push(item);
@@ -96,17 +96,18 @@ const editManualPlayset = async (req, res) => {
     return !isAlreadyAdded;
   });
 
-  // If no new items to add, return a response
-  if (filteredArray.length === 0) {
-    return res.status(200).json({
-      status: "OK",
-      message: "repeats",
-      existingValues: duplicates
-    });
-  }
-
+  // // If no new items to add, return a response
+  // if (filteredArray.length === 0) {
+  //   return res.status(200).json({
+  //     status: "OK",
+  //     message: "repeats",
+  //     existingValues: duplicates
+  //   });
+  // }
+  
   const update = { $push: { manualPlayset: { $each: filteredArray } } };
-
+  console.log("filtered array")
+console.log(filteredArray)
   try {
     await patientModel.updateOne(query, update);
     return res
@@ -124,37 +125,42 @@ const editManualPlayset = async (req, res) => {
 
 
 const editManualPlaysetYt = async (req, res) => {
-  const vals = req.body.array[0].item;
+  const item = req.body.array[0]?.item;  // Access item 
   const patientinfo = req.body.patientInfo;
   const query = { _id: ObjectId(patientinfo._id) };
   let doc;
   let track;
   
+
   try {
+    console.log("goin in")
     doc = await trackModel.create({
-      Title: vals['name'],
-      YtId: vals['videoId'],
-      Artist: vals['artist'].name,
+      Title: item['name'],
+      YtId: item['videoId'],
+      Artist: item['artist'].name,
       Language: patientinfo.language,
       Genre: patientinfo.genres[0],
-      ImageURL: vals.thumbnails[0].url
+      ImageURL: item.thumbnails[0].url
     });
+    
     track = doc;
+    console.log("track")
+    console.log(track)
   } catch (err) {
     if (err.code === 11000) {
-      track = await trackModel.findOne({YtId:vals['videoId']});
+      track = await trackModel.findOne({YtId:item['videoId']});
     } else {
       return res.status(500).json({ status: "ERROR", message: "Internal server error" });
     }
   }
 
-  console.log("Track ID:", track._id.toString());  //Print track ID
+  console.log("Track ID:", track);  //Print track ID
 
-  const playsetUpdate = { id: vals['videoId'], rating: 3, name: vals['name'] };
+  const playsetUpdate = { id:"", trackid:track._id.toString()};
   const trackratingsUpdate = { track: ObjectId(track._id.toString()), rating: 3};
 
   // Check if the value already exists in the manualPlayset array
-  const isAlreadyAdded = await patientinfo.manualPlayset.some(item => item.id === playsetUpdate.id);
+  const isAlreadyAdded = patientinfo.manualPlayset.some(item => item.trackid === playsetUpdate.trackid);
 
   if (!isAlreadyAdded) {
     const update = { $push: { manualPlayset: playsetUpdate } };
@@ -180,8 +186,10 @@ const editManualPlaysetYt = async (req, res) => {
 };
 
 
+
 const deletefromManual = async(req,res)=>{
-  const id_to_delete = req.body.trackid
+  console.log("IN DELETE")
+  const id_to_delete = ObjectId(req.body.trackid); // Convert id_to_delete to ObjectId
   const patientid = req.body.patientid
   const patient = await patientModel.findOne({_id: patientid});
   console.log(patientid,id_to_delete)
@@ -192,7 +200,8 @@ const deletefromManual = async(req,res)=>{
   }
 
   // Filter out the item with the id_to_delete
-  patient.manualPlayset = patient.manualPlayset.filter(item => item.id !== id_to_delete);
+  patient.manualPlayset = patient.manualPlayset.filter(item => !item.trackid.equals(id_to_delete));
+  console.log("item deleted")
   console.log(patient.manualPlayset)
   // Save the updated patient
   await patient.save();
@@ -219,9 +228,10 @@ const getManual = async (req, res) => {
       let trackModelArray = [];
 
       for (let i = 0; i < patient.manualPlayset.length; i++) {
-          const trackId = patient.manualPlayset[i].id;
-          const track = await trackModel.findOne({ YtId: trackId });
-      
+          const trackId = patient.manualPlayset[i].trackid;
+          console.log(trackId)
+          const track = await trackModel.findOne({ _id: trackId });
+
           if (track) {
               trackModelArray.push(track);
           }
