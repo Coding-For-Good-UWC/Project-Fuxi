@@ -5,10 +5,9 @@ const router = express.Router ();
 
 router.post ("/next", controller.getNextTrackId); 
 router.post ("/nextrandom", controller.getNextTrackIdRandom); 
-router.post ("/get", controller.getTrack); 
 router.get ("/titles", controller.getTitles); 
-router.post ("/scrape", controller.scrapeTracks);
-router.post ("/scrapeyt", controller.scrapeYtTrack);
+router.post ("/initial", controller.loadInitialPlayset);
+router.post ("/ytQuery", controller.manualYtQuery);
 router.post('/audio-url', controller.playTrack);
 router.post ("/rating", controller.updateTrackRating);
 module.exports = router; 

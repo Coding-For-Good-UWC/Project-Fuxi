@@ -63,7 +63,7 @@ function YoutubeManual({ route, navigation }) {
 
         try {
             const response = await fetch(
-                `${Constants.expoConfig.extra.apiUrl}/patient/manualyt`,
+                `${Constants.expoConfig.extra.apiUrl}/patient/ytQuery`,
                 {
                     method: "PUT",
                     headers: {
