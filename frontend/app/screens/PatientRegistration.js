@@ -368,11 +368,9 @@ const PatientRegistration = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.titleContainer}>
-                <Text style={styles.title}>New Listener</Text>
-            </View>
             <View style={styles.bodyContainer}>
-                <View style={styles.rightContainer}>
+                <View style={styles.fieldContainer}>
+                <Text style={styles.title}>New Listener</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
@@ -455,12 +453,11 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     bodyContainer: {
-        flex: 0.45,
-        flexDirection: "row",
+        flex: 1,
         width: "100%",
         height: "100%",
     },
-    rightContainer: {
+    fieldContainer: {
         flex: 1,
         paddingTop: "5%",
         alignItems: "center",
@@ -470,6 +467,7 @@ const styles = StyleSheet.create({
         color: colours.primaryText,
         fontSize: 36,
         fontWeight: "bold",
+        marginBottom: 20,
     },
     inputContainer: {
         backgroundColor: colours.secondary,
@@ -487,14 +485,13 @@ const styles = StyleSheet.create({
         color: colours.primaryText,
     },
     pickerSelectStyles: {
-        inputAndroid: {
-            textAlign: "center",
-            marginTop: 13,
-        },
+        textAlign: "center",
+        marginTop: 13,
         inputIOS: {
+            color: colours.primaryText,
             textAlign: "center",
             marginTop: 13,
-        },
+        }
     },
 });
 

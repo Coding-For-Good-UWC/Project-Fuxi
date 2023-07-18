@@ -34,8 +34,7 @@ function PatientDashboard({ route, navigation })
                 const patients = await getPatients(); 
 
                 setPatientData(patients);
-            setPatientData(patients);
-            setIsLoading(false);
+                setIsLoading(false);
             };
 
             loadPatients();

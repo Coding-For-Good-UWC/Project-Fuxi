@@ -174,8 +174,8 @@ const ShuffleManual = ({ route, navigation }) => {
                         handleView();
                     }}
                 >
-                    <Text style={{ color: "white", fontSize: 10, padding: 10 }}>
-                        View Current Playset
+                    <Text style={{ color: "white", fontSize: 14, padding: 10 }}>
+                        View Songs
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colours.bg,
         paddingHorizontal: 20,
-        paddingTop: 100,
+        paddingTop: 70,
     },
     topContainer: {
         flex: 2,
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        paddingBottom: 80,
+        paddingTop: 30,
     },
     sliderContainer: {
         alignItems: "center",

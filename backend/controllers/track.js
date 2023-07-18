@@ -347,8 +347,11 @@ const scrapeTracks = async (req, res) => {
         const sortedTracks = allTracks.sort((a, b) => Math.abs(a.Era - era) - Math.abs(b.Era - era));
 
         // Add the remaining songs from the start of the sorted list
-        for (let i = 0; i < 15 - tracks.length; i++)
+        const numToAdd = Math.min(15 - tracks.length, sortedTracks.length);
+        for (let i = 0; i < numToAdd; i++)
+        {
             tracks.push(sortedTracks[i]);
+        }
     }
 
     tracks.forEach((track) => 
@@ -399,7 +402,7 @@ const scrapeTracksFn = async (patientId, numOfTracksToAdd) =>
             {
                 console.log ("ADDING NEW TRACK FROM YOUTUBE: " + ytTrack.name);
 
-                const track = addNewTrack (
+                const track = await addNewTrack (
                     ytTrack.name,
                     ytTrack.videoId,
                     ytTrack.artist ? ytTrack.artist.name : "",
@@ -436,7 +439,7 @@ const scrapeTracksFn = async (patientId, numOfTracksToAdd) =>
 							newTracks.push(track);
 						} else {
 							console.log ("ADDING NEW TRACK FROM YOUTUBE: " + ytTrack.name);
-                            const track = addNewTrack (
+                            const track = await addNewTrack (
                                 ytTrack.name,
                                 ytTrack.videoId,
                                 ytTrack.artist ? ytTrack.artist.name : "",

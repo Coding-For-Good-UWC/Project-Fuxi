@@ -42,8 +42,6 @@ const PlayerScreen = ({ route, navigation }) => {
     const [ratingText, setRatingText] = useState(RATING_VALUES[rating - 1]);
     const [elapsedTime, setElapsedTime] = useState("0:00");
     const [prevTracks, setPrevTracks] = useState([]);
-
-    const [canSkip, setCanSkip] = useState(false);
     const isSkipping = useRef(false);
 
     const ratingRef = useRef(rating);
@@ -86,8 +84,6 @@ const PlayerScreen = ({ route, navigation }) => {
     };
 
     const updateSong = async () => { // get audio file for a track based on algorithm 
-        setCanSkip(false);
-
         await Audio.setAudioModeAsync({
             allowsRecordingIOS: false,
             staysActiveInBackground: false,
@@ -109,7 +105,6 @@ const PlayerScreen = ({ route, navigation }) => {
 
         if (!response.ok) {
             alert('Something went wrong!');
-            setCanSkip(true);
             return; 
         }
 
@@ -137,7 +132,6 @@ const PlayerScreen = ({ route, navigation }) => {
 
         if (response2.status === "ERROR") {
             alert('Something went wrong!');
-            setCanSkip(true);
             return;
         }
 
@@ -160,8 +154,6 @@ const PlayerScreen = ({ route, navigation }) => {
         const newPrevTracks = [...prevTracks];
         newPrevTracks.push(track);
         setPrevTracks(newPrevTracks);
-
-        setCanSkip(true);
     };  
 
     const nextTrack = async () => 
@@ -191,6 +183,9 @@ const PlayerScreen = ({ route, navigation }) => {
     };
 
     const handleRatingValueChange = (value) => {
+        if (isSkipping.current) 
+            return;
+
         setRating(value);
         ratingRef.current = value; // Add this line
         setRatingColor(RATING_COLORS[value - 1]);
@@ -209,8 +204,6 @@ const PlayerScreen = ({ route, navigation }) => {
         ratingRef.current = 3;
         setRatingColor(RATING_COLORS[2]);
         setRatingText(RATING_VALUES[2]);
-
-        setCanSkip(false);
         
         await Audio.setAudioModeAsync({ // TODO: separate function with all common code with updateSong
             allowsRecordingIOS: false,
@@ -253,7 +246,6 @@ const PlayerScreen = ({ route, navigation }) => {
 
         if (response2.status === "ERROR") {
             alert('Something went wrong!');
-            setCanSkip(true);
             return;
         }
 
@@ -271,8 +263,6 @@ const PlayerScreen = ({ route, navigation }) => {
         setElapsedTime("0:00");
 
         setIsPlaying(true);
-
-        setCanSkip(true);
     };
 
     return (

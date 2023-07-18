@@ -93,8 +93,10 @@ function AudioPlayerComponent(props) {
         setIsPlaying(!isPlaying);
     };
 
-    const handleSliderValueChange = async (value) => {
-        if (audio) await audio.setPositionAsync(value);
+    const handleSliderValueChange = async (value) => 
+    {
+        if (audio) 
+            await audio.setPositionAsync(value);
     };
 
     return (

@@ -9,30 +9,21 @@ import {
     TouchableOpacity,
     Alert,
 } from "react-native";
-import { getTrackTitles } from "../components/MyListComponent.js";
 import Constants from "expo-constants";
 
 import colours from "../config/colours.js";
-let x;
-
 
 function ManualPlayerScreen({ route, navigation }) {
     const { setIsLoading } = useContext(LoadingContext);
     const { patient } = route.params;
     const [titles, setTitles] = useState([]);
-   
-    useEffect(() => {
+    
+    const updateSelectionPanel = async () => {
         let trackids = patient.trackRatings.map((rating) => rating.track);
-        setIsLoading(true);
-        console.log(trackids);
         async function fetchTitles(ids) {
-            const response = await fetch(
-                `${
-                    Constants.expoConfig.extra.apiUrl
-                }/track/titles?ids=${ids.join(",")}`
-            );
+            setIsLoading(true);
+            const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/titles?ids=${ids.join(",")}`);
             const data = await response.json();
-            // console.log(data.titles)
             setIsLoading(false);
             return data.titles;
         }
@@ -49,13 +40,19 @@ function ManualPlayerScreen({ route, navigation }) {
                     .map((title) => ({
                         ...title,
                     }));
-
                 setTitles(uniqueTitles);
             })
             .catch((error) => {
                 console.error(error);
             });
+
+        console.log(">>>>>>>>>>>>>>>>> UPDATE SELECTION PANEL <<<<<<<<<<<<<<<<<<<<");
+    };
+
+    useEffect(() => {
+        updateSelectionPanel();
     }, []);
+
     const getPlayset = async () => {
         const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`);
         const data = await response.json();
@@ -95,18 +92,6 @@ function ManualPlayerScreen({ route, navigation }) {
           console.log(error)
         }
     }
-    
-
-
-    function goToYoutubeManualPlayer() {
-        navigation.navigate("YoutubeManual", { patient });
-    }
-
-    const [modalVisible, setModalVisible] = useState(false);
-
-    const handleModalClose = () => {
-        setModalVisible(false);
-    };
 
    async function goToPlayer() {
         const x = await getPlayset(); // await the result of getPlayset
@@ -118,7 +103,7 @@ function ManualPlayerScreen({ route, navigation }) {
           navigation.navigate("ShuffleManual", { patient });
         }
     }
-    console.log(titles)
+
     return (
         <View style={styles.container}>
             <View style={styles.topContainer}>
@@ -127,7 +112,7 @@ function ManualPlayerScreen({ route, navigation }) {
                     {" "}
                     Select tracks for your Playset
                 </Text>
-                {titles.length > 0 && <MyListComponent data={titles} patientId={patient._id} />}
+                {titles && titles.length > 0 && <MyListComponent data={titles} patientId={patient._id} />}
                 <Text></Text>
                 <TouchableOpacity
                     style={styles.button}
@@ -138,15 +123,15 @@ function ManualPlayerScreen({ route, navigation }) {
                 <Text></Text>
                 <Text></Text>
                 <View style={styles.buttonContainer}>
-                    <Text></Text>
-                    <Text></Text>
+                    {/* <Text></Text>
+                    <Text></Text> */}
 
                     <TouchableOpacity
                         style={styles.buttonPlay}
-                        onPress={goToYoutubeManualPlayer}
+                        onPress={() => navigation.navigate("YoutubeManual", { patient, onAdd: updateSelectionPanel })}
                     >
                         <Text style={styles.buttonTextsmall}>
-                            Search from Youtube
+                            Custom Song Search
                         </Text>
                     </TouchableOpacity>
 
