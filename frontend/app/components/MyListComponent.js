@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
     View,
     Text,
@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import Constants from "expo-constants";
+import { useFocusEffect } from '@react-navigation/native';
 
 const MyListComponent = ({ data, patientId }) => {
     const getPlayset = async () => {
@@ -22,33 +23,36 @@ const MyListComponent = ({ data, patientId }) => {
     };
     const [currentPlayset, setCurrentPlayset] = useState([]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(
-                    `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patientId}`
-                );
-                const data = await response.json();
-                setCurrentPlayset(data);
-                const initialSelectedTitles = data.map((item) => ({
-                    trackid: item._id,
-                    title: item.Title,
-                }));
-                setSelectedTitles(initialSelectedTitles);
-            } catch (error) {
-                // Handle the error
-            }
-        };
+    useFocusEffect(
+        useCallback(() => {
+            const fetchData = async () => {
+                try {
+                    const response = await fetch(
+                        `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patientId}`
+                    );
+                    const data = await response.json();
+                    setCurrentPlayset(data);
+                    const initialSelectedTitles = data.map((item) => ({
+                        trackid: item._id,
+                        title: item.Title,
+                    }));
+                    setSelectedTitles(initialSelectedTitles);
+                } catch (error) {
+                    // Handle the error
+                }
+            };
+    
+            fetchData();
 
-        fetchData();
-    }, []);
+            console.log ("CALLED 2")
+        }, [])
+    );
 
     useEffect(() => {
         // console.log("currentPlayset", currentPlayset);
     }, [currentPlayset]);
 
     const [searchText, setSearchText] = useState("");
-    const [selectedIds, setSelectedIds] = useState([]);
     const [selectedTitles, setSelectedTitles] = useState([]);
 
     async function updateDB(selectedTrackRatings) {

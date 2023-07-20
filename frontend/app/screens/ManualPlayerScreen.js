@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import MyListComponent from "../components/MyListComponent.js";
 import LoadingContext from "../store/LoadingContext.js";
+import { useFocusEffect } from '@react-navigation/native';
 
 import {
     StyleSheet,
@@ -27,31 +28,28 @@ function ManualPlayerScreen({ route, navigation }) {
             setIsLoading(false);
             return data.titles;
         }
-
+    
         fetchTitles(trackids)
             .then((titles) => {
                 let uniqueTitles = titles
-                    .filter((title, index, self) => {
-                        return (
-                            index ===
-                            self.findIndex((t) => t.Title === title.Title)
-                        );
-                    })
-                    .map((title) => ({
-                        ...title,
-                    }));
+                    .filter((title) => title && (
+                        titles.findIndex((t) => t && t.Title === title.Title) === titles.indexOf(title)
+                    ))
+                    .map((title) => ({ ...title }));
                 setTitles(uniqueTitles);
             })
             .catch((error) => {
                 console.error(error);
             });
-
+    
         console.log(">>>>>>>>>>>>>>>>> UPDATE SELECTION PANEL <<<<<<<<<<<<<<<<<<<<");
-    };
+    };    
 
-    useEffect(() => {
-        updateSelectionPanel();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            updateSelectionPanel();
+        }, [patient])
+    );
 
     const getPlayset = async () => {
         const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`);
@@ -96,8 +94,8 @@ function ManualPlayerScreen({ route, navigation }) {
    async function goToPlayer() {
         const x = await getPlayset(); // await the result of getPlayset
         console.log("playset" + x);
-        if (x.length < 5) {
-          Alert.alert("Please add more songs before playing! You have less than 5 songs in the playset currently");
+        if (x.length < 1) {
+          Alert.alert("You have not added any songs to your playset yet!");
         }
         else {
           navigation.navigate("ShuffleManual", { patient });
@@ -128,7 +126,7 @@ function ManualPlayerScreen({ route, navigation }) {
 
                     <TouchableOpacity
                         style={styles.buttonPlay}
-                        onPress={() => navigation.navigate("YoutubeManual", { patient, onAdd: updateSelectionPanel })}
+                        onPress={() => navigation.navigate("YoutubeManual", { patient })}
                     >
                         <Text style={styles.buttonTextsmall}>
                             Custom Song Search

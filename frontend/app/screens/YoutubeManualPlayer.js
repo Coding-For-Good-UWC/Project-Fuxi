@@ -9,13 +9,12 @@ import {
     Alert,
 } from "react-native";
 
-function YoutubeManual({ route, navigation }) {
-    const { patient, onAdd } = route.params;
+function YoutubeManual({ route }) {
+    const { patient } = route.params;
     const [searchQuery, setQuery] = useState(""); // State for search text
-    const [data, setData] = useState([]); // State for fetched data
 
     function searchYoutube() {
-        const url = `${Constants.expoConfig.extra.apiUrl}/track/scrapeyt`;
+        const url = `${Constants.expoConfig.extra.apiUrl}/track/ytQuery`;
         const postData = { searchQuery: searchQuery, patientInfo: patient };
 
         fetch(url, {
@@ -27,9 +26,7 @@ function YoutubeManual({ route, navigation }) {
         })
             .then((response) => response.json())
             .then((fetchedData) => {
-                setData(fetchedData.tracks);
                 showAlert(fetchedData);
-                onAdd();
             })
             .catch((error) => {
                 console.error("Error:", error);
@@ -63,7 +60,7 @@ function YoutubeManual({ route, navigation }) {
 
         try {
             const response = await fetch(
-                `${Constants.expoConfig.extra.apiUrl}/patient/ytQuery`,
+                `${Constants.expoConfig.extra.apiUrl}/patient/manualyt`,
                 {
                     method: "PUT",
                     headers: {

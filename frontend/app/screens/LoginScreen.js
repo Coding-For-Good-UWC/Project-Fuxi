@@ -35,8 +35,7 @@ function LoginScreen({ navigation }) {
         try {
             const auth = getAuth();
 
-            await signInWithEmailAndPassword(auth, "apex@gmail.com", "Supersecret1");
-			// await signInWithEmailAndPassword(auth, email, password);
+			      await signInWithEmailAndPassword(auth, email, password);
     
             const idToken = await auth.currentUser.getIdToken();
 
@@ -81,6 +80,7 @@ function LoginScreen({ navigation }) {
                     autoCapitalize="none"
                     secureTextEntry={false}
                     onChangeText={(email) => setEmail(email)}
+                    autoCorrect={false}
                 />
             </View>
             

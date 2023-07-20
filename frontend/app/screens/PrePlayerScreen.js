@@ -34,8 +34,8 @@ function PrePlayerScreen({ route, navigation }) {
                 onPress: async () => { // Make this callback async
                   const x = await getPlayset(); // await the result of getPlayset
                   console.log("playset" + x);
-                  if (x.length < 5) {
-                    Alert.alert("Please add more songs before playing! You have less than 5 songs in the playset currently");
+                  if (x.length < 1) {
+                    Alert.alert("You have not added any songs to your playset yet!");
                   }
                   else {
                     navigation.navigate("ShuffleManual", { patient });
