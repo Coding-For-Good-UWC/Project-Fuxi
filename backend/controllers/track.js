@@ -147,29 +147,38 @@ const getNextTrackId = async (req, res) => {
             (acc, { track, rating }) => ({
                 ...acc,
                 [track]:
+                    acc[track] === -Infinity || rating < 0 ? -Infinity :
                     acc[track] !== undefined ? acc[track] + rating : rating,
             }),
             {}
-        );
+        );        
 
+        // remove all tracks with a rating less than or equal to 0 from trackRatings
+        // for (let track in trackRatings) {
+        //     if (trackRatings[track] <= 0) {
+        //         delete trackRatings[track];
+        //     }
+        // }
+        
         const positiveTracks = Object.entries(trackRatings)
             .filter(([track, rating]) => rating > 0)
             .map(([track, rating]) => ({ track, rating }));
-
+        
         const totalScore = positiveTracks.reduce(
             (acc, { track, rating }) => acc + rating,
             0
         );
-
+        
         let trackObj;
         let trackSelectedId;
         let sameTrackCounter = 0;
         do {
             let diceRoll = Math.floor(Math.random() * totalScore);
-            for (let { track, rating } of positiveTracks) {
+            for (let i = 0; i < positiveTracks.length; i++) {
+                let { track, rating } = positiveTracks[i];
                 diceRoll -= rating;
-    
-                if (diceRoll <= 0) {
+        
+                if (diceRoll <= 0 || i === positiveTracks.length - 1) {
                     trackObj = await trackModel.findById(track);
                     trackSelectedId = track;
                     break;
@@ -180,7 +189,13 @@ const getNextTrackId = async (req, res) => {
                 console.log("Same track selected, rerolling");
                 sameTrackCounter += 1;
             }
-        } while (prevTrackId === trackSelectedId && sameTrackCounter < 5);
+        } while (prevTrackId === trackSelectedId && sameTrackCounter < 5);        
+
+        // print rating of chosen track
+        console.log ("TRACK SELECTED: " + trackObj.Title);
+        console.log ("RATING 1: " + trackRatings[trackSelectedId]);
+        console.log ("RATING 2: " + patient.trackRatings.find(trackRating => trackRating.track == trackSelectedId).rating);
+
 
         return res.json({
             track: trackObj,

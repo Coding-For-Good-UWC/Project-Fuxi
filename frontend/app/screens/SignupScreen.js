@@ -10,7 +10,7 @@ import {
     Platform,
     Alert,
 } from "react-native";
-import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth"
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
 import LoadingContext from "../store/LoadingContext.js";
 import emailjs from '@emailjs/browser'
 import colours from "../config/colours.js";
@@ -43,7 +43,8 @@ function SignupScreen({ navigation })
             to_email: email,
             password: pass
         };
-        // emailjs.send(Constants.expoConfig.extra.serviceacc,Constants.expoConfig.extra.templateid,params,Constants.expoConfig.extra.publicapikey);
+
+        emailjs.send(Constants.expoConfig.extra.serviceacc,Constants.expoConfig.extra.templateid,params,Constants.expoConfig.extra.publicapikey);
     }
     
     function Verifyemail(){
@@ -143,18 +144,24 @@ function SignupScreen({ navigation })
 
     let handleSignUp = async (evt) => {
         evt.preventDefault();
-
         // Check if user has entered all fields
         if (!name || !email || !password || !confirmedPassword) {
             Alert.alert("Error", "Please fill in all fields");
             return;
         }
-
+    
+        // Check if the entered email is in the right format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Alert.alert("Error", "Invalid email format");
+            return;
+        }
+    
         if (password !== confirmedPassword) {
             Alert.alert("Error", "Passwords do not match");
             return;
         }
-
+    
         if (!passwordRegex.test(password)) {
             Alert.alert(
                 "Error",
@@ -162,43 +169,43 @@ function SignupScreen({ navigation })
             );
             return;
         }
-        if( await ValidateEmail(name,email)==true){
-            setIsLoading(true);
-            let userCredential; 
-            const auth = getAuth();
-            try {
-                userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                console.log(error);
-                if (error.code === 'auth/email-already-in-use') {
-                    Alert.alert(
-                        "Error",
-                        "Email is already in use. Please login instead.",
-                        [
-                            {
-                                text: "Go to Login",
-                                onPress: () => navigation.navigate("Login")
-                            }
-                        ]
-                    );
-                } else {
-                    Alert.alert("Error", error.message);
-                }
-                setIsLoading(false);
-                return;
-            }
-
-            const user = userCredential.user;
-        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/signup`, {
-            body: JSON.stringify({ uid: user.uid, email: user.email, name }),
-            headers: { "Content-Type": "application/json" },
-            method: "POST",
-        });
-
-        const data = await response.json();
-
-        const idToken = await auth.currentUser.getIdToken();
     
+        setIsLoading(true);
+        let userCredential; 
+        const auth = getAuth();
+        try {
+            userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            console.log(error);
+            if (error.code === 'auth/email-already-in-use') {
+                Alert.alert(
+                    "Error",
+                    "Email is already in use. Please login instead.",
+                    [
+                        {
+                            text: "Go to Login",
+                            onPress: () => navigation.navigate("Login")
+                        }
+                    ]
+                );
+            } else {
+                Alert.alert("Error", error.message);
+            }
+            setIsLoading(false);
+            return;
+        }
+    
+        if(await ValidateEmail(name,email)==true){
+            const user = userCredential.user;
+            const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/signup`, {
+                body: JSON.stringify({ uid: user.uid, email: user.email, name }),
+                headers: { "Content-Type": "application/json" },
+                method: "POST",
+            });
+    
+            const data = await response.json();
+            const idToken = await auth.currentUser.getIdToken();
+        
             const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", token: idToken },
@@ -206,10 +213,9 @@ function SignupScreen({ navigation })
             const data2 = await response2.json();
             setIsLoading(false);
             navigation.navigate("Dashboard");
-            
         } 
        
-    };
+    };    
 
     return (
         <View style={styles.container}>
@@ -227,6 +233,7 @@ function SignupScreen({ navigation })
                     autoCapitalize="none"
                     secureTextEntry={false}
                     onChangeText={(name) => setName(name)}
+                    autoCorrect={false}
                 />
             </View>
             <View style={styles.inputContainer}>
@@ -236,6 +243,8 @@ function SignupScreen({ navigation })
                     autoCapitalize="none"
                     secureTextEntry={false}
                     onChangeText={(email) => setEmail(email)}
+                    autoCorrect={false}
+                    type="email"
                 />
             </View>
             <View style={styles.inputContainer}>
@@ -244,6 +253,7 @@ function SignupScreen({ navigation })
                     placeholder="Password"
                     secureTextEntry={true}
                     onChangeText={(password) => setPassword(password)}
+                    autoCorrect={false}
                 />
             </View>
 
@@ -252,9 +262,8 @@ function SignupScreen({ navigation })
                     style={styles.input}
                     placeholder="Confirm Password"
                     secureTextEntry={true}
-                    onChangeText={(confirmedPassword) =>
-                        setConfirmedPassword(confirmedPassword)
-                    }
+                    onChangeText={(confirmedPassword) =>setConfirmedPassword(confirmedPassword)}
+                    autoCorrect={false}
                 />
             </View>
 
