@@ -6,11 +6,9 @@ import {
   Image,
   Dimensions,
   Animated,
-  StatusBar,
-  FlatList,
+  StatusBar
 } from "react-native";
 import StyledButton from "../components/StyledButton.js";
-import colours from "../config/colours.js";
 
 const { width, height } = Dimensions.get("screen");
 
@@ -19,7 +17,7 @@ const DATA = [
     key: 1,
     title: "Welcome to Project Fuxi",
     description:
-      "Discover the healing power of music therapy and embark on a journey of self-care and well-being. Let's get started!",
+      "Project Fuxi harnesses music's power to enhance mental wellbeing for dementia patients. Start this transformative journey today.",
     image: require("../assets/fuxiIcon.png"),
     style: {
       width: width * 0.7,
@@ -31,7 +29,7 @@ const DATA = [
     key: 2,
     title: "Personalize Your Experience",
     description:
-      "We believe in tailoring your music therapy journey to your unique needs. Remember, every step you take here is a step toward finding harmony within yourself.",
+      "With dementia's unique effects on individuals, our music therapy is tailored to fit their distinct needs, guiding them towards tranquillity.",
     image: require("../assets/landing/26783.png"),
     style: {
       width: width,
@@ -43,7 +41,7 @@ const DATA = [
     key: 3,
     title: "Explore a World of Musical Wellness",
     description:
-      "Welcome to our diverse library of musical content specifically crafted for therapy purposes. From calming melodies to uplifting rhythms, we have a wide range of tracks carefully selected by music therapists.",
+      "Delve into our diverse music library, handpicked for dementia patients. Our tunes range from calming to energizing, designed to spark joy and peace.",
     image: require("../assets/landing/5508.png"),
     style: {
       width: width,
