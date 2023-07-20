@@ -52,22 +52,10 @@ const schema = new Schema ({
     }], 
     manualPlayset: 
     [{
-        id: { 
-            type: String, 
-            required: true 
-        }, 
-        rating: { 
-            type: Number, 
-            required: true
-        },
-        name:{
-            type:String,
+        trackid:{
+            type:Types.ObjectId,
             required:true
         }
-    }], 
-    requestedSongs:
-    [{
-        type: String
     }],
     institute: 
     {

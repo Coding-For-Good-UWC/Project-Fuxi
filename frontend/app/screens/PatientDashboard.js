@@ -34,8 +34,7 @@ function PatientDashboard({ route, navigation })
                 const patients = await getPatients(); 
 
                 setPatientData(patients);
-            setPatientData(patients);
-            setIsLoading(false);
+                setIsLoading(false);
             };
 
             loadPatients();
@@ -77,9 +76,8 @@ function PatientDashboard({ route, navigation })
                 ))}
             </ScrollView>
             <StyledButton
-                text="Add Patient"
+                text="New Listener"
                 onPress={addPatient}
-                style={styles.addButton}
             />
         </View>
     );

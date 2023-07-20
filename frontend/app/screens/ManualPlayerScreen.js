@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import MyListComponent from "../components/MyListComponent.js";
 import LoadingContext from "../store/LoadingContext.js";
+import { useFocusEffect } from '@react-navigation/native';
 
 import {
     StyleSheet,
@@ -9,135 +10,96 @@ import {
     TouchableOpacity,
     Alert,
 } from "react-native";
-import { getTrackTitles } from "../components/MyListComponent.js";
 import Constants from "expo-constants";
 
 import colours from "../config/colours.js";
-let x;
 
 function ManualPlayerScreen({ route, navigation }) {
     const { setIsLoading } = useContext(LoadingContext);
     const { patient } = route.params;
     const [titles, setTitles] = useState([]);
-    async function updateDB(selectedTrackRatings, id) {
-        const requestPayload = {
-            array: selectedTrackRatings,
-            patientID: id,
-        };
-
-        try {
-            const response = await fetch(
-                `${Constants.expoConfig.extra.apiUrl}/patient/manual`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(requestPayload),
-                }
-            );
-
-            const data = await response.json();
-            console.log(data);
-            if (data.message == "repeats") {
-                console.log("REPEATED");
-                console.log(data.existingValues);
-                let trackNames = data.existingValues
-                    .map((item) => item.name)
-                    .join("\n");
-
-                // display an alert
-                Alert.alert(
-                    "Duplicate Tracks",
-                    "These tracks are already in the playlist: \n \n" +
-                        trackNames
-                );
-            } else {
-                Alert.alert("Update Succesful");
-            }
-        } catch (error) {
-            Alert.alert("Update Unsuccesful, Please try again.");
-            console.error(error);
-        }
-    }
-
-    useEffect(() => {
+    
+    const updateSelectionPanel = async () => {
         let trackids = patient.trackRatings.map((rating) => rating.track);
-        setIsLoading(true);
-        console.log(trackids);
         async function fetchTitles(ids) {
-            const response = await fetch(
-                `${
-                    Constants.expoConfig.extra.apiUrl
-                }/track/titles?ids=${ids.join(",")}`
-            );
+            setIsLoading(true);
+            const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/titles?ids=${ids.join(",")}`);
             const data = await response.json();
-            // console.log(data.titles)
             setIsLoading(false);
             return data.titles;
         }
-
+    
         fetchTitles(trackids)
             .then((titles) => {
                 let uniqueTitles = titles
-                    .filter((title, index, self) => {
-                        return (
-                            index ===
-                            self.findIndex((t) => t.Title === title.Title)
-                        );
-                    })
-                    .map((title) => ({
-                        ...title,
-                    }));
-
+                    .filter((title) => title && (
+                        titles.findIndex((t) => t && t.Title === title.Title) === titles.indexOf(title)
+                    ))
+                    .map((title) => ({ ...title }));
                 setTitles(uniqueTitles);
             })
             .catch((error) => {
                 console.error(error);
             });
-    }, []);
+    
+        console.log(">>>>>>>>>>>>>>>>> UPDATE SELECTION PANEL <<<<<<<<<<<<<<<<<<<<");
+    };    
 
-    function SaveData() {
-        let m = getTrackTitles();
+    useFocusEffect(
+        useCallback(() => {
+            updateSelectionPanel();
+        }, [patient])
+    );
 
-        const selectedTrackRatings = [];
-
-        m.forEach((item) => {
-            selectedTrackRatings.push({
-                id: item.id,
-                rating: 3,
-                name: item.title,
-            });
-        });
-
-        updateDB(selectedTrackRatings, patient._id);
+    const getPlayset = async () => {
+        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`);
+        const data = await response.json();
+        return data
     }
 
-    const handleSelectedIdsChange = (ids) => {
-        setSelectedIds(ids);
-    };
+    async function viewTitles(){
+        try {
+          const response = await fetch(
+            `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`
+          );
+          const songNames = await response.json();
+          console.log("getmanual"+songNames)
+          const songNamesString = songNames.map((item, index) => `${index + 1}. ${item.Title}`).join("\n \n");
+      
+          // Show the alert
+          if(songNamesString==""){
+            Alert.alert("Playset is currently empty!")
 
-    const handleSelectedTitlesChange = (selectedtitles) => {
-        setSelectedTitles(selectedTitles);
-    };
-    function ViewSelectedTitles() {
-        x = getTrackTitles();
-        const titles = x.map((item) => item.title);
-        Alert.alert("Selected Playset", titles.join("\n \n"));
+          }
+          else{
+            Alert.alert(
+                "Current Playset",
+                songNamesString,
+                [
+                  {
+                    text: "OK",
+                  },
+                ],
+                { cancelable: false }
+              );
+            }
+
+          }
+        
+        catch(error){
+          console.log(error)
+        }
     }
 
-    function goToYoutubeManualPlayer() {
-        navigation.navigate("YoutubeManual", { patient });
-    }
-
-    const [modalVisible, setModalVisible] = useState(false);
-
-    const handleModalClose = () => {
-        setModalVisible(false);
-    };
-
-    function goToPlayer() {
-        navigation.navigate("ShuffleManual", { patient });
+   async function goToPlayer() {
+        const x = await getPlayset(); // await the result of getPlayset
+        console.log("playset" + x);
+        if (x.length < 1) {
+          Alert.alert("You have not added any songs to your playset yet!");
+        }
+        else {
+          navigation.navigate("ShuffleManual", { patient });
+        }
     }
 
     return (
@@ -148,29 +110,26 @@ function ManualPlayerScreen({ route, navigation }) {
                     {" "}
                     Select tracks for your Playset
                 </Text>
-                {titles.length > 0 && <MyListComponent data={titles} />}
+                {titles && titles.length > 0 && <MyListComponent data={titles} patientId={patient._id} />}
                 <Text></Text>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={ViewSelectedTitles}
+                    onPress={viewTitles}
                 >
                     <Text style={styles.buttonText}>View Selected Playset</Text>
                 </TouchableOpacity>
                 <Text></Text>
-                <TouchableOpacity style={styles.buttonSave} onPress={SaveData}>
-                    <Text style={styles.buttonTextSave}>Save</Text>
-                </TouchableOpacity>
                 <Text></Text>
                 <View style={styles.buttonContainer}>
-                    <Text></Text>
-                    <Text></Text>
+                    {/* <Text></Text>
+                    <Text></Text> */}
 
                     <TouchableOpacity
                         style={styles.buttonPlay}
-                        onPress={goToYoutubeManualPlayer}
+                        onPress={() => navigation.navigate("YoutubeManual", { patient })}
                     >
                         <Text style={styles.buttonTextsmall}>
-                            Search from Youtube
+                            Custom Song Search
                         </Text>
                     </TouchableOpacity>
 

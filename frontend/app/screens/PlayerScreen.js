@@ -1,27 +1,18 @@
-import React, { useState, useEffect, useContext, useRef} from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import {
-    StyleSheet,
     View,
     Text,
-    TouchableOpacity,
-    Image,
-    StatusBar,
+    StatusBar
 } from "react-native";
 import Slider from '@react-native-community/slider';
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-    faPlay,
-    faPause,
-    faBackward,
-    faForward,
-    faRepeat,
-} from "@fortawesome/free-solid-svg-icons";
 import Constants from 'expo-constants'
 
 import { Audio } from "expo-av";
 import LoadingContext from "../store/LoadingContext.js";
 
 import colours from "../config/colours.js";
+import { styles } from "../styles/playerStyles.js";
+import AudioPlayerComponent from "../components/AudioPlayerComponent.js";
 
 const DEFAULT_SONG_INFO = {
     title: "Track Name",
@@ -38,58 +29,40 @@ const RATING_COLORS = [
 ];
 
 let currentTrackId = -1;
-let currAudioFile = "";
-let nextAudioFile = "";
 
 const PlayerScreen = ({ route, navigation }) => {
-    const { patient } = route.params;
-
     const [audio, setAudio] = useState(null);
-    const [preloadedSound, setPreloadedSound] = useState(null);
+    const { patient } = route.params;
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
-    const [nextDuration, setNextDuration] = useState(0);
-    const [position, setPosition] = useState(0);
-
-    const [isPreloading, setIsPreloading] = useState(false);
-    const [usePreloadedImmediately, setUsePreloadedImmediately] = useState(false); // if true, use preloaded track immediately
-
-    const { isLoading, setIsLoading } = useContext(LoadingContext);
-
+    const { setIsLoading } = useContext(LoadingContext);
     const [songInfo, setSongInfo] = useState(DEFAULT_SONG_INFO);
-    const [nextSongInfo, setNextSongInfo] = useState(DEFAULT_SONG_INFO);
-
     const [rating, setRating] = useState(3);
     const [ratingColor, setRatingColor] = useState(RATING_COLORS[rating - 1]);
     const [ratingText, setRatingText] = useState(RATING_VALUES[rating - 1]);
-
     const [elapsedTime, setElapsedTime] = useState("0:00");
-    const [isLooping, setIsLooping] = useState(false);
+    const [prevTracks, setPrevTracks] = useState([]);
+    const isSkipping = useRef(false);
 
     const ratingRef = useRef(rating);
 
-    useEffect(() => {
-        updateSong(false, true); 
-        updateSong(true, true);
+    useEffect(() => 
+    {
+        const init = async () =>
+        {
+            setIsLoading(true);
+            await updateSong();
+            setIsLoading(false);
+        }
+
+        init();
     }, []);
 
-    const togglePlayPause = async () => {
-        if (!audio) return;
-    
-        if (isPlaying) {
-            await audio.pauseAsync();
-        } else {
-            const playbackStatus = await audio.playAsync();
-            setPosition(playbackStatus.positionMillis);
-        }
-        setIsPlaying(!isPlaying);
-    };    
-
-    const handleSliderValueChange = async (value) => {
-        if (audio) {
-            await audio.setPositionAsync(value);
-        }
-    };
+    useEffect(() => 
+    {
+        const prevTrackNames = prevTracks.map((track) => track.Title);
+        console.log(prevTrackNames);
+    }, [prevTracks]);
 
     const updateTrackRating = async () => {
         const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/rating`, {
@@ -97,7 +70,7 @@ const PlayerScreen = ({ route, navigation }) => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 patientId: patient._id,
-                trackId: currentTrackId,
+                trackId: currentTrackId, // TODO: MAKE SURE UPDATING RATING OF RIGHT TRACK
                 rating: ratingRef.current - 3
             }),
         });
@@ -110,37 +83,7 @@ const PlayerScreen = ({ route, navigation }) => {
         }
     };
 
-    const cleanTempFolder = async (fileName, isPreloading) => 
-    {    
-        nextAudioFile = fileName;
-
-        const payload = {
-            patientId: patient._id,
-            keepFiles: [currAudioFile, nextAudioFile]
-        };
-
-        console.log("payload: " + JSON.stringify(payload));
-
-        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/clean`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) 
-        {
-            alert('Something went wrong!');
-        }
-    };
-
-    const updateSong = async (isPreloading=true, isFirstLoad=false) => { // get audio file for a track based on algorithm // isNextTrack true means preloading next track
-        console.log("isPreloading: " + isPreloading);
-
-        if (!isPreloading)
-            setIsLoading(true);
-        else
-            setIsPreloading(true);
-
+    const updateSong = async () => { // get audio file for a track based on algorithm 
         await Audio.setAudioModeAsync({
             allowsRecordingIOS: false,
             staysActiveInBackground: false,
@@ -162,7 +105,6 @@ const PlayerScreen = ({ route, navigation }) => {
 
         if (!response.ok) {
             alert('Something went wrong!');
-            setIsLoading(false);
             return; 
         }
 
@@ -176,215 +118,168 @@ const PlayerScreen = ({ route, navigation }) => {
             imgUri: track.ImageURL,
         };
 
-        if (!isPreloading)
-            setSongInfo(newSongInfo);
-        else
-            setNextSongInfo(newSongInfo);
+        setSongInfo(newSongInfo);
 
-        const youtubeUrl = `https://www.youtube.com/watch?v=${track.URI}`;
-        data = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url?videoUrl=${encodeURIComponent(youtubeUrl)}&patientId=${patient._id}`);
+        // Make a post request to audio-url and pass the track objet and patient id
+        const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                track: track,
+                patientId: patient._id
+            })
+        });
 
-        const { audioURL } = await data.json();
+        if (response2.status === "ERROR") {
+            alert('Something went wrong!');
+            return;
+        }
+
+        const data2 = await response2.json();
+
+        const { audioURL } = data2;
 
         console.log ("audioURL: " + audioURL);
 
-        const fileName = audioURL.split("/").pop();
-
-        if (isFirstLoad)
-        {
-            if (!isPreloading)
-                currAudioFile = fileName;
-            else
-                nextAudioFile = fileName;
-        }
-        else
-            await cleanTempFolder(fileName, isPreloading); 
-        
         const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
-        
-        if (!isPreloading)
-        {
-            setAudio(sound);
-            setDuration(status.durationMillis);
-            setElapsedTime("0:00");
-        }
-        else
-        {
-            setPreloadedSound(sound);
-            setNextDuration(status.durationMillis);
-        }
 
-        if (!isPreloading)
-            setIsLoading(false);
-        else
-            setIsPreloading(false);
+        setAudio(sound);
+        setDuration(status?.durationMillis);
+        setElapsedTime("0:00");
+        
+        await sound.playAsync();
+        setIsPlaying(true);
+
+        // push new song to prevTracks
+        const newPrevTracks = [...prevTracks];
+        newPrevTracks.push(track);
+        setPrevTracks(newPrevTracks);
     };  
 
-    const loadPreloadedTrack = async () => {
-        try {
-            if (preloadedSound) {
-                setAudio(preloadedSound);
-                setDuration(nextDuration);
-                setElapsedTime("0:00");
-                setIsPlaying(true);
-                await preloadedSound.playAsync(); 
-            } else {
-                throw new Error("Preloaded sound is not ready.");
-            }
-        } catch (error) {
-            console.log("Preloaded sound was not ready. Loading next track.", error); // TODO: BUG WHEN SLIDER REACHES END OF SONG AND GETS STUCK
-            await updateSong(true);
-        }
-    };    
-
-    useEffect(() => { 
-        if (usePreloadedImmediately)
-        {
-            nextTrack();
-            setIsLoading(false);
-            setUsePreloadedImmediately(false);
-        }
-    }, [isPreloading]);
- 
-    const nextTrack = async () => {
-        if (isPreloading) {
-            console.log("WAITING FOR PRELOADING TO FINISH");
-            setUsePreloadedImmediately(true);
-            setIsLoading(true);
+    const nextTrack = async () => 
+    {
+        if (isSkipping.current) {
             return;
         }
-    
+        
+        isSkipping.current = true;
+
         console.log("NEXT TRACK");
     
         if (audio) {
             await audio.unloadAsync();
         }
-      
+        
         await updateTrackRating();
     
-        setSongInfo(nextSongInfo);
         setRating(3);
         ratingRef.current = 3;
         setRatingColor(RATING_COLORS[2]);
         setRatingText(RATING_VALUES[2]);
-        
-        // Load and play the preloaded track.
-        await loadPreloadedTrack();  
-    
-        // Now start preloading the next track.
-        await updateSong(true);  
+
+        await updateSong();  
+
+        isSkipping.current = false;
     };
-    
-    useEffect(() => {
-        if (audio) 
-        {
-            audio.setOnPlaybackStatusUpdate((status) => {
-                setPosition(status.positionMillis);
-    
-                const totalSeconds = Math.floor(status.positionMillis / 1000);
-                const minutes = Math.floor(totalSeconds / 60);
-                const seconds = totalSeconds % 60;
-                setElapsedTime(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
-    
-                if (status.didJustFinish) {
-                    if (isLooping) {
-                        // TODO: increase rating for this track by 1
-                        audio.replayAsync(); // Replay track if isLooping is true
-                    }
-                    else {
-                        nextTrack();
-                    }
-                }
-            });
-        }
-    }, [audio, isLooping]);  // add audio and isLooping as dependency
 
     const handleRatingValueChange = (value) => {
+        if (isSkipping.current) 
+            return;
+
         setRating(value);
         ratingRef.current = value; // Add this line
         setRatingColor(RATING_COLORS[value - 1]);
         setRatingText(RATING_VALUES[value - 1]);
     };    
 
+    const onTrackPrev = async () => 
+    {
+        if (audio) {
+            await audio.unloadAsync();
+        }
+        
+        await updateTrackRating();
+    
+        setRating(3);
+        ratingRef.current = 3;
+        setRatingColor(RATING_COLORS[2]);
+        setRatingText(RATING_VALUES[2]);
+        
+        await Audio.setAudioModeAsync({ // TODO: separate function with all common code with updateSong
+            allowsRecordingIOS: false,
+            staysActiveInBackground: false,
+            playsInSilentModeIOS: true,
+            shouldDuckAndroid: true,
+            playThroughEarpieceAndroid: false,
+        });
+        
+        const track = prevTracks[prevTracks.length - 1];
+        
+        if (!track) {
+            nextTrack(); 
+        }
+        
+        // remove last track from prevTracks
+        const newPrevTracks = [...prevTracks];
+        newPrevTracks.pop();
+        setPrevTracks(newPrevTracks);
+    
+        currentTrackId = track._id;
+
+        const newSongInfo = {
+			title: `${track.Title} - ${track.Artist ? track.Artist: "Unknown"}`,
+            imgUri: track.ImageURL,
+        };
+
+        setSongInfo(newSongInfo);
+
+        // Make a post request to audio-url and pass the track objet and patient id
+        const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify
+            ({
+                track: track,
+                patientId: patient._id
+            })
+        });
+
+        if (response2.status === "ERROR") {
+            alert('Something went wrong!');
+            return;
+        }
+
+        const data2 = await response2.json();
+
+        const { audioURL } = data2;
+
+        console.log ("audioURL: " + audioURL);
+        const { sound, status } = await Audio.Sound.createAsync({ uri: audioURL });
+        
+        setAudio(sound);
+
+        await sound.playAsync();
+        setDuration(status.durationMillis);
+        setElapsedTime("0:00");
+
+        setIsPlaying(true);
+    };
+
     return (
         <View style={styles.container}>
-            {/* <BackButton navigation={navigation} onClick={
-                async () => {
-                    if (audio) {
-                        await audio.unloadAsync();
-                    }
-                }
-            } /> */}
             <StatusBar backgroundColor={colours.bg} barStyle="dark-content" />
-            <View style={styles.topContainer}>
-                <Text style={styles.title}>Project FUXI</Text>
-                <View style={styles.musicInfoContainer}>
-                    <Image
-                        style={styles.coverImage}
-                        source={{ uri: songInfo.imgUri }}
-                    />
-                    <Text style={styles.songName} numberOfLines={1}>
-                        {songInfo.title}
-                    </Text>
-                    <View style={styles.progressBarContainer}>
-                        <Slider
-                            style={styles.slider}
-                            minimumValue={0}
-                            maximumValue={duration}
-                            value={position}
-                            onSlidingComplete={handleSliderValueChange}
-                            minimumTrackTintColor="#3d5875"
-                            maximumTrackTintColor="#d3d3d3"
-                            thumbTintColor="#3d5875"
-                        />
-                        <Text style={styles.elapsedTime}>{elapsedTime}</Text>
-                    </View>
-                    <View style={styles.ratingContainer}>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => console.log("BACK")}
-                        >
-                            <FontAwesomeIcon icon={faBackward} size={20} />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => {
-                                setIsLooping(!isLooping);
-                            }}
-                        >
-                            <FontAwesomeIcon icon={faRepeat} size={20} />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={togglePlayPause}
-                        >
-                            <FontAwesomeIcon
-                                icon={isPlaying ? faPause : faPlay}
-                                size={20}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={() => nextTrack()}
-                        >
-                            <FontAwesomeIcon icon={faForward} size={20} />
-                        </TouchableOpacity>
-                    </View>
-                    <Text
-                        style={[
-                            {
-                                color: isLooping
-                                    ? colours.primary
-                                    : colours.secondary,
-                            },
-                            styles.loopText,
-                        ]}
-                    >
-                        Loop: {isLooping ? "On" : "Off"}
-                    </Text>
-                </View>
-            </View>
-            <View style={styles.bottomContainer}>
+            <AudioPlayerComponent 
+                audio={audio}
+                songInfo={songInfo}
+                duration={duration}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+                elapsedTime={elapsedTime}
+                setElapsedTime={setElapsedTime}
+                onTrackFinish={nextTrack}
+                onTrackPrev={onTrackPrev}
+            />
+            <View style={styles.ratingContainer}>
                 <View style={styles.sliderContainer}>
                 <Slider
                     style={styles.ratingSlider}
@@ -411,120 +306,5 @@ const PlayerScreen = ({ route, navigation }) => {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colours.bg,
-        paddingHorizontal: 20,
-    },
-    topContainer: {
-        flex: 2,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingTop: 130,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: "bold",
-        color: colours.primaryText,
-        marginBottom: 20,
-    },
-    musicInfoContainer: {
-        alignItems: "center",
-    },
-    coverImage: {
-        width: 200,
-        height: 200,
-        borderRadius: 20,
-        marginBottom: 20,
-    },
-    songName: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: colours.primaryText,
-        marginTop: 10,
-    },
-    progressBarContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        marginVertical: 20,
-    },
-    elapsedTime: {
-        fontSize: 14,
-        color: colours.primaryText,
-        paddingHorizontal: 8,
-    },
-    button: {
-        alignItems: "center",
-        justifyContent: "center",
-        paddingHorizontal: 8,
-    },
-    progressBar: {
-        flex: 1,
-        height: 5,
-        backgroundColor: colours.secondary,
-        borderRadius: 3,
-        marginRight: 10,
-    },
-    progressBarFill: {
-        backgroundColor: colours.primary,
-        borderRadius: 3,
-    },
-    playPauseButton: {
-        alignSelf: "center",
-        marginBottom: 30,
-    },
-    bottomContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingBottom: 120,
-    },
-    sliderContainer: {
-        alignItems: "center",
-    },
-    slider: {
-        flex: 1,
-        marginRight: 10,
-    },
-    ratingSlider: {
-        width: 300,
-        marginBottom: 10,
-    },
-    sliderValues: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        width: "100%",
-    },    
-    sliderValue: {
-        fontSize: 12,
-        color: "gray",
-    },
-    ratingText: {
-        fontSize: 18,
-        fontWeight: "bold",
-        textAlign: "center",
-        marginTop: 5,
-    },
-    ratingContainer: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center",
-        width: "80%",
-        marginTop: 10,
-        marginBottom: 20,
-        backgroundColor: colours.bg,
-        borderRadius: 25,
-        paddingVertical: 5,
-    },
-    loopText: {
-        fontSize: 16,
-        marginTop: 10,
-        color: colours.primaryText,
-    },
-});
 
 export default PlayerScreen;

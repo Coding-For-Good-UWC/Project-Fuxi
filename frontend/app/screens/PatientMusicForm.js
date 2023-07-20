@@ -87,7 +87,7 @@ function PatientMusicForm({ route, navigation })
         }
         else 
         {
-			let res = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/scrape`, {
+			let res = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/initial`, {
 				body: JSON.stringify({ patientId: data.patient._id }),
 				headers: { "Content-Type": "application/json" },
 				method: "POST",
@@ -109,7 +109,7 @@ function PatientMusicForm({ route, navigation })
             </View>
             <View style={styles.info}>
                 <Text style={styles.info}>
-                    What did your patient listen to in their teen years?
+                    What do you think the listener would have heard during their teen years?
                 </Text>
             </View>
             <View style={styles.bodyContainer}>
