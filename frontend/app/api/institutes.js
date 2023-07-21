@@ -6,7 +6,7 @@ const getInstitute = async () =>
     const idToken = await getAuth().currentUser.getIdToken(); // id token
 
     const response = await fetch(
-        `${Constants.expoConfig.extra.apiUrl}/institute/`,
+        `https://project-fuxi-fsugt.ondigitalocean.app/institute/`,
         {
             method: "GET",
             headers: { "Content-Type": "application/json", token: idToken },

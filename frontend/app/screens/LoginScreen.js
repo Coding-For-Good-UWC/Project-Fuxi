@@ -39,7 +39,7 @@ function LoginScreen({ navigation }) {
     
             const idToken = await auth.currentUser.getIdToken();
 
-            const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
+            const response = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/institute/verify`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", token: idToken },
             });

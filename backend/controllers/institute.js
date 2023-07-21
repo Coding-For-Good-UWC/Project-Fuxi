@@ -65,4 +65,19 @@ const verify = async(req, res) =>
     res.status(200).json({ status: "OK", message: "Verified", uid: req.uid });
 }
 
-module.exports = { signup, getPatients, verify, getInstitute }; 
+const checkNameRepeat = async (req, res) => {
+    console.log("IN HERE")
+    const { name } = req.query; // Get the 'name' parameter from the query string instead of the request body
+    const institute = await instituteModel.findOne({name: name });
+    if (institute == null) {
+        console.log("UNIQUE")
+        return res.status(200).json({ status: "OK", message: "Name is unique" });
+
+    } else {
+        console.log("SAME")
+        return res.status(400).json({ status: "ERROR", message: "same" });
+
+    }
+};
+
+module.exports = { signup, getPatients, verify, getInstitute, checkNameRepeat }; 

@@ -55,7 +55,7 @@ const ShuffleManual = ({ route, navigation }) => {
         setSongInfo(newSongInfo);
         
         // Make a post request to audio-url and pass the track objet and patient id
-        const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url`, {
+        const response2 = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/track/audio-url`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -87,7 +87,7 @@ const ShuffleManual = ({ route, navigation }) => {
     const getManualPlayset = async () => {
         try {
             const response = await fetch(
-                `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`
+                `https://project-fuxi-fsugt.ondigitalocean.app/patient/getmanual?id=${patient._id}`
             );
             const data = await response.json();
             console.log(data);

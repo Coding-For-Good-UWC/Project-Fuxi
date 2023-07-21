@@ -14,7 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 const MyListComponent = ({ data, patientId }) => {
     const getPlayset = async () => {
         const response = await fetch(
-            `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patientId}`
+            `https://project-fuxi-fsugt.ondigitalocean.app/patient/getmanual?id=${patientId}`
         );
         const data = await response.json();
         console.log("got data");
@@ -28,7 +28,7 @@ const MyListComponent = ({ data, patientId }) => {
             const fetchData = async () => {
                 try {
                     const response = await fetch(
-                        `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patientId}`
+                        `https://project-fuxi-fsugt.ondigitalocean.app/patient/getmanual?id=${patientId}`
                     );
                     const data = await response.json();
                     setCurrentPlayset(data);
@@ -63,7 +63,7 @@ const MyListComponent = ({ data, patientId }) => {
         console.log(selectedTrackRatings);
         try {
             const response = await fetch(
-                `${Constants.expoConfig.extra.apiUrl}/patient/manual`,
+                `https://project-fuxi-fsugt.ondigitalocean.app/patient/manual`,
                 {
                     method: "PUT",
                     headers: {
@@ -103,7 +103,7 @@ const MyListComponent = ({ data, patientId }) => {
 
         try {
             const response = await fetch(
-                `${Constants.expoConfig.extra.apiUrl}/patient/deletemanual`,
+                `https://project-fuxi-fsugt.ondigitalocean.app/patient/deletemanual`,
                 {
                     method: "PUT",
                     headers: {

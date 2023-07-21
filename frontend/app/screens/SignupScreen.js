@@ -35,7 +35,9 @@ function SignupScreen({ navigation })
         console.log("actual password:" + pass);
         return pass;
     }
-    
+    function gotoSignUp(){
+        handleSignUp();
+    }
 
     function SendEmail(name, email, pass){
         var params = {
@@ -44,7 +46,7 @@ function SignupScreen({ navigation })
             password: pass
         };
 
-        emailjs.send(Constants.expoConfig.extra.serviceacc,Constants.expoConfig.extra.templateid,params,Constants.expoConfig.extra.publicapikey);
+        // emailjs.send(Constants.expoConfig.extra.serviceacc,Constants.expoConfig.extra.templateid,params,Constants.expoConfig.extra.publicapikey);
     }
     
     function Verifyemail(){
@@ -58,57 +60,74 @@ function SignupScreen({ navigation })
     
     async function showAlert(name, email) {
         let passwordCorrect = false;
-        while (!passwordCorrect) {
-            userpassword = await new Promise((resolve) => {
-                prompt(
-                    "Email Verification",
-                    "We've just sent you a verification email with a password. Please enter your password here to proceed!",
-                    [
-                        { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
-                        {
-                            text: 'OK',
-                            onPress: (inputPassword) => {
-                                if (/^\d{6}$/.test(inputPassword)) {
-                                    resolve(inputPassword);
-                                } else {
-                                    Alert.alert(
-                                        "Invalid Password",
-                                        "Please enter 6 digits only.",
-                                        [{ text: "OK", onPress: () => resolve(null) }]
-                                    );
-                                }
-                            }
-                        },
-                        { 
-                            text: 'Resend Email', 
-                            onPress: () => {
-                                SendEmail(name, email, generateRandomPassword())
-                                resolve(null);
-                            }
-                        }
-                    ],
-                    { type: 'secure-text', cancelable: false, defaultValue: '', placeholder: 'password' }
+        let isCancelled = false;
+      
+        while (!passwordCorrect && !isCancelled) {
+          userpassword = await new Promise((resolve) => {
+            prompt(
+              "Email Verification",
+              "We've just sent you a verification email with a password. Please enter your password here to proceed!",
+              [
+                {
+                  text: 'Cancel',
+                  onPress: () => {
+                    setIsLoading(false);
+                    isCancelled = true;
+                    resolve(null); // Resolve with null when Cancel is clicked
+                  },
+                  style: 'cancel',
+                },
+                {
+                  text: 'OK',
+                  onPress: (inputPassword) => {
+                    if (/^\d{6}$/.test(inputPassword)) {
+                      resolve(inputPassword);
+                    } else {
+                      Alert.alert(
+                        "Invalid Password",
+                        "Please enter 6 digits only.",
+                        [{ text: "OK", onPress: () => resolve(null) }]
+                      );
+                    }
+                  },
+                },
+                {
+                  text: 'Resend Email',
+                  onPress: () => {
+                    SendEmail(name, email, generateRandomPassword());
+                    resolve(null);
+                  },
+                },
+              ],
+              {
+                type: 'secure-text',
+                cancelable: false,
+                defaultValue: '',
+                placeholder: 'password',
+              }
+            );
+          });
+      
+          if (userpassword !== null && !isCancelled) {
+            if (Verifyemail()) {
+              console.log("email verified");
+              passwordCorrect = true;
+            } else {
+              console.log("no");
+              await new Promise((resolve) => {
+                Alert.alert(
+                  "Invalid Password",
+                  "Wrong password entered. Please try again!",
+                  [{ text: "OK", onPress: resolve }]
                 );
-            });
-    
-            if (userpassword !== null) {
-                if (Verifyemail()) {
-                    console.log("email verified");
-                    passwordCorrect = true;
-                } else {
-                    console.log("no");
-                    await new Promise((resolve) => {
-                        Alert.alert(
-                            "Invalid Password",
-                            "Wrong password entered. Please try again!",
-                            [ { text: "OK", onPress: resolve } ]
-                        );
-                    });
-                }
+              });
             }
+          }
         }
-        return true;
-    }
+      
+        return !isCancelled; // Return true if not cancelled, false otherwise
+      }
+      
     
     
     
@@ -170,49 +189,73 @@ function SignupScreen({ navigation })
             return;
         }
     
-        setIsLoading(true);
-        let userCredential; 
-        const auth = getAuth();
-        try {
-            userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        } catch (error) {
-            console.log(error);
-            if (error.code === 'auth/email-already-in-use') {
-                Alert.alert(
-                    "Error",
-                    "Email is already in use. Please login instead.",
-                    [
-                        {
-                            text: "Go to Login",
-                            onPress: () => navigation.navigate("Login")
-                        }
-                    ]
-                );
-            } else {
-                Alert.alert("Error", error.message);
-            }
-            setIsLoading(false);
-            return;
-        }
+       
     
         if(await ValidateEmail(name,email)==true){
-            const user = userCredential.user;
-            const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/signup`, {
-                body: JSON.stringify({ uid: user.uid, email: user.email, name }),
-                headers: { "Content-Type": "application/json" },
-                method: "POST",
+            const getnames = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/namerepeat?name=${encodeURIComponent(name)}`, {
+                method: "GET",
             });
+            const values = await getnames.json();
+            
+            if (values.message === "same") {
+                Alert.alert("Error", "Institute with the same name already exists, please choose a different name and try again.");
+                setIsLoading(false);
+                console.log("EXISTS")
+                return
+            }
+            
+            setIsLoading(true);
+            let userCredential; 
+            const auth = getAuth();
+            try {
+                userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.log(error);
+                if (error.code === 'auth/email-already-in-use') {
+                    Alert.alert(
+                        "Error",
+                        "Email is already in use. Please login instead.",
+                        [
+                            {
+                                text: "Go to Login",
+                                onPress: () => navigation.navigate("Login")
+                            }
+                        ]
+                    );
+                } else {
+                    Alert.alert("Error", error.message);
+                }
+                setIsLoading(false);
+                return;
+            }
     
-            const data = await response.json();
-            const idToken = await auth.currentUser.getIdToken();
+            try {
+                const user = userCredential.user;
+                const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/signup`, {
+                    body: JSON.stringify({ uid: user.uid, email: user.email, name }),
+                    headers: { "Content-Type": "application/json" },
+                    method: "POST",
+                });
+                const data = await response.json();
+           
+                const idToken = await auth.currentUser.getIdToken();
+                const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", token: idToken },
+                });
+                const data2 = await response2.json();
+              
+                setIsLoading(false);
+                navigation.navigate("Dashboard");
+               
+              } catch (error) {
+                console.log(error);
+                  Alert.alert("Error", "An error occurred while processing your request");
         
-            const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/institute/verify`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", token: idToken },
-            });
-            const data2 = await response2.json();
-            setIsLoading(false);
-            navigation.navigate("Dashboard");
+                setIsLoading(false);
+              }
+              
+              
         } 
        
     };    

@@ -6,7 +6,7 @@ const getPatients = async () =>
     const idToken = await getAuth().currentUser.getIdToken(); // id token
 
     const response = await fetch(
-        `${Constants.expoConfig.extra.apiUrl}/institute/patients/`,
+        `https://project-fuxi-fsugt.ondigitalocean.app/institute/patients/`,
         {
             method: "GET",
             headers: { "Content-Type": "application/json", token: idToken },

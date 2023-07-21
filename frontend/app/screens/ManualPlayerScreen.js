@@ -23,7 +23,7 @@ function ManualPlayerScreen({ route, navigation }) {
         let trackids = patient.trackRatings.map((rating) => rating.track);
         async function fetchTitles(ids) {
             setIsLoading(true);
-            const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/titles?ids=${ids.join(",")}`);
+            const response = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/track/titles?ids=${ids.join(",")}`);
             const data = await response.json();
             setIsLoading(false);
             return data.titles;
@@ -52,7 +52,7 @@ function ManualPlayerScreen({ route, navigation }) {
     );
 
     const getPlayset = async () => {
-        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`);
+        const response = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/patient/getmanual?id=${patient._id}`);
         const data = await response.json();
         return data
     }
@@ -60,7 +60,7 @@ function ManualPlayerScreen({ route, navigation }) {
     async function viewTitles(){
         try {
           const response = await fetch(
-            `${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`
+            `https://project-fuxi-fsugt.ondigitalocean.app/patient/getmanual?id=${patient._id}`
           );
           const songNames = await response.json();
           console.log("getmanual"+songNames)

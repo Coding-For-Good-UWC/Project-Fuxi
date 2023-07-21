@@ -13,7 +13,7 @@ function PrePlayerScreen({ route, navigation }) {
     const { patient } = route.params;
     console.log(patient._id)
     const getPlayset = async () => {
-        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/getmanual?id=${patient._id}`);
+        const response = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/patient/getmanual?id=${patient._id}`);
         const data = await response.json();
         return data
     }

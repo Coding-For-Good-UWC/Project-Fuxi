@@ -17,5 +17,6 @@ router.post("/verify", verifyMw, controller.verify); // verify patient
 
 router.get ("/", verifyMw, controller.getInstitute); 
 router.get("/patients", verifyMw, controller.getPatients); // get all patients of institute
+router.get("/namerepeat", controller.checkNameRepeat); // check if institute name is already taken
 
 module.exports = router; 

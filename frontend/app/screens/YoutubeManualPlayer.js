@@ -14,7 +14,7 @@ function YoutubeManual({ route }) {
     const [searchQuery, setQuery] = useState(""); // State for search text
 
     function searchYoutube() {
-        const url = `${Constants.expoConfig.extra.apiUrl}/track/ytQuery`;
+        const url = `https://project-fuxi-fsugt.ondigitalocean.app/track/ytQuery`;
         const postData = { searchQuery: searchQuery, patientInfo: patient };
 
         fetch(url, {
@@ -60,7 +60,7 @@ function YoutubeManual({ route }) {
 
         try {
             const response = await fetch(
-                `${Constants.expoConfig.extra.apiUrl}/patient/manualyt`,
+                `https://project-fuxi-fsugt.ondigitalocean.app/patient/manualyt`,
                 {
                     method: "PUT",
                     headers: {

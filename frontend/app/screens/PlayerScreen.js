@@ -65,7 +65,7 @@ const PlayerScreen = ({ route, navigation }) => {
     }, [prevTracks]);
 
     const updateTrackRating = async () => {
-        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/rating`, {
+        const response = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/track/rating`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -97,7 +97,7 @@ const PlayerScreen = ({ route, navigation }) => {
 			prevTrackId: currentTrackId,
         };
 
-        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/next`, {
+        const response = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/track/next`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -121,7 +121,7 @@ const PlayerScreen = ({ route, navigation }) => {
         setSongInfo(newSongInfo);
 
         // Make a post request to audio-url and pass the track objet and patient id
-        const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url`, {
+        const response2 = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/track/audio-url`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -234,7 +234,7 @@ const PlayerScreen = ({ route, navigation }) => {
         setSongInfo(newSongInfo);
 
         // Make a post request to audio-url and pass the track objet and patient id
-        const response2 = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/audio-url`, {
+        const response2 = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/track/audio-url`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify

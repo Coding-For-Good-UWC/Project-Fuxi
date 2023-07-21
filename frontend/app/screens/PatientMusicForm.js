@@ -4,6 +4,7 @@ import Constants from 'expo-constants'
 
 import GenreToggleButton from "../components/GenreToggleButton";
 import LoadingContext from "../store/LoadingContext";
+import StyledButton from "../components/StyledButton";
 
 import colours from "../config/colours.js";
 
@@ -74,7 +75,7 @@ function PatientMusicForm({ route, navigation })
             instituteId: institute._id,
         };
 
-        const response = await fetch(`${Constants.expoConfig.extra.apiUrl}/patient/new`, {
+        const response = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/patient/new`, {
             body: JSON.stringify(newPatientData),
             headers: { "Content-Type": "application/json" },
             method: "POST",
@@ -87,7 +88,7 @@ function PatientMusicForm({ route, navigation })
         }
         else 
         {
-			let res = await fetch(`${Constants.expoConfig.extra.apiUrl}/track/initial`, {
+			let res = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/track/initial`, {
 				body: JSON.stringify({ patientId: data.patient._id }),
 				headers: { "Content-Type": "application/json" },
 				method: "POST",
@@ -114,21 +115,16 @@ function PatientMusicForm({ route, navigation })
             </View>
             <View style={styles.bodyContainer}>
                 <View style={styles.rightContainer}>
-                {genres.map((genre, index) => (
-                    <GenreToggleButton
-                        genre={genre}
-                        key={index}
-                        updatePreferences={() => updatePreferences(index)}
-                    />
-                ))}
+                    {genres.map((genre, index) => (
+                        <GenreToggleButton
+                            genre={genre}
+                            key={index}
+                            updatePreferences={() => updatePreferences(index)}
+                        />
+                    ))}
                 </View>
-                <TouchableOpacity
-                    style={styles.submitButton}
-                    onPress={submitHandler}
-                >
-                    <Text style={styles.submitButtonText}>Submit</Text>
-                </TouchableOpacity>
             </View>
+            <StyledButton text="Submit" onPress={submitHandler} />
         </View>
     );
 }
@@ -146,7 +142,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     bodyContainer: {
-        flex: 0.55,
+        flex: 0.7,
         width: "100%",
         alignItems: "center",
     },
@@ -154,7 +150,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: colours.primaryText,
         textAlign: "center",
-        marginBottom: 30,
+        marginBottom: 10,
         paddingRight: 20,
         paddingLeft: 20,
     },
@@ -163,50 +159,14 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "row",
-        flexWrap: "wrap"
+        flexWrap: "wrap",
+        padding: 20
     },    
     title: {
         color: colours.primaryText,
         fontSize: 32,
         fontWeight: "500",
         marginBottom: 10,
-    },
-    inputContainer: {
-        backgroundColor: colours.secondary,
-        borderRadius: 30,
-        width: 200,
-        height: 50,
-        marginBottom: 20,
-    },
-    input: {
-        flex: 1,
-        height: 50,
-        padding: 10,
-        marginLeft: 20,
-        marginRight: 20,
-        color: colours.primaryText,
-    },
-    clickableText: {
-        height: 30,
-        color: colours.primary,
-    },
-    submitButton: {
-        backgroundColor: colours.primary,
-        borderRadius: 10,
-        width: 100,
-        height: 40,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 20,
-    },
-    submitButtonText: {
-        color: colours.bg,
-        textAlign: "center",
-        paddingLeft: 10,
-        paddingRight: 10,
-        fontSize: 18,
-        fontWeight: "450",
     }
 });
 
