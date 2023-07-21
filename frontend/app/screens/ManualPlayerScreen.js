@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from "react";
 import MyListComponent from "../components/MyListComponent.js";
 import LoadingContext from "../store/LoadingContext.js";
 import { useFocusEffect } from '@react-navigation/native';
+import StyledButton from "../components/StyledButton.js";
 
 import {
     StyleSheet,
@@ -112,34 +113,21 @@ function ManualPlayerScreen({ route, navigation }) {
                 </Text>
                 {titles && titles.length > 0 && <MyListComponent data={titles} patientId={patient._id} />}
                 <Text></Text>
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={styles.button}
                     onPress={viewTitles}
                 >
                     <Text style={styles.buttonText}>View Selected Playset</Text>
-                </TouchableOpacity>
-                <Text></Text>
-                <Text></Text>
-                <View style={styles.buttonContainer}>
-                    {/* <Text></Text>
-                    <Text></Text> */}
-
-                    <TouchableOpacity
-                        style={styles.buttonPlay}
-                        onPress={() => navigation.navigate("YoutubeManual", { patient })}
-                    >
-                        <Text style={styles.buttonTextsmall}>
-                            Custom Song Search
-                        </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.buttonPlay}
-                        onPress={goToPlayer}
-                    >
-                        <Text style={styles.buttonTextSave}>Play</Text>
-                    </TouchableOpacity>
-                </View>
+                </TouchableOpacity> */}
+                <StyledButton text="View" onPress={viewTitles} />
+                <StyledButton text="Play" onPress={goToPlayer} />
+                
+                {/* <TouchableOpacity
+                    style={styles.buttonPlay}
+                    onPress={goToPlayer}
+                >
+                    <Text style={styles.buttonTextSave}>Play</Text>
+                </TouchableOpacity> */}
             </View>
         </View>
     );

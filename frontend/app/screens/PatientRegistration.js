@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
     StyleSheet,
     Text,
@@ -7,20 +7,10 @@ import {
     TextInput,
     TouchableOpacity,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
+import { Picker } from "@react-native-picker/picker";
 import DatePickerModal from "../components/DatePickerModal";
 import colours from "../config/colours.js";
 import StyledButton from "../components/StyledButton";
-
-const renderPickerSelect = (placeholder, onValueChange, items) => (
-    <RNPickerSelect
-        placeholder={{ label: placeholder, value: null }}
-        onValueChange={onValueChange}
-        items={items.map((item) => ({ label: item, value: item }))}
-        style={styles.pickerSelectStyles}
-        textAlign="center"
-    />
-);
 
 const countries = [
     "Afghanistan",
@@ -249,6 +239,41 @@ const PatientRegistration = ({ route, navigation }) => {
         language: "",
     });
 
+    const ethnicityRef = useRef();
+    const birthplaceRef = useRef();
+    const languageRef = useRef();
+    
+    const [pickerVisible, setPickerVisible] = useState(false);
+  
+    const renderPickerSelect = (selectedValue, onValueChange, items, pickerRef) => (
+        <View style={styles.inputContainer}>
+            {pickerVisible && (
+                <Picker
+                    selectedValue={selectedValue}
+                    onValueChange={(itemValue, itemIndex) => {
+                        onValueChange(itemValue);
+                        setPickerVisible(false);
+                    }}
+                    style={styles.pickerSelectStyles}
+                >
+                    <Picker.Item label="Select" value={null} />
+                    {items.map((item) => (
+                        <Picker.Item key={item} label={item} value={item} />
+                    ))}
+                </Picker>
+            )}
+            {!pickerVisible && (
+                <TouchableOpacity style={styles.pickerPlaceholderContainer} onPress={() => setPickerVisible(true)}>
+                    <Text style={styles.pickerPlaceholderText}>
+                        {selectedValue || "Select"}
+                    </Text>
+                </TouchableOpacity>
+            )}
+        </View>
+    );
+    
+    
+
     const [datePickerModalActive, setDatePickerModalActive] = useState(false);
 
     const handleChange = (value, name) => {
@@ -322,25 +347,28 @@ const PatientRegistration = ({ route, navigation }) => {
 
                     <View style={styles.inputContainer}>
                         {renderPickerSelect(
-                            "Select Ethnicity",
+                            formData.ethnicity,
                             (value) => handleChange(value, "ethnicity"),
-                            ethnicities
+                            ethnicities,
+                            ethnicityRef
                         )}
                     </View>
 
                     <View style={styles.inputContainer}>
                         {renderPickerSelect(
-                            "Select Birthplace",
+                            formData.birthplace,
                             (value) => handleChange(value, "birthplace"),
-                            countries
+                            countries,
+                            birthplaceRef
                         )}
                     </View>
 
                     <View style={styles.inputContainer}>
                         {renderPickerSelect(
-                            "Select Language",
+                            formData.language,
                             (value) => handleChange(value, "language"),
-                            languages
+                            languages,
+                            languageRef
                         )}
                     </View>
                     <StyledButton
@@ -413,6 +441,14 @@ const styles = StyleSheet.create({
             textAlign: "center",
             marginTop: 13,
         }
+    },
+    pickerPlaceholderContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    pickerPlaceholderText: {
+        color: colours.primaryText,
     },
 });
 
