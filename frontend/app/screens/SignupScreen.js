@@ -35,9 +35,6 @@ function SignupScreen({ navigation }) {
         console.log("actual password:" + pass);
         return pass;
     }
-    function gotoSignUp() {
-        handleSignUp();
-    }
 
     function SendEmail(name, email, pass) {
         var params = {
