@@ -239,40 +239,22 @@ const PatientRegistration = ({ route, navigation }) => {
         language: "",
     });
 
-    const ethnicityRef = useRef();
-    const birthplaceRef = useRef();
-    const languageRef = useRef();
-    
-    const [pickerVisible, setPickerVisible] = useState(false);
-  
-    const renderPickerSelect = (selectedValue, onValueChange, items, pickerRef) => (
+    const renderPickerSelect = (selectedValue, onValueChange, items) => (
         <View style={styles.inputContainer}>
-            {pickerVisible && (
-                <Picker
-                    selectedValue={selectedValue}
-                    onValueChange={(itemValue, itemIndex) => {
-                        onValueChange(itemValue);
-                        setPickerVisible(false);
-                    }}
-                    style={styles.pickerSelectStyles}
-                >
-                    <Picker.Item label="Select" value={null} />
-                    {items.map((item) => (
-                        <Picker.Item key={item} label={item} value={item} />
-                    ))}
-                </Picker>
-            )}
-            {!pickerVisible && (
-                <TouchableOpacity style={styles.pickerPlaceholderContainer} onPress={() => setPickerVisible(true)}>
-                    <Text style={styles.pickerPlaceholderText}>
-                        {selectedValue || "Select"}
-                    </Text>
-                </TouchableOpacity>
-            )}
+            <Picker
+                selectedValue={selectedValue}
+                onValueChange={(itemValue, itemIndex) => {
+                    onValueChange(itemValue);
+                }}
+                style={styles.pickerSelectStyles}
+            >
+                <Picker.Item label="Select" value={null} />
+                {items.map((item) => (
+                    <Picker.Item key={item} label={item} value={item} />
+                ))}
+            </Picker>
         </View>
-    );
-    
-    
+    );    
 
     const [datePickerModalActive, setDatePickerModalActive] = useState(false);
 
@@ -349,8 +331,7 @@ const PatientRegistration = ({ route, navigation }) => {
                         {renderPickerSelect(
                             formData.ethnicity,
                             (value) => handleChange(value, "ethnicity"),
-                            ethnicities,
-                            ethnicityRef
+                            ethnicities
                         )}
                     </View>
 
@@ -358,8 +339,7 @@ const PatientRegistration = ({ route, navigation }) => {
                         {renderPickerSelect(
                             formData.birthplace,
                             (value) => handleChange(value, "birthplace"),
-                            countries,
-                            birthplaceRef
+                            countries
                         )}
                     </View>
 
@@ -367,10 +347,10 @@ const PatientRegistration = ({ route, navigation }) => {
                         {renderPickerSelect(
                             formData.language,
                             (value) => handleChange(value, "language"),
-                            languages,
-                            languageRef
+                            languages
                         )}
                     </View>
+
                     <StyledButton
                         text="Next"
                         onPress={handleSubmit}
@@ -424,6 +404,9 @@ const styles = StyleSheet.create({
         width: 250,
         height: 50,
         marginBottom: 10,
+        // center
+        justifyContent: "center",
+        // alignItems: "center",
     },
     input: {
         flex: 1,
@@ -435,12 +418,17 @@ const styles = StyleSheet.create({
     },
     pickerSelectStyles: {
         textAlign: "center",
-        marginTop: 13,
-        inputIOS: {
-            color: colours.primaryText,
-            textAlign: "center",
-            marginTop: 13,
-        }
+        marginTop: 4,
+        // inputIOS: {
+        //     color: colours.primaryText,
+        //     textAlign: "center",
+        //     marginTop: 13,
+        // },
+        // inputAndroid: {
+        //     color: colours.primaryText,
+        //     textAlign: "center",
+        //     marginTop: 13,
+        // }
     },
     pickerPlaceholderContainer: {
         flex: 1,

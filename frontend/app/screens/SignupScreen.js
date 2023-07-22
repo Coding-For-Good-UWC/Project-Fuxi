@@ -1,5 +1,4 @@
 import React, { useState, useContext } from "react";
-
 import {
     StyleSheet,
     Text,
@@ -10,60 +9,83 @@ import {
     Platform,
     Alert,
 } from "react-native";
+
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import LoadingContext from "../store/LoadingContext.js";
 import emailjs from "@emailjs/browser";
+import prompt from "react-native-prompt-android";
+
 import colours from "../config/colours.js";
 import StyledButton from "../components/StyledButton.js";
-import prompt from "react-native-prompt-android";
+
+import LoadingContext from "../store/LoadingContext.js";
 import Constants from "expo-constants";
 
-function SignupScreen({ navigation }) {
-    let pass;
-    let userpassword;
+function SignupScreen({ navigation }) 
+{
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmedPassword, setConfirmedPassword] = useState("");
 
-    function generateRandomPassword() {
-        var chars = "0123456789";
-        var passwordLength = 5;
-        pass = "";
+    const { setIsLoading } = useContext(LoadingContext);
+
+    let verificationCode = ""; // global variable to store the verification code
+    let inputVerificationCode = ""; // what verification code the user inputs
+
+    const generateRandomPassword = () => 
+    {
+        const chars = "0123456789";
+        const passwordLength = 5;
+        verificationCode = "";
 
         for (var i = 0; i <= passwordLength; i++) {
             var randomNumber = Math.floor(Math.random() * chars.length);
-            pass += chars.substring(randomNumber, randomNumber + 1);
+            verificationCode += chars.substring(randomNumber, randomNumber + 1);
         }
 
-        console.log("actual password:" + pass);
-        return pass;
+        console.log("Verification Code: " + verificationCode);
+
+        return verificationCode;
     }
 
-    function SendEmail(name, email, pass) {
+    const SendEmail = (name, email, pass) => 
+    {
         var params = {
             to_name: name,
             to_email: email,
             password: pass,
         };
 
-        emailjs.send(Constants.expoConfig.extra.serviceacc,Constants.expoConfig.extra.templateid,params,Constants.expoConfig.extra.publicapikey);
+        emailjs.send(
+            Constants.expoConfig.extra.serviceacc,
+            Constants.expoConfig.extra.templateid,
+            params,
+            Constants.expoConfig.extra.publicapikey
+        );
     }
 
-    function Verifyemail() {
-        if (String(userpassword) == String(pass)) {
+    const verifyCode = () => 
+    {
+        if (inputVerificationCode == verificationCode)
             return true;
-        } else {
-            console.log("wrong password");
+        else {
+            Alert.alert("Invalid code", "Wrong code entered. Please try again!");
             return false;
         }
     }
 
-    async function showAlert(name, email) {
+    async function showAlert(name, email) 
+    {
         let passwordCorrect = false;
         let isCancelled = false;
 
-        while (!passwordCorrect && !isCancelled) {
-            userpassword = await new Promise((resolve) => {
+        while (!passwordCorrect && !isCancelled) 
+        {
+            inputVerificationCode = await new Promise((resolve) => 
+            {
                 prompt(
                     "Email Verification",
-                    "We've just sent you a verification email with a password. Please enter your password here to proceed!",
+                    "We've just sent you a verification email with a code. Please enter your code here to proceed!",
                     [
                         {
                             text: "Cancel",
@@ -77,24 +99,19 @@ function SignupScreen({ navigation }) {
                         {
                             text: "OK",
                             onPress: (inputPassword) => {
-                                if (/^\d{6}$/.test(inputPassword)) {
-                                    resolve(inputPassword);
-                                } else {
+                                if (inputPassword === "") {
                                     Alert.alert(
                                         "Invalid Password",
-                                        "Please enter 6 digits only.",
-                                        [
-                                            {
-                                                text: "OK",
-                                                onPress: () => resolve(null),
-                                            },
-                                        ]
+                                        "Please enter a password!"
                                     );
+                                    resolve(null);
                                 }
+                                else
+                                    resolve(inputPassword);
                             },
                         },
                         {
-                            text: "Resend Email",
+                            text: "Resend email",
                             onPress: () => {
                                 SendEmail(
                                     name,
@@ -106,7 +123,6 @@ function SignupScreen({ navigation }) {
                         },
                     ],
                     {
-                        // type: "secure-text",
                         cancelable: false,
                         defaultValue: "",
                         placeholder: "password",
@@ -114,12 +130,12 @@ function SignupScreen({ navigation }) {
                 );
             });
 
-            if (userpassword !== null && !isCancelled) {
-                if (Verifyemail()) {
-                    console.log("email verified");
+            if (inputVerificationCode !== null && !isCancelled) {
+                if (verifyCode()) {
+                    console.log("Email verified!");
                     passwordCorrect = true;
                 } else {
-                    console.log("no");
+                    console.log("Email not verified!");
                     await new Promise((resolve) => {
                         Alert.alert(
                             "Invalid Password",
@@ -134,32 +150,23 @@ function SignupScreen({ navigation }) {
         return !isCancelled; // Return true if not cancelled, false otherwise
     }
 
-    async function ValidateEmail(name, email) {
-        console.log("in validate email");
-        pass = generateRandomPassword();
-        SendEmail(name, email, pass);
+    const validateEmail = async (name, email) => 
+    {
+        console.log("In validate email");
+        verificationCode = generateRandomPassword();
+        SendEmail(name, email, verificationCode);
 
         try {
             if ((await showAlert(name, email)) == true) {
-                console.log("verified!!!");
+                console.log("Verified!!!");
                 return true;
             } else {
                 return false;
             }
         } catch (error) {
-            console.log("Error occurred:", error);
-            // Handle the error as needed
+            console.log("An error occurred:", error);
         }
     }
-
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmedPassword, setConfirmedPassword] = useState("");
-
-    const { setIsLoading } = useContext(LoadingContext);
-
-    const passwordRegex = /^(?=.*\d)[A-Za-z\d]{8,}$/;
 
     let handleSignUp = async (evt) => {
         evt.preventDefault();
@@ -181,103 +188,90 @@ function SignupScreen({ navigation }) {
             return;
         }
 
-        if (!passwordRegex.test(password)) {
+        // if ((await validateEmail(name, email)) == true) {
+        const getnames = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/institute/namerepeat?name=${name}`);
+        const values = await getnames.json();
+
+        if (values.message === "same") {
             Alert.alert(
                 "Error",
-                "Password must have at least 8 characters and include a digit"
+                "Institute with the same name already exists, please choose a different name and try again."
             );
+            setIsLoading(false);
+            console.log("EXISTS");
             return;
         }
 
-        if ((await ValidateEmail(name, email)) == true) {
-            const getnames = await fetch(
-                `https://project-fuxi-fsugt.ondigitalocean.app/institute/namerepeat?name=${encodeURIComponent(name)}`,
+        setIsLoading(true);
+        let userCredential;
+        const auth = getAuth();
+        try {
+            userCredential = await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+        } catch (error) {
+            console.log(error);
+            if (error.code === "auth/email-already-in-use") {
+                Alert.alert(
+                    "Error",
+                    "Email is already in use. Please login instead.",
+                    [
+                        {
+                            text: "Go to Login",
+                            onPress: () => navigation.navigate("Login"),
+                        },
+                    ]
+                );
+            } else {
+                Alert.alert("Error", error.message);
+            }
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            const user = userCredential.user;
+            const response = await fetch(
+                `https://project-fuxi-fsugt.ondigitalocean.app/institute/signup`,
                 {
-                    method: "GET",
+                    body: JSON.stringify({
+                        uid: user.uid,
+                        email: user.email,
+                        name,
+                    }),
+                    headers: { "Content-Type": "application/json" },
+                    method: "POST",
                 }
             );
-            const values = await getnames.json();
+            const data = await response.json();
 
-            if (values.message === "same") {
-                Alert.alert(
-                    "Error",
-                    "Institute with the same name already exists, please choose a different name and try again."
-                );
-                setIsLoading(false);
-                console.log("EXISTS");
-                return;
-            }
-
-            setIsLoading(true);
-            let userCredential;
-            const auth = getAuth();
-            try {
-                userCredential = await createUserWithEmailAndPassword(
-                    auth,
-                    email,
-                    password
-                );
-            } catch (error) {
-                console.log(error);
-                if (error.code === "auth/email-already-in-use") {
-                    Alert.alert(
-                        "Error",
-                        "Email is already in use. Please login instead.",
-                        [
-                            {
-                                text: "Go to Login",
-                                onPress: () => navigation.navigate("Login"),
-                            },
-                        ]
-                    );
-                } else {
-                    Alert.alert("Error", error.message);
+            const idToken = await auth.currentUser.getIdToken();
+            const response2 = await fetch(
+                `https://project-fuxi-fsugt.ondigitalocean.app/institute/verify`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        token: idToken,
+                    },
                 }
-                setIsLoading(false);
-                return;
-            }
+            );
+            const data2 = await response2.json();
 
-            try {
-                const user = userCredential.user;
-                const response = await fetch(
-                    `https://project-fuxi-fsugt.ondigitalocean.app/institute/signup`,
-                    {
-                        body: JSON.stringify({
-                            uid: user.uid,
-                            email: user.email,
-                            name,
-                        }),
-                        headers: { "Content-Type": "application/json" },
-                        method: "POST",
-                    }
-                );
-                const data = await response.json();
+            setIsLoading(false);
+            navigation.navigate("Dashboard");
+        } catch (error) {
+            console.log(error);
+            Alert.alert(
+                "Error",
+                "An error occurred while processing your request"
+            );
 
-                const idToken = await auth.currentUser.getIdToken();
-                const response2 = await fetch(
-                    `https://project-fuxi-fsugt.ondigitalocean.app/institute/verify`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            token: idToken,
-                        },
-                    }
-                );
-                const data2 = await response2.json();
-
-                setIsLoading(false);
-                navigation.navigate("Dashboard");
-            } catch (error) {
-                console.log(error);
-                Alert.alert(
-                    "Error",
-                    "An error occurred while processing your request"
-                );
-
-                setIsLoading(false);
-            }
+            setIsLoading(false);
         }
+        // }
     };
 
     return (

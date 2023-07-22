@@ -36,6 +36,7 @@ function LoginScreen({ navigation }) {
             const auth = getAuth();
 
 			      await signInWithEmailAndPassword(auth, email, password);
+            // await signInWithEmailAndPassword(auth, "lee12048@gapps.uwcsea.edu.sg", "Supersecret1");
     
             const idToken = await auth.currentUser.getIdToken();
 
