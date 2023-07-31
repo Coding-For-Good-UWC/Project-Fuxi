@@ -290,7 +290,7 @@ const isValidTrack = (track) =>
 // 3. If still less than 15 songs, search youtube and filter the results. If a yt track already exists in the database, use that instead. If not, create a new track in the database
 const loadInitialPlayset = async (req, res) => {
     const { patientId } = req.body;
-
+    console.log("in loadinitialplayset")
     const patient = await patientModel.findById(patientId);
     const era = Math.floor((patient.birthdate.getTime() / (1000 * 60 * 60 * 24 * 365) + 18) / 10 ) * 10 + 1960;
     
@@ -303,7 +303,18 @@ const loadInitialPlayset = async (req, res) => {
     { 
         patient.trackRatings.push({ track: track._id, rating: 3 }) 
     });
-    await patient.save();
+    // console.log(patient.trackRatings)
+    if(patient.trackRatings.length < 15){
+        // generate a function to check mongodb for all the tracks with the patient's language and get the first 15
+        const allTracks = await trackModel.find({ Language: patient.language});
+        const first15Tracks = allTracks.slice(0, 15);
+        // iterate through first15Tracks and add them to the patient's trackRatings array
+        first15Tracks.forEach((track) =>{
+            patient.trackRatings.push({ track: track._id, rating: 3 })
+        })
+        // console.log(patient.trackRatings)
+    }
+	await patient.save();
 
     return res.status(200).json({ status: "OK", message: "Found tracks for patient: " + patientId });
 };
