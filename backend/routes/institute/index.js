@@ -1,22 +1,14 @@
-const express = require ("express"); 
-const controller = require ("../../controllers/institute"); 
-const { getAuth } = require ("firebase-admin/auth");
+const express = require("express");
+const controller = require("../../controllers/institute");
+const requireAuth = require("../../middlewares/auth");
 
-const router = express.Router (); 
+const router = express.Router();
 
-const verifyMw = async (req, res, next) => {
-    const token = await getAuth().verifyIdToken(req.headers.token)
-    
-    req.uid = token.uid;
+router.post("/signup", controller.signup); // create new institute/user
+router.post("/verify", requireAuth, controller.verify); // verify patient
 
-    next();
-}
-
-router.post ("/signup", controller.signup); // create new institute/user
-router.post("/verify", verifyMw, controller.verify); // verify patient
-
-router.get ("/", verifyMw, controller.getInstitute); 
-router.get("/patients", verifyMw, controller.getPatients); // get all patients of institute
+router.get("/", requireAuth, controller.getInstitute);
+router.get("/patients", requireAuth, controller.getPatients); // get all patients of institute
 router.get("/namerepeat", controller.checkNameRepeat); // check if institute name is already taken
 
-module.exports = router; 
+module.exports = router;
