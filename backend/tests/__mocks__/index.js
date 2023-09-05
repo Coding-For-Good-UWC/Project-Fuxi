@@ -1,9 +1,12 @@
 const mongoose = require("mongoose");
 const instituteModel = require("../../models/institute");
+const trackModel = require("../../models/track");
 const { seedInstitutes } = require("./institute.mock");
+const { seedTracks } = require("./track.mock");
 
 const seedData = async () => {
     await instituteModel.insertMany(seedInstitutes);
+    await trackModel.insertMany(seedTracks);
 };
 
 const prepareMongoose = () => {

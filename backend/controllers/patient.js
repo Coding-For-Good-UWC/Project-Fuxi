@@ -60,7 +60,7 @@ const newPatient = async (req, res) => {
         });
 
         // Remove password from patient object
-        newPatient.password = undefined;
+        delete newPatient.password
 
         res.status(200).json({
             patient: newPatient,

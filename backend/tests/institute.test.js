@@ -11,9 +11,11 @@ describe("test institude", () => {
         await server.close();
     });
 
+    const uid = v1()
+
     it("API signup", async () => {
         const requestData = {
-            uid: v1(),
+            uid,
             email: "demo@gmail.com",
             name: "demo",
         };
@@ -27,4 +29,25 @@ describe("test institude", () => {
         expect(userInDb.email).toEqual(requestData.email);
         expect(userInDb.name).toEqual(requestData.name);
     });
+
+    it("API get institude", async () => {
+        const requestData = {};
+        const response = await request(app).get("/institude").set('TOKEN', uid).send();
+
+        expect(response.statusCode).toEqual(200);
+    });
+
+    it("API get pations", async () => {
+        const requestData = {}
+        const reponse = await request(app).get("/institude/patients").set('TOKEN', uid).send()
+
+        expect(response.statusCode).toEqual(200);
+    })
+
+    it("API check name repeat", async () => {
+        const requestData = {}
+        const reponse = await request(app).get("/institude/namerepeat").send()
+
+        expect(response.statusCode).toEqual(200);
+    })
 });
