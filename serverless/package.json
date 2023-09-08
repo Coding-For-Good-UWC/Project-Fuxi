@@ -10,7 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mongoose": "^7.5.0"
+    "aws-sdk": "^2.1453.0",
+    "mongoose": "^7.5.0",
+    "youtube-music-api": "^1.0.6",
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "serverless-middleware": "^3.2.0"

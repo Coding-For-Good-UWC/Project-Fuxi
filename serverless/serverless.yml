@@ -54,22 +54,75 @@ plugins:
 #    variable1: value1
 
 # you can add packaging information here
-#package:
-#  patterns:
-#    - '!exclude-me.js'
-#    - '!exclude-me-dir/**'
-#    - include-me.js
-#    - include-me-dir/**
+package:
+  patterns:
+    - lib/**
+    - models/**
+  #  - '!exclude-me.js'
+  #  - '!exclude-me-dir/**'
+  #  - include-me.js
+  #  - include-me-dir/**
 functions:
+  getPatients:
+    handler: lambdas/institute.getPatients
+    events:
+      - http:
+        path: /institute/patients
+        method: post
+  signup:
+    handler: lambdas/institute.signup
+    events:
+      - http:
+        path: /institute/signup
+        method: post
+  verify:
+    handler: lambdas/institute.verify
+    events:
+      - http:
+        path: /institute/verify
+        method: get
   getInstitute:
     handler: lambdas/institute.getInstitute
     events:
-      - httpApi:
+      - http:
         path: /institute
         method: get
-    middleware:
-      pre:
-        - lib/auth.auth
+  checkNameRepeat:
+    handler: lambdas/institute.checkNameRepeat
+    events:
+      - http:
+        path: /institute/checkNameRepeat
+        method: get
+  newPatient:
+    handler: lambdas/patient.newPatient
+    events:
+      - http:
+        path: /patient/new
+        method: post
+  editManualPlayset:
+    handler: lambdas/patient.editManualPlayset
+    events:
+      - http:
+        path: /patient/manual
+        method: put
+  editManualPlaysetYt:
+    handler: lambdas/patient.editManualPlaysetYt
+    events:
+      - http:
+        path: /patient/manualyt
+        method: put
+  getmanual:
+    handler: lambdas/patient.getmanual
+    events:
+      - http:
+        path: /patient/getmanual
+        method: get
+  deletefromManual:
+    handler: lambdas/patient.deletefromManual
+    events:
+      - http:
+        path: /patient/deletemanual
+        method: put
   hello:
     handler: handler.hello
 #    The following are a few example events you can configure
