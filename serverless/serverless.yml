@@ -67,62 +67,104 @@ functions:
     handler: lambdas/institute.getPatients
     events:
       - http:
-        path: /institute/patients
-        method: post
+          path: /institute/patients
+          method: post
   signup:
     handler: lambdas/institute.signup
     events:
       - http:
-        path: /institute/signup
-        method: post
+          path: /institute/signup
+          method: post
   verify:
     handler: lambdas/institute.verify
     events:
       - http:
-        path: /institute/verify
-        method: get
+          path: /institute/verify
+          method: get
   getInstitute:
     handler: lambdas/institute.getInstitute
     events:
       - http:
-        path: /institute
-        method: get
+          path: /institute
+          method: get
   checkNameRepeat:
     handler: lambdas/institute.checkNameRepeat
     events:
       - http:
-        path: /institute/checkNameRepeat
-        method: get
+          path: /institute/checkNameRepeat
+          method: get
   newPatient:
     handler: lambdas/patient.newPatient
     events:
       - http:
-        path: /patient/new
-        method: post
+          path: /patient/new
+          method: post
   editManualPlayset:
     handler: lambdas/patient.editManualPlayset
     events:
       - http:
-        path: /patient/manual
-        method: put
+          path: /patient/manual
+          method: put
   editManualPlaysetYt:
     handler: lambdas/patient.editManualPlaysetYt
     events:
       - http:
-        path: /patient/manualyt
-        method: put
+          path: /patient/manualyt
+          method: put
   getmanual:
     handler: lambdas/patient.getmanual
     events:
       - http:
-        path: /patient/getmanual
-        method: get
+          path: /patient/getmanual
+          method: get
   deletefromManual:
     handler: lambdas/patient.deletefromManual
     events:
       - http:
-        path: /patient/deletemanual
-        method: put
+          path: /patient/deletemanual
+          method: put
+  getNextTrackId:
+    handler: lambdas/track.getNextTrackId
+    events:
+      - http:
+          path: /track/next
+          method: post
+  getNextTrackIdRandom:
+    handler: lambdas/track.getNextTrackIdRandom
+    events:
+      - http:
+          path: /track/nextrandom
+          method: post
+  getTitles:
+    handler: lambdas/track.getTitles
+    events:
+      - http:
+          path: /track/titles
+          method: get
+  loadInitialPlayset:
+    handler: lambdas/track.loadInitialPlayset
+    events:
+      - http:
+          path: /track/initial
+          method: post
+  manualYtQuery:
+    handler: lambdas/track.manualYtQuery
+    events:
+      - http:
+          path: /track/ytQuery
+          method: post
+  playTrack:
+    handler: lambdas/track.playTrack
+    events:
+      - http:
+          path: /track/audio-url
+          method: post
+  updateTrackRating:
+    handler: lambdas/track.updateTrackRating
+    events:
+      - http:
+          path: /track/rating
+          method: post
   hello:
     handler: handler.hello
 #    The following are a few example events you can configure

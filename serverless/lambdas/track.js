@@ -12,12 +12,6 @@ const trackModel = require("../models/track");
 const patientModel = require("../models/patient");
 
 const AWS = require("aws-sdk");
-// const { AWS_REGION, AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY, BUCKET_NAME } = process.env;
-// AWS.config.update({
-//     region: AWS_REGION,
-//     accessKeyId: AWS_ACCESS_KEY,
-//     secretAccessKey: AWS_SECRET_ACCESS_KEY,
-// });
 const s3 = new AWS.S3();
 
 const api = new YoutubeMusicApi();
@@ -274,29 +268,41 @@ const getNextTrackIdRandom = async (event) => {
   try {
     const { patientId } = event.body;
 
-    if (!patientId)
-      return res
-        .status(400)
-        .json({ status: "ERROR", message: "Patient id required" });
+    if (!patientId) {
+      return {
+        statusCode: 400,
+        body: { status: "ERROR", message: "Patient id required" },
+      };
+    }
 
     const patient = await patientModel.findById(patientId);
 
-    if (patient.manualPlayset.length <= 5)
-      return res.status(500).json({ status: "ERROR", message: "songs" });
+    if (patient.manualPlayset.length <= 5) {
+      return {
+        statusCode: 500,
+        body: { status: "ERROR", message: "songs" },
+      };
+    }
 
     const randomIndex = Math.floor(
       Math.random() * patient.manualPlayset.length
     );
     const trackObj = patient.manualPlayset[randomIndex];
 
-    return res.json({
-      track: trackObj,
-      status: "OK",
-      message: "Returning a random track from patient's manual playset",
-    });
+    return {
+      statusCode: 200,
+      body: {
+        track: trackObj,
+        status: "OK",
+        message: "Returning a random track from patient's manual playset",
+      },
+    };
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ status: "ERROR", message: "Server error" });
+    return {
+      statusCode: 500,
+      body: { status: "ERROR", message: "Server error" },
+    };
   }
 };
 
@@ -309,9 +315,10 @@ const getTitles = async (event) => {
     titles.push(result);
   }
 
-  return res
-    .status(200)
-    .json({ titles, status: "OK", message: "Found titles" });
+  return {
+    statusCode: 200,
+    body: { titles, status: "OK", message: "Found titles" },
+  };
 };
 
 const isValidTrack = (track) => {
@@ -390,9 +397,10 @@ const loadInitialPlayset = async (event) => {
   }
   await patient.save();
 
-  return res
-    .status(200)
-    .json({ status: "OK", message: "Found tracks for patient: " + patientId });
+  return {
+    statusCode: 200,
+    body: { status: "OK", message: "Found tracks for patient: " + patientId },
+  };
 };
 
 const manualYtQuery = async (event) => {
@@ -403,7 +411,10 @@ const manualYtQuery = async (event) => {
 
   const tracks = response.content.slice(0, 5);
 
-  return res.json({ tracks: tracks });
+  return {
+    statusCode: 200,
+    body: { tracks: tracks },
+  };
 };
 
 const uploadToS3 = (filePath, bucketName, contentType = "audio/mpeg") => {
@@ -485,18 +496,22 @@ const playTrack = async (event) => {
   try {
     const { track, patientId } = event.body;
 
-    if (!track || !patientId)
-      return res
-        .status(400)
-        .json({ status: "ERROR", message: "Track and patient id required" });
+    if (!track || !patientId) {
+      return {
+        statusCode: 400,
+        body: { status: "ERROR", message: "Track and patient id required" },
+      };
+    }
 
     // retrieve the track from the database
     const trackObj = await trackModel.findById(track);
 
-    if (!trackObj)
-      return res
-        .status(404)
-        .json({ status: "ERROR", message: "No track by id " + track });
+    if (!trackObj) {
+      return {
+        statusCode: 400,
+        body: { status: "ERROR", message: "No track by id " + track },
+      };
+    }
 
     if (!trackObj.URI || trackObj.URI === "") {
       let youtubeUrl = `https://www.youtube.com/watch?v=${trackObj.YtId}`;
@@ -508,22 +523,31 @@ const playTrack = async (event) => {
       await trackObj.save();
 
       console.log("TRACK CONVERTED AND UPLOADED TO S3: " + trackObj.Title);
-      res.status(200).json({
-        audioURL: s3Url,
-        status: "OK",
-        message: "Track converted and uploaded to s3",
-      });
+      return {
+        statusCode: 200,
+        body: {
+          audioURL: s3Url,
+          status: "OK",
+          message: "Track converted and uploaded to s3",
+        },
+      };
     } else {
       console.log("TRACK ALREADY IN S3: " + trackObj.Title);
-      res.status(200).json({
-        audioURL: trackObj.URI,
-        status: "OK",
-        message: "Track already in s3",
-      });
+      return {
+        statusCode: 200,
+        body: {
+          audioURL: trackObj.URI,
+          status: "OK",
+          message: "Track already in s3",
+        },
+      };
     }
   } catch (error) {
     console.error("Error playing track:", error);
-    res.status(500).json({ error: "Error playing track" });
+    return {
+      statusCode: 500,
+      body: { error: "Error playing track" }
+    }
   }
 };
 
