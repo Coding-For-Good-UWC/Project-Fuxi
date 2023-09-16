@@ -1,9 +1,10 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const connectDb = () => {
-  const mongoUrl = "mongodb+srv://Antoine:OoNsBwcb4Gi0cKmQ@cluster0.h9uq5il.mongodb.net/Project_FUXI?retryWrites=true&w=majority"
+  const mongoUrl =
+    'mongodb+srv://Antoine:OoNsBwcb4Gi0cKmQ@cluster0.h9uq5il.mongodb.net/Project_FUXI?retryWrites=true&w=majority';
   mongoose.set({ strictQuery: false });
-  mongoose.connect(mongoUrl);
+  mongoose.connect(mongoUrl).then(() => console.log('Mongo Connected....'));
 };
 
 module.exports.connectDb = connectDb;

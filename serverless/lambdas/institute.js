@@ -1,124 +1,130 @@
-"use strict";
+'use strict';
 
-const { connectDb } = require("../lib/mongodb");
-const instituteModel = require("../models/institute");
-const patientModel = require("../models/patient");
+require('aws-sdk/lib/maintenance_mode_message').suppress = true;
+const { connectDb } = require('../lib/mongodb');
+const instituteModel = require('../models/institute');
+const patientModel = require('../models/patient');
 
 connectDb();
 
 const getPatients = async (event) => {
   try {
-    const instituteId = event.header.uid;
+    console.log(event.body);
+    const { uid } = JSON.parse(event.body);
+    console.log(uid);
 
-    if (!instituteId) {
-      return {
+    if (!uid) {
+      return JSON.stringify({
         statusCode: 400,
-        body: { status: "ERROR", message: "Institute ID is required" },
-      };
+        body: { status: 'ERROR', message: 'Institute ID is required' },
+      });
     }
 
-    const institute = await instituteModel.findOne({ uid: instituteId });
+    const institute = await instituteModel.findOne({ uid: uid });
 
     if (!institute) {
-      return {
+      return JSON.stringify({
         statusCode: 400,
-        body: { status: "ERROR", message: "Institute not found" },
-      };
+        body: { status: 'ERROR', message: 'Institute not found' },
+      });
     }
 
     const patients = await patientModel.find({ institute: institute._id });
 
-    return {
+    return JSON.stringify({
       statusCode: 200,
       body: {
         patients,
-        status: "OK",
-        message: "Patients retrieved successfully",
+        status: 'OK',
+        message: 'Patients retrieved successfully',
       },
-    };
+    });
   } catch (err) {
-    return {
+    return JSON.stringify({
       statusCode: 500,
-      body: { status: "ERROR", message: "Server error" },
-    };
+      body: { status: 'ERROR', message: 'Server error' },
+    });
   }
 };
 
 const signup = async (event) => {
-  const { uid, email, name } = event.body;
+  const { uid, email, name } = JSON.parse(event.body);
   if (!uid) {
-    return {
+    return JSON.stringify({
       statusCode: 400,
       body: {
-        status: "ERROR",
-        message: "Missing required fields",
+        status: 'ERROR',
+        message: 'Missing required fields',
       },
-    };
+    });
   }
 
   const newInstitute = await instituteModel.create({ uid, email, name });
 
-  return {
+  return JSON.stringify({
     statusCode: 200,
     body: {
-      status: "OK",
-      message: "Institute created",
+      status: 'OK',
+      message: 'Institute created',
       institute: newInstitute,
     },
-  };
+  });
 };
 
 const verify = async (event) => {
-  return {
+  const json = JSON.parse(event.body);
+  return JSON.stringify({
     statusCode: 200,
-    body: { status: "OK", message: "Verified", uid: req.uid },
-  };
+    body: { status: 'OK', message: 'Verified', uid: json.uid },
+  });
 };
 
 const getInstitute = async (event) => {
-  const id = event.headers.token;
+  const json = JSON.parse(event.body);
+  console.log(json);
+  const id = json.token;
 
   const institute = await instituteModel.findOne({ uid: id });
 
   if (!institute) {
-    return {
+    return JSON.stringify({
       statusCode: 400,
       body: {
-        status: "ERROR",
-        message: "Institute not found",
+        status: 'ERROR',
+        message: 'Institute not found',
       },
-    };
+    });
   }
 
-  return {
+  return JSON.stringify({
     statusCode: 200,
     body: {
-      message: "Get Institute",
+      message: 'Get Institute',
       institute,
-      status: "OK",
+      status: 'OK',
     },
-  };
+  });
 };
 
 const checkNameRepeat = async (event) => {
-  const { name } = event.query;
-  const institute = await instituteModel.findOne({ name: name });
+  console.log(event);
+  const { name } = event.queryStringParameters;
+  console.log(name);
+  const institute = instituteModel.findOne({ name: name });
+  console.log(institute);
   if (institute == null) {
-    return {
-      statusCode: 400,
-      body: {
-        status: "OK",
-        message: "Name is unique",
-      },
-    };
+    return JSON.stringify({
+      statusCode: 200,
+      body: JSON.stringify(institute), // Stringify the response body
+    });
   } else {
-    return {
+    return JSON.stringify({
       statusCode: 400,
       body: {
-        status: "ERROR",
-        message: "same",
+        status: 'ERROR',
+        message: 'same',
       },
-    };
+    });
   }
 };
 

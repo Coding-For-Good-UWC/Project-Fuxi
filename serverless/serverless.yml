@@ -166,6 +166,36 @@ functions:
       - http:
           path: /track/rating
           method: post
+  getAllProfilesByInstituteUId:
+    handler: lambdas/profile.getAllProfilesByInstituteUId
+    events:
+      - http:
+          path: /profile
+          method: get
+  getProfileById:
+    handler: lambdas/profile.getProfileById
+    events:
+      - http:
+          path: /profile/profileId
+          method: get
+  createProfile:
+    handler: lambdas/profile.createProfile
+    events:
+      - http:
+          path: /profile
+          method: post
+  deleteProfile:
+    handler: lambdas/profile.deleteProfile
+    events:
+      - http:
+          path: /profile/profileId
+          method: delete
+  updateProfile:
+    handler: lambdas/profile.updateProfile
+    events:
+      - http:
+          path: /profile/update
+          method: put
   hello:
     handler: handler.hello
 #    The following are a few example events you can configure
