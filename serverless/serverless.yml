@@ -31,6 +31,18 @@ provider:
 plugins:
   - serverless-middleware
   - serverless-offline
+  - serverless-offline-watcher
+
+custom:
+  serverless-offline:
+    httpPort: 3000
+  serverless-offline-watcher:
+    # - path: src/index.ts
+    #   command: echo "index.ts was modified!"
+    - path:
+        - lambdas/*.js
+        - models/*.js
+      command: echo "api folder or js file in cow folder was modified!"
 
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
@@ -195,6 +207,30 @@ functions:
     events:
       - http:
           path: /profile/update
+          method: put
+  getRateTrack:
+    handler: lambdas/profileRating.getRateTrack
+    events:
+      - http:
+          path: /profileRating/getRate
+          method: post
+  createRateTrack:
+    handler: lambdas/profileRating.createRateTrack
+    events:
+      - http:
+          path: /profileRating/track
+          method: post
+  deleteRateTrack:
+    handler: lambdas/profileRating.deleteRateTrack
+    events:
+      - http:
+          path: /profileRating/track
+          method: delete
+  updateRateTrack:
+    handler: lambdas/profileRating.updateRateTrack
+    events:
+      - http:
+          path: /profileRating/track
           method: put
   hello:
     handler: handler.hello

@@ -3,22 +3,22 @@ const mongoose = require('mongoose');
 const { Schema, model, Types } = mongoose;
 
 const schema = new Schema({
-  uid: {
-    type: String,
-    unique: true,
+  profileId: {
+    type: Types.ObjectId,
+    ref: 'profiles',
     required: true,
   },
-  fullname: {
-    type: String,
+  trackId: {
+    type: Types.ObjectId,
+    ref: 'tracks',
     required: true,
   },
-  age: {
+  rating: {
     type: Number,
     required: true,
-  },
-  description: {
-    type: String,
+    min: 1,
+    max: 5,
   },
 });
 
-module.exports = model('profiles', schema);
+module.exports = model('profilerating', schema);
