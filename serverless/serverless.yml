@@ -88,6 +88,12 @@ functions:
       - http:
           path: /institute/signup
           method: post
+  signin:
+    handler: lambdas/institute.signin
+    events:
+      - http:
+          path: /institute/signin
+          method: post
   verify:
     handler: lambdas/institute.verify
     events:
@@ -99,7 +105,7 @@ functions:
     events:
       - http:
           path: /institute
-          method: get
+          method: post
   checkNameRepeat:
     handler: lambdas/institute.checkNameRepeat
     events:

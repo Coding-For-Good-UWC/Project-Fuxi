@@ -1,11 +1,15 @@
 'use strict';
 
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
+const admin = require('firebase-admin');
 const { connectDb } = require('../lib/mongodb');
+const { firebaseConfig } = require('../config/config');
 const instituteModel = require('../models/institute');
 const patientModel = require('../models/patient');
+const { createUserFirebase, loginWithCredentials, authenticationToken } = require('../middlewares/index');
 
 connectDb();
+firebaseConfig();
 
 const getPatients = async (event) => {
   try {
@@ -48,8 +52,8 @@ const getPatients = async (event) => {
 };
 
 const signup = async (event) => {
-  const { uid, email, name } = JSON.parse(event.body);
-  if (!uid) {
+  const { email, name } = JSON.parse(event.body);
+  if (!email || !name) {
     return JSON.stringify({
       statusCode: 400,
       body: {
@@ -59,7 +63,8 @@ const signup = async (event) => {
     });
   }
 
-  const newInstitute = await instituteModel.create({ uid, email, name });
+  const userUid = await createUserFirebase(email, name);
+  const newInstitute = await instituteModel.create({ uid: userUid, email, name });
 
   return JSON.stringify({
     statusCode: 200,
@@ -69,6 +74,31 @@ const signup = async (event) => {
       institute: newInstitute,
     },
   });
+};
+
+const signin = async (event) => {
+  try {
+    const { email, name } = JSON.parse(event.body);
+    if (!name || !email) return JSON.stringify({ statusCode: 400, message: 'Missing required fields' });
+
+    const credentials = await loginWithCredentials(email, name);
+    const createToken = await admin.auth().createCustomToken(credentials.uid);
+
+    const institute = await instituteModel.find({ uid: credentials.uid }).exec();
+    if (!institute) {
+      return JSON.stringify({ statusCode: 400, message: 'Invalid credentials' });
+    } else {
+      return JSON.stringify({
+        statusCode: 200,
+        message: 'Successfully signed in',
+        token: createToken,
+        institute: institute,
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    JSON.stringify({ statusCode: 500, message: 'Server error' });
+  }
 };
 
 const verify = async (event) => {
@@ -81,8 +111,19 @@ const verify = async (event) => {
 
 const getInstitute = async (event) => {
   const json = JSON.parse(event.body);
-  console.log(json);
-  const id = json.token;
+  const { id, authtoken } = json;
+
+  const uidAuth = await authenticationToken(authtoken);
+
+  if (id !== uidAuth) {
+    return JSON.stringify({
+      statusCode: 400,
+      body: {
+        status: 'ERROR',
+        message: 'Invalid credentials',
+      },
+    });
+  }
 
   const institute = await instituteModel.findOne({ uid: id });
 
@@ -131,6 +172,7 @@ const checkNameRepeat = async (event) => {
 module.exports = {
   getPatients,
   signup,
+  signin,
   verify,
   getInstitute,
   checkNameRepeat,

@@ -1,4 +1,57 @@
+# Ignore node_modules except for package-lock.json or yarn.lock
+node_modules/
+!package-lock.json
+!yarn.lock
+
+# Dependency directories
+.pnpm-store/
+pnpm-lock.yaml
+pnpmfile.js
+shrinkwrap.yaml
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Optional eslint cache
+.eslintcache
+
+# Optional .env file (may contain sensitive data)
 .env
-node_modules
-.firebase.json
-/temp/*
+
+# Optional configuration files
+.editorconfig
+*.config.js
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Debugging files
+.vscode/
+.idea/
+
+# User-specific files
+.npmrc
+.npmignore
+npm-debug.log
+yarn-error.log
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Serverless Framework
+.serverless/
+.serverless-debug.log
+
+# Webpack
+dist/
