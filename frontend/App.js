@@ -20,8 +20,11 @@ import PatientMusicForm from "./app/screens/PatientMusicForm";
 
 import LoadingContext from "./app/store/LoadingContext";
 import LoadingScreen from "./app/components/LoadingScreen";
+import WelcomeScreen from "./app/screens/WelcomeScreen";
 
 import "./firebaseConfig";
+import AboutFUXI from "./app/screens/AboutFUXI";
+import PlayMedia from './app/screens/PlayMedia';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,6 +57,21 @@ export default function App() {
             <LoadingContext.Provider value={isLoadingContextValue}>
                 <NavigationContainer>
                     <Stack.Navigator>
+                        <Stack.Screen
+                            name="Welcome"
+                            component={WelcomeScreen}
+                            options={{ headerTitle: "", headerTransparent: true }}
+                        />
+                        <Stack.Screen
+                            name="AboutFUXI"
+                            component={AboutFUXI}
+                            options={{ headerTitle: "", headerTransparent: true }}
+                        />
+                        <Stack.Screen
+                            name="PlayMedia"
+                            component={PlayMedia}
+                            options={{ headerTitle: "Nina's playlist", headerTransparent: true }}
+                        />
                         <Stack.Screen
                             name="Landing"
                             component={LandingScreen}
