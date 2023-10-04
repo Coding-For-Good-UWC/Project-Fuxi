@@ -15,8 +15,10 @@ import {} from 'react-native-paper';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import colours from '../config/colours';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
+import { useNavigation } from '@react-navigation/native';
 
 const CreateAccountScreen = () => {
+    const navigation = useNavigation();
     const [isChecked, setIsChecked] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -116,6 +118,8 @@ const CreateAccountScreen = () => {
         console.log('Name:', name);
         console.log('Email:', email);
         console.log('Password:', password);
+
+        navigation.navigate('ListenerProfileMain');
     };
 
     const isValidEmail = (email) => {

@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
 import SelectElementEffectLabel from '../components/SelectElementEffectLabel';
-import { languages } from './PatientRegistration';
+import { countries } from './PatientRegistration';
 
-const ListenerProfileScreen1 = () => {
+const ListenerProfileScreen1 = ({ goToScreen }) => {
     const [isValid, setIsValid] = useState(false);
     const [formData, setFormData] = useState({
         nameListener: '',
@@ -19,7 +19,6 @@ const ListenerProfileScreen1 = () => {
     });
 
     const years = [];
-    years.push('');
     const currentYear = new Date().getFullYear();
     for (let year = currentYear; year >= 1900; year--) {
         years.push(year.toString());
@@ -36,6 +35,8 @@ const ListenerProfileScreen1 = () => {
         let error = '';
         if (field === 'nameListener' && value === '') {
             error = 'Name is required.';
+        } else if (field === 'nameListener' && value.length < 6) {
+            error = 'Name must be at least 6 characters.';
         } else if (field === 'yearBirth' && value === '') {
             error = 'Year of birth is required.';
         } else if (field === 'language' && value === '') {
@@ -51,21 +52,27 @@ const ListenerProfileScreen1 = () => {
             ...prevErrors,
             [field]: error,
         }));
-        console.log();
-        if (validateNullFormData(formData)) {
+    };
+
+    useEffect(() => {
+        if (formData.nameListener.length < 6) {
             setIsValid(false);
         } else {
-            setIsValid(true);
+            validateNullFormData(formData)
+                ? setIsValid(false)
+                : setIsValid(true);
         }
-    };
+    }, [formData, errors]);
 
     const handleSubmit = () => {
         const { nameListener, yearBirth, language } = formData;
 
-        // if (validateNullFormData(formData)) {
-        //     alert('Please fix the validation errors');
-        //     return;
-        // }
+        if (validateNullFormData(formData)) {
+            alert('Please fix the validation errors');
+            return;
+        }
+
+        goToScreen();
 
         console.log('Name:', nameListener);
         console.log('Year of birth:', yearBirth);
@@ -109,7 +116,7 @@ const ListenerProfileScreen1 = () => {
                     error={errors.yearBirth}
                 />
                 <SelectElementEffectLabel
-                    dataArray={languages}
+                    dataArray={countries}
                     label="Preferred language"
                     onValueChange={(text) =>
                         handleChangeValue('language', text)
@@ -148,6 +155,8 @@ export default ListenerProfileScreen1;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingTop: 40,
+        padding: 30,
     },
     headerText: {
         fontSize: 24,
@@ -158,8 +167,10 @@ const styles = StyleSheet.create({
     },
     descriptionText: {
         fontSize: 16,
-        color: '#222C2D',
+        color: '#3C4647',
+        fontWeight: '400',
         lineHeight: 24,
+        marginBottom: 20,
     },
     formProfile: {
         flexDirection: 'column',

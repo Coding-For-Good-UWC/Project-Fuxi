@@ -45,7 +45,7 @@ const WelcomeScreen = ({ navigation }) => {
             <View style={styles.center}>
                 <TouchableOpacity
                     style={styles.toggleActive}
-                    onPress={() => navigation.navigate('ListenerProfileMain')}
+                    onPress={() => navigation.navigate('CreateAccountScreen')}
                 >
                     <Text style={styles.activeText}>Create new account</Text>
                 </TouchableOpacity>

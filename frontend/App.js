@@ -27,6 +27,8 @@ import AboutFUXI from './app/screens/AboutFUXI';
 import PlayMedia from './app/screens/PlayMedia';
 import CreateAccountScreen from './app/screens/CreateAccountScreen';
 import ListenerProfileMain from './app/screens/ListenerProfileMain';
+import ListenerProfileScreen1 from './app/screens/ListenerProfileScreen1';
+import ListenerProfileScreen3 from './app/screens/ListenerProfileScreen3';
 
 const Stack = createNativeStackNavigator();
 
@@ -181,6 +183,24 @@ export default function App() {
                         <Stack.Screen
                             name="ListenerProfileMain"
                             component={ListenerProfileMain}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                                headerShown: false,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="ListenerProfileScreen1"
+                            component={ListenerProfileScreen1}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                                headerShown: false,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="ListenerProfileScreen3"
+                            component={ListenerProfileScreen3}
                             options={{
                                 headerTitle: '',
                                 headerTransparent: true,
