@@ -1,30 +1,32 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { View, StyleSheet, Animated } from "react-native";
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, StyleSheet, Animated } from 'react-native';
 
-import LandingScreen from "./app/screens/LandingScreen";
+import LandingScreen from './app/screens/LandingScreen';
 
-import LoginScreen from "./app/screens/LoginScreen";
-import ManualPlayerScreen from "./app/screens/ManualPlayerScreen";
-import SignupScreen from "./app/screens/SignupScreen";
-import PlayerScreen from "./app/screens/PlayerScreen";
-import PrePlayerScreen from "./app/screens/PrePlayerScreen";
-import ShuffleManual from "./app/screens/ShuffleManual";
-import YoutubeManual from "./app/screens/YoutubeManualPlayer";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import LoginScreen from './app/screens/LoginScreen';
+import ManualPlayerScreen from './app/screens/ManualPlayerScreen';
+import SignupScreen from './app/screens/SignupScreen';
+import PlayerScreen from './app/screens/PlayerScreen';
+import PrePlayerScreen from './app/screens/PrePlayerScreen';
+import ShuffleManual from './app/screens/ShuffleManual';
+import YoutubeManual from './app/screens/YoutubeManualPlayer';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import PatientDashboard from "./app/screens/PatientDashboard";
+import PatientDashboard from './app/screens/PatientDashboard';
 
-import PatientRegistration from "./app/screens/PatientRegistration";
-import PatientMusicForm from "./app/screens/PatientMusicForm";
+import PatientRegistration from './app/screens/PatientRegistration';
+import PatientMusicForm from './app/screens/PatientMusicForm';
 
-import LoadingContext from "./app/store/LoadingContext";
-import LoadingScreen from "./app/components/LoadingScreen";
-import WelcomeScreen from "./app/screens/WelcomeScreen";
+import LoadingContext from './app/store/LoadingContext';
+import LoadingScreen from './app/components/LoadingScreen';
+import WelcomeScreen from './app/screens/WelcomeScreen';
 
-import "./firebaseConfig";
-import AboutFUXI from "./app/screens/AboutFUXI";
+import './firebaseConfig';
+import AboutFUXI from './app/screens/AboutFUXI';
 import PlayMedia from './app/screens/PlayMedia';
+import CreateAccountScreen from './app/screens/CreateAccountScreen';
+import ListenerProfileMain from './app/screens/ListenerProfileMain';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,7 +35,7 @@ export default function App() {
     const [fadeAnim] = useState(new Animated.Value(0));
     const isLoadingContextValue = useMemo(
         () => ({ isLoading, setIsLoading }),
-        [isLoading, setIsLoading]
+        [isLoading, setIsLoading],
     );
 
     useEffect(() => {
@@ -60,17 +62,26 @@ export default function App() {
                         <Stack.Screen
                             name="Welcome"
                             component={WelcomeScreen}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
                         />
                         <Stack.Screen
                             name="AboutFUXI"
                             component={AboutFUXI}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
                         />
                         <Stack.Screen
                             name="PlayMedia"
                             component={PlayMedia}
-                            options={{ headerTitle: "Nina's playlist", headerTransparent: true }}
+                            options={{
+                                headerTitle: "Nina's playlist",
+                                headerTransparent: true,
+                            }}
                         />
                         <Stack.Screen
                             name="Landing"
@@ -80,53 +91,101 @@ export default function App() {
                         <Stack.Screen
                             name="Login"
                             component={LoginScreen}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
                         />
                         <Stack.Screen
                             name="Signup"
                             component={SignupScreen}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
                         />
                         <Stack.Screen
                             name="Dashboard"
                             component={PatientDashboard}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
                         />
                         <Stack.Screen
                             name="PatientRegistration"
                             component={PatientRegistration}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
                         />
                         <Stack.Screen
                             name="PatientMusicForm"
                             component={PatientMusicForm}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
                         />
                         <Stack.Screen
                             name="Player"
                             component={PlayerScreen}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
                         />
 
                         <Stack.Screen
                             name="PrePlayer"
                             component={PrePlayerScreen}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
                         />
                         <Stack.Screen
                             name="ManualPlayer"
                             component={ManualPlayerScreen}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
                         />
                         <Stack.Screen
                             name="YoutubeManual"
                             component={YoutubeManual}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
                         />
                         <Stack.Screen
                             name="ShuffleManual"
                             component={ShuffleManual}
-                            options={{ headerTitle: "", headerTransparent: true }}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="CreateAccountScreen"
+                            component={CreateAccountScreen}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                                headerShown: false,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="ListenerProfileMain"
+                            component={ListenerProfileMain}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                                headerShown: false,
+                            }}
                         />
                     </Stack.Navigator>
                 </NavigationContainer>
@@ -139,6 +198,6 @@ export default function App() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: '#fff',
     },
 });

@@ -43,9 +43,12 @@ const WelcomeScreen = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
             <View style={styles.center}>
-                <View style={styles.toggleActive}>
+                <TouchableOpacity
+                    style={styles.toggleActive}
+                    onPress={() => navigation.navigate('ListenerProfileMain')}
+                >
                     <Text style={styles.activeText}>Create new account</Text>
-                </View>
+                </TouchableOpacity>
                 <View style={styles.toggleInactive}>
                     <Text style={styles.inactiveText}>
                         I already have an account
