@@ -1,7 +1,7 @@
 const NodeRSA = require('node-rsa');
 const jwt = require('jsonwebtoken');
-const webrtc = require('../webrtc.json');
-const publicKey = new NodeRSA().importKey(webrtc.private_key, 'pkcs8-private-pem').exportKey('pkcs8-public-pem');
+const firebase = require('../firebase.json');
+const publicKey = new NodeRSA().importKey(firebase.private_key, 'pkcs8-private-pem').exportKey('pkcs8-public-pem');
 
 const decodeJWT = (token) => {
   return new Promise((resolve, reject) => {
