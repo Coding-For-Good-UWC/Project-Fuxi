@@ -45,7 +45,7 @@ const ListenerProfileScreen3 = () => {
                         },
                     ]}
                     onPress={() => {
-                        navigation.navigate('ListenerProfileScreen1');
+                        navigation.navigate('ListenerProfileMain');
                     }}
                 >
                     <Text style={[styles.buttonText, { color: '#137882' }]}>

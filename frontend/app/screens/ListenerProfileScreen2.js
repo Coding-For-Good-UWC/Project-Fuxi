@@ -1,19 +1,21 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Chip } from 'react-native-paper';
-import { languages } from './PatientRegistration';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
+import { languages } from './PatientRegistration';
+import { baseURL } from '../utils/constain';
+import { getStoreData } from '../utils/AsyncStorage';
 
-const ListenerProfileScreen2 = () => {
+const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData }) => {
     const navigation = useNavigation();
-    const [selectedItems, setSelectedItems] = useState([]);
     const [isSelected, setIsSelected] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const toggleItem = (item) => {
         if (selectedItems.includes(item)) {
-            setSelectedItems(
-                selectedItems.filter((selected) => selected !== item),
-            );
+            setSelectedItems(selectedItems.filter((selected) => selected !== item));
         } else {
             setSelectedItems([...selectedItems, item]);
         }
@@ -27,21 +29,55 @@ const ListenerProfileScreen2 = () => {
         }
     }, [selectedItems]);
 
+    const handleSubmit = async () => {
+        setLoading(true);
+        const { nameListener, yearBirth, language } = formData;
+        console.log(formData, selectedItems);
+        const userUid = await getStoreData('UserUid');
+
+        try {
+            const newProfile = await axios.post(`${baseURL}/dev/profile `, {
+                instituteUid: userUid,
+                fullname: nameListener,
+                yearBirth: yearBirth,
+                language: language,
+                genres: selectedItems,
+                description: null,
+            });
+
+            const { statusCode, body } = JSON.parse(newProfile.data);
+
+            if (statusCode == 201) {
+                navigation.navigate('ListenerProfileScreen3');
+            } else if (statusCode == 400) {
+                alert(body.message);
+            } else {
+                alert(body.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Create profile unsuccessful');
+            return;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <View style={styles.container}>
+            <CustomAnimatedLoader
+                visible={loading}
+                source={require('../assets/loader/ellipsis-horizontal-loader.json')}
+            />
             <Text style={styles.headerText}>Music taste</Text>
-            <Text style={styles.descriptionText}>
-                Please select at least 1 type that they like.
-            </Text>
+            <Text style={styles.descriptionText}>Please select at least 1 type that they like.</Text>
             <View style={styles.listChip}>
                 {languages.map((item, index) => (
                     <Chip
                         key={index}
                         onPress={() => toggleItem(item)}
                         style={{
-                            backgroundColor: selectedItems.includes(item)
-                                ? '#137882'
-                                : '#F8F8F8',
+                            backgroundColor: selectedItems.includes(item) ? '#137882' : '#F8F8F8',
                             borderRadius: 100,
                         }}
                         textStyle={{
@@ -49,9 +85,7 @@ const ListenerProfileScreen2 = () => {
                             paddingVertical: 12,
                             fontSize: 16,
                             fontWeight: '500',
-                            color: selectedItems.includes(item)
-                                ? '#fff'
-                                : '#3C4647',
+                            color: selectedItems.includes(item) ? '#fff' : '#3C4647',
                         }}
                     >
                         {item}
@@ -66,10 +100,7 @@ const ListenerProfileScreen2 = () => {
                     },
                 ]}
                 disabled={!isSelected}
-                onPress={() => {
-                    console.log(selectedItems);
-                    navigation.navigate('ListenerProfileScreen3');
-                }}
+                onPress={handleSubmit}
             >
                 <Text
                     style={[

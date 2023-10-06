@@ -1,25 +1,18 @@
-import {
-    View,
-    Text,
-    SafeAreaView,
-    StyleSheet,
-    TouchableOpacity,
-    Image,
-    Platform,
-    TextInput,
-    StatusBar,
-    Button,
-} from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import React, { useState } from 'react';
-import {} from 'react-native-paper';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 import colours from '../config/colours';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
-import { useNavigation } from '@react-navigation/native';
+import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
+import { baseURL } from '../utils/constain';
+import { storeData } from '../utils/AsyncStorage';
 
 const CreateAccountScreen = () => {
     const navigation = useNavigation();
     const [isChecked, setIsChecked] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -44,6 +37,8 @@ const CreateAccountScreen = () => {
         let error = '';
         if (field === 'name' && !value) {
             error = 'Name is required.';
+        } else if (field === 'name' && value.length < 6) {
+            error = 'Name must be at least 6 characters.';
         } else if (field === 'email' && !isValidEmail(value)) {
             error = 'Invalid email address.';
         } else if (field === 'password' && value.length < 8) {
@@ -100,7 +95,7 @@ const CreateAccountScreen = () => {
         return isValid;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const { name, email, password } = formData;
 
         const isValid = validateNullFormData(formData);
@@ -115,11 +110,36 @@ const CreateAccountScreen = () => {
             return;
         }
 
-        console.log('Name:', name);
-        console.log('Email:', email);
-        console.log('Password:', password);
+        try {
+            setLoading(true);
+            const institutesNew = await axios.post(`${baseURL}/dev/institute/signup`, {
+                email: email,
+                name: name,
+                password: password,
+            });
 
-        navigation.navigate('ListenerProfileMain');
+            const { statusCode, body } = JSON.parse(institutesNew.data);
+
+            if (statusCode == 200) {
+                storeData('UserUid', body.userUid);
+                navigation.navigate('ListenerProfileMain');
+            } else if (statusCode == 400) {
+                alert(body.message);
+            } else if (statusCode == 409) {
+                setErrors({
+                    ...errors,
+                    email: body.message,
+                });
+            } else {
+                alert(body.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message);
+            return;
+        } finally {
+            setLoading(false);
+        }
     };
 
     const isValidEmail = (email) => {
@@ -128,6 +148,10 @@ const CreateAccountScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <CustomAnimatedLoader
+                visible={loading}
+                source={require('../assets/loader/ellipsis-horizontal-loader.json')}
+            />
             <View style={styles.brand}>
                 <Text style={styles.brandText}>FUXI</Text>
             </View>
@@ -155,9 +179,7 @@ const CreateAccountScreen = () => {
                 <TextInputEffectLabel
                     label="Re-enter password"
                     type="password"
-                    onChangeText={(text) =>
-                        handleInputChange('confirmPassword', text)
-                    }
+                    onChangeText={(text) => handleInputChange('confirmPassword', text)}
                     value={formData.confirmPassword}
                     error={errors.confirmPassword}
                 />
@@ -180,10 +202,8 @@ const CreateAccountScreen = () => {
                         size={20}
                     />
                     <Text style={styles.policyText}>
-                        I have read and agreed to the{' '}
-                        <Text style={styles.primaryText}>Terms of Service</Text>{' '}
-                        & <Text style={styles.primaryText}>Privacy Policy</Text>{' '}
-                        of Project FUXI.
+                        I have read and agreed to the <Text style={styles.primaryText}>Terms of Service</Text> &{' '}
+                        <Text style={styles.primaryText}>Privacy Policy</Text> of Project FUXI.
                     </Text>
                 </View>
                 <View style={styles.toggle}>
@@ -191,9 +211,7 @@ const CreateAccountScreen = () => {
                         style={[
                             styles.toggleActive,
                             {
-                                backgroundColor: !isChecked
-                                    ? '#EFEFF1'
-                                    : '#315F64',
+                                backgroundColor: !isChecked ? '#EFEFF1' : '#315F64',
                             },
                         ]}
                         onPress={handleSubmit}
@@ -211,9 +229,7 @@ const CreateAccountScreen = () => {
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.toggleInactive}>
-                        <Text style={styles.inactiveText}>
-                            I already have an account
-                        </Text>
+                        <Text style={styles.inactiveText}>I already have an account</Text>
                     </TouchableOpacity>
                 </View>
             </View>

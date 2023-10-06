@@ -1,12 +1,4 @@
-import {
-    StyleSheet,
-    Text,
-    View,
-    SafeAreaView,
-    StatusBar,
-    Dimensions,
-    TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, StatusBar, Dimensions, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import Dialog from 'react-native-dialog';
@@ -20,6 +12,20 @@ const ListenerProfileMain = () => {
     const [currentScreen, setCurrentScreen] = useState(0);
     const [progressBarValue, setProgressBarValue] = useState(0.5);
     const [visible, setVisible] = useState(false);
+
+    const [formData, setFormData] = useState({
+        nameListener: '',
+        yearBirth: '',
+        language: '',
+    });
+
+    const [errors, setErrors] = useState({
+        nameListener: '',
+        yearBirth: '',
+        language: '',
+    });
+
+    const [selectedItems, setSelectedItems] = useState([]);
 
     const showDialog = () => {
         setVisible(true);
@@ -39,8 +45,12 @@ const ListenerProfileMain = () => {
                 setCurrentScreen(1);
                 setProgressBarValue(0.9);
             }}
+            formData={formData}
+            setFormData={setFormData}
+            errors={errors}
+            setErrors={setErrors}
         />,
-        <ListenerProfileScreen2 />,
+        <ListenerProfileScreen2 selectedItems={selectedItems} setSelectedItems={setSelectedItems} formData={formData} />,
     ];
 
     return (
@@ -67,29 +77,14 @@ const ListenerProfileMain = () => {
                 data={[screens[0]]}
                 scrollAnimationDuration={0}
                 onSnapToItem={(index) => setCurrentScreen(index)}
-                renderItem={({ item }) => (
-                    <View style={{ flex: 1 }}>{screens[currentScreen]}</View>
-                )}
+                renderItem={({ item }) => <View style={{ flex: 1 }}>{screens[currentScreen]}</View>}
             />
             <View style={styles.dialog}>
                 <Dialog.Container visible={visible}>
-                    <Dialog.Title style={styles.dialogTitle}>
-                        Unsaved profile
-                    </Dialog.Title>
-                    <Dialog.Description style={styles.dialogDescription}>
-                        You haven’t finished setting up this profile yet. Are
-                        you sure?
-                    </Dialog.Description>
-                    <Dialog.Button
-                        style={styles.dialogButtonNo}
-                        label="No, go back"
-                        onPress={handleCancel}
-                    />
-                    <Dialog.Button
-                        style={styles.dialogButtonYes}
-                        label="Skip anyway"
-                        onPress={handleDelete}
-                    />
+                    <Dialog.Title style={styles.dialogTitle}>Unsaved profile</Dialog.Title>
+                    <Dialog.Description style={styles.dialogDescription}>You haven’t finished setting up this profile yet. Are you sure?</Dialog.Description>
+                    <Dialog.Button style={styles.dialogButtonNo} label="No, go back" onPress={handleCancel} />
+                    <Dialog.Button style={styles.dialogButtonYes} label="Skip anyway" onPress={handleDelete} />
                 </Dialog.Container>
             </View>
         </SafeAreaView>

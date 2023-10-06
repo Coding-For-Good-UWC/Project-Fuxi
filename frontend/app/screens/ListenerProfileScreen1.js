@@ -4,19 +4,8 @@ import TextInputEffectLabel from '../components/TextInputEffectLabel';
 import SelectElementEffectLabel from '../components/SelectElementEffectLabel';
 import { countries } from './PatientRegistration';
 
-const ListenerProfileScreen1 = ({ goToScreen }) => {
+const ListenerProfileScreen1 = ({ goToScreen, formData, setFormData, errors, setErrors }) => {
     const [isValid, setIsValid] = useState(false);
-    const [formData, setFormData] = useState({
-        nameListener: '',
-        yearBirth: '',
-        language: '',
-    });
-
-    const [errors, setErrors] = useState({
-        nameListener: '',
-        yearBirth: '',
-        language: '',
-    });
 
     const years = [];
     const currentYear = new Date().getFullYear();
@@ -58,9 +47,7 @@ const ListenerProfileScreen1 = ({ goToScreen }) => {
         if (formData.nameListener.length < 6) {
             setIsValid(false);
         } else {
-            validateNullFormData(formData)
-                ? setIsValid(false)
-                : setIsValid(true);
+            validateNullFormData(formData) ? setIsValid(false) : setIsValid(true);
         }
     }, [formData, errors]);
 
@@ -94,33 +81,26 @@ const ListenerProfileScreen1 = ({ goToScreen }) => {
         <View style={styles.container}>
             <Text style={styles.headerText}>Set up listener profile</Text>
             <Text style={styles.descriptionText}>
-                In order for us to personalize our music therapy for the
-                listener, please help us understand a bit about them.
+                In order for us to personalize our music therapy for the listener, please help us understand a bit about them.
             </Text>
             <View style={styles.formProfile}>
                 <TextInputEffectLabel
                     label="Name"
-                    onChangeText={(text) =>
-                        handleChangeValue('nameListener', text)
-                    }
+                    onChangeText={(text) => handleChangeValue('nameListener', text)}
                     value={formData.nameListener}
                     error={errors.nameListener}
                 />
                 <SelectElementEffectLabel
                     dataArray={years}
                     label="Year of birth"
-                    onValueChange={(text) =>
-                        handleChangeValue('yearBirth', text)
-                    }
+                    onValueChange={(text) => handleChangeValue('yearBirth', text)}
                     value={formData.yearBirth}
                     error={errors.yearBirth}
                 />
                 <SelectElementEffectLabel
                     dataArray={countries}
                     label="Preferred language"
-                    onValueChange={(text) =>
-                        handleChangeValue('language', text)
-                    }
+                    onValueChange={(text) => handleChangeValue('language', text)}
                     value={formData.language}
                     error={errors.language}
                 />
