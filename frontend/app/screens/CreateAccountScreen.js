@@ -2,12 +2,11 @@ import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, Statu
 import React, { useState } from 'react';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useNavigation } from '@react-navigation/native';
-import axios from 'axios';
 import colours from '../config/colours';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
-import { baseURL } from '../utils/constain';
 import { storeData } from '../utils/AsyncStorage';
+import { signUpInstitute } from '../api/institutes';
 
 const CreateAccountScreen = () => {
     const navigation = useNavigation();
@@ -112,13 +111,8 @@ const CreateAccountScreen = () => {
 
         try {
             setLoading(true);
-            const institutesNew = await axios.post(`${baseURL}/dev/institute/signup`, {
-                email: email,
-                name: name,
-                password: password,
-            });
-
-            const { statusCode, body } = JSON.parse(institutesNew.data);
+            const institutesNew = await signUpInstitute(name, email, password);
+            const { statusCode, body } = JSON.parse(institutesNew);
 
             if (statusCode == 200) {
                 storeData('UserUid', body.userUid);

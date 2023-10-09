@@ -2,11 +2,10 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Chip } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import axios from 'axios';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 import { languages } from './PatientRegistration';
-import { baseURL } from '../utils/constain';
 import { getStoreData } from '../utils/AsyncStorage';
+import { createProfile } from '../api/profiles';
 
 const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData }) => {
     const navigation = useNavigation();
@@ -36,19 +35,12 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData }) =
         const userUid = await getStoreData('UserUid');
 
         try {
-            const newProfile = await axios.post(`${baseURL}/dev/profile `, {
-                instituteUid: userUid,
-                fullname: nameListener,
-                yearBirth: yearBirth,
-                language: language,
-                genres: selectedItems,
-                description: null,
-            });
+            const newProfile = await createProfile(userUid, nameListener, yearBirth, language, selectedItems, null);
 
-            const { statusCode, body } = JSON.parse(newProfile.data);
+            const { statusCode, body } = JSON.parse(newProfile);
 
             if (statusCode == 201) {
-                navigation.navigate('ListenerProfileScreen3');
+                navigation.navigate('ListenerProfileScreen3', { nameProfile: formData.nameListener });
             } else if (statusCode == 400) {
                 alert(body.message);
             } else {

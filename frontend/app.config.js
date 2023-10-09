@@ -32,7 +32,7 @@ export default {
       favicon: "./app/assets/favicon.png",
     },
     extra: {
-      apiUrl: process.env.BACKEND_HOST || "http://10.0.1.1:8080",
+      apiUrl: process.env.BACKEND_HOST || "http://10.10.11.129:3000",
       serviceacc: process.env.SERVICE_ACCOUNT_EMAILJS || "service_2ltnpw6", 
       templateid:process.env.TEMPLATE_ID_EMAILJS || "template_v3e5qxl",
       publicapikey:process.env.PUBLIC_API_KEY_EMAILJS || "Pqb-hgicf_LaXv1mp",
