@@ -2,6 +2,7 @@
 
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 const admin = require('firebase-admin');
+const bcrypt = require('bcrypt');
 const { connectDb } = require('../lib/mongodb');
 const { firebaseConfig } = require('../config/config');
 const instituteModel = require('../models/institute');
@@ -113,33 +114,46 @@ const signup = async (event) => {
 
 const signin = async (event) => {
     try {
-        const { email, name } = JSON.parse(event.body);
-        if (!name || !email)
+        const { email, password } = JSON.parse(event.body);
+        if (!email || !password)
             return JSON.stringify({
                 statusCode: 400,
                 message: 'Missing required fields',
             });
 
-        const credentials = await loginWithCredentials(email, name);
+        const credentials = await loginWithCredentials(email);
         const createToken = await admin.auth().createCustomToken(credentials.uid);
 
-        const institute = await instituteModel.find({ uid: credentials.uid }).exec();
+        const institute = await instituteModel.findOne({ uid: credentials.uid }).exec();
+        const resultPassword = await bcrypt.compare(password, institute.password);
+
         if (!institute) {
             return JSON.stringify({
                 statusCode: 400,
                 message: 'Invalid credentials',
             });
         } else {
-            return JSON.stringify({
-                statusCode: 200,
-                message: 'Successfully signed in',
-                token: createToken,
-                institute: institute,
-            });
+            if (resultPassword) {
+                return JSON.stringify({
+                    statusCode: 200,
+                    message: 'Successfully signed in',
+                    institute: {
+                        uid: institute.uid,
+                        email: institute.email,
+                        name: institute.name,
+                    },
+                    token: createToken,
+                });
+            } else {
+                return JSON.stringify({
+                    statusCode: 401,
+                    message: 'Incorrect password',
+                });
+            }
         }
     } catch (err) {
         console.log(err);
-        JSON.stringify({ statusCode: 500, message: 'Server error' });
+        return JSON.stringify({ statusCode: 500, message: 'Server error' });
     }
 };
 

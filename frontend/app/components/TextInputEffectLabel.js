@@ -3,12 +3,7 @@ import { View, TextInput, Animated, StyleSheet, Text } from 'react-native';
 import colours from '../config/colours';
 import { Ionicons } from '@expo/vector-icons';
 
-const TextInputEffectLabel = ({
-    type = 'text',
-    label,
-    onChangeText,
-    error,
-}) => {
+const TextInputEffectLabel = ({ type = 'text', label, onChangeText, error, style, styleInput }) => {
     const [text, setText] = useState('');
     const placeholderAnim = useRef(new Animated.Value(0)).current;
     const isPassword = type === 'password';
@@ -44,7 +39,7 @@ const TextInputEffectLabel = ({
     };
 
     return (
-        <View style={{ marginBottom: 10 }}>
+        <View style={[{ marginBottom: 10 }, style]}>
             <Animated.Text
                 style={{
                     position: 'absolute',
@@ -69,25 +64,24 @@ const TextInputEffectLabel = ({
             <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
                 <TextInput
                     onChangeText={handleTextChange}
-                    style={{
-                        height: 40,
-                        marginTop: 12,
-                        marginBottom: -2,
-                        fontSize: 16,
-                        width: '100%',
-                        color: '#3C4647',
-                    }}
+                    style={[
+                        {
+                            height: 40,
+                            marginTop: 12,
+                            marginBottom: -2,
+                            fontSize: 16,
+                            width: '100%',
+                            color: '#3C4647',
+                        },
+                        styleInput,
+                    ]}
                     secureTextEntry={isPassword && !isPasswordVisible}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                 />
                 {isPassword && (
                     <Ionicons
-                        name={
-                            isPasswordVisible
-                                ? 'eye-outline'
-                                : 'eye-off-outline'
-                        }
+                        name={isPasswordVisible ? 'eye-outline' : 'eye-off-outline'}
                         size={24}
                         color={'#757575'}
                         style={{

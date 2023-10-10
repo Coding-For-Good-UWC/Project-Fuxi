@@ -1,11 +1,4 @@
-import {
-    Image,
-    StyleSheet,
-    Text,
-    View,
-    Button,
-    TouchableOpacity,
-} from 'react-native';
+import { Image, StyleSheet, Text, View, Button, TouchableOpacity } from 'react-native';
 import React, { useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import colours from '../config/colours';
@@ -17,29 +10,13 @@ const WelcomeScreen = ({ navigation }) => {
                 <Text style={styles.headerName}>FUXI</Text>
                 <Text style={styles.headerAbout}>A music therapy app</Text>
                 <Text style={styles.headerAbout}>for dementia treatmemt</Text>
-                <TouchableOpacity
-                    style={styles.headerMoreAbout}
-                    onPress={() => navigation.navigate('AboutFUXI')}
-                >
-                    <Text style={styles.headerMoreAboutText}>
-                        More about FUXI
-                    </Text>
-                    <Ionicons
-                        name="arrow-forward-outline"
-                        size={18}
-                        color={colours.deepTurquoise}
-                    />
+                <TouchableOpacity style={styles.headerMoreAbout} onPress={() => navigation.navigate('AboutFUXI')}>
+                    <Text style={styles.headerMoreAboutText}>More about FUXI</Text>
+                    <Ionicons name="arrow-forward-outline" size={18} color={colours.deepTurquoise} />
                 </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.headerMoreAbout}
-                    onPress={() => navigation.navigate('PlayMedia')}
-                >
+                <TouchableOpacity style={styles.headerMoreAbout} onPress={() => navigation.navigate('PlayMedia')}>
                     <Text style={styles.headerMoreAboutText}>PlayMedia</Text>
-                    <Ionicons
-                        name="arrow-forward-outline"
-                        size={18}
-                        color={colours.deepTurquoise}
-                    />
+                    <Ionicons name="arrow-forward-outline" size={18} color={colours.deepTurquoise} />
                 </TouchableOpacity>
             </View>
             <View style={styles.center}>
@@ -49,11 +26,9 @@ const WelcomeScreen = ({ navigation }) => {
                 >
                     <Text style={styles.activeText}>Create new account</Text>
                 </TouchableOpacity>
-                <View style={styles.toggleInactive}>
-                    <Text style={styles.inactiveText}>
-                        I already have an account
-                    </Text>
-                </View>
+                <TouchableOpacity style={styles.toggleInactive} onPress={() => navigation.navigate('SignInScreen')}>
+                    <Text style={styles.inactiveText}>I already have an account</Text>
+                </TouchableOpacity>
             </View>
             <View style={styles.footer}>
                 <View style={styles.backgroundFooter}></View>
@@ -63,13 +38,8 @@ const WelcomeScreen = ({ navigation }) => {
                     <Text style={{ fontWeight: '600' }}> Coding for Good</Text>
                 </Text>
                 <View style={styles.footerViewImg}>
-                    <Image
-                        source={require('../assets/UWC.png')}
-                        style={styles.img}
-                    />
-                    <Image
-                        source={require('../assets/CodingforGoodLogo.png')}
-                    />
+                    <Image source={require('../assets/UWC.png')} style={styles.img} />
+                    <Image source={require('../assets/CodingforGoodLogo.png')} />
                 </View>
             </View>
         </View>

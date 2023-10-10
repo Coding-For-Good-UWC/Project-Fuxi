@@ -29,16 +29,18 @@ import CreateAccountScreen from './app/screens/CreateAccountScreen';
 import ListenerProfileMain from './app/screens/ListenerProfileMain';
 import ListenerProfileScreen1 from './app/screens/ListenerProfileScreen1';
 import ListenerProfileScreen3 from './app/screens/ListenerProfileScreen3';
+import SignInScreen from './app/screens/SignInScreen';
+import ResetPassword from './app/screens/ResetPassword';
+import ResetPasswordCheckEmail from './app/screens/ResetPasswordCheckEmail';
+import ResetPasswordNew from './app/screens/ResetPasswordNew';
+import LibrariesScreen from './app/screens/LibrariesScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
     const [isLoading, setIsLoading] = useState(false);
     const [fadeAnim] = useState(new Animated.Value(0));
-    const isLoadingContextValue = useMemo(
-        () => ({ isLoading, setIsLoading }),
-        [isLoading, setIsLoading],
-    );
+    const isLoadingContextValue = useMemo(() => ({ isLoading, setIsLoading }), [isLoading, setIsLoading]);
 
     useEffect(() => {
         if (isLoading) {
@@ -85,11 +87,7 @@ export default function App() {
                                 headerTransparent: true,
                             }}
                         />
-                        <Stack.Screen
-                            name="Landing"
-                            component={LandingScreen}
-                            options={{ headerShown: false }}
-                        />
+                        <Stack.Screen name="Landing" component={LandingScreen} options={{ headerShown: false }} />
                         <Stack.Screen
                             name="Login"
                             component={LoginScreen}
@@ -201,6 +199,51 @@ export default function App() {
                         <Stack.Screen
                             name="ListenerProfileScreen3"
                             component={ListenerProfileScreen3}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                                headerShown: false,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="LibrariesScreen"
+                            component={LibrariesScreen}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                                headerShown: false,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="SignInScreen"
+                            component={SignInScreen}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                                headerShown: false,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="ResetPassword"
+                            component={ResetPassword}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                                headerShown: false,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="ResetPasswordCheckEmail"
+                            component={ResetPasswordCheckEmail}
+                            options={{
+                                headerTitle: '',
+                                headerTransparent: true,
+                                headerShown: false,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="ResetPasswordNew"
+                            component={ResetPasswordNew}
                             options={{
                                 headerTitle: '',
                                 headerTransparent: true,

@@ -149,7 +149,7 @@ const CreateAccountScreen = () => {
             <View style={styles.brand}>
                 <Text style={styles.brandText}>FUXI</Text>
             </View>
-            <View style={styles.signIn}>
+            <View style={styles.signUp}>
                 <Text style={styles.headerFormText}>Create new account</Text>
                 <TextInputEffectLabel
                     label="Name"
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingVertical: 40,
     },
-    signIn: {
+    signUp: {
         paddingHorizontal: 25,
     },
     headerFormText: {

@@ -29,3 +29,16 @@ export const signUpInstitute = async (name, email, password) => {
         throw error;
     }
 };
+
+export const signInInstitute = async (email, password) => {
+    try {
+        const response = await axios.post(`${apiUrl}/dev/institute/signin`, {
+            email: email,
+            password: password,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error in signInInstitute:', error);
+        throw error;
+    }
+};
