@@ -74,12 +74,14 @@ const signup = async (event) => {
                 password,
             });
             if (newInstitute) {
+                const createToken = await admin.auth().createCustomToken(userUid);
                 return JSON.stringify({
                     statusCode: 200,
                     body: {
                         status: 'OK',
                         message: 'Institute created',
                         userUid: userUid,
+                        token: createToken,
                     },
                 });
             } else {

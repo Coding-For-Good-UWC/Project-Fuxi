@@ -1,13 +1,20 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRoute } from '@react-navigation/native';
+import { AuthContext } from '../context/AuthContext';
 
 const ListenerProfileScreen3 = () => {
+    const { loginAuthContext } = useContext(AuthContext);
     const navigation = useNavigation();
     const route = useRoute();
     const nameProfile = route.params.nameProfile;
+    const token = route.params.token;
+
+    const handleGoToHomeScreen = async () => {
+        loginAuthContext(token);
+    };
 
     return (
         <View style={styles.container}>
@@ -43,7 +50,7 @@ const ListenerProfileScreen3 = () => {
                 >
                     <Text style={[styles.buttonText, { color: '#137882' }]}>Create another profile</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={handleGoToHomeScreen}>
                     <Text style={[styles.buttonText, { color: '#222C2D' }]}>Go to Home screen</Text>
                 </TouchableOpacity>
             </View>

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Chip } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -6,8 +6,9 @@ import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 import { languages } from './PatientRegistration';
 import { getStoreData } from '../utils/AsyncStorage';
 import { createProfile } from '../api/profiles';
+import colours from '../config/colours.js';
 
-const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData }) => {
+const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, token }) => {
     const navigation = useNavigation();
     const [isSelected, setIsSelected] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -40,7 +41,7 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData }) =
             const { statusCode, body } = JSON.parse(newProfile);
 
             if (statusCode == 201) {
-                navigation.navigate('ListenerProfileScreen3', { nameProfile: formData.nameListener });
+                navigation.navigate('ListenerProfileScreen3', { nameProfile: formData.nameListener, token: token });
             } else if (statusCode == 400) {
                 alert(body.message);
             } else {
@@ -55,6 +56,35 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData }) =
         }
     };
 
+    const getColour = (genre) => {
+        switch (genre) {
+            case 'Cantonese':
+                return colours.genreCantonese;
+            case 'Chinese':
+                return colours.genreChinese;
+            case 'Christian':
+                return colours.genreChristian;
+            case 'English':
+                return colours.genreEnglish;
+            case 'Hainanese':
+                return colours.genreHainanese;
+            case 'Hindi':
+                return colours.genreHindi;
+            case 'Hokkien':
+                return colours.genreHokkien;
+            case 'Malay':
+                return colours.genreMalay;
+            case 'Mandarin':
+                return colours.genreMandarin;
+            case 'TV':
+                return colours.genreTV;
+            case 'Tamil':
+                return colours.genreTamil;
+            default:
+                return '#137882';
+        }
+    };
+
     return (
         <View style={styles.container}>
             <CustomAnimatedLoader
@@ -63,14 +93,15 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData }) =
             />
             <Text style={styles.headerText}>Music taste</Text>
             <Text style={styles.descriptionText}>Please select at least 1 type that they like.</Text>
-            <View style={styles.listChip}>
+            <View style={styles.listChip} vertical={true}>
                 {languages.map((item, index) => (
                     <Chip
                         key={index}
                         onPress={() => toggleItem(item)}
                         style={{
-                            backgroundColor: selectedItems.includes(item) ? '#137882' : '#F8F8F8',
+                            backgroundColor: selectedItems.includes(item) ? getColour(item) : '#F8F8F8',
                             borderRadius: 100,
+                            textAlign: 'center',
                         }}
                         textStyle={{
                             paddingHorizontal: 24,

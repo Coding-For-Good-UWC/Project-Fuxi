@@ -1,16 +1,17 @@
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import colours from '../config/colours';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
 import { signInInstitute } from '../api/institutes';
-import { storeData } from '../utils/AsyncStorage';
+import { AuthContext } from '../context/AuthContext';
 
 const SignInScreen = () => {
+    const navigation = useNavigation();
+    const { loginAuthContext } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
     const [isValid, setIsValid] = useState(false);
-    const navigation = useNavigation();
 
     const [formData, setFormData] = useState({
         email: '',
@@ -74,14 +75,12 @@ const SignInScreen = () => {
             const { statusCode, message, institute, token } = JSON.parse(response);
             if (statusCode == 200) {
                 console.log(token);
-                storeData('token-user', token);
-                navigation.navigate('ListenerProfileMain');
+                loginAuthContext(token);
             } else if (statusCode == 400) {
                 alert(message);
             } else if (statusCode == 401) {
                 alert(message);
             }
-            navigation.navigate('LibrariesScreen');
         }
     };
 

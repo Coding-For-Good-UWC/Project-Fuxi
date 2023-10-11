@@ -1,12 +1,5 @@
 import React, { useState, useRef } from 'react';
-import {
-    StyleSheet,
-    Text,
-    View,
-    Alert,
-    TextInput,
-    TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, Text, View, Alert, TextInput, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DatePickerModal from '../components/DatePickerModal';
 import colours from '../config/colours.js';
@@ -211,24 +204,39 @@ export const countries = [
 ];
 
 export const languages = [
-    'Chinese',
-    'English',
-    'Hindi',
-    'Tamil',
     'Cantonese',
+    'Chinese',
+    'Christian',
+    'English',
     'Hainanese',
+    'Hindi',
     'Hokkien',
+    'Malay',
     'Mandarin',
+    'TV',
+    'Tamil',
+    // 'Spanish',
+    // 'French',
+    // 'German',
+    // 'Italian',
+    // 'Japanese',
+    // 'Korean',
+    // 'Portuguese',
+    // 'Russian',
+    // 'Arabic',
+    // 'Dutch',
+    // 'Swedish',
+    // 'Turkish',
+    // 'Greek',
+    // 'Thai',
+    // 'Vietnamese',
+    // 'Indonesian',
+    // 'Hebrew',
+    // 'Polish',
+    // 'Finnish',
 ];
 
-export const ethnicities = [
-    'Singaporean',
-    'Malaysian',
-    'Indian',
-    'Chinese',
-    'Eurasian',
-    'Hokkien',
-];
+export const ethnicities = ['Singaporean', 'Malaysian', 'Indian', 'Chinese', 'Eurasian', 'Hokkien'];
 
 const PatientRegistration = ({ route, navigation }) => {
     const [formData, setFormData] = useState({
@@ -276,10 +284,7 @@ const PatientRegistration = ({ route, navigation }) => {
         const currentDate = new Date();
         let age = currentDate.getFullYear() - birthDateObj.getFullYear();
         const monthDiff = currentDate.getMonth() - birthDateObj.getMonth();
-        if (
-            monthDiff < 0 ||
-            (monthDiff === 0 && currentDate.getDate() < birthDateObj.getDate())
-        ) {
+        if (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < birthDateObj.getDate())) {
             age--;
         }
 
@@ -304,16 +309,12 @@ const PatientRegistration = ({ route, navigation }) => {
                             style={styles.input}
                             placeholder="Name"
                             placeholderTextColor={colours.selected}
-                            onChangeText={(value) =>
-                                handleChange(value, 'name')
-                            }
+                            onChangeText={(value) => handleChange(value, 'name')}
                             textAlign="center"
                         />
                     </View>
 
-                    <TouchableOpacity
-                        onPress={() => setDatePickerModalActive(true)}
-                    >
+                    <TouchableOpacity onPress={() => setDatePickerModalActive(true)}>
                         <View style={styles.inputContainer}>
                             <TextInput
                                 style={styles.input}
@@ -344,18 +345,10 @@ const PatientRegistration = ({ route, navigation }) => {
                     </View>
 
                     <View style={styles.inputContainer}>
-                        {renderPickerSelect(
-                            formData.language,
-                            (value) => handleChange(value, 'language'),
-                            languages,
-                        )}
+                        {renderPickerSelect(formData.language, (value) => handleChange(value, 'language'), languages)}
                     </View>
 
-                    <StyledButton
-                        text="Next"
-                        onPress={handleSubmit}
-                        style={styles.submitButton}
-                    />
+                    <StyledButton text="Next" onPress={handleSubmit} style={styles.submitButton} />
                 </View>
             </View>
 

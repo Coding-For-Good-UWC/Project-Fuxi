@@ -11,7 +11,7 @@ import { signUpInstitute } from '../api/institutes';
 const CreateAccountScreen = () => {
     const navigation = useNavigation();
     const [isChecked, setIsChecked] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -116,7 +116,7 @@ const CreateAccountScreen = () => {
 
             if (statusCode == 200) {
                 storeData('UserUid', body.userUid);
-                navigation.navigate('ListenerProfileMain');
+                navigation.navigate('ListenerProfileMain', { token: body.token });
             } else if (statusCode == 400) {
                 alert(body.message);
             } else if (statusCode == 409) {
@@ -222,7 +222,7 @@ const CreateAccountScreen = () => {
                             Create account
                         </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.toggleInactive}>
+                    <TouchableOpacity style={styles.toggleInactive} onPress={() => navigation.navigate('SignInScreen')}>
                         <Text style={styles.inactiveText}>I already have an account</Text>
                     </TouchableOpacity>
                 </View>
@@ -296,6 +296,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingVertical: 16,
         fontSize: 16,
+        fontWeight: '500',
         color: '#222C2D',
         textAlign: 'center',
     },

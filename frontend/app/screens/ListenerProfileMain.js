@@ -5,6 +5,7 @@ import Dialog from 'react-native-dialog';
 import ListenerProfileScreen1 from './ListenerProfileScreen1';
 import ListenerProfileScreen2 from './ListenerProfileScreen2';
 import CustomProgressBar from '../components/CustomProgressBar';
+import { useRoute } from '@react-navigation/native';
 
 const ListenerProfileMain = () => {
     const width = Dimensions.get('window').width;
@@ -12,6 +13,8 @@ const ListenerProfileMain = () => {
     const [currentScreen, setCurrentScreen] = useState(0);
     const [progressBarValue, setProgressBarValue] = useState(0.5);
     const [visible, setVisible] = useState(false);
+    const route = useRoute();
+    const token = route.params.token;
 
     const [formData, setFormData] = useState({
         nameListener: '',
@@ -50,7 +53,12 @@ const ListenerProfileMain = () => {
             errors={errors}
             setErrors={setErrors}
         />,
-        <ListenerProfileScreen2 selectedItems={selectedItems} setSelectedItems={setSelectedItems} formData={formData} />,
+        <ListenerProfileScreen2
+            selectedItems={selectedItems}
+            setSelectedItems={setSelectedItems}
+            formData={formData}
+            token={token}
+        />,
     ];
 
     return (
@@ -82,7 +90,9 @@ const ListenerProfileMain = () => {
             <View style={styles.dialog}>
                 <Dialog.Container visible={visible}>
                     <Dialog.Title style={styles.dialogTitle}>Unsaved profile</Dialog.Title>
-                    <Dialog.Description style={styles.dialogDescription}>You haven’t finished setting up this profile yet. Are you sure?</Dialog.Description>
+                    <Dialog.Description style={styles.dialogDescription}>
+                        You haven’t finished setting up this profile yet. Are you sure?
+                    </Dialog.Description>
                     <Dialog.Button style={styles.dialogButtonNo} label="No, go back" onPress={handleCancel} />
                     <Dialog.Button style={styles.dialogButtonYes} label="Skip anyway" onPress={handleDelete} />
                 </Dialog.Container>
