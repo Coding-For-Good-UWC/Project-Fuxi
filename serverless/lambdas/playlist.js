@@ -8,36 +8,6 @@ const trackModel = require('../models/track');
 
 connectDb();
 
-const getPlaylistByArtist = async (event) => {
-  try {
-    const { artist } = JSON.parse(event.body);
-
-    if (!artist) {
-      return JSON.stringify({
-        statusCode: 400,
-        status: 'Bad Request',
-        message: 'Missing required fields',
-      });
-    }
-
-    const playlist = await trackModel.find({ Artist: artist }).exec();
-
-    return JSON.stringify({
-      statusCode: 200,
-      status: 'OK',
-      message: `Get playlist by artist ${artist}`,
-      data: playlist,
-    });
-  } catch (error) {
-    console.error(error);
-    return JSON.stringify({
-      statusCode: 500,
-      status: 'Internal server error',
-      message: 'Server Error',
-    });
-  }
-};
-
 const getPlaylistByGenresInProfile = async (event) => {
   try {
     const { uid } = JSON.parse(event.body);
@@ -95,4 +65,4 @@ const getPlaylistByGenresInProfile = async (event) => {
   }
 };
 
-module.exports = { getPlaylistByArtist, getPlaylistByGenresInProfile };
+module.exports = { getTracksByArtist, getPlaylistByGenresInProfile };

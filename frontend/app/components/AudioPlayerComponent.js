@@ -1,20 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from 'react';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 
-import Slider from "@react-native-community/slider";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import Slider from '@react-native-community/slider';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
-import {
-    faPlay,
-    faPause,
-    faBackward,
-    faForward,
-    faRepeat,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPlay, faPause, faBackward, faForward, faRepeat } from '@fortawesome/free-solid-svg-icons';
 
-import colours from "../config/colours.js";
-import { styles } from "../styles/playerStyles.js";
+import colours from '../config/colours.js';
+import { styles } from '../styles/playerStyles.js';
 
 function AudioPlayerComponent(props) {
     const {
@@ -26,12 +20,12 @@ function AudioPlayerComponent(props) {
         elapsedTime,
         setElapsedTime,
         onTrackFinish,
-        onTrackPrev
+        onTrackPrev,
     } = props;
 
     const [position, setPosition] = useState(0);
     const [isLooping, setIsLooping] = useState(false);
-    const [trackFinished, setTrackFinished] = useState(false); 
+    const [trackFinished, setTrackFinished] = useState(false);
 
     const isFocused = useIsFocused();
 
@@ -39,16 +33,15 @@ function AudioPlayerComponent(props) {
         useCallback(() => {
             return () => {
                 const stopAudio = async () => {
-                    if(audio && isPlaying) {
+                    if (audio && isPlaying) {
                         await audio.pauseAsync();
                         setIsPlaying(false);
                     }
-                }
+                };
                 stopAudio();
             };
-        }, [audio, isPlaying, isFocused])
+        }, [audio, isPlaying, isFocused]),
     );
-
 
     useEffect(() => {
         if (audio) {
@@ -58,9 +51,7 @@ function AudioPlayerComponent(props) {
                 const totalSeconds = Math.floor(status.positionMillis / 1000);
                 const minutes = Math.floor(totalSeconds / 60);
                 const seconds = totalSeconds % 60;
-                setElapsedTime(
-                    `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`
-                );
+                setElapsedTime(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
 
                 if (status.didJustFinish) {
                     if (isLooping) {
@@ -93,20 +84,15 @@ function AudioPlayerComponent(props) {
         setIsPlaying(!isPlaying);
     };
 
-    const handleSliderValueChange = async (value) => 
-    {
-        if (audio) 
-            await audio.setPositionAsync(value);
+    const handleSliderValueChange = async (value) => {
+        if (audio) await audio.setPositionAsync(value);
     };
 
     return (
         <View style={styles.topContainer}>
             <Text style={styles.title}>Project FUXI</Text>
             <View style={styles.musicInfoContainer}>
-                <Image
-                    style={styles.coverImage}
-                    source={{ uri: songInfo.imgUri }}
-                />
+                <Image style={styles.coverImage} source={{ uri: songInfo.imgUri }} />
                 <Text style={styles.songName} numberOfLines={1}>
                     {songInfo.title}
                 </Text>
@@ -124,10 +110,7 @@ function AudioPlayerComponent(props) {
                     <Text style={styles.elapsedTime}>{elapsedTime}</Text>
                 </View>
                 <View style={styles.controlsContainer}>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => onTrackPrev()}
-                    >
+                    <TouchableOpacity style={styles.button} onPress={() => onTrackPrev()}>
                         <FontAwesomeIcon icon={faBackward} size={20} />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -138,14 +121,8 @@ function AudioPlayerComponent(props) {
                     >
                         <FontAwesomeIcon icon={faRepeat} size={20} />
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={togglePlayPause}
-                    >
-                        <FontAwesomeIcon
-                            icon={isPlaying ? faPause : faPlay}
-                            size={20}
-                        />
+                    <TouchableOpacity style={styles.button} onPress={togglePlayPause}>
+                        <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} size={20} />
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.button}
@@ -160,14 +137,12 @@ function AudioPlayerComponent(props) {
                 <Text
                     style={[
                         {
-                            color: isLooping
-                                ? colours.primary
-                                : colours.secondary,
+                            color: isLooping ? colours.primary : colours.secondary,
                         },
                         styles.loopText,
                     ]}
                 >
-                    Loop: {isLooping ? "On" : "Off"}
+                    Loop: {isLooping ? 'On' : 'Off'}
                 </Text>
             </View>
         </View>

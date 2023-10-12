@@ -238,6 +238,24 @@ functions:
       - http:
           path: /profileRating/track
           method: put
+  getPlaylistByArtist:
+    handler: lambdas/playlist.getPlaylistByArtist
+    events:
+      - http:
+          path: /playlist/artist
+          method: post
+  getPlaylistByGenresInProfile:
+    handler: lambdas/playlist.getPlaylistByGenresInProfile
+    events:
+      - http:
+          path: /playlist/genresProfile
+          method: post
+  createReactTrack:
+    handler: lambdas/reactTrack.createReactTrack
+    events:
+      - http:
+          path: /reactTrack
+          method: post
   hello:
     handler: handler.hello
 #    The following are a few example events you can configure

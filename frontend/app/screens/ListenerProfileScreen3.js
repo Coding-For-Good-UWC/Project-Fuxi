@@ -13,7 +13,12 @@ const ListenerProfileScreen3 = () => {
     const token = route.params.token;
 
     const handleGoToHomeScreen = async () => {
-        loginAuthContext(token);
+        await loginAuthContext(token);
+    };
+
+    const handleGoToPlayMediaScreen = async () => {
+        await loginAuthContext(token);
+        navigation.navigate('PlayMedia');
     };
 
     return (
@@ -31,9 +36,9 @@ const ListenerProfileScreen3 = () => {
                             backgroundColor: '#315F64',
                         },
                     ]}
-                    onPress={() => navigation.navigate('PlayMedia')}
+                    onPress={handleGoToPlayMediaScreen}
                 >
-                    <Text style={[styles.buttonText, { color: '#fff' }]}>Play music for Nina now</Text>
+                    <Text style={[styles.buttonText, { color: '#fff' }]}>Welcome, let's play some music now</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[
