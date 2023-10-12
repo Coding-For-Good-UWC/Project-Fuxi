@@ -11,7 +11,7 @@ import { signUpInstitute } from '../api/institutes';
 const CreateAccountScreen = () => {
     const navigation = useNavigation();
     const [isChecked, setIsChecked] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
