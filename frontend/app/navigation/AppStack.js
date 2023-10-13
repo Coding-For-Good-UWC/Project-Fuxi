@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import PlayMedia from '../screens/PlayMedia';
 import TabNavigator from './TabNavigator';
+import PlaylistDetailsScreen from './../screens/PlaylistDetailsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,13 @@ const AppStack = () => {
                 component={PlayMedia}
                 options={{
                     headerTitle: "Nina's playlist",
+                    headerTransparent: true,
+                }}
+            />
+            <Stack.Screen
+                name="PlaylistDetailsScreen"
+                component={PlaylistDetailsScreen}
+                options={{
                     headerTransparent: true,
                 }}
             />

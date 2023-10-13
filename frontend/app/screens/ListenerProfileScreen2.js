@@ -87,10 +87,7 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
 
     return (
         <View style={styles.container}>
-            <CustomAnimatedLoader
-                visible={loading}
-                source={require('../assets/loader/ellipsis-horizontal-loader.json')}
-            />
+            <CustomAnimatedLoader visible={loading} source={require('../assets/loader/cat-loader.json')} />
             <Text style={styles.headerText}>Music taste</Text>
             <Text style={styles.descriptionText}>Please select at least 1 type that they like.</Text>
             <View style={styles.listChip} vertical={true}>

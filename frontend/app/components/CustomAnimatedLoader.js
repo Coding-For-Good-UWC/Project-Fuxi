@@ -9,7 +9,7 @@ const CustomAnimatedLoader = ({ visible = false, source }) => {
         <AnimatedLoader
             visible={visible}
             overlayColor="rgba(255, 255, 255, 0.7)"
-            animationStyle={styles.loader}
+            animationStyle={styles.AnimatedLoader}
             source={source}
             speed={1}
         >
@@ -21,12 +21,11 @@ const CustomAnimatedLoader = ({ visible = false, source }) => {
 export default CustomAnimatedLoader;
 
 const styles = StyleSheet.create({
-    loader: {
-        width: 100,
-        height: 100,
-    },
+    AnimatedLoader: {},
     loaderText: {
+        position: 'absolute',
         fontSize: 16,
-        marginTop: 10,
+        fontWeight: '600',
+        bottom: '38%',
     },
 });

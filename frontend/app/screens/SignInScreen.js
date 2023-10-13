@@ -71,15 +71,24 @@ const SignInScreen = () => {
         const { email, password } = formData;
         if (validateNullFormData(formData)) {
             console.log('Form is valid:', formData);
-            const response = await signInInstitute(email, password);
-            const { statusCode, message, institute, token } = JSON.parse(response);
-            if (statusCode == 200) {
-                console.log(token);
-                loginAuthContext(token);
-            } else if (statusCode == 400) {
-                alert(message);
-            } else if (statusCode == 401) {
-                alert(message);
+            try {
+                setLoading(true);
+                const response = await signInInstitute(email, password);
+                const { statusCode, message, institute, token } = JSON.parse(response);
+                if (statusCode == 200) {
+                    console.log(token);
+                    loginAuthContext(token);
+                } else if (statusCode == 400) {
+                    alert(message);
+                } else if (statusCode == 401) {
+                    alert(message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+                return;
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -91,10 +100,7 @@ const SignInScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <CustomAnimatedLoader
-                visible={loading}
-                source={require('../assets/loader/ellipsis-horizontal-loader.json')}
-            />
+            <CustomAnimatedLoader visible={loading} source={require('../assets/loader/cat-loader.json')} />
             <View style={styles.brand}>
                 <Text style={styles.brandText}>FUXI</Text>
             </View>

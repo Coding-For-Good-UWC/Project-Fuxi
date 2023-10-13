@@ -56,8 +56,8 @@ const LibraryScreen = () => {
         </TouchableOpacity>
     );
 
-    const RenderPlayListItem = () => (
-        <TouchableOpacity onLayout={this.handleLayout}>
+    const RenderPlayListItem = ({ onpress }) => (
+        <TouchableOpacity onLayout={this.handleLayout} onPress={onpress}>
             <View style={{ height: heightItem, borderRadius: 6, overflow: 'hidden' }}>
                 <CustomGridLayout columns={2} data={listImages} />
             </View>
@@ -69,26 +69,13 @@ const LibraryScreen = () => {
 
     const data = [
         <RenderItemLikedSong />,
-        <RenderPlayListItem />,
-        <RenderPlayListItem />,
-        <RenderPlayListItem />,
-        <RenderPlayListItem />,
-        <RenderPlayListItem />,
-        <RenderPlayListItem />,
+        <RenderPlayListItem onpress={() => navigation.navigate('PlaylistDetailsScreen')} />,
     ];
 
     const Header = () => (
         <>
             <TouchableOpacity style={styles.buttonNewPlaylist}>
-                <Ionicons
-                    name="add"
-                    color={colours.deepTurquoise}
-                    size={20}
-                    onPress={() => {
-                        console.log(123);
-                        navigation.navigate('PlayMedia');
-                    }}
-                />
+                <Ionicons name="add" color={colours.deepTurquoise} size={20} />
                 <Text style={styles.buttonNewPlaylistText}>Create new playlist</Text>
             </TouchableOpacity>
             <View style={{ height: 20 }} />

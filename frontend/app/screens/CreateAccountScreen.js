@@ -142,10 +142,7 @@ const CreateAccountScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <CustomAnimatedLoader
-                visible={loading}
-                source={require('../assets/loader/ellipsis-horizontal-loader.json')}
-            />
+            <CustomAnimatedLoader visible={loading} source={require('../assets/loader/cat-loader.json')} />
             <View style={styles.brand}>
                 <Text style={styles.brandText}>FUXI</Text>
             </View>
