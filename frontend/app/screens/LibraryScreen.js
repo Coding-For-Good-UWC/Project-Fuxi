@@ -4,12 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import colours from '../config/colours';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { LinearGradient } from 'expo-linear-gradient';
-import songs from '../data/data';
+import playlist from '../data/data';
 import { useNavigation } from '@react-navigation/native';
 
 const LibraryScreen = () => {
-    const [heightItem, setHeightItem] = useState(0);
     const navigation = useNavigation();
+    const [heightItem, setHeightItem] = useState(0);
 
     handleLayout = (event) => {
         const { width, height } = event.nativeEvent.layout;
@@ -17,9 +17,8 @@ const LibraryScreen = () => {
     };
 
     const songImages = [];
-
-    if (songs && Array.isArray(songs)) {
-        const songImages = songs.map((song) => (
+    if (playlist.tracks && Array.isArray(playlist.tracks)) {
+        const songImages = playlist.tracks.map((song) => (
             <Image source={{ uri: song.artwork }} style={{ width: heightItem / 2, height: heightItem / 2 }} />
         ));
     } else {
@@ -46,7 +45,7 @@ const LibraryScreen = () => {
     ];
 
     const RenderItemLikedSong = () => (
-        <TouchableOpacity onLayout={this.handleLayout}>
+        <TouchableOpacity onLayout={this.handleLayout} onPress={() => navigation.navigate('LikedSongsScreen')}>
             <View style={{ height: heightItem }}>
                 <LinearGradient colors={['#1e957f', '#13747e']} style={[styles.itemLikedSong, { height: heightItem }]}>
                     <Ionicons name="heart" color="#fff" size={70} style={styles.iconHeart} />
@@ -69,12 +68,15 @@ const LibraryScreen = () => {
 
     const data = [
         <RenderItemLikedSong />,
-        <RenderPlayListItem onpress={() => navigation.navigate('PlaylistDetailsScreen')} />,
+        <RenderPlayListItem onpress={() => navigation.navigate('PlaylistDetailsScreen', { dataPlaylist: playlist })} />,
     ];
 
     const Header = () => (
         <>
-            <TouchableOpacity style={styles.buttonNewPlaylist}>
+            <TouchableOpacity
+                style={styles.buttonNewPlaylist}
+                onPress={() => navigation.navigate('CreateNewPlaylistScreen')}
+            >
                 <Ionicons name="add" color={colours.deepTurquoise} size={20} />
                 <Text style={styles.buttonNewPlaylistText}>Create new playlist</Text>
             </TouchableOpacity>

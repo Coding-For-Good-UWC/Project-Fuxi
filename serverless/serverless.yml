@@ -256,6 +256,18 @@ functions:
       - http:
           path: /reactTrack
           method: post
+  createPlaylist:
+    handler: lambdas/playlist.createPlaylist
+    events:
+      - http:
+          path: /playlist
+          method: post
+  searchTrack:
+    handler: lambdas/track.searchTrack
+    events:
+      - http:
+          path: /track/searchTrack
+          method: post
   hello:
     handler: handler.hello
 #    The following are a few example events you can configure

@@ -12,14 +12,18 @@ import {
 import React, { useLayoutEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
+import { useRoute } from '@react-navigation/native';
 import CustomGridLayout from './../components/CustomGridLayout';
-import songs from '../data/data';
+import playlist from '../data/data';
+import SlotPlayer from '../components/SlotPlayer';
 
 const PlaylistDetailsScreen = () => {
     const navigation = useNavigation();
     const [heightItem, setHeightItem] = useState(0);
     const [heightItem2, setHeightItem2] = useState(0);
     const { height } = Dimensions.get('window');
+    const route = useRoute();
+    const dataPlaylist = route.params.dataPlaylist;
 
     handleLayout = (event) => {
         const { width, height } = event.nativeEvent.layout;
@@ -35,24 +39,16 @@ const PlaylistDetailsScreen = () => {
         navigation.navigate('PlayMedia');
     };
 
-    const listImages = [
-        <Image
-            source={{ uri: 'https://i.ytimg.com/vi/w68MGL20Mf0/0.jpg' }}
-            style={{ width: heightItem / 2, height: heightItem / 2 }}
-        />,
-        <Image
-            source={{ uri: 'https://i.ytimg.com/vi/KyMm5HRd1Ks/0.jpg' }}
-            style={{ width: heightItem / 2, height: heightItem / 2 }}
-        />,
-        <Image
-            source={{ uri: 'https://i.ytimg.com/vi/Ctxti-H7hZ8/0.jpg' }}
-            style={{ width: heightItem / 2, height: heightItem / 2 }}
-        />,
-        <Image
-            source={{ uri: 'https://i.ytimg.com/vi/h2oJbwgQpA0/0.jpg' }}
-            style={{ width: heightItem / 2, height: heightItem / 2 }}
-        />,
-    ];
+    const imageHeader = [];
+    for (let i = 0; i < 4; i++) {
+        const item = (
+            <Image
+                source={{ uri: playlist.tracks[i].artwork }}
+                style={{ width: heightItem / 2, height: heightItem / 2 }}
+            />
+        );
+        imageHeader.push(item);
+    }
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -66,7 +62,10 @@ const PlaylistDetailsScreen = () => {
             ),
             headerRight: () => (
                 <View style={styles.bar}>
-                    <TouchableOpacity style={styles.roundButtonHeader}>
+                    <TouchableOpacity
+                        style={styles.roundButtonHeader}
+                        onPress={() => navigation.navigate('ModalSearchScreen')}
+                    >
                         <Ionicons name="search" size={24} color={'#3C4647'} />
                     </TouchableOpacity>
                 </View>
@@ -76,37 +75,40 @@ const PlaylistDetailsScreen = () => {
 
     const RenderItemSong = ({ item, index }) => {
         return (
-            <View style={styles.rowItem}>
-                <TouchableOpacity
-                    // onPress={() => handleTrackPress(item)}
-                    style={{ flexDirection: 'row', width: '100%' }}
-                >
-                    <View style={styles.viewSong}>
-                        <Image source={{ uri: item.artwork }} style={styles.songImage} />
-                    </View>
-                    <View style={styles.rowItemText}>
-                        <Text style={styles.titleText}>{item.title}</Text>
-                        <Text style={styles.artistText}>{item.artist}</Text>
-                    </View>
+            <TouchableOpacity
+                style={styles.rowItem}
+                onPress={() => {
+                    navigation.navigate('PlayMedia', { track: item, playlist: dataPlaylist });
+                }}
+            >
+                <Image source={{ uri: item.artwork }} style={styles.songImage} />
+                <View style={styles.rowItemText}>
+                    <Text style={styles.titleText} numberOfLines={1}>
+                        {item.title}
+                    </Text>
+                    <Text style={styles.artistText}>{item.artist}</Text>
+                </View>
+                <TouchableOpacity>
+                    <Ionicons name="heart" color="#137882" size={30} />
                 </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
         );
     };
 
-    const RenderListSong = songs.map((item, index) => <RenderItemSong key={index} item={item} />);
+    const RenderListSong = playlist.tracks.map((item, index) => <RenderItemSong key={index} item={item} />);
 
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
                 <View style={{ alignItems: 'center' }}>
                     <View style={{ borderRadius: 6, overflow: 'hidden', width: '70%' }} onLayout={this.handleLayout}>
-                        <CustomGridLayout columns={2} data={listImages} />
+                        <CustomGridLayout columns={2} data={imageHeader} />
                     </View>
                 </View>
                 <View style={styles.playListDetail}>
-                    <Text style={styles.playListName}>Ninaazarova's playlist</Text>
+                    <Text style={styles.playListName}>{dataPlaylist.namePlaylist}</Text>
                     <View style={styles.playListTracksAndTime}>
-                        <Text style={styles.playListTotalName}>120 songs</Text>
+                        <Text style={styles.playListTotalName}>{dataPlaylist.tracks.length} songs</Text>
                         <Ionicons name="ellipse" color="#E2E3E4" size={10} />
                         <Text style={styles.playListTotalName}>3h 42m</Text>
                     </View>
@@ -120,6 +122,7 @@ const PlaylistDetailsScreen = () => {
                     <CustomGridLayout data={RenderListSong} columns={1} styleLayout={{ height: heightItem2 + 20 }} />
                 </View>
             </View>
+            <SlotPlayer />
         </SafeAreaView>
     );
 };
@@ -175,18 +178,21 @@ const styles = StyleSheet.create({
     },
 
     rowItem: {
-        flexDirection: 'row',
+        flex: 1,
         paddingVertical: 6,
         marginVertical: 2,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
     },
     songImage: {
         height: 50,
         width: 50,
         borderRadius: 4,
-        marginRight: 14,
     },
     rowItemText: {
-        justifyContent: 'center',
+        flex: 1,
+        flexDirection: 'column',
     },
     titleText: {
         fontWeight: '500',
