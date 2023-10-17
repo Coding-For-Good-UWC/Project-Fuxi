@@ -525,7 +525,7 @@ const playTrack = async (event) => {
 };
 
 const searchTrack = async (event) => {
-    const { title, pageNumber, pageSize = 10 } = JSON.parse(event.body);
+    const { title, pageNumber, pageSize = 15 } = JSON.parse(event.body);
     if (!title || !pageNumber) {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }

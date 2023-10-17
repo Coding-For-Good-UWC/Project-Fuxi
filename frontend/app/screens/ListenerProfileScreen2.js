@@ -112,27 +112,19 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
                     </Chip>
                 ))}
             </View>
-            <TouchableOpacity
-                style={[
-                    styles.button,
-                    {
-                        backgroundColor: isSelected ? '#315F64' : '#EFEFF1',
-                    },
-                ]}
-                disabled={!isSelected}
+            <ToggleButton
+                isDisabled={isSelected}
                 onPress={handleSubmit}
-            >
-                <Text
-                    style={[
-                        styles.buttonText,
-                        {
-                            color: isSelected ? '#fff' : '#CACECE',
-                        },
-                    ]}
-                >
-                    Done
-                </Text>
-            </TouchableOpacity>
+                lable="Done"
+                backgroundColorActive="#315F64"
+                backgroundColorInactive="#EFEFF1"
+                colorActive="#fff"
+                colorInactive="#CACECE"
+                styleButton={{
+                    marginTop: 'auto',
+                    marginBottom: 24,
+                }}
+            />
         </View>
     );
 };

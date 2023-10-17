@@ -14,7 +14,8 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import playlist from '../data/data';
 import CustomGridLayout from '../components/CustomGridLayout';
-import ModalSearchScreen from './ModalSearchScreen';
+import SearchTrackScreen from './SearchTrackScreen';
+import RenderItemSong from '../components/RenderItemSong';
 
 const LikedSongsScreen = () => {
     const navigation = useNavigation();
@@ -33,7 +34,7 @@ const LikedSongsScreen = () => {
                 <View style={styles.bar}>
                     <TouchableOpacity
                         style={styles.roundButtonHeader}
-                        onPress={() => navigation.navigate('ModalSearchScreen')}
+                        onPress={() => navigation.navigate('SearchTrackScreen')}
                     >
                         <Ionicons name="search" size={24} color={'#3C4647'} style={{ paddingVertical: 10 }} />
                     </TouchableOpacity>
@@ -67,29 +68,17 @@ const LikedSongsScreen = () => {
         </>
     );
 
-    const RenderItemSong = ({ item, index }) => {
-        return (
-            <TouchableOpacity
-                style={styles.rowItem}
-                onPress={() => {
-                    // navigation.navigate('PlayMedia', { track: item, playlist: dataPlaylist });
-                }}
-            >
-                <Image source={{ uri: item.artwork }} style={styles.songImage} />
-                <View style={styles.rowItemText}>
-                    <Text style={styles.titleText} numberOfLines={1}>
-                        {item.title}
-                    </Text>
-                    <Text style={styles.artistText}>{item.artist}</Text>
-                </View>
+    const RenderListSong = playlist.tracks?.map((item, index) => (
+        <RenderItemSong
+            key={index}
+            item={item}
+            iconRight={
                 <TouchableOpacity>
                     <Ionicons name="heart" color="#137882" size={30} />
                 </TouchableOpacity>
-            </TouchableOpacity>
-        );
-    };
-
-    const RenderListSong = playlist.tracks?.map((item, index) => <RenderItemSong key={index} item={item} />);
+            }
+        />
+    ));
 
     return (
         <SafeAreaView style={styles.safeArea}>

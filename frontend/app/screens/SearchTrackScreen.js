@@ -1,26 +1,15 @@
-import {
-    Platform,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
-    SafeAreaView,
-    TouchableOpacity,
-    TextInput,
-    Image,
-} from 'react-native';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Platform, StatusBar, StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import playlist from '../data/data';
 import CustomGridLayout from '../components/CustomGridLayout';
-import { searchTrack } from './../api/track';
+import { searchTrack } from '../api/track';
+import RenderItemSong from '../components/RenderItemSong';
 
-const ModalSearchScreen = () => {
+const SearchTrackScreen = () => {
     const navigation = useNavigation();
     const textInputRef = useRef(null);
     const [text, setText] = useState('');
-    const [data, setData] = useState([]);
     const [renderTracks, setRenderTracks] = useState([]);
 
     useEffect(() => {
@@ -29,41 +18,6 @@ const ModalSearchScreen = () => {
         }
     }, []);
 
-    const EmptySongs = () => (
-        <>
-            <View style={styles.emptyView}>
-                <Text style={styles.emptyText}>No songs found</Text>
-            </View>
-        </>
-    );
-
-    const NotEmptySongs = () => (
-        <>
-            <View onLayout={this.handleLayout2}>
-                <CustomGridLayout data={renderTracks} columns={1} styleLayout={{}} />
-            </View>
-        </>
-    );
-
-    const RenderItemSong = ({ item, index }) => {
-        return (
-            <TouchableOpacity
-                style={styles.rowItem}
-                onPress={() => {
-                    // navigation.navigate('PlayMedia', { track: item, playlist: dataPlaylist });
-                }}
-            >
-                <Image source={{ uri: item.ImageURL }} style={styles.songImage} />
-                <View style={styles.rowItemText}>
-                    <Text style={styles.titleText} numberOfLines={1}>
-                        {item.Title}
-                    </Text>
-                    <Text style={styles.artistText}>{item.Artist}</Text>
-                </View>
-            </TouchableOpacity>
-        );
-    };
-
     const handleTextChange = async (newText) => {
         setText(newText);
         try {
@@ -71,7 +25,6 @@ const ModalSearchScreen = () => {
             const { code, data, message } = JSON.parse(response);
 
             if (code == 200) {
-                setData(data);
                 setRenderTracks(data.map((item, index) => <RenderItemSong key={index} item={item} />));
             } else {
                 alert(message);
@@ -102,16 +55,24 @@ const ModalSearchScreen = () => {
                         ''
                     )}
                 </View>
-                <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
             </View>
-            <View style={styles.container}>{renderTracks ? <NotEmptySongs /> : <EmptySongs />}</View>
+            <View style={styles.container}>
+                {renderTracks.length !== 0 ? (
+                    <CustomGridLayout data={renderTracks} columns={1} />
+                ) : (
+                    <View style={styles.emptyView}>
+                        <Text style={styles.emptyText}>No songs found</Text>
+                    </View>
+                )}
+            </View>
         </SafeAreaView>
     );
 };
 
-export default ModalSearchScreen;
+export default SearchTrackScreen;
 
 const styles = StyleSheet.create({
     safeArea: {

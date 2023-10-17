@@ -262,6 +262,12 @@ functions:
       - http:
           path: /playlist
           method: post
+  getAllPlayListByProfileId:
+    handler: lambdas/playlist.getAllPlayListByProfileId
+    events:
+      - http:
+          path: /playlist/profile
+          method: post
   searchTrack:
     handler: lambdas/track.searchTrack
     events:

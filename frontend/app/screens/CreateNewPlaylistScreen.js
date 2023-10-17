@@ -12,39 +12,22 @@ import {
     View,
     Image,
 } from 'react-native';
-import playlist from '../data/data';
 import CustomGridLayout from '../components/CustomGridLayout';
+import { searchTrack } from './../api/track';
+import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
+import { getStoreData } from '../utils/AsyncStorage';
+import { createPlaylist } from '../api/playlist';
+import RenderItemSong from '../components/RenderItemSong';
+import ToggleButton from '../components/ToggleButton';
 
 const CreateNewPlaylistScreen = () => {
     const navigation = useNavigation();
     const [searchText, setSearchText] = useState('');
     const [namePlaylistText, setNamePlaylistText] = useState('');
     const [isSelected, setIsSelected] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [selectedItems, setSelectedItems] = useState([]);
-
-    const toggleItem = (item) => {
-        if (selectedItems.includes(item)) {
-            setSelectedItems(selectedItems.filter((selected) => selected !== item));
-        } else {
-            setSelectedItems([...selectedItems, item]);
-        }
-    };
-
-    const handleSubmit = async () => {};
-
-    useEffect(() => {
-        console.log(selectedItems);
-        if (selectedItems.length < 1 || namePlaylistText === '') {
-            setIsSelected(false);
-        } else {
-            setIsSelected(true);
-        }
-    }, [selectedItems, namePlaylistText]);
-
-    const handleTextChange = (newText) => {
-        console.log(newText);
-        setSearchText(newText);
-    };
+    const [renderTracks, setRenderTracks] = useState([]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -59,54 +42,89 @@ const CreateNewPlaylistScreen = () => {
         });
     }, [navigation]);
 
-    const EmptySongs = () => (
-        <>
-            <View style={styles.emptyView}>
-                <Text style={styles.emptyText}>No songs found</Text>
-            </View>
-        </>
-    );
+    const toggleItem = (item) => {
+        setSelectedItems((prevSelectedItems) => {
+            if (prevSelectedItems.includes(item)) {
+                return prevSelectedItems.filter((selected) => selected !== item);
+            } else {
+                return [...prevSelectedItems, item];
+            }
+        });
+    };
 
-    const NotEmptySongs = () => (
-        <>
-            <View onLayout={this.handleLayout2}>
-                <CustomGridLayout data={RenderListSong} columns={1} styleLayout={{}} />
-            </View>
-        </>
-    );
-
-    const RenderItemSong = ({ item, index }) => {
+    const renderIconButton = (item) => {
         return (
-            <TouchableOpacity
-                style={styles.rowItem}
-                onPress={() => {
-                    // navigation.navigate('PlayMedia', { track: item, playlist: dataPlaylist });
-                }}
-            >
-                <Image source={{ uri: item.artwork }} style={styles.songImage} />
-                <View style={styles.rowItemText}>
-                    <Text style={styles.titleText} numberOfLines={1}>
-                        {item.title}
-                    </Text>
-                    <Text style={styles.artistText}>{item.artist}</Text>
-                </View>
-                {selectedItems.includes(item) ? (
-                    <TouchableOpacity onPress={() => toggleItem(item)}>
-                        <Text style={styles.removeText}>Remove</Text>
-                    </TouchableOpacity>
+            <TouchableOpacity onPress={() => toggleItem(item._id)}>
+                {selectedItems.includes(item._id) ? (
+                    <Text style={styles.removeText}>Remove</Text>
                 ) : (
-                    <TouchableOpacity onPress={() => toggleItem(item)}>
-                        <Ionicons name="add" color="#757575" size={30} style={{ padding: 6, paddingRight: 0 }} />
-                    </TouchableOpacity>
+                    <Ionicons name="add" color="#757575" size={30} style={{ padding: 6, paddingRight: 0 }} />
                 )}
             </TouchableOpacity>
         );
     };
 
-    const RenderListSong = playlist.tracks?.map((item, index) => <RenderItemSong key={index} item={item} />);
+    const handleTextChange = async (newText) => {
+        setSearchText(newText);
+        if (newText !== '') {
+            try {
+                const response = await searchTrack(newText, 1);
+                const { code, data, message } = JSON.parse(response);
+
+                if (code == 200) {
+                    setRenderTracks(
+                        data.map((item, index) => (
+                            <RenderItemSong key={item._id} item={item} iconRight={renderIconButton(item)} />
+                        )),
+                    );
+                } else {
+                    alert(message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+                return;
+            }
+        } else {
+            setRenderTracks([]);
+        }
+    };
+
+    const handleSubmit = async () => {
+        const json = await getStoreData('userInfo');
+        const userInfo = JSON.parse(json);
+
+        try {
+            setLoading(true);
+            const response = await createPlaylist(userInfo.id, namePlaylistText, selectedItems);
+            const { code, message, data } = JSON.parse(response);
+
+            if (code == 201) {
+                navigation.navigate('TabNavigator');
+            } else {
+                alert(message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message);
+            return;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        console.log(selectedItems);
+        if (selectedItems.length < 1 || namePlaylistText === '') {
+            setIsSelected(false);
+        } else {
+            setIsSelected(true);
+        }
+    }, [selectedItems, namePlaylistText]);
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <CustomAnimatedLoader visible={loading} source={require('../assets/loader/cat-loader.json')} />
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.headerText}>Create new playlist</Text>
@@ -147,30 +165,28 @@ const CreateNewPlaylistScreen = () => {
                         </View>
                     </View>
                     <View style={styles.contentSearch}>
-                        {playlist?.tracks !== null ? <NotEmptySongs /> : <EmptySongs />}
+                        {renderTracks.length !== 0 ? (
+                            <CustomGridLayout data={renderTracks} columns={1} styleLayout={{}} />
+                        ) : (
+                            <View style={styles.emptyView}>
+                                <Text style={styles.emptyText}>No songs found</Text>
+                            </View>
+                        )}
                     </View>
                 </View>
-                <TouchableOpacity
-                    style={[
-                        styles.button,
-                        {
-                            backgroundColor: isSelected ? '#315F64' : '#EFEFF1',
-                        },
-                    ]}
-                    disabled={!isSelected}
+                <ToggleButton
+                    isDisabled={isSelected}
                     onPress={handleSubmit}
-                >
-                    <Text
-                        style={[
-                            styles.buttonText,
-                            {
-                                color: isSelected ? '#fff' : '#CACECE',
-                            },
-                        ]}
-                    >
-                        Done
-                    </Text>
-                </TouchableOpacity>
+                    lable="Done"
+                    backgroundColorActive="#315F64"
+                    backgroundColorInactive="#EFEFF1"
+                    colorActive="#fff"
+                    colorInactive="#CACECE"
+                    styleButton={{
+                        marginTop: 'auto',
+                        marginBottom: 24,
+                    }}
+                />
             </View>
         </SafeAreaView>
     );
@@ -300,48 +316,5 @@ const styles = StyleSheet.create({
         fontSize: 12,
         lineHeight: 16,
         color: '#757575',
-    },
-
-    rowItem: {
-        flex: 1,
-        paddingVertical: 6,
-        marginVertical: 2,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 14,
-    },
-    songImage: {
-        height: 50,
-        width: 50,
-        borderRadius: 4,
-    },
-    rowItemText: {
-        flex: 1,
-        flexDirection: 'column',
-    },
-    titleText: {
-        fontWeight: '500',
-        fontSize: 15,
-        lineHeight: 24,
-        color: '#222C2D',
-    },
-    artistText: {
-        fontWeight: '500',
-        fontSize: 12,
-        lineHeight: 16,
-        color: '#757575',
-    },
-
-    button: {
-        borderRadius: 100,
-        marginTop: 'auto',
-        marginBottom: 24,
-    },
-    buttonText: {
-        fontSize: 16,
-        fontWeight: '500',
-        textAlign: 'center',
-        paddingHorizontal: 24,
-        paddingVertical: 16,
     },
 });

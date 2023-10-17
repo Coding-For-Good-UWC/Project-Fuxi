@@ -34,7 +34,6 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         isLoggedIn();
-        console.log(userToken);
     }, []);
 
     return (

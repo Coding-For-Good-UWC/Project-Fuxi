@@ -6,6 +6,7 @@ import TextInputEffectLabel from '../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
 import { signInInstitute } from '../api/institutes';
 import { AuthContext } from '../context/AuthContext';
+import { storeData } from '../utils/AsyncStorage';
 
 const SignInScreen = () => {
     const navigation = useNavigation();
@@ -76,7 +77,7 @@ const SignInScreen = () => {
                 const response = await signInInstitute(email, password);
                 const { statusCode, message, institute, token } = JSON.parse(response);
                 if (statusCode == 200) {
-                    console.log(token);
+                    await storeData('userInfo', JSON.stringify(institute));
                     loginAuthContext(token);
                 } else if (statusCode == 400) {
                     alert(message);

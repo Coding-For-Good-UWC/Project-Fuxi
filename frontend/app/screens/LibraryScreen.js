@@ -6,6 +6,7 @@ import CustomGridLayout from '../components/CustomGridLayout';
 import { LinearGradient } from 'expo-linear-gradient';
 import playlist from '../data/data';
 import { useNavigation } from '@react-navigation/native';
+import TipComponent from './../components/TipComponent';
 
 const LibraryScreen = () => {
     const navigation = useNavigation();
@@ -73,10 +74,8 @@ const LibraryScreen = () => {
 
     const Header = () => (
         <>
-            <TouchableOpacity
-                style={styles.buttonNewPlaylist}
-                onPress={() => navigation.navigate('CreateNewPlaylistScreen')}
-            >
+            <TipComponent />
+            <TouchableOpacity style={styles.buttonNewPlaylist} onPress={() => navigation.navigate('PlayMedia')}>
                 <Ionicons name="add" color={colours.deepTurquoise} size={20} />
                 <Text style={styles.buttonNewPlaylistText}>Create new playlist</Text>
             </TouchableOpacity>

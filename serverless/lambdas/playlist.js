@@ -68,7 +68,6 @@ const getPlaylistByGenresInProfile = async (event) => {
 
 const createPlaylist = async (event) => {
     const json = JSON.parse(event.body);
-    console.log(json);
     const { profileId, namePlaylist, tracks } = json;
     try {
         if (!profileId || !namePlaylist || !tracks) {
@@ -89,4 +88,27 @@ const createPlaylist = async (event) => {
     }
 };
 
-module.exports = { getPlaylistByGenresInProfile, createPlaylist };
+const getAllPlayListByProfileId = async (event) => {
+    const json = JSON.parse(event.body);
+    const { profileId } = json;
+
+    try {
+        if (!profileId) {
+            return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        }
+        const response = await playlistModel
+            .find({ profileId: new mongoose.Types.ObjectId(profileId) })
+            .populate('tracks')
+            .sort({ updatedAt: 'desc' });
+        if (response) {
+            return JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Created react track success', response));
+        } else {
+            return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Create failure'));
+        }
+    } catch (error) {
+        console.error(error);
+        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+    }
+};
+
+module.exports = { getPlaylistByGenresInProfile, createPlaylist, getAllPlayListByProfileId };

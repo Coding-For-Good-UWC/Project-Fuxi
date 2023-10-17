@@ -129,6 +129,8 @@ const signin = async (event) => {
         const institute = await instituteModel.findOne({ uid: credentials.uid }).exec();
         const resultPassword = await bcrypt.compare(password, institute.password);
 
+        console.log(institute);
+
         if (!institute) {
             return JSON.stringify({
                 statusCode: 400,
@@ -140,7 +142,7 @@ const signin = async (event) => {
                     statusCode: 200,
                     message: 'Successfully signed in',
                     institute: {
-                        uid: institute.uid,
+                        id: institute._id,
                         email: institute.email,
                         name: institute.name,
                     },

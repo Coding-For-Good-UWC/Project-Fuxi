@@ -61,9 +61,7 @@ const ListenerProfileScreen1 = ({ goToScreen, formData, setFormData, errors, set
 
         goToScreen();
 
-        console.log('Name:', nameListener);
-        console.log('Year of birth:', yearBirth);
-        console.log('Language:', language);
+        console.log('formData:', formData);
     };
 
     const validateNullFormData = (formData) => {

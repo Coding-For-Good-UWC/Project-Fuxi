@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import { StyleSheet, Text, View, SafeAreaView, Image, TouchableOpacity, Dimensions, FlatList } from 'react-native';
-import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
+import React, { useRef, useState, useEffect, useLayoutEffect, useMemo } from 'react';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -9,13 +9,9 @@ import { Audio } from 'expo-av';
 import colours from '../config/colours';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import playlist from './../data/data';
-
-const defaultSong = {
-    artwork: 'https://res.cloudinary.com/dusmue7d9/image/upload/v1695711862/default_l8mbsa.png',
-    title: 'Choose song in playlist',
-    artist: '',
-    url: '',
-};
+import CustomGridLayout from './../components/CustomGridLayout';
+import RenderItemSong from '../components/RenderItemSong';
+import PlayMediaComponent from '../components/PlayMediaComponent';
 
 const PlayMedia = () => {
     const route = useRoute();
@@ -27,95 +23,12 @@ const PlayMedia = () => {
     const [duration, setDuration] = useState(0);
     const [selectSound, setSelectSound] = useState(route.params?.track || null);
     const [sound, setSound] = useState();
-
-    const handleTrackPress = async (item) => {
-        if (sound) {
-            await sound.unloadAsync();
-        }
-        console.log(item.title);
-        const { sound, status } = await Audio.Sound.createAsync({
-            uri: item.url,
-        });
-        setDuration(status.durationMillis / 1000);
-        setSelectSound(item);
-        setSound(sound);
-        setIsPlaying(true);
-        await sound.playAsync();
-    };
+    const snapPoints = useMemo(() => ['50%', '100%'], []);
 
     useLayoutEffect(() => {
         if (selectSound) {
             handleTrackPress(selectSound);
         }
-    }, [navigation]);
-
-    function handleBottomSheet() {
-        buttonSheetRef.current?.present();
-        setTimeout(() => {
-            setIsOpenBottomSheet(true);
-        }, 100);
-    }
-
-    const handlePlay = async () => {
-        if (sound) {
-            await sound.playAsync();
-            setIsPlaying(true);
-        }
-    };
-
-    const handlePause = async () => {
-        if (sound) {
-            await sound.pauseAsync();
-            setIsPlaying(false);
-        }
-    };
-
-    const handleSliderChange = (value) => {
-        if (sound) {
-            const newPositionMillis = value * 1000;
-            sound.setPositionAsync(newPositionMillis);
-            setPosition(value);
-        }
-    };
-
-    const getSoundToUpdate = (currentIndex, songList) => {
-        const lastIndex = songList.length;
-
-        if (currentIndex == lastIndex) {
-            return songList[0];
-        }
-        if (currentIndex < 0) {
-            return songList[lastIndex - 1];
-        }
-
-        return songList[currentIndex];
-    };
-
-    const handleNextPrevSound = async (index) => {
-        if (sound) {
-            await sound.unloadAsync();
-            setIsPlaying(false);
-        }
-
-        const updateSound = getSoundToUpdate(index, playlist.tracks);
-
-        const { sound, status } = await Audio.Sound.createAsync({
-            uri: updateSound.url,
-        });
-        setDuration(status.durationMillis / 1000);
-        setPosition(0);
-        setSelectSound(updateSound);
-        setSound(sound);
-        await sound.playAsync();
-    };
-
-    const formatTime = (seconds) => {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = Math.floor(seconds % 60);
-        return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-    };
-
-    useLayoutEffect(() => {
         navigation.setOptions({
             headerTransparent: true,
             headerTintColor: '#3C4647',
@@ -127,6 +40,28 @@ const PlayMedia = () => {
         });
     }, [navigation]);
 
+    const handleTrackPress = async (item) => {
+        if (sound) {
+            await sound.unloadAsync();
+        }
+        console.log(item.Title);
+        const { sound, status } = await Audio.Sound.createAsync({
+            uri: item.songURL,
+        });
+        setDuration(status.durationMillis / 1000);
+        setSelectSound(item);
+        setSound(sound);
+        setIsPlaying(true);
+        await sound.playAsync();
+    };
+
+    function handleBottomSheet() {
+        buttonSheetRef.current?.present();
+        setTimeout(() => {
+            setIsOpenBottomSheet(true);
+        }, 100);
+    }
+
     useEffect(() => {
         return () => {
             if (sound) {
@@ -137,128 +72,62 @@ const PlayMedia = () => {
         };
     }, [sound, selectSound]);
 
-    // useEffect(() => {
-    //     if (sound && isPlaying) {
-    //         sound.setOnPlaybackStatusUpdate((status) => {
-    //             setPosition(status.positionMillis / 1000);
-    //         });
-    //     }
-    // }, [sound, isPlaying]);
+    useEffect(() => {
+        if (sound && isPlaying) {
+            sound.setOnPlaybackStatusUpdate((status) => {
+                if (typeof status.positionMillis === 'number' && !isNaN(status.positionMillis)) {
+                    setPosition(status.positionMillis / 1000);
+                }
+            });
+        }
+    }, [sound, isPlaying]);
 
-    const renderSongs = ({ item, index }) => {
-        return (
-            <View style={styles.rowItem}>
-                <TouchableOpacity
-                    onPress={() => handleTrackPress(item)}
-                    style={{ flexDirection: 'row', width: '100%' }}
-                >
-                    <View style={styles.viewSong}>
-                        <Image source={{ uri: item.artwork }} style={styles.songImage} />
-                    </View>
-                    <View style={styles.rowItemText}>
-                        <Text style={styles.titleText}>{item.title}</Text>
-                        <Text style={styles.artistText}>{item.artist}</Text>
-                    </View>
-                </TouchableOpacity>
-            </View>
-        );
-    };
-
-    const RenderPlayer = ({ song }) => {
-        const currentSong = song || defaultSong;
-        return (
-            <>
-                <View style={styles.playlistHeader}>
-                    <View style={styles.viewImage}>
-                        <Image
-                            style={[styles.image, { opacity: isOpenBottomSheet ? 0.6 : 1 }]}
-                            source={{ uri: currentSong.artwork }}
-                        />
-                    </View>
-                    <Text style={styles.trackText} numberOfLines={2}>
-                        {currentSong.title}
-                    </Text>
-                    <Text style={styles.patientText} numberOfLines={1}>
-                        {currentSong.artist}
-                    </Text>
-                </View>
-                <View style={styles.playmediaCenter}>
-                    <View style={styles.progressBarView}>
-                        <Slider
-                            style={styles.progressBar}
-                            minimumValue={0}
-                            maximumValue={duration}
-                            value={position}
-                            onValueChange={handleSliderChange}
-                            thumbTintColor={colours.deepTurquoise}
-                            minimumTrackTintColor={colours.genreMalay}
-                            maximumTrackTintColor="#000000"
-                        />
-                    </View>
-                    <View style={styles.progressLevelDuration}>
-                        <Text style={styles.progressLabelText}>{formatTime(position)}</Text>
-                        <Text style={styles.progressLabelText}>{formatTime(duration)}</Text>
-                    </View>
-                    <View style={styles.navigationPlayer}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                if (selectSound) {
-                                    handleNextPrevSound(selectSound.id - 2 || 0);
-                                }
-                            }}
-                        >
-                            <Ionicons name="play-skip-back" size={40} color={'#222C2D'} />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={isPlaying ? handlePause : handlePlay}>
-                            <Ionicons name={isPlaying ? 'pause-circle' : 'play-circle'} size={60} color={'#222C2D'} />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => {
-                                if (selectSound) {
-                                    handleNextPrevSound(selectSound.id || 0);
-                                }
-                            }}
-                        >
-                            <Ionicons name="play-skip-forward" size={40} color={'#222C2D'} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={styles.following}>
-                    <TouchableOpacity style={{ alignItems: 'center' }}>
-                        <Ionicons name="heart-outline" size={50} color={'#222C2D'} />
-                        <Text>Like</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{ alignItems: 'center' }}>
-                        <Ionicons name="sad-outline" size={50} color={'#222C2D'} />
-                        <Text>Dislike</Text>
-                    </TouchableOpacity>
-                </View>
-            </>
-        );
-    };
+    const RenderListSong = playlist.tracks?.map((item, index) => <RenderItemSong key={index} item={item} />);
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <BottomSheetModalProvider>
                 <SafeAreaView style={[styles.safeArea, { backgroundColor: isOpenBottomSheet ? '#A9A9A9' : 'white' }]}>
-                    <RenderPlayer song={selectSound} />
+                    <PlayMediaComponent
+                        song={selectSound}
+                        duration={duration}
+                        position={position}
+                        handleSliderChange={(value) => {
+                            if (sound) {
+                                const newPositionMillis = value * 1000;
+                                sound.setPositionAsync(newPositionMillis);
+                                setPosition(value);
+                            }
+                        }}
+                        isPlaying={isPlaying}
+                        handlePlay={async () => {
+                            if (sound) {
+                                await sound.playAsync();
+                                setIsPlaying(true);
+                            }
+                        }}
+                        handlePause={async () => {
+                            if (sound) {
+                                await sound.pauseAsync();
+                                setIsPlaying(false);
+                            }
+                        }}
+                    />
                     <BottomSheetModal
-                        overDragResistanceFactor={0}
                         ref={buttonSheetRef}
-                        snapPoints={['50%', '100%']}
+                        snapPoints={snapPoints}
                         index={0}
                         handleIndicatorStyle={{ display: 'none' }}
                         backgroundStyle={{
                             borderRadius: 0,
                         }}
                         onDismiss={() => setIsOpenBottomSheet(false)}
-                        enablePanDownToClose
                     >
-                        <FlatList
-                            data={playlist.tracks}
-                            renderItem={renderSongs}
-                            style={styles.listSongs}
-                            keyExtractor={(item) => item.id}
+                        <CustomGridLayout
+                            data={RenderListSong}
+                            columns={1}
+                            styleLayout={{ paddingHorizontal: 20 }}
+                            styleCell={{ borderBottomWidth: 1, borderBottomColor: '#E0E0E0' }}
                         />
                     </BottomSheetModal>
                     <TouchableOpacity style={styles.viewPlaylistBottom} onPress={handleBottomSheet}>
@@ -278,7 +147,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 100,
     },
     playlistHeader: {
         flex: 3,

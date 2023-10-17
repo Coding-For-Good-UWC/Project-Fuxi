@@ -6,8 +6,9 @@ import PlayMedia from '../screens/PlayMedia';
 import TabNavigator from './TabNavigator';
 import PlaylistDetailsScreen from './../screens/PlaylistDetailsScreen';
 import LikedSongsScreen from '../screens/LikedSongsScreen';
-import ModalSearchScreen from '../screens/ModalSearchScreen';
+import SearchTrackScreen from '../screens/SearchTrackScreen';
 import CreateNewPlaylistScreen from '../screens/CreateNewPlaylistScreen';
+import RateSongsScreen from '../screens/RateSongsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,14 +38,26 @@ const AppStack = () => {
                 options={{ headerTitle: '', headerTransparent: true }}
             />
             <Stack.Screen
-                name="ModalSearchScreen"
-                component={ModalSearchScreen}
+                name="SearchTrackScreen"
+                component={SearchTrackScreen}
                 options={{ headerTitle: '', headerTransparent: true, headerShown: false }}
             />
             <Stack.Screen
                 name="CreateNewPlaylistScreen"
                 component={CreateNewPlaylistScreen}
                 options={{ headerTitle: '', headerTransparent: true }}
+            />
+            <Stack.Screen
+                name="RateSongsScreen"
+                component={RateSongsScreen}
+                options={{
+                    headerTitle: '',
+                    headerTransparent: false,
+                    headerStyle: {
+                        elevation: 0,
+                        shadowOpacity: 0,
+                    },
+                }}
             />
         </Stack.Navigator>
     );

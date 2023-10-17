@@ -16,6 +16,7 @@ import { useRoute } from '@react-navigation/native';
 import CustomGridLayout from './../components/CustomGridLayout';
 import playlist from '../data/data';
 import SlotPlayer from '../components/SlotPlayer';
+import RenderItemSong from '../components/RenderItemSong';
 
 const PlaylistDetailsScreen = () => {
     const navigation = useNavigation();
@@ -41,12 +42,15 @@ const PlaylistDetailsScreen = () => {
 
     const imageHeader = [];
     for (let i = 0; i < 4; i++) {
-        const item = (
-            <Image
-                source={{ uri: playlist.tracks[i].artwork }}
-                style={{ width: heightItem / 2, height: heightItem / 2 }}
-            />
-        );
+        let item = null;
+        if (playlist.tracks[i]) {
+            item = (
+                <Image
+                    source={{ uri: playlist.tracks[i].ImageURL }}
+                    style={{ width: heightItem / 2, height: heightItem / 2 }}
+                />
+            );
+        }
         imageHeader.push(item);
     }
 
@@ -64,7 +68,7 @@ const PlaylistDetailsScreen = () => {
                 <View style={styles.bar}>
                     <TouchableOpacity
                         style={styles.roundButtonHeader}
-                        onPress={() => navigation.navigate('ModalSearchScreen')}
+                        onPress={() => navigation.navigate('SearchTrackScreen')}
                     >
                         <Ionicons name="search" size={24} color={'#3C4647'} />
                     </TouchableOpacity>
@@ -73,29 +77,20 @@ const PlaylistDetailsScreen = () => {
         });
     }, [navigation]);
 
-    const RenderItemSong = ({ item, index }) => {
-        return (
-            <TouchableOpacity
-                style={styles.rowItem}
-                onPress={() => {
-                    navigation.navigate('PlayMedia', { track: item, playlist: dataPlaylist });
-                }}
-            >
-                <Image source={{ uri: item.artwork }} style={styles.songImage} />
-                <View style={styles.rowItemText}>
-                    <Text style={styles.titleText} numberOfLines={1}>
-                        {item.title}
-                    </Text>
-                    <Text style={styles.artistText}>{item.artist}</Text>
-                </View>
+    const RenderListSong = playlist.tracks?.map((item, index) => (
+        <RenderItemSong
+            key={index}
+            item={item}
+            iconRight={
                 <TouchableOpacity>
                     <Ionicons name="heart" color="#137882" size={30} />
                 </TouchableOpacity>
-            </TouchableOpacity>
-        );
-    };
-
-    const RenderListSong = playlist.tracks.map((item, index) => <RenderItemSong key={index} item={item} />);
+            }
+            onPress={() => {
+                navigation.navigate('PlayMedia', { track: item, playlist: dataPlaylist });
+            }}
+        />
+    ));
 
     return (
         <SafeAreaView style={styles.safeArea}>

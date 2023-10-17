@@ -16,11 +16,11 @@ const schema = new Schema(
             {
                 type: Types.ObjectId,
                 required: true,
+                ref: 'tracks',
             },
         ],
     },
     { timestamps: true },
-    { versionKey: false },
 );
 
 module.exports = model('playlist', schema);
