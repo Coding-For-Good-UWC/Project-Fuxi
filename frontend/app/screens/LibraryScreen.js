@@ -75,7 +75,10 @@ const LibraryScreen = () => {
     const Header = () => (
         <>
             <TipComponent />
-            <TouchableOpacity style={styles.buttonNewPlaylist} onPress={() => navigation.navigate('PlayMedia')}>
+            <TouchableOpacity
+                style={styles.buttonNewPlaylist}
+                onPress={() => navigation.navigate('CreateNewPlaylistScreen')}
+            >
                 <Ionicons name="add" color={colours.deepTurquoise} size={20} />
                 <Text style={styles.buttonNewPlaylistText}>Create new playlist</Text>
             </TouchableOpacity>

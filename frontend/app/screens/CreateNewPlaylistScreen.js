@@ -1,17 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import {
-    Platform,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    Image,
-} from 'react-native';
+import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { searchTrack } from './../api/track';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
@@ -52,16 +42,26 @@ const CreateNewPlaylistScreen = () => {
         });
     };
 
-    const renderIconButton = (item) => {
-        return (
-            <TouchableOpacity onPress={() => toggleItem(item._id)}>
-                {selectedItems.includes(item._id) ? (
-                    <Text style={styles.removeText}>Remove</Text>
-                ) : (
-                    <Ionicons name="add" color="#757575" size={30} style={{ padding: 6, paddingRight: 0 }} />
-                )}
-            </TouchableOpacity>
-        );
+    const RenderItem = ({ item }) => {
+        const isSelected = selectedItems.some((selectedItem) => selectedItem === item._id);
+        const [select, setSelect] = useState(isSelected);
+        const renderIconRight = (item) => {
+            return (
+                <TouchableOpacity
+                    onPress={() => {
+                        toggleItem(item._id);
+                        setSelect(!select);
+                    }}
+                >
+                    {select ? (
+                        <Text style={styles.removeText}>Remove</Text>
+                    ) : (
+                        <Ionicons name="add" color="#757575" size={30} style={{ padding: 6, paddingRight: 0 }} />
+                    )}
+                </TouchableOpacity>
+            );
+        };
+        return <RenderItemSong item={item} iconRight={renderIconRight(item)} />;
     };
 
     const handleTextChange = async (newText) => {
@@ -72,11 +72,7 @@ const CreateNewPlaylistScreen = () => {
                 const { code, data, message } = JSON.parse(response);
 
                 if (code == 200) {
-                    setRenderTracks(
-                        data.map((item, index) => (
-                            <RenderItemSong key={item._id} item={item} iconRight={renderIconButton(item)} />
-                        )),
-                    );
+                    setRenderTracks(data.map((item, index) => <RenderItem item={item} key={index} />));
                 } else {
                     alert(message);
                 }

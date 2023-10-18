@@ -17,6 +17,7 @@ import CustomGridLayout from './../components/CustomGridLayout';
 import playlist from '../data/data';
 import SlotPlayer from '../components/SlotPlayer';
 import RenderItemSong from '../components/RenderItemSong';
+import ToggleDialog from '../components/ToggleDialog';
 
 const PlaylistDetailsScreen = () => {
     const navigation = useNavigation();
@@ -25,6 +26,11 @@ const PlaylistDetailsScreen = () => {
     const { height } = Dimensions.get('window');
     const route = useRoute();
     const dataPlaylist = route.params.dataPlaylist;
+
+    const [isDialogVisible, setIsDialogVisible] = useState(false);
+    const [dialogProps, setDialogProps] = useState({});
+    const statusLikeEnum = { Normal: '#137882', High: '#FFC857' };
+    const statusDislikeEnum = { Normal: '#222C2D', High: '#C31E1E' };
 
     handleLayout = (event) => {
         const { width, height } = event.nativeEvent.layout;
@@ -77,20 +83,80 @@ const PlaylistDetailsScreen = () => {
         });
     }, [navigation]);
 
-    const RenderListSong = playlist.tracks?.map((item, index) => (
-        <RenderItemSong
-            key={index}
-            item={item}
-            iconRight={
-                <TouchableOpacity>
-                    <Ionicons name="heart" color="#137882" size={30} />
-                </TouchableOpacity>
-            }
-            onPress={() => {
-                navigation.navigate('PlayMedia', { track: item, playlist: dataPlaylist });
-            }}
-        />
-    ));
+    const RenderListSong = playlist.tracks?.map((item, index) => {
+        const [statusLike, setStatusLike] = useState(statusLikeEnum.Normal);
+        const [statusDislike, setStatusDislike] = useState(statusDislikeEnum.Normal);
+
+        const handleShowDialogLike = () => {
+            showDialogLike(item.id);
+        };
+
+        const handleShowDialogDislike = () => {
+            showDialogDislike(item.id);
+        };
+
+        const handleNavigation = () => {
+            navigation.navigate('PlayMedia', { track: item, playlist: dataPlaylist });
+        };
+
+        const showDialogLike = (itemId) => {
+            setDialogProps({
+                title: 'Unlike this song?',
+                desc: 'This song will be played less frequently for you.',
+                labelYes: 'Confirm',
+                labelNo: 'No, go back',
+                onPressYes: () => handleStatusLike(itemId),
+                onPressNo: () => setIsDialogVisible(false),
+            });
+            setIsDialogVisible(true);
+        };
+
+        const showDialogDislike = (itemId) => {
+            setDialogProps({
+                title: 'Un-Dislike this song?',
+                desc: 'This song will be played more frequently for you.',
+                labelYes: 'Confirm',
+                labelNo: 'No, go back',
+                onPressYes: () => handleStatusDislike(itemId),
+                onPressNo: () => setIsDialogVisible(false),
+            });
+            setIsDialogVisible(true);
+        };
+
+        const handleStatusLike = (itemId) => {
+            console.log(itemId);
+            setStatusLike(null);
+            setIsDialogVisible(false);
+        };
+
+        const handleStatusDislike = (itemId) => {
+            console.log(itemId);
+            setStatusDislike(null);
+            setIsDialogVisible(false);
+        };
+
+        return (
+            <RenderItemSong
+                key={index}
+                item={item}
+                iconRight={
+                    <>
+                        {statusLike !== null && (
+                            <TouchableOpacity onPress={handleShowDialogLike}>
+                                <Ionicons name="heart" color={statusLike} size={26} />
+                            </TouchableOpacity>
+                        )}
+                        {statusDislike !== null && (
+                            <TouchableOpacity onPress={handleShowDialogDislike}>
+                                <Ionicons name="sad-outline" color={statusDislike} size={26} />
+                            </TouchableOpacity>
+                        )}
+                    </>
+                }
+                onPress={handleNavigation}
+            />
+        );
+    });
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -117,7 +183,18 @@ const PlaylistDetailsScreen = () => {
                     <CustomGridLayout data={RenderListSong} columns={1} styleLayout={{ height: heightItem2 + 20 }} />
                 </View>
             </View>
-            <SlotPlayer />
+            {/* <SlotPlayer /> */}
+
+            <ToggleDialog
+                visible={isDialogVisible}
+                title={dialogProps.title}
+                desc={dialogProps.desc}
+                labelYes={dialogProps.labelYes}
+                labelNo={dialogProps.labelNo}
+                onPressYes={dialogProps.onPressYes}
+                onPressNo={dialogProps.onPressNo}
+                styleBtnYes={dialogProps.styleBtnYes}
+            />
         </SafeAreaView>
     );
 };

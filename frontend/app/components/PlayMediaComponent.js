@@ -1,106 +1,11 @@
 import 'react-native-gesture-handler';
-import { StyleSheet, Text, View, SafeAreaView, Image, TouchableOpacity, Dimensions, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions } from 'react-native';
 import React, { useState } from 'react';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
-import ToggleDialog from './ToggleDialog';
+import FollowPlayMedia from './FollowPlayMedia';
 
 const PlayMediaComponent = ({ song, duration, position, handleSliderChange, isPlaying, handlePause, handlePlay }) => {
-    const [isDialogVisible, setIsDialogVisible] = useState(false);
-    const [dialogProps, setDialogProps] = useState({});
-    const statusLikeEnum = { Normal: '#222C2D', Medium: '#137882', High: '#FFC857' };
-    const [statusLike, setStatusLike] = useState(null);
-    const [statusDislike, setStatusDislike] = useState(null);
-
-    const showDialogLike = () => {
-        if (statusLike == null) {
-            setDialogProps({
-                title: 'Like this song?',
-                desc: 'This song will be played more frequently for you.',
-                labelYes: 'Yes, I like it',
-                labelNo: 'No, go back',
-                onPressYes: () => handleStatusLike(),
-                onPressNo: () => setIsDialogVisible(false),
-            });
-        } else if (statusLike == statusLikeEnum.Medium) {
-            setDialogProps({
-                title: 'Like this song?',
-                desc: 'We’ll play this song more frequently for you.',
-                labelYes: 'Yes, I like it',
-                labelNo: 'No, go back',
-                onPressYes: () => handleStatusLike(),
-                onPressNo: () => setIsDialogVisible(false),
-            });
-        } else {
-            setDialogProps({
-                title: 'Like this song?',
-                desc: 'This song will be played more frequently for you.',
-                labelYes: 'Yes, I like it',
-                labelNo: 'No, go back',
-                onPressYes: () => handleStatusLike(),
-                onPressNo: () => setIsDialogVisible(false),
-            });
-        }
-        setIsDialogVisible(true);
-    };
-
-    const showDialogDislike = () => {
-        if (statusLike == null) {
-            setDialogProps({
-                title: 'Dislike this song?',
-                desc: 'This song will be played less frequently for you.',
-                labelYes: 'I don’t like it',
-                labelNo: 'No, go back',
-                onPressYes: () => handleStatusDislike(),
-                onPressNo: () => setIsDialogVisible(false),
-                styleBtnYes: { backgroundColor: '#E84C4C' },
-            });
-        } else if (statusLike == statusLikeEnum.Medium) {
-            setDialogProps({
-                title: 'Dislike this song?',
-                desc: 'This song will be played less frequently for you.',
-                labelYes: 'I don’t like it',
-                labelNo: 'No, go back',
-                onPressYes: () => handleStatusDislike(),
-                onPressNo: () => setIsDialogVisible(false),
-                styleBtnYes: { backgroundColor: '#E84C4C' },
-            });
-        } else {
-            setDialogProps({
-                title: 'Dislike this song?',
-                desc: 'This song will be played less frequently for you.',
-                labelYes: 'I don’t like it',
-                labelNo: 'No, go back',
-                onPressYes: () => handleStatusDislike(),
-                onPressNo: () => setIsDialogVisible(false),
-                styleBtnYes: { backgroundColor: '#E84C4C' },
-            });
-        }
-        setIsDialogVisible(true);
-    };
-
-    const handleStatusLike = () => {
-        if (statusLike == null) {
-            setStatusLike(statusLikeEnum.Medium);
-        } else if (statusLike == statusLikeEnum.Medium) {
-            setStatusLike(statusLikeEnum.High);
-        } else {
-            setStatusLike(null);
-        }
-        setIsDialogVisible(false);
-    };
-
-    const handleStatusDislike = () => {
-        if (statusLike == null) {
-            setStatusLike(statusLikeEnum.Medium);
-        } else if (statusLike == statusLikeEnum.Medium) {
-            setStatusLike(statusLikeEnum.High);
-        } else {
-            setStatusLike(null);
-        }
-        setIsDialogVisible(false);
-    };
-
     const defaultSong = {
         Artist: '',
         Title: 'Choose song in playlist',
@@ -108,17 +13,17 @@ const PlayMediaComponent = ({ song, duration, position, handleSliderChange, isPl
         songURL: '',
     };
 
+    const currentSong = song || defaultSong;
+
     const formatTime = (seconds) => {
         if (seconds) {
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = Math.floor(seconds % 60);
             return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
         } else {
-            return '00:00';
+            return '0:00';
         }
     };
-
-    const currentSong = song || defaultSong;
 
     return (
         <>
@@ -162,30 +67,7 @@ const PlayMediaComponent = ({ song, duration, position, handleSliderChange, isPl
                     </TouchableOpacity>
                 </View>
             </View>
-            <View style={styles.following}>
-                <TouchableOpacity style={styles.center} onPress={() => showDialogLike()}>
-                    <Ionicons
-                        name={statusLike !== null ? 'heart' : 'heart-outline'}
-                        size={50}
-                        color={statusLike !== null ? statusLike : '#222C2D'}
-                    />
-                    <Text>{statusLike === statusLikeEnum.High ? 'Super Like' : 'Like'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.center} onPress={() => showDialogDislike()}>
-                    <Ionicons name="sad-outline" size={50} color={statusDislike !== null ? statusLike : '#222C2D'} />
-                    <Text>Dislike</Text>
-                </TouchableOpacity>
-            </View>
-            <ToggleDialog
-                visible={isDialogVisible}
-                title={dialogProps.title}
-                desc={dialogProps.desc}
-                labelYes={dialogProps.labelYes}
-                labelNo={dialogProps.labelNo}
-                onPressYes={dialogProps.onPressYes}
-                onPressNo={dialogProps.onPressNo}
-                styleBtnYes={dialogProps.styleBtnYes}
-            />
+            <FollowPlayMedia />
         </>
     );
 };
@@ -221,6 +103,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#222C2D',
         marginTop: 10,
+        paddingHorizontal: 20,
     },
     patientText: {
         fontSize: 16,
@@ -238,14 +121,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 60,
-    },
-    following: {
-        height: 150,
-        marginTop: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: 180,
     },
     viewPlaylistBottom: {
         height: 60,
@@ -296,6 +171,4 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingVertical: 18,
     },
-
-    center: { alignItems: 'center' },
 });

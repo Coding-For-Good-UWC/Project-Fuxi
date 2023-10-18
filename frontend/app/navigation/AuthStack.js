@@ -30,6 +30,10 @@ const AuthStack = () => {
                 options={{
                     headerTitle: '',
                     headerTransparent: true,
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#fff',
+                    },
                 }}
             />
             <Stack.Screen

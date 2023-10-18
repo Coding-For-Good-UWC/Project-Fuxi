@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Chip } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
-import { languages } from './PatientRegistration';
+import { languages } from '../utils/Diversity';
 import { getStoreData } from '../utils/AsyncStorage';
 import { createProfile } from '../api/profiles';
 import colours from '../config/colours.js';

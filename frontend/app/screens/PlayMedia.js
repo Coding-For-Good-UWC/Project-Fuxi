@@ -1,7 +1,6 @@
 import 'react-native-gesture-handler';
-import { StyleSheet, Text, View, SafeAreaView, Image, TouchableOpacity, Dimensions, FlatList } from 'react-native';
+import { StyleSheet, Text, SafeAreaView, TouchableOpacity, Dimensions } from 'react-native';
 import React, { useRef, useState, useEffect, useLayoutEffect, useMemo } from 'react';
-import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -12,6 +11,7 @@ import playlist from './../data/data';
 import CustomGridLayout from './../components/CustomGridLayout';
 import RenderItemSong from '../components/RenderItemSong';
 import PlayMediaComponent from '../components/PlayMediaComponent';
+import OverlayMediaScreen from './OverlayMediaScreen';
 
 const PlayMedia = () => {
     const route = useRoute();
@@ -24,6 +24,33 @@ const PlayMedia = () => {
     const [selectSound, setSelectSound] = useState(route.params?.track || null);
     const [sound, setSound] = useState();
     const snapPoints = useMemo(() => ['50%', '100%'], []);
+
+    const [isOverlay, setIsOverlay] = useState(false);
+    const [seconds, setSeconds] = useState(5);
+
+    const startCountdown = () => {
+        const intervalId = setInterval(() => {
+            if (seconds > 0) {
+                setSeconds((prevSeconds) => prevSeconds - 1);
+            } else {
+                setIsOverlay(true);
+                clearInterval(intervalId);
+            }
+        }, 1000);
+
+        return intervalId;
+    };
+
+    const handleSubmit = () => {
+        setIsOverlay(false);
+    };
+
+    useEffect(() => {
+        const intervalId = startCountdown();
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [seconds]);
 
     useLayoutEffect(() => {
         if (selectSound) {
@@ -87,53 +114,59 @@ const PlayMedia = () => {
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <BottomSheetModalProvider>
-                <SafeAreaView style={[styles.safeArea, { backgroundColor: isOpenBottomSheet ? '#A9A9A9' : 'white' }]}>
-                    <PlayMediaComponent
-                        song={selectSound}
-                        duration={duration}
-                        position={position}
-                        handleSliderChange={(value) => {
-                            if (sound) {
-                                const newPositionMillis = value * 1000;
-                                sound.setPositionAsync(newPositionMillis);
-                                setPosition(value);
-                            }
-                        }}
-                        isPlaying={isPlaying}
-                        handlePlay={async () => {
-                            if (sound) {
-                                await sound.playAsync();
-                                setIsPlaying(true);
-                            }
-                        }}
-                        handlePause={async () => {
-                            if (sound) {
-                                await sound.pauseAsync();
-                                setIsPlaying(false);
-                            }
-                        }}
-                    />
-                    <BottomSheetModal
-                        ref={buttonSheetRef}
-                        snapPoints={snapPoints}
-                        index={0}
-                        handleIndicatorStyle={{ display: 'none' }}
-                        backgroundStyle={{
-                            borderRadius: 0,
-                        }}
-                        onDismiss={() => setIsOpenBottomSheet(false)}
+                {isOverlay ? (
+                    <OverlayMediaScreen isOverlay={handleSubmit} song={selectSound} />
+                ) : (
+                    <SafeAreaView
+                        style={[styles.safeArea, { backgroundColor: isOpenBottomSheet ? '#A9A9A9' : '#fff' }]}
                     >
-                        <CustomGridLayout
-                            data={RenderListSong}
-                            columns={1}
-                            styleLayout={{ paddingHorizontal: 20 }}
-                            styleCell={{ borderBottomWidth: 1, borderBottomColor: '#E0E0E0' }}
+                        <PlayMediaComponent
+                            song={selectSound}
+                            duration={duration}
+                            position={position}
+                            handleSliderChange={(value) => {
+                                if (sound) {
+                                    const newPositionMillis = value * 1000;
+                                    sound.setPositionAsync(newPositionMillis);
+                                    setPosition(value);
+                                }
+                            }}
+                            isPlaying={isPlaying}
+                            handlePlay={async () => {
+                                if (sound) {
+                                    await sound.playAsync();
+                                    setIsPlaying(true);
+                                }
+                            }}
+                            handlePause={async () => {
+                                if (sound) {
+                                    await sound.pauseAsync();
+                                    setIsPlaying(false);
+                                }
+                            }}
                         />
-                    </BottomSheetModal>
-                    <TouchableOpacity style={styles.viewPlaylistBottom} onPress={handleBottomSheet}>
-                        <Text style={styles.viewPlaylistText}>View playlist</Text>
-                    </TouchableOpacity>
-                </SafeAreaView>
+                        <BottomSheetModal
+                            ref={buttonSheetRef}
+                            snapPoints={snapPoints}
+                            index={0}
+                            handleIndicatorStyle={{ display: 'none' }}
+                            backgroundStyle={{
+                                borderRadius: 0,
+                            }}
+                            onDismiss={() => setIsOpenBottomSheet(false)}
+                        >
+                            <CustomGridLayout
+                                data={RenderListSong}
+                                columns={1}
+                                styleLayout={{ paddingHorizontal: 20 }}
+                                styleCell={{ borderBottomWidth: 1, borderBottomColor: '#E0E0E0' }}
+                            />
+                        </BottomSheetModal>
+                        <TouchableOpacity style={styles.viewPlaylistBottom} onPress={handleBottomSheet}>
+                            <Text style={styles.viewPlaylistText}>View playlist</Text>
+                        </TouchableOpacity>
+                    </SafeAreaView>
+                )}
             </BottomSheetModalProvider>
         </GestureHandlerRootView>
     );
@@ -144,7 +177,6 @@ export default PlayMedia;
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        paddingHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
     },

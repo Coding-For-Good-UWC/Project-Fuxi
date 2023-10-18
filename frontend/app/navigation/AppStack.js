@@ -1,6 +1,5 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import PlayMedia from '../screens/PlayMedia';
 import TabNavigator from './TabNavigator';
@@ -9,10 +8,9 @@ import LikedSongsScreen from '../screens/LikedSongsScreen';
 import SearchTrackScreen from '../screens/SearchTrackScreen';
 import CreateNewPlaylistScreen from '../screens/CreateNewPlaylistScreen';
 import RateSongsScreen from '../screens/RateSongsScreen';
+import OverlayMediaScreen from '../screens/OverlayMediaScreen';
 
 const Stack = createNativeStackNavigator();
-
-const Drawer = createDrawerNavigator();
 
 const AppStack = () => {
     return (
@@ -52,11 +50,17 @@ const AppStack = () => {
                 component={RateSongsScreen}
                 options={{
                     headerTitle: '',
-                    headerTransparent: false,
+                    headerTransparent: true,
                     headerStyle: {
-                        elevation: 0,
-                        shadowOpacity: 0,
+                        backgroundColor: '#fff',
                     },
+                }}
+            />
+            <Stack.Screen
+                name="OverlayMediaScreen"
+                component={OverlayMediaScreen}
+                options={{
+                    headerShown: false,
                 }}
             />
         </Stack.Navigator>

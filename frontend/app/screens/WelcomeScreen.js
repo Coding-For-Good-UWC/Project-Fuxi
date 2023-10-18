@@ -14,10 +14,6 @@ const WelcomeScreen = ({ navigation }) => {
                     <Text style={styles.headerMoreAboutText}>More about FUXI</Text>
                     <Ionicons name="arrow-forward-outline" size={18} color={colours.deepTurquoise} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.headerMoreAbout} onPress={() => navigation.navigate('PlayMedia')}>
-                    <Text style={styles.headerMoreAboutText}>PlayMedia</Text>
-                    <Ionicons name="arrow-forward-outline" size={18} color={colours.deepTurquoise} />
-                </TouchableOpacity>
             </View>
             <View style={styles.center}>
                 <TouchableOpacity

@@ -14,7 +14,6 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import playlist from '../data/data';
 import CustomGridLayout from '../components/CustomGridLayout';
-import SearchTrackScreen from './SearchTrackScreen';
 import RenderItemSong from '../components/RenderItemSong';
 
 const LikedSongsScreen = () => {
