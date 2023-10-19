@@ -67,7 +67,6 @@ const PlayMediaComponent = ({ song, duration, position, handleSliderChange, isPl
                     </TouchableOpacity>
                 </View>
             </View>
-            <FollowPlayMedia />
         </>
     );
 };
