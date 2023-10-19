@@ -1,31 +1,29 @@
-import { Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+    Dimensions,
+    Image,
+    Platform,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import colours from '../config/colours';
 import CustomGridLayout from '../components/CustomGridLayout';
-import { LinearGradient } from 'expo-linear-gradient';
 import playlist from '../data/data';
 import { useNavigation } from '@react-navigation/native';
 import TipComponent from './../components/TipComponent';
 import WithProfile from '../components/WithProfile';
+import RenderPlayListItem from '../components/RenderPlayListItem';
+import RenderItemLikedSong from '../components/RenderItemLikedSong';
 
 const LibraryScreen = () => {
     const navigation = useNavigation();
-    const [heightItem, setHeightItem] = useState(0);
-
-    handleLayout = (event) => {
-        const { width, height } = event.nativeEvent.layout;
-        setHeightItem(width);
-    };
-
-    const songImages = [];
-    if (playlist.tracks && Array.isArray(playlist.tracks)) {
-        const songImages = playlist.tracks.map((song) => (
-            <Image source={{ uri: song.artwork }} style={{ width: heightItem / 2, height: heightItem / 2 }} />
-        ));
-    } else {
-        console.log('songs is undefined or not an array');
-    }
+    const { width } = Dimensions.get('screen');
+    const heightItem = (width - 40 - 20) / 2;
 
     const listImages = [
         <Image
@@ -46,31 +44,13 @@ const LibraryScreen = () => {
         />,
     ];
 
-    const RenderItemLikedSong = () => (
-        <TouchableOpacity onLayout={this.handleLayout} onPress={() => navigation.navigate('LikedSongsScreen')}>
-            <View style={{ height: heightItem }}>
-                <LinearGradient colors={['#1e957f', '#13747e']} style={[styles.itemLikedSong, { height: heightItem }]}>
-                    <Ionicons name="heart" color="#fff" size={70} style={styles.iconHeart} />
-                </LinearGradient>
-            </View>
-            <Text style={styles.likesSongText}>Liked songs</Text>
-        </TouchableOpacity>
-    );
-
-    const RenderPlayListItem = ({ onpress }) => (
-        <TouchableOpacity onLayout={this.handleLayout} onPress={onpress}>
-            <View style={{ height: heightItem, borderRadius: 6, overflow: 'hidden' }}>
-                <CustomGridLayout columns={2} data={listImages} />
-            </View>
-            <Text style={styles.likesSongText} numberOfLines={2}>
-                Ninaazarova's playlist
-            </Text>
-        </TouchableOpacity>
-    );
-
     const data = [
-        <RenderItemLikedSong />,
-        <RenderPlayListItem onpress={() => navigation.navigate('PlaylistDetailsScreen', { dataPlaylist: playlist })} />,
+        <RenderItemLikedSong heightItem={heightItem} />,
+        <RenderPlayListItem
+            onpress={() => navigation.navigate('PlaylistDetailsScreen', { dataPlaylist: playlist })}
+            heightItem={heightItem}
+            data={listImages}
+        />,
     ];
 
     const Header = () => (
@@ -153,12 +133,5 @@ const styles = StyleSheet.create({
         bottom: 0,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    likesSongText: {
-        fontWeight: '600',
-        fontSize: 16,
-        lineHeight: 24,
-        color: '#222C2D',
-        marginTop: 12,
     },
 });
