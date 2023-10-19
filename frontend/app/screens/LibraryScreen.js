@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import playlist from '../data/data';
 import { useNavigation } from '@react-navigation/native';
 import TipComponent from './../components/TipComponent';
+import WithProfile from '../components/WithProfile';
 
 const LibraryScreen = () => {
     const navigation = useNavigation();
@@ -74,6 +75,7 @@ const LibraryScreen = () => {
 
     const Header = () => (
         <>
+            <WithProfile />
             <TipComponent />
             <TouchableOpacity
                 style={styles.buttonNewPlaylist}
