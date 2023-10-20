@@ -23,10 +23,11 @@ const PlayMedia = () => {
     const [position, setPosition] = useState(0);
     const [duration, setDuration] = useState(0);
     const [selectSound, setSelectSound] = useState(route.params?.track || null);
+    const [dataTracksOrigin, setDataTracksOrigin] = useState(route.params?.dataTracksOrigin || []);
     const [sound, setSound] = useState();
 
     const [isOverlay, setIsOverlay] = useState(false);
-    const [seconds, setSeconds] = useState(5);
+    const [seconds, setSeconds] = useState(9999);
     const bottomSheetRef = useRef(null);
 
     const expandHandler = useCallback(() => {
@@ -78,7 +79,7 @@ const PlayMedia = () => {
         }
         console.log(item.Title);
         const { sound, status } = await Audio.Sound.createAsync({
-            uri: item.songURL,
+            uri: item.URI,
         });
         setDuration(status.durationMillis / 1000);
         setSelectSound(item);
@@ -106,8 +107,6 @@ const PlayMedia = () => {
             });
         }
     }, [sound, isPlaying]);
-
-    const RenderListSong = playlist.tracks?.map((item, index) => <RenderItemSong key={index} item={item} />);
 
     return (
         <SafeAreaProvider>
@@ -146,14 +145,11 @@ const PlayMedia = () => {
                             <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
                                 <Text style={styles.viewPlaylistText}>View playlist</Text>
                             </TouchableOpacity>
-                            <BottomSheetScrollView
-                                ref={bottomSheetRef}
-                                snapTo={'50%'}
-                                backgroundColor="#fff"
-                                backDropColor="#000"
-                            >
+                            <BottomSheetScrollView ref={bottomSheetRef} snapTo={'50%'} backgroundColor="#fff" backDropColor="#000">
                                 <CustomGridLayout
-                                    data={RenderListSong}
+                                    data={dataTracksOrigin?.map((item, index) => (
+                                        <RenderItemSong key={index} item={item} />
+                                    ))}
                                     columns={1}
                                     styleLayout={{ paddingHorizontal: 20 }}
                                     styleCell={{ borderBottomWidth: 1, borderBottomColor: '#E0E0E0' }}

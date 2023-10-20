@@ -1,5 +1,5 @@
 import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import colours from '../config/colours';
 import CustomGridLayout from '../components/CustomGridLayout';
@@ -28,15 +28,21 @@ const LibraryScreen = () => {
             const response = await getAllPlayListByProfileId(_id);
             const { code, message, data } = JSON.parse(response);
             if (code == 200) {
-                const playlistItems = data.map((dataItem, index) => <RenderPlayListItem key={index} heightItem={heightItem} data={dataItem} />);
-                setDataPlaylist([<RenderItemLikedSong heightItem={heightItem} />, playlistItems]);
+                const playlistItems = data.map((dataItem, index) => (
+                    <RenderPlayListItem
+                        key={index}
+                        heightItem={heightItem}
+                        data={dataItem}
+                        onPress={() => navigation.navigate('PlaylistDetailsScreen', { dataPlaylistDetail: dataItem })}
+                    />
+                ));
+                setDataPlaylist(playlistItems);
             } else {
                 alert(message);
             }
         } catch (error) {
             alert(error.message);
             return;
-        } finally {
         }
     }
 

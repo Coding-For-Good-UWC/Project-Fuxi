@@ -1,64 +1,37 @@
-import {
-    Dimensions,
-    Image,
-    Platform,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import React, { useLayoutEffect, useState } from 'react';
+import { Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import CustomGridLayout from './../components/CustomGridLayout';
-import playlist from '../data/data';
 import SlotPlayer from '../components/SlotPlayer';
-import RenderItemSong from '../components/RenderItemSong';
 import ToggleDialog from '../components/ToggleDialog';
+import { getPlaylistById } from '../api/playlist';
+import RenderListSong from '../components/RenderListSong';
+import { secondsToTimeString, totalDurationTracks } from '../utils/AudioUtils';
 
 const PlaylistDetailsScreen = () => {
     const navigation = useNavigation();
     const [heightItem, setHeightItem] = useState(0);
-    const [heightItem2, setHeightItem2] = useState(0);
-    const { height } = Dimensions.get('window');
     const route = useRoute();
-    const dataPlaylist = route.params.dataPlaylist;
+    const dataPlaylistDetail = route.params.dataPlaylistDetail;
+    const [renderPlaylistDetail, setRenderPlaylistDetail] = useState([]);
+    const [countTracks, setCountTracks] = useState(0);
+    const [totalDuration, setTotalDuration] = useState(0);
 
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
     const statusLikeEnum = { Normal: '#137882', High: '#FFC857' };
     const statusDislikeEnum = { Normal: '#222C2D', High: '#C31E1E' };
 
+    const listImages = dataPlaylistDetail.tracks.map((item, index) => (
+        <Image key={index} source={{ uri: item.ImageURL }} style={{ width: heightItem / 2, height: heightItem / 2 }} />
+    ));
+
     handleLayout = (event) => {
-        const { width, height } = event.nativeEvent.layout;
+        const { width } = event.nativeEvent.layout;
         setHeightItem(width);
     };
-
-    handleLayout2 = (event) => {
-        const { width, height } = event.nativeEvent.layout;
-        setHeightItem2(width);
-    };
-
-    const handleStartPlaylist = () => {
-        navigation.navigate('PlayMedia');
-    };
-
-    const imageHeader = [];
-    for (let i = 0; i < 4; i++) {
-        let item = null;
-        if (playlist.tracks[i]) {
-            item = (
-                <Image
-                    source={{ uri: playlist.tracks[i].ImageURL }}
-                    style={{ width: heightItem / 2, height: heightItem / 2 }}
-                />
-            );
-        }
-        imageHeader.push(item);
-    }
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -72,10 +45,7 @@ const PlaylistDetailsScreen = () => {
             ),
             headerRight: () => (
                 <View style={styles.bar}>
-                    <TouchableOpacity
-                        style={styles.roundButtonHeader}
-                        onPress={() => navigation.navigate('SearchTrackScreen')}
-                    >
+                    <TouchableOpacity style={styles.roundButtonHeader} onPress={() => navigation.navigate('SearchTrackScreen')}>
                         <Ionicons name="search" size={24} color={'#3C4647'} />
                     </TouchableOpacity>
                 </View>
@@ -83,104 +53,61 @@ const PlaylistDetailsScreen = () => {
         });
     }, [navigation]);
 
-    const RenderListSong = playlist.tracks?.map((item, index) => {
-        const [statusLike, setStatusLike] = useState(statusLikeEnum.Normal);
-        const [statusDislike, setStatusDislike] = useState(statusDislikeEnum.Normal);
+    async function getPlaylistDetail() {
+        try {
+            const response = await getPlaylistById(dataPlaylistDetail._id);
+            const { code, message, data } = JSON.parse(response);
+            if (code == 200) {
+                setCountTracks(data.tracks.length);
+                const playlistItems = data.tracks.map((dataItem, index) => (
+                    <RenderListSong
+                        key={index}
+                        item={dataItem}
+                        statusLikeEnum={statusLikeEnum}
+                        statusDislikeEnum={statusDislikeEnum}
+                        setIsDialogVisible={setIsDialogVisible}
+                        setDialogProps={setDialogProps}
+                        dataTracksOrigin={data.tracks}
+                    />
+                ));
+                setRenderPlaylistDetail(playlistItems);
+                setTotalDuration(await totalDurationTracks(data.tracks));
+            } else {
+                alert(message);
+            }
+        } catch (error) {
+            alert(error.message);
+            return;
+        }
+    }
 
-        const handleShowDialogLike = () => {
-            showDialogLike(item.id);
-        };
-
-        const handleShowDialogDislike = () => {
-            showDialogDislike(item.id);
-        };
-
-        const handleNavigation = () => {
-            navigation.navigate('PlayMedia', { track: item, playlist: dataPlaylist });
-        };
-
-        const showDialogLike = (itemId) => {
-            setDialogProps({
-                title: 'Unlike this song?',
-                desc: 'This song will be played less frequently for you.',
-                labelYes: 'Confirm',
-                labelNo: 'No, go back',
-                onPressYes: () => handleStatusLike(itemId),
-                onPressNo: () => setIsDialogVisible(false),
-            });
-            setIsDialogVisible(true);
-        };
-
-        const showDialogDislike = (itemId) => {
-            setDialogProps({
-                title: 'Un-Dislike this song?',
-                desc: 'This song will be played more frequently for you.',
-                labelYes: 'Confirm',
-                labelNo: 'No, go back',
-                onPressYes: () => handleStatusDislike(itemId),
-                onPressNo: () => setIsDialogVisible(false),
-            });
-            setIsDialogVisible(true);
-        };
-
-        const handleStatusLike = (itemId) => {
-            console.log(itemId);
-            setStatusLike(null);
-            setIsDialogVisible(false);
-        };
-
-        const handleStatusDislike = (itemId) => {
-            console.log(itemId);
-            setStatusDislike(null);
-            setIsDialogVisible(false);
-        };
-
-        return (
-            <RenderItemSong
-                key={index}
-                item={item}
-                iconRight={
-                    <>
-                        {statusLike !== null && (
-                            <TouchableOpacity onPress={handleShowDialogLike}>
-                                <Ionicons name="heart" color={statusLike} size={26} />
-                            </TouchableOpacity>
-                        )}
-                        {statusDislike !== null && (
-                            <TouchableOpacity onPress={handleShowDialogDislike}>
-                                <Ionicons name="sad-outline" color={statusDislike} size={26} />
-                            </TouchableOpacity>
-                        )}
-                    </>
-                }
-                onPress={handleNavigation}
-            />
-        );
-    });
+    useEffect(() => {
+        getPlaylistDetail();
+    }, []);
 
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
                 <View style={{ alignItems: 'center' }}>
                     <View style={{ borderRadius: 6, overflow: 'hidden', width: '70%' }} onLayout={this.handleLayout}>
-                        <CustomGridLayout columns={2} data={imageHeader} />
+                        <CustomGridLayout columns={2} data={listImages} />
                     </View>
                 </View>
                 <View style={styles.playListDetail}>
-                    <Text style={styles.playListName}>{dataPlaylist.namePlaylist}</Text>
+                    <Text style={styles.playListName}>{dataPlaylistDetail.namePlaylist}</Text>
                     <View style={styles.playListTracksAndTime}>
-                        <Text style={styles.playListTotalName}>{dataPlaylist.tracks.length} songs</Text>
+                        <Text style={styles.playListTotalName}>{countTracks} songs</Text>
                         <Ionicons name="ellipse" color="#E2E3E4" size={10} />
-                        <Text style={styles.playListTotalName}>3h 42m</Text>
+                        <Text style={styles.playListTotalName}>{secondsToTimeString(totalDuration)}</Text>
                     </View>
                 </View>
-                <TouchableOpacity style={styles.buttonPlay} onPress={handleStartPlaylist}>
+                <TouchableOpacity style={styles.buttonPlay} onPress={() => navigation.navigate('PlayMedia')}>
                     <Ionicons name="play" color="#fff" size={20} />
                     <Text style={styles.playText}>Play</Text>
                 </TouchableOpacity>
-                <View onLayout={this.handleLayout2}>
+                <View style={{ flex: 1 }}>
                     <View style={{ borderTopColor: '#ECEDEE', borderTopWidth: 1 }}></View>
-                    <CustomGridLayout data={RenderListSong} columns={1} styleLayout={{ height: heightItem2 + 20 }} />
+                    <CustomGridLayout data={renderPlaylistDetail} columns={1} styleLayout={{}} />
                 </View>
             </View>
             {/* <SlotPlayer /> */}
@@ -208,6 +135,7 @@ const styles = StyleSheet.create({
         paddingTop: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0),
     },
     container: {
+        flex: 1,
         paddingHorizontal: 20,
         flexDirection: 'column',
         gap: 24,

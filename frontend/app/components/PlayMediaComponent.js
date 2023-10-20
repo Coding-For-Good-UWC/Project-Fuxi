@@ -4,26 +4,17 @@ import React, { useState } from 'react';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import FollowPlayMedia from './FollowPlayMedia';
+import { formatTime } from '../utils/AudioUtils';
 
 const PlayMediaComponent = ({ song, duration, position, handleSliderChange, isPlaying, handlePause, handlePlay }) => {
     const defaultSong = {
         Artist: '',
         Title: 'Choose song in playlist',
         ImageURL: 'https://res.cloudinary.com/dusmue7d9/image/upload/v1695711862/default_l8mbsa.png',
-        songURL: '',
+        URI: '',
     };
 
     const currentSong = song || defaultSong;
-
-    const formatTime = (seconds) => {
-        if (seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = Math.floor(seconds % 60);
-            return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-        } else {
-            return '0:00';
-        }
-    };
 
     return (
         <>
