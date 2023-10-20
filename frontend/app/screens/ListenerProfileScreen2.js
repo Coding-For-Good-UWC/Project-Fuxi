@@ -39,7 +39,7 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
             const newProfile = await createProfile(userUid, nameListener, yearBirth, language, selectedItems, null);
             const { code, message, data } = JSON.parse(newProfile);
             if (code == 201) {
-                await storeData('profileData', JSON.stringify(data));
+                await storeData('profile0', JSON.stringify(data));
                 navigation.navigate('ListenerProfileScreen3', { nameProfile: formData.nameListener, token: token });
             } else if (code == 400) {
                 alert(message);

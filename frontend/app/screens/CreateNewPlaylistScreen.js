@@ -89,7 +89,8 @@ const CreateNewPlaylistScreen = () => {
     const handleSubmit = async () => {
         try {
             setIsLoading(true);
-            const profileData = await getStoreData('profileData');
+            const profileData = await getStoreData('profile0');
+            console.log(profileData);
             const { _id } = JSON.parse(profileData);
             const response = await createPlaylist(_id, namePlaylistText, selectedItems);
             const { code, message } = JSON.parse(response);
