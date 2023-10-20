@@ -3,7 +3,7 @@ import { deleteData, getStoreData, storeData } from '../utils/AsyncStorage';
 
 export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [userToken, setUserToken] = useState(null);
 
@@ -37,8 +37,6 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ loginAuthContext, logoutAuthContext, isLoading, userToken }}>
-            {children}
-        </AuthContext.Provider>
+        <AuthContext.Provider value={{ loginAuthContext, logoutAuthContext, isLoading, setIsLoading, userToken }} {...props}></AuthContext.Provider>
     );
 };

@@ -1,17 +1,18 @@
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
 import { Chip } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 import { languages } from '../utils/Diversity';
-import { getStoreData } from '../utils/AsyncStorage';
+import { getStoreData, storeData } from '../utils/AsyncStorage';
 import { createProfile } from '../api/profiles';
 import colours from '../config/colours.js';
+import ToggleButton from './../components/ToggleButton';
+import { AuthContext } from '../context/AuthContext';
 
 const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, token }) => {
     const navigation = useNavigation();
+    const { setIsLoading } = useContext(AuthContext);
     const [isSelected, setIsSelected] = useState(false);
-    const [loading, setLoading] = useState(false);
 
     const toggleItem = (item) => {
         if (selectedItems.includes(item)) {
@@ -30,29 +31,27 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
     }, [selectedItems]);
 
     const handleSubmit = async () => {
-        setLoading(true);
+        setIsLoading(true);
         const { nameListener, yearBirth, language } = formData;
         console.log(formData, selectedItems);
         const userUid = await getStoreData('UserUid');
-
         try {
             const newProfile = await createProfile(userUid, nameListener, yearBirth, language, selectedItems, null);
-
-            const { statusCode, body } = JSON.parse(newProfile);
-
-            if (statusCode == 201) {
+            const { code, message, data } = JSON.parse(newProfile);
+            if (code == 201) {
+                await storeData('profileData', JSON.stringify(data));
                 navigation.navigate('ListenerProfileScreen3', { nameProfile: formData.nameListener, token: token });
-            } else if (statusCode == 400) {
-                alert(body.message);
+            } else if (code == 400) {
+                alert(message);
             } else {
-                alert(body.message);
+                alert(message);
             }
         } catch (error) {
             console.error('Error:', error);
             alert('Create profile unsuccessful');
             return;
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -87,7 +86,6 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
 
     return (
         <View style={styles.container}>
-            <CustomAnimatedLoader visible={loading} source={require('../assets/loader/cat-loader.json')} />
             <Text style={styles.headerText}>Music taste</Text>
             <Text style={styles.descriptionText}>Please select at least 1 type that they like.</Text>
             <View style={styles.listChip} vertical={true}>

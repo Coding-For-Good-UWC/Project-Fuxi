@@ -143,6 +143,7 @@ const signin = async (event) => {
                     message: 'Successfully signed in',
                     institute: {
                         id: institute._id,
+                        uid: institute.uid,
                         email: institute.email,
                         name: institute.name,
                     },

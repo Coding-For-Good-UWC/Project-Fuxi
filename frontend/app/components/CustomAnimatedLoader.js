@@ -1,16 +1,18 @@
 import { StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import React, { useContext } from 'react';
 import AnimatedLoader from 'react-native-animated-loader';
+import { AuthContext } from '../context/AuthContext';
 
 // source animation in link: https://lottiefiles.com/search?q=loader&category=animations
 
-const CustomAnimatedLoader = ({ visible = false, source }) => {
+const CustomAnimatedLoader = () => {
+    const { isLoading } = useContext(AuthContext);
     return (
         <AnimatedLoader
-            visible={visible}
+            visible={isLoading}
             overlayColor="rgba(255, 255, 255, 0.7)"
             animationStyle={styles.AnimatedLoader}
-            source={source}
+            source={require('../assets/loader/cat-loader.json')}
             speed={1}
         >
             <Text style={styles.loaderText}>Loading...</Text>

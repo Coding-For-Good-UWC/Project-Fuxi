@@ -4,11 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRoute } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
-import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 
 const ListenerProfileScreen3 = () => {
-    const { loginAuthContext } = useContext(AuthContext);
-    const [loading, setLoading] = useState(false);
+    const { loginAuthContext, setIsLoading } = useContext(AuthContext);
     const navigation = useNavigation();
     const route = useRoute();
     const nameProfile = route.params.nameProfile;
@@ -27,19 +25,18 @@ const ListenerProfileScreen3 = () => {
 
     const handleGoToPlayMediaScreen = async () => {
         try {
-            setLoading(true);
+            setIsLoading(true);
             await loginAuthContext(token);
-            // setTimeout(navigation.navigate('PlayMedia'), 2500);
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false);
+            setTimeout(navigation.navigate('PlayMedia'), 2500);
+            setIsLoading(false);
         }
     };
 
     return (
         <View style={styles.container}>
-            <CustomAnimatedLoader visible={loading} source={require('../assets/loader/cat-loader.json')} />
             <Ionicons name="checkmark-circle-outline" color="#137882" size={70} />
             <View style={styles.title}>
                 <Text style={styles.titleText}>{nameProfile} profile is ready!</Text>

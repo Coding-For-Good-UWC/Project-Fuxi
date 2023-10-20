@@ -188,13 +188,13 @@ functions:
     handler: lambdas/profile.getAllProfilesByInstituteUId
     events:
       - http:
-          path: /profile
+          path: /profiles
           method: get
   getProfileById:
     handler: lambdas/profile.getProfileById
     events:
       - http:
-          path: /profile/profileId
+          path: /profile
           method: get
   createProfile:
     handler: lambdas/profile.createProfile
@@ -206,13 +206,13 @@ functions:
     handler: lambdas/profile.deleteProfile
     events:
       - http:
-          path: /profile/profileId
+          path: /profile
           method: delete
   updateProfile:
     handler: lambdas/profile.updateProfile
     events:
       - http:
-          path: /profile/update
+          path: /profile
           method: put
   getRateTrack:
     handler: lambdas/profileRating.getRateTrack
@@ -244,30 +244,42 @@ functions:
       - http:
           path: /playlist/artist
           method: post
-  getPlaylistByGenresInProfile:
-    handler: lambdas/playlist.getPlaylistByGenresInProfile
-    events:
-      - http:
-          path: /playlist/genresProfile
-          method: post
   createReactTrack:
     handler: lambdas/reactTrack.createReactTrack
     events:
       - http:
           path: /reactTrack
           method: post
+  getPlaylistById:
+    handler: lambdas/playlist.getPlaylistById
+    events:
+      - http:
+          path: /playlist
+          method: get
+  getAllPlayListByProfileId:
+    handler: lambdas/playlist.getAllPlayListByProfileId
+    events:
+      - http:
+          path: /playlists
+          method: get
   createPlaylist:
     handler: lambdas/playlist.createPlaylist
     events:
       - http:
           path: /playlist
           method: post
-  getAllPlayListByProfileId:
-    handler: lambdas/playlist.getAllPlayListByProfileId
+  updatePlaylist:
+    handler: lambdas/playlist.updatePlaylist
     events:
       - http:
-          path: /playlist/profile
-          method: post
+          path: /playlist
+          method: put
+  deletePlaylist:
+    handler: lambdas/playlist.deletePlaylist
+    events:
+      - http:
+          path: /playlist
+          method: delete
   searchTrack:
     handler: lambdas/track.searchTrack
     events:

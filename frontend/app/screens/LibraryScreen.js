@@ -1,66 +1,50 @@
-import {
-    Dimensions,
-    Image,
-    Platform,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import React, { useState } from 'react';
+import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import colours from '../config/colours';
 import CustomGridLayout from '../components/CustomGridLayout';
-import playlist from '../data/data';
 import { useNavigation } from '@react-navigation/native';
 import TipComponent from './../components/TipComponent';
 import WithProfile from '../components/WithProfile';
 import RenderPlayListItem from '../components/RenderPlayListItem';
 import RenderItemLikedSong from '../components/RenderItemLikedSong';
+import { getAllPlayListByProfileId } from '../api/playlist';
+import { getStoreData } from '../utils/AsyncStorage';
 
 const LibraryScreen = () => {
     const navigation = useNavigation();
     const { width } = Dimensions.get('screen');
     const heightItem = (width - 40 - 20) / 2;
+    const [dataPlaylist, setDataPlaylist] = useState([]);
 
-    const listImages = [
-        <Image
-            source={{ uri: 'https://i.ytimg.com/vi/w68MGL20Mf0/0.jpg' }}
-            style={{ width: heightItem / 2, height: heightItem / 2 }}
-        />,
-        <Image
-            source={{ uri: 'https://i.ytimg.com/vi/KyMm5HRd1Ks/0.jpg' }}
-            style={{ width: heightItem / 2, height: heightItem / 2 }}
-        />,
-        <Image
-            source={{ uri: 'https://i.ytimg.com/vi/Ctxti-H7hZ8/0.jpg' }}
-            style={{ width: heightItem / 2, height: heightItem / 2 }}
-        />,
-        <Image
-            source={{ uri: 'https://i.ytimg.com/vi/h2oJbwgQpA0/0.jpg' }}
-            style={{ width: heightItem / 2, height: heightItem / 2 }}
-        />,
-    ];
+    useEffect(() => {
+        getPlaylist();
+    }, []);
 
-    const data = [
-        <RenderItemLikedSong heightItem={heightItem} />,
-        <RenderPlayListItem
-            onpress={() => navigation.navigate('PlaylistDetailsScreen', { dataPlaylist: playlist })}
-            heightItem={heightItem}
-            data={listImages}
-        />,
-    ];
+    async function getPlaylist() {
+        try {
+            const profile0 = await getStoreData('profile0');
+            const { _id } = JSON.parse(profile0);
+            const response = await getAllPlayListByProfileId(_id);
+            const { code, message, data } = JSON.parse(response);
+            if (code == 200) {
+                const playlistItems = data.map((dataItem, index) => <RenderPlayListItem key={index} heightItem={heightItem} data={dataItem} />);
+                setDataPlaylist([<RenderItemLikedSong heightItem={heightItem} />, playlistItems]);
+            } else {
+                alert(message);
+            }
+        } catch (error) {
+            alert(error.message);
+            return;
+        } finally {
+        }
+    }
 
     const Header = () => (
         <>
-            <WithProfile />
-            <TipComponent />
-            <TouchableOpacity
-                style={styles.buttonNewPlaylist}
-                onPress={() => navigation.navigate('CreateNewPlaylistScreen')}
-            >
+            {/* <WithProfile />
+            <TipComponent /> */}
+            <TouchableOpacity style={styles.buttonNewPlaylist} onPress={() => navigation.navigate('CreateNewPlaylistScreen')}>
                 <Ionicons name="add" color={colours.deepTurquoise} size={20} />
                 <Text style={styles.buttonNewPlaylistText}>Create new playlist</Text>
             </TouchableOpacity>
@@ -75,7 +59,7 @@ const LibraryScreen = () => {
                 <CustomGridLayout
                     columns={2}
                     gap={20}
-                    data={data}
+                    data={dataPlaylist}
                     styleCell={styles.cellStyle}
                     header={<Header />}
                     footer={<View style={{ height: 40 }} />}

@@ -1,17 +1,17 @@
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useNavigation } from '@react-navigation/native';
 import colours from '../config/colours';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
-import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 import { storeData } from '../utils/AsyncStorage';
 import { signUpInstitute } from '../api/institutes';
+import { AuthContext } from '../context/AuthContext';
 
 const CreateAccountScreen = () => {
     const navigation = useNavigation();
+    const { setIsLoading } = useContext(AuthContext);
     const [isChecked, setIsChecked] = useState(false);
-    const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -110,7 +110,7 @@ const CreateAccountScreen = () => {
         }
 
         try {
-            setLoading(true);
+            setIsLoading(true);
             const institutesNew = await signUpInstitute(name, email, password);
             const { statusCode, body } = JSON.parse(institutesNew);
 
@@ -132,7 +132,7 @@ const CreateAccountScreen = () => {
             alert(error.message);
             return;
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -142,7 +142,6 @@ const CreateAccountScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <CustomAnimatedLoader visible={loading} source={require('../assets/loader/cat-loader.json')} />
             <View style={styles.brand}>
                 <Text style={styles.brandText}>FUXI</Text>
             </View>

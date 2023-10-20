@@ -1,15 +1,18 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import CustomGridLayout from './CustomGridLayout';
 
-const RenderPlayListItem = ({ onpress, heightItem, data, namePlaylist }) => {
+const RenderPlayListItem = ({ onpress, heightItem, data }) => {
+    const listImages = data.tracks.map((item, index) => (
+        <Image key={index} source={{ uri: item.ImageURL }} style={{ width: heightItem / 2, height: heightItem / 2 }} />
+    ));
     return (
         <TouchableOpacity onPress={onpress}>
             <View style={{ height: heightItem, borderRadius: 6, overflow: 'hidden' }}>
-                <CustomGridLayout columns={2} data={data} />
+                <CustomGridLayout columns={2} data={listImages} />
             </View>
             <Text style={styles.likesSongText} numberOfLines={2}>
-                Ninaazarova's playlist
+                {data.namePlaylist}
             </Text>
         </TouchableOpacity>
     );

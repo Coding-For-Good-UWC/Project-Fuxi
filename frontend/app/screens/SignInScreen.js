@@ -1,17 +1,16 @@
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import colours from '../config/colours';
-import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
 import { signInInstitute } from '../api/institutes';
 import { AuthContext } from '../context/AuthContext';
 import { storeData } from '../utils/AsyncStorage';
+import { getAllProfilesByInstituteUId } from '../api/profiles';
 
 const SignInScreen = () => {
     const navigation = useNavigation();
-    const { loginAuthContext } = useContext(AuthContext);
-    const [loading, setLoading] = useState(false);
+    const { setIsLoading, loginAuthContext } = useContext(AuthContext);
     const [isValid, setIsValid] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -73,11 +72,14 @@ const SignInScreen = () => {
         if (validateNullFormData(formData)) {
             console.log('Form is valid:', formData);
             try {
-                setLoading(true);
-                const response = await signInInstitute(email, password);
-                const { statusCode, message, institute, token } = JSON.parse(response);
+                setIsLoading(true);
+                const login = await signInInstitute(email, password);
+                const { statusCode, message, institute, token } = JSON.parse(login);
+                const getProfile0 = await getAllProfilesByInstituteUId(institute.uid);
+                const { data } = JSON.parse(getProfile0);
                 if (statusCode == 200) {
                     await storeData('userInfo', JSON.stringify(institute));
+                    await storeData('profile0', JSON.stringify(data[0]));
                     loginAuthContext(token);
                 } else if (statusCode == 400) {
                     alert(message);
@@ -89,7 +91,7 @@ const SignInScreen = () => {
                 alert(error.message);
                 return;
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         }
     };
@@ -101,7 +103,6 @@ const SignInScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <CustomAnimatedLoader visible={loading} source={require('../assets/loader/cat-loader.json')} />
             <View style={styles.brand}>
                 <Text style={styles.brandText}>FUXI</Text>
             </View>
@@ -145,10 +146,7 @@ const SignInScreen = () => {
                             Sign in
                         </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.toggleInactive}
-                        onPress={() => navigation.navigate('CreateAccountScreen')}
-                    >
+                    <TouchableOpacity style={styles.toggleInactive} onPress={() => navigation.navigate('CreateAccountScreen')}>
                         <Text style={styles.inactiveText}>Create new account</Text>
                     </TouchableOpacity>
                 </View>

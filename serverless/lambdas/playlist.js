@@ -3,76 +3,70 @@
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 const mongoose = require('mongoose');
 const { connectDb } = require('../lib/mongodb');
-const trackModel = require('../models/track');
+require('../models/track');
 const playlistModel = require('../models/playlist');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 
 connectDb();
 
-const getPlaylistByGenresInProfile = async (event) => {
+const getPlaylistById = async (event) => {
+    const { playlistId } = event.queryStringParameters;
+    if (!playlistId) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
     try {
-        const { uid } = JSON.parse(event.body);
-
-        if (!uid) {
-            return JSON.stringify({
-                statusCode: 400,
-                status: 'Bad Request',
-                message: 'Missing required fields',
-            });
+        const response = await playlistModel.findById(playlistId).populate('tracks');
+        if (response) {
+            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', response));
+        } else {
+            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found'));
         }
-
-        const genreValues = ['English', 'Tamil'];
-        // const playlist = await trackModel.find({ Language: { $in: genreValues } }).exec();
-
-        const pipeline = [
-            {
-                $match: { Language: { $in: genreValues } },
-            },
-            {
-                $group: {
-                    _id: '$Artist',
-                    tracks: { $push: '$$ROOT' }, // Tạo mảng bản ghi cho từng nghệ sĩ
-                },
-            },
-            {
-                $project: {
-                    _id: 1,
-                    tracks: {
-                        $slice: ['$tracks', 0, 4], // Giới hạn số lượng bản ghi theo nghệ sĩ là 4
-                    },
-                },
-            },
-            {
-                $limit: 5, // Giới hạn số lượng nghệ sĩ là 10
-            },
-        ];
-
-        const playlist = await trackModel.aggregate(pipeline);
-        console.log(playlist);
-
-        return JSON.stringify({
-            statusCode: 200,
-            status: 'OK',
-            message: `Get playlist by artist ${uid}`,
-            data: playlist,
-        });
     } catch (error) {
         console.error(error);
-        return JSON.stringify({
-            statusCode: 500,
-            status: 'Internal server error',
-            message: 'Server Error',
-        });
+        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+    }
+};
+
+const getAllPlayListByProfileId = async (event) => {
+    const { profileId } = event.queryStringParameters;
+    if (!profileId) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
+    try {
+        const response = await playlistModel
+            .find({ profileId: new mongoose.Types.ObjectId(profileId) })
+            .populate('tracks')
+            .sort({ updatedAt: 'desc' });
+        const result = await Promise.all(
+            response.map(async (item) => {
+                if (item.tracks && item.tracks.length > 0) {
+                    const firstFourTracks = item.tracks.slice(0, 4);
+                    while (firstFourTracks.length < 4) {
+                        firstFourTracks.push({});
+                    }
+                    return {
+                        ...item.toObject(),
+                        tracks: firstFourTracks,
+                    };
+                } else {
+                    return item;
+                }
+            }),
+        );
+        return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', result));
+    } catch (error) {
+        console.error(error);
+        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
     }
 };
 
 const createPlaylist = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, namePlaylist, tracks } = json;
+    if (!profileId || !namePlaylist || !tracks) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
     try {
-        if (!profileId || !namePlaylist || !tracks) {
-            return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
-        }
         const response = await playlistModel.create({
             profileId: new mongoose.Types.ObjectId(profileId),
             namePlaylist,
@@ -85,30 +79,28 @@ const createPlaylist = async (event) => {
         }
     } catch (error) {
         console.error(error);
-    }
-};
-
-const getAllPlayListByProfileId = async (event) => {
-    const json = JSON.parse(event.body);
-    const { profileId } = json;
-
-    try {
-        if (!profileId) {
-            return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
-        }
-        const response = await playlistModel
-            .find({ profileId: new mongoose.Types.ObjectId(profileId) })
-            .populate('tracks')
-            .sort({ updatedAt: 'desc' });
-        if (response) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Created react track success', response));
-        } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Create failure'));
-        }
-    } catch (error) {
-        console.error(error);
         return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
     }
 };
 
-module.exports = { getPlaylistByGenresInProfile, createPlaylist, getAllPlayListByProfileId };
+const updatePlaylist = async (event) => {};
+
+const deletePlaylist = async (event) => {
+    const { playlistId } = event.queryStringParameters;
+    if (!playlistId) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
+    try {
+        const deletePlaylist = await playlistModel.findByIdAndDelete(playlistId);
+        if (deletePlaylist) {
+            return JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte playlist success'));
+        } else {
+            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found'));
+        }
+    } catch (err) {
+        console.log(err);
+        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+    }
+};
+
+module.exports = { getPlaylistById, getAllPlayListByProfileId, createPlaylist, updatePlaylist, deletePlaylist };

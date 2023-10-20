@@ -1,21 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { searchTrack } from './../api/track';
-import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 import { getStoreData } from '../utils/AsyncStorage';
 import { createPlaylist } from '../api/playlist';
 import RenderItemSong from '../components/RenderItemSong';
 import ToggleButton from '../components/ToggleButton';
+import { AuthContext } from './../context/AuthContext';
 
 const CreateNewPlaylistScreen = () => {
     const navigation = useNavigation();
+    const { setIsLoading } = useContext(AuthContext);
     const [searchText, setSearchText] = useState('');
     const [namePlaylistText, setNamePlaylistText] = useState('');
     const [isSelected, setIsSelected] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [selectedItems, setSelectedItems] = useState([]);
     const [renderTracks, setRenderTracks] = useState([]);
 
@@ -87,14 +87,12 @@ const CreateNewPlaylistScreen = () => {
     };
 
     const handleSubmit = async () => {
-        const json = await getStoreData('userInfo');
-        const userInfo = JSON.parse(json);
-
         try {
-            setLoading(true);
-            const response = await createPlaylist(userInfo.id, namePlaylistText, selectedItems);
-            const { code, message, data } = JSON.parse(response);
-
+            setIsLoading(true);
+            const profileData = await getStoreData('profileData');
+            const { _id } = JSON.parse(profileData);
+            const response = await createPlaylist(_id, namePlaylistText, selectedItems);
+            const { code, message } = JSON.parse(response);
             if (code == 201) {
                 navigation.navigate('TabNavigator');
             } else {
@@ -105,7 +103,7 @@ const CreateNewPlaylistScreen = () => {
             alert(error.message);
             return;
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -120,7 +118,6 @@ const CreateNewPlaylistScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <CustomAnimatedLoader visible={loading} source={require('../assets/loader/cat-loader.json')} />
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.headerText}>Create new playlist</Text>
@@ -141,19 +138,9 @@ const CreateNewPlaylistScreen = () => {
                         <View style={styles.headerSearch}>
                             <View style={styles.search}>
                                 <Ionicons name="search" color="#757575" size={24} style={{ padding: 10 }} />
-                                <TextInput
-                                    placeholder="Search"
-                                    style={styles.inputStyle}
-                                    onChangeText={handleTextChange}
-                                    value={searchText}
-                                />
+                                <TextInput placeholder="Search" style={styles.inputStyle} onChangeText={handleTextChange} value={searchText} />
                                 {searchText !== '' ? (
-                                    <Ionicons
-                                        name="close"
-                                        size={24}
-                                        style={{ padding: 10 }}
-                                        onPress={() => handleTextChange('')}
-                                    />
+                                    <Ionicons name="close" size={24} style={{ padding: 10 }} onPress={() => handleTextChange('')} />
                                 ) : (
                                     ''
                                 )}
