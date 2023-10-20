@@ -1,17 +1,33 @@
 import { StyleSheet, Text, TouchableOpacity, View, Modal } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import ChangeListenerScreen from '../screens/ChangeListenerScreen';
+import { getStoreData } from '../utils/AsyncStorage';
 
-const WithProfile = () => {
+const WithProfile = ({ data }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [fullname, setFullname] = useState('');
+
+    const getFullname = async () => {
+        try {
+            const profile0 = await getStoreData('profile0');
+            const { fullname } = JSON.parse(profile0);
+            setFullname(fullname);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        getFullname();
+    }, []);
 
     return (
         <>
             <View style={styles.container}>
                 <View style={styles.listener}>
                     <Text style={styles.listenerText}>Listener</Text>
-                    <Text style={styles.nameListenerText}>Prairie Johnson</Text>
+                    <Text style={styles.nameListenerText}>{fullname}</Text>
                 </View>
                 <TouchableOpacity onPress={() => setIsModalVisible(!isModalVisible)}>
                     <Ionicons name="sync" color={'#757575'} size={26} style={{ padding: 4, paddingRight: 0 }} />

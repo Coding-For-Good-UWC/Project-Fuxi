@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         gap: 18,
         width: '100%',
+        backgroundColor: '#fff',
     },
     headerText: {
         fontWeight: '600',
