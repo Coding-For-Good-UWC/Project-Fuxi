@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Chip } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { languages } from '../utils/Diversity';
@@ -7,11 +7,11 @@ import { getStoreData, storeData } from '../utils/AsyncStorage';
 import { createProfile } from '../api/profiles';
 import colours from '../config/colours.js';
 import ToggleButton from './../components/ToggleButton';
-import { AuthContext } from '../context/AuthContext';
+import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 
 const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, token }) => {
     const navigation = useNavigation();
-    const { setIsLoading } = useContext(AuthContext);
+    const [isLoading, setIsLoading] = useState(false);
     const [isSelected, setIsSelected] = useState(false);
 
     const toggleItem = (item) => {
@@ -86,6 +86,7 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
 
     return (
         <View style={styles.container}>
+            <CustomAnimatedLoader visible={isLoading} />
             <Text style={styles.headerText}>Music taste</Text>
             <Text style={styles.descriptionText}>Please select at least 1 type that they like.</Text>
             <View style={styles.listChip} vertical={true}>

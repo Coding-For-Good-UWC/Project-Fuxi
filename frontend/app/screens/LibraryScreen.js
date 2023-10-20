@@ -36,7 +36,7 @@ const LibraryScreen = () => {
                         onPress={() => navigation.navigate('PlaylistDetailsScreen', { dataPlaylistDetail: dataItem })}
                     />
                 ));
-                setDataPlaylist(playlistItems);
+                setDataPlaylist([<RenderItemLikedSong heightItem={heightItem} />, ...playlistItems]);
             } else {
                 alert(message);
             }
@@ -48,8 +48,8 @@ const LibraryScreen = () => {
 
     const Header = () => (
         <>
-            {/* <WithProfile />
-            <TipComponent /> */}
+            <WithProfile />
+            {/* <TipComponent /> */}
             <TouchableOpacity style={styles.buttonNewPlaylist} onPress={() => navigation.navigate('CreateNewPlaylistScreen')}>
                 <Ionicons name="add" color={colours.deepTurquoise} size={20} />
                 <Text style={styles.buttonNewPlaylistText}>Create new playlist</Text>

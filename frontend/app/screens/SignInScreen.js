@@ -7,11 +7,13 @@ import { signInInstitute } from '../api/institutes';
 import { AuthContext } from '../context/AuthContext';
 import { storeData } from '../utils/AsyncStorage';
 import { getAllProfilesByInstituteUId } from '../api/profiles';
+import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 
 const SignInScreen = () => {
     const navigation = useNavigation();
-    const { setIsLoading, loginAuthContext } = useContext(AuthContext);
+    const { loginAuthContext } = useContext(AuthContext);
     const [isValid, setIsValid] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         email: '',
@@ -103,6 +105,7 @@ const SignInScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <CustomAnimatedLoader visible={isLoading} />
             <View style={styles.brand}>
                 <Text style={styles.brandText}>FUXI</Text>
             </View>

@@ -1,32 +1,67 @@
 import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as Animatable from 'react-native-animatable';
 import { Ionicons } from '@expo/vector-icons';
+import { getStoreData, storeData } from '../utils/AsyncStorage';
+import CustomGridLayout from '../components/CustomGridLayout';
+import { getAllProfilesByInstituteUId, getProfileById } from '../api/profiles';
 
 const ChangeListenerScreen = ({ visible }) => {
+    const [renderListener, setRenderListener] = useState([]);
+
+    const handleChangeProfile = async (item) => {
+        const response = await getProfileById(item._id);
+        const { code, message, data } = JSON.parse(response);
+        if (code == 200) {
+            console.log(data.fullname);
+            await storeData('profile0', JSON.stringify(data));
+        } else {
+            alert(message);
+        }
+    };
+
+    async function getAllProfile() {
+        try {
+            const userInfo = await getStoreData('userInfo');
+            const { uid } = JSON.parse(userInfo);
+            const response = await getAllProfilesByInstituteUId(uid);
+            const { code, message, data } = JSON.parse(response);
+            if (code == 200) {
+                const playlistItems = data.map((item, index) => <ListenerItem key={index} data={item} onPress={() => handleChangeProfile(item)} />);
+                setRenderListener(playlistItems);
+            } else {
+                alert(message);
+            }
+        } catch (error) {
+            alert(error.message);
+            return;
+        }
+    }
+
+    const ListenerItem = ({ data, onPress }) => (
+        <>
+            <View style={styles.listenerItem}>
+                <Ionicons name="ellipse" color="#137882" size={20} />
+                <Text style={styles.nameListener} numberOfLines={1}>
+                    {data.fullname}
+                </Text>
+                <TouchableOpacity onPress={onPress}>
+                    <Text style={styles.selectText}>Select</Text>
+                </TouchableOpacity>
+            </View>
+        </>
+    );
+
+    useEffect(() => {
+        getAllProfile();
+    }, []);
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <Animatable.View animation="fadeIn" duration={500} style={styles.container}>
                 <Text style={styles.headerText}>Change listener</Text>
                 <View style={styles.listenerList}>
-                    <View style={styles.listenerItem}>
-                        <Ionicons name="ellipse" color="#FFC857" size={20} />
-                        <Text style={styles.nameListener} numberOfLines={1}>
-                            Homer Robert
-                        </Text>
-                        <TouchableOpacity>
-                            <Text style={styles.selectText}>Select</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.listenerItem}>
-                        <Ionicons name="ellipse" color="#137882" size={20} />
-                        <Text style={styles.nameListener} numberOfLines={1}>
-                            ninaazarova
-                        </Text>
-                        <TouchableOpacity>
-                            <Text style={styles.selectText}>Select</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <CustomGridLayout data={renderListener} columns={1} gap={12} />
                 </View>
                 <Text style={styles.note}>
                     Manage profiles in
@@ -67,7 +102,6 @@ const styles = StyleSheet.create({
     },
     listenerList: {
         flexDirection: 'column',
-        gap: 12,
     },
     listenerItem: {
         flexDirection: 'row',

@@ -1,17 +1,17 @@
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useNavigation } from '@react-navigation/native';
 import colours from '../config/colours';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
 import { storeData } from '../utils/AsyncStorage';
 import { signUpInstitute } from '../api/institutes';
-import { AuthContext } from '../context/AuthContext';
+import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 
 const CreateAccountScreen = () => {
     const navigation = useNavigation();
-    const { setIsLoading } = useContext(AuthContext);
     const [isChecked, setIsChecked] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -117,6 +117,7 @@ const CreateAccountScreen = () => {
             if (statusCode == 200) {
                 storeData('UserUid', body.userUid);
                 navigation.navigate('ListenerProfileMain', { token: body.token });
+                console.log(body.token);
             } else if (statusCode == 400) {
                 alert(body.message);
             } else if (statusCode == 409) {
@@ -142,6 +143,7 @@ const CreateAccountScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <CustomAnimatedLoader visible={isLoading} />
             <View style={styles.brand}>
                 <Text style={styles.brandText}>FUXI</Text>
             </View>

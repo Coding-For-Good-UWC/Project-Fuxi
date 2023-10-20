@@ -6,33 +6,18 @@ import { useRoute } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 
 const ListenerProfileScreen3 = () => {
-    const { loginAuthContext, setIsLoading } = useContext(AuthContext);
+    const { loginAuthContext } = useContext(AuthContext);
     const navigation = useNavigation();
     const route = useRoute();
     const nameProfile = route.params.nameProfile;
     const token = route.params.token;
 
     const handleGoToHomeScreen = async () => {
-        try {
-            setLoading(true);
-            await loginAuthContext(token);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
+        await loginAuthContext(token);
     };
 
     const handleGoToPlayMediaScreen = async () => {
-        try {
-            setIsLoading(true);
-            await loginAuthContext(token);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setTimeout(navigation.navigate('PlayMedia'), 2500);
-            setIsLoading(false);
-        }
+        await loginAuthContext(token);
     };
 
     return (
