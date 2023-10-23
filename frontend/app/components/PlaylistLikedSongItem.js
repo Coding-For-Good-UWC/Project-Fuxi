@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/core';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
-const RenderItemLikedSong = ({ heightItem }) => {
+const PlaylistLikedSongItem = ({ heightItem }) => {
     const navigation = useNavigation();
     return (
         <TouchableOpacity onPress={() => navigation.navigate('LikedSongsScreen')}>
@@ -18,7 +18,7 @@ const RenderItemLikedSong = ({ heightItem }) => {
     );
 };
 
-export default RenderItemLikedSong;
+export default PlaylistLikedSongItem;
 
 const styles = StyleSheet.create({
     likesSongText: {

@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import TextInputEffectLabel from '../components/TextInputEffectLabel';
-import SelectElementEffectLabel from '../components/SelectElementEffectLabel';
-import { countries } from '../utils/Diversity';
+import TextInputEffectLabel from '../../components/TextInputEffectLabel';
+import SelectElementEffectLabel from '../../components/SelectElementEffectLabel';
+import { countries } from '../../utils/Diversity';
 
 const ListenerProfileScreen1 = ({ goToScreen, formData, setFormData, errors, setErrors }) => {
     const [isValid, setIsValid] = useState(false);

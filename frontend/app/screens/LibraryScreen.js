@@ -6,8 +6,8 @@ import CustomGridLayout from '../components/CustomGridLayout';
 import { useNavigation } from '@react-navigation/native';
 import TipComponent from './../components/TipComponent';
 import WithProfile from '../components/WithProfile';
-import RenderPlayListItem from '../components/RenderPlayListItem';
-import RenderItemLikedSong from '../components/RenderItemLikedSong';
+import PlaylistItem from '../components/PlaylistItem';
+import PlaylistLikedSongItem from '../components/PlaylistLikedSongItem';
 import { getAllPlayListByProfileId } from '../api/playlist';
 import { getStoreData } from '../utils/AsyncStorage';
 
@@ -28,15 +28,7 @@ const LibraryScreen = () => {
             const response = await getAllPlayListByProfileId(_id);
             const { code, message, data } = JSON.parse(response);
             if (code == 200) {
-                const playlistItems = data.map((dataItem, index) => (
-                    <RenderPlayListItem
-                        key={index}
-                        heightItem={heightItem}
-                        data={dataItem}
-                        onPress={() => navigation.navigate('PlaylistDetailsScreen', { dataPlaylistDetail: dataItem })}
-                    />
-                ));
-                setDataPlaylist([<RenderItemLikedSong heightItem={heightItem} />, ...playlistItems]);
+                setDataPlaylist(data);
             } else {
                 alert(message);
             }
@@ -65,7 +57,14 @@ const LibraryScreen = () => {
                 <CustomGridLayout
                     columns={2}
                     gap={20}
-                    data={dataPlaylist}
+                    data={dataPlaylist.map((dataItem, index) => (
+                        <PlaylistItem
+                            key={index}
+                            heightItem={heightItem}
+                            data={dataItem}
+                            onPress={() => navigation.navigate('PlaylistDetailsScreen', { dataPlaylistDetail: dataItem })}
+                        />
+                    ))}
                     styleCell={styles.cellStyle}
                     header={<Header />}
                     footer={<View style={{ height: 40 }} />}

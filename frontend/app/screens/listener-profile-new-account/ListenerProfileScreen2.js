@@ -2,12 +2,12 @@ import { StyleSheet, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Chip } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { languages } from '../utils/Diversity';
-import { getStoreData, storeData } from '../utils/AsyncStorage';
-import { createProfile } from '../api/profiles';
-import colours from '../config/colours.js';
-import ToggleButton from './../components/ToggleButton';
-import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
+import { languages } from '../../utils/Diversity';
+import { getStoreData, storeData } from '../../utils/AsyncStorage';
+import { createProfile } from '../../api/profiles';
+import ToggleButton from '../../components/ToggleButton';
+import CustomAnimatedLoader from '../../components/CustomAnimatedLoader';
+import { getColour } from '../../utils/BackgroundColor';
 
 const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, token }) => {
     const navigation = useNavigation();
@@ -52,35 +52,6 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
             return;
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    const getColour = (genre) => {
-        switch (genre) {
-            case 'Cantonese':
-                return colours.genreCantonese;
-            case 'Chinese':
-                return colours.genreChinese;
-            case 'Christian':
-                return colours.genreChristian;
-            case 'English':
-                return colours.genreEnglish;
-            case 'Hainanese':
-                return colours.genreHainanese;
-            case 'Hindi':
-                return colours.genreHindi;
-            case 'Hokkien':
-                return colours.genreHokkien;
-            case 'Malay':
-                return colours.genreMalay;
-            case 'Mandarin':
-                return colours.genreMandarin;
-            case 'TV':
-                return colours.genreTV;
-            case 'Tamil':
-                return colours.genreTamil;
-            default:
-                return '#137882';
         }
     };
 

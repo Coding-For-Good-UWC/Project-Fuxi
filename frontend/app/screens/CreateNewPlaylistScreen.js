@@ -6,7 +6,7 @@ import CustomGridLayout from '../components/CustomGridLayout';
 import { searchTrack } from './../api/track';
 import { getStoreData } from '../utils/AsyncStorage';
 import { createPlaylist } from '../api/playlist';
-import RenderItemSong from '../components/RenderItemSong';
+import SongItem from '../components/SongItem';
 import ToggleButton from '../components/ToggleButton';
 import { AuthContext } from './../context/AuthContext';
 
@@ -61,7 +61,7 @@ const CreateNewPlaylistScreen = () => {
                 </TouchableOpacity>
             );
         };
-        return <RenderItemSong item={item} iconRight={renderIconRight(item)} />;
+        return <SongItem item={item} iconRight={renderIconRight(item)} />;
     };
 
     const handleTextChange = async (newText) => {

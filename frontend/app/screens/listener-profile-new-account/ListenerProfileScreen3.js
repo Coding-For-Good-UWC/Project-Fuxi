@@ -3,7 +3,7 @@ import React, { useContext, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRoute } from '@react-navigation/native';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext';
 
 const ListenerProfileScreen3 = () => {
     const { loginAuthContext } = useContext(AuthContext);

@@ -2,7 +2,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import CustomGridLayout from './CustomGridLayout';
 
-const RenderPlayListItem = ({ onPress, heightItem, data }) => {
+const PlaylistItem = ({ onPress, heightItem, data }) => {
     const listImages = data.tracks.map((item, index) => (
         <Image key={index} source={{ uri: item.ImageURL }} style={{ width: heightItem / 2, height: heightItem / 2 }} />
     ));
@@ -18,7 +18,7 @@ const RenderPlayListItem = ({ onPress, heightItem, data }) => {
     );
 };
 
-export default RenderPlayListItem;
+export default PlaylistItem;
 
 const styles = StyleSheet.create({
     likesSongText: {

@@ -1,20 +1,10 @@
-import {
-    Dimensions,
-    Image,
-    Platform,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+import { Dimensions, Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useLayoutEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import playlist from '../data/data';
 import CustomGridLayout from '../components/CustomGridLayout';
-import RenderItemSong from '../components/RenderItemSong';
+import SongItem from '../components/SongItem';
 
 const LikedSongsScreen = () => {
     const navigation = useNavigation();
@@ -31,10 +21,7 @@ const LikedSongsScreen = () => {
             ),
             headerRight: () => (
                 <View style={styles.bar}>
-                    <TouchableOpacity
-                        style={styles.roundButtonHeader}
-                        onPress={() => navigation.navigate('SearchTrackScreen')}
-                    >
+                    <TouchableOpacity style={styles.roundButtonHeader} onPress={() => navigation.navigate('SearchTrackScreen')}>
                         <Ionicons name="search" size={24} color={'#3C4647'} style={{ paddingVertical: 10 }} />
                     </TouchableOpacity>
                 </View>
@@ -68,7 +55,7 @@ const LikedSongsScreen = () => {
     );
 
     const RenderListSong = playlist.tracks?.map((item, index) => (
-        <RenderItemSong
+        <SongItem
             key={index}
             item={item}
             iconRight={

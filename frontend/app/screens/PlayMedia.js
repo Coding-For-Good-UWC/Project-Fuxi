@@ -9,7 +9,7 @@ import colours from '../config/colours';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import playlist from './../data/data';
 import CustomGridLayout from './../components/CustomGridLayout';
-import RenderItemSong from '../components/RenderItemSong';
+import SongItem from '../components/SongItem';
 import PlayMediaComponent from '../components/PlayMediaComponent';
 import OverlayMediaScreen from './OverlayMediaScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -148,7 +148,7 @@ const PlayMedia = () => {
                             <BottomSheetScrollView ref={bottomSheetRef} snapTo={'50%'} backgroundColor="#fff" backDropColor="#000">
                                 <CustomGridLayout
                                     data={dataTracksOrigin?.map((item, index) => (
-                                        <RenderItemSong key={index} item={item} />
+                                        <SongItem key={index} item={item} />
                                     ))}
                                     columns={1}
                                     styleLayout={{ paddingHorizontal: 20 }}

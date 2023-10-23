@@ -7,26 +7,19 @@ import CustomGridLayout from './../components/CustomGridLayout';
 import SlotPlayer from '../components/SlotPlayer';
 import ToggleDialog from '../components/ToggleDialog';
 import { getPlaylistById } from '../api/playlist';
-import RenderListSong from '../components/RenderListSong';
+import ReactSongItem from '../components/ReactSongItem';
 import { secondsToTimeString, totalDurationTracks } from '../utils/AudioUtils';
 
 const PlaylistDetailsScreen = () => {
+    const route = useRoute();
+    const dataNavigation = route.params.dataPlaylistDetail;
     const navigation = useNavigation();
     const [heightItem, setHeightItem] = useState(0);
-    const route = useRoute();
-    const dataPlaylistDetail = route.params.dataPlaylistDetail;
-    const [renderPlaylistDetail, setRenderPlaylistDetail] = useState([]);
+    const [dataPlaylistDetail, setDataPlaylistDetail] = useState({});
     const [countTracks, setCountTracks] = useState(0);
     const [totalDuration, setTotalDuration] = useState(0);
-
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
-    const statusLikeEnum = { Normal: '#137882', High: '#FFC857' };
-    const statusDislikeEnum = { Normal: '#222C2D', High: '#C31E1E' };
-
-    const listImages = dataPlaylistDetail.tracks.map((item, index) => (
-        <Image key={index} source={{ uri: item.ImageURL }} style={{ width: heightItem / 2, height: heightItem / 2 }} />
-    ));
 
     handleLayout = (event) => {
         const { width } = event.nativeEvent.layout;
@@ -55,29 +48,17 @@ const PlaylistDetailsScreen = () => {
 
     async function getPlaylistDetail() {
         try {
-            const response = await getPlaylistById(dataPlaylistDetail._id);
+            const response = await getPlaylistById(dataNavigation._id);
             const { code, message, data } = JSON.parse(response);
-            if (code == 200) {
-                setCountTracks(data.tracks.length);
-                const playlistItems = data.tracks.map((dataItem, index) => (
-                    <RenderListSong
-                        key={index}
-                        item={dataItem}
-                        statusLikeEnum={statusLikeEnum}
-                        statusDislikeEnum={statusDislikeEnum}
-                        setIsDialogVisible={setIsDialogVisible}
-                        setDialogProps={setDialogProps}
-                        dataTracksOrigin={data.tracks}
-                    />
-                ));
-                setRenderPlaylistDetail(playlistItems);
-                setTotalDuration(await totalDurationTracks(data.tracks));
+            if (code === 200) {
+                setCountTracks(data?.tracks.length);
+                setDataPlaylistDetail(data);
+                setTotalDuration(await totalDurationTracks(data?.tracks));
             } else {
                 alert(message);
             }
         } catch (error) {
             alert(error.message);
-            return;
         }
     }
 
@@ -90,11 +71,16 @@ const PlaylistDetailsScreen = () => {
             <View style={styles.container}>
                 <View style={{ alignItems: 'center' }}>
                     <View style={{ borderRadius: 6, overflow: 'hidden', width: '70%' }} onLayout={this.handleLayout}>
-                        <CustomGridLayout columns={2} data={listImages} />
+                        <CustomGridLayout
+                            columns={2}
+                            data={dataNavigation?.tracks?.map((item, index) => (
+                                <Image key={index} source={{ uri: item.ImageURL }} style={{ width: heightItem / 2, height: heightItem / 2 }} />
+                            ))}
+                        />
                     </View>
                 </View>
                 <View style={styles.playListDetail}>
-                    <Text style={styles.playListName}>{dataPlaylistDetail.namePlaylist}</Text>
+                    <Text style={styles.playListName}>{dataPlaylistDetail?.namePlaylist}</Text>
                     <View style={styles.playListTracksAndTime}>
                         <Text style={styles.playListTotalName}>{countTracks} songs</Text>
                         <Ionicons name="ellipse" color="#E2E3E4" size={10} />
@@ -107,7 +93,18 @@ const PlaylistDetailsScreen = () => {
                 </TouchableOpacity>
                 <View style={{ flex: 1 }}>
                     <View style={{ borderTopColor: '#ECEDEE', borderTopWidth: 1 }}></View>
-                    <CustomGridLayout data={renderPlaylistDetail} columns={1} styleLayout={{}} />
+                    <CustomGridLayout
+                        data={dataPlaylistDetail?.tracks?.map((dataItem, index) => (
+                            <ReactSongItem
+                                key={index}
+                                item={dataItem}
+                                setIsDialogVisible={setIsDialogVisible}
+                                setDialogProps={setDialogProps}
+                                dataTracksOrigin={dataPlaylistDetail?.tracks}
+                            />
+                        ))}
+                        columns={1}
+                    />
                 </View>
             </View>
             {/* <SlotPlayer /> */}

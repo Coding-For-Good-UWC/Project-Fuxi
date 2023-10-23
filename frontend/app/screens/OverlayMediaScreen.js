@@ -5,10 +5,10 @@ import FollowPlayMedia from '../components/FollowPlayMedia';
 
 const defaultSong = {
     id: 1,
-    Title: 'THỦY CHUNG',
-    Artist: 'THƯƠNG VÕ',
-    ImageURL: 'https://i.ytimg.com/vi/w68MGL20Mf0/0.jpg',
-    songURL: 'https://res.cloudinary.com/dusmue7d9/video/upload/v1695703525/MP3/TH%E1%BB%A6Y_CHUNG_jmdrdq.mp3',
+    Title: 'Please choose a song',
+    Artist: '',
+    ImageURL: 'https://res.cloudinary.com/dusmue7d9/image/upload/v1695711862/MP3/default_l8mbsa.png',
+    songURL: '',
 };
 
 const OverlayMediaScreen = ({ isOverlay, song }) => {

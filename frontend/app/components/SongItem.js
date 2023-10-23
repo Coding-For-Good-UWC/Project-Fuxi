@@ -1,7 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import React from 'react';
 
-const RenderItemSong = ({ item, iconRight, onPress }) => {
+const SongItem = ({ item, iconRight, onPress }) => {
     return (
         <TouchableOpacity style={styles.rowItem} onPress={onPress}>
             <Image source={{ uri: item.ImageURL }} style={styles.songImage} />
@@ -18,7 +18,7 @@ const RenderItemSong = ({ item, iconRight, onPress }) => {
     );
 };
 
-export default RenderItemSong;
+export default SongItem;
 
 const styles = StyleSheet.create({
     rowItem: {

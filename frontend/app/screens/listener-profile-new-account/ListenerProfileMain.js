@@ -2,10 +2,10 @@ import { StyleSheet, Text, View, SafeAreaView, StatusBar, Dimensions, TouchableO
 import React, { useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import Dialog from 'react-native-dialog';
+import { useRoute } from '@react-navigation/native';
 import ListenerProfileScreen1 from './ListenerProfileScreen1';
 import ListenerProfileScreen2 from './ListenerProfileScreen2';
-import CustomProgressBar from '../components/CustomProgressBar';
-import { useRoute } from '@react-navigation/native';
+import CustomProgressBar from '../../components/CustomProgressBar';
 
 const ListenerProfileMain = () => {
     const width = Dimensions.get('window').width;
@@ -53,12 +53,7 @@ const ListenerProfileMain = () => {
             errors={errors}
             setErrors={setErrors}
         />,
-        <ListenerProfileScreen2
-            selectedItems={selectedItems}
-            setSelectedItems={setSelectedItems}
-            formData={formData}
-            token={token}
-        />,
+        <ListenerProfileScreen2 selectedItems={selectedItems} setSelectedItems={setSelectedItems} formData={formData} token={token} />,
     ];
 
     return (

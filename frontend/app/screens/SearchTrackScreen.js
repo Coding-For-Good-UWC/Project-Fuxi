@@ -4,13 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { searchTrack } from '../api/track';
-import RenderItemSong from '../components/RenderItemSong';
+import SongItem from '../components/SongItem';
 
 const SearchTrackScreen = () => {
     const navigation = useNavigation();
     const textInputRef = useRef(null);
     const [text, setText] = useState('');
-    const [renderTracks, setRenderTracks] = useState([]);
+    const [dataTracks, setDataTracks] = useState([]);
 
     useEffect(() => {
         if (textInputRef.current) {
@@ -22,18 +22,14 @@ const SearchTrackScreen = () => {
         setText(newText);
         try {
             const response = await searchTrack(newText, 1);
-            const { code, data, message } = JSON.parse(response);
-
+            const { code, message, data } = JSON.parse(response);
             if (code == 200) {
-                setRenderTracks(data.map((item, index) => <RenderItemSong key={index} item={item} />));
-            } else {
-                alert(message);
+                setDataTracks(data);
             }
         } catch (error) {
             console.error('Error:', error);
             alert(error.message);
             return;
-        } finally {
         }
     };
 
@@ -49,19 +45,20 @@ const SearchTrackScreen = () => {
                         onChangeText={handleTextChange}
                         value={text}
                     />
-                    {text !== '' ? (
-                        <Ionicons name="close" size={24} style={{ padding: 10 }} onPress={() => handleTextChange('')} />
-                    ) : (
-                        ''
-                    )}
+                    {text !== '' ? <Ionicons name="close" size={24} style={{ padding: 10 }} onPress={() => handleTextChange('')} /> : ''}
                 </View>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.container}>
-                {renderTracks.length !== 0 ? (
-                    <CustomGridLayout data={renderTracks} columns={1} />
+                {dataTracks.length !== 0 ? (
+                    <CustomGridLayout
+                        data={dataTracks?.map((item, index) => (
+                            <SongItem key={index} item={item} />
+                        ))}
+                        columns={1}
+                    />
                 ) : (
                     <View style={styles.emptyView}>
                         <Text style={styles.emptyText}>No songs found</Text>

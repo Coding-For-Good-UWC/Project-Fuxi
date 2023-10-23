@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 
 const CustomGridLayout = ({ columns, gap = 0, data, styleLayout, styleCell, header, footer }) => {
     const calculateRows = () => {
-        return Math.ceil(data.length / columns);
+        return Math.ceil(data?.length / columns);
     };
 
     const renderGrid = () => {
@@ -12,7 +12,7 @@ const CustomGridLayout = ({ columns, gap = 0, data, styleLayout, styleCell, head
             const row = [];
             for (let j = 0; j < columns; j++) {
                 const dataIndex = i * columns + j;
-                if (dataIndex < data.length) {
+                if (dataIndex < data?.length) {
                     const item = data[dataIndex];
                     row.push(
                         <View style={[styles.column, styleCell]} key={`column_${i}_${j}`}>

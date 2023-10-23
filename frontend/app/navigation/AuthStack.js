@@ -2,14 +2,14 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import WelcomeScreen from '../screens/WelcomeScreen';
-import AboutFUXI from '../screens/AboutFUXI';
+import AboutFUXI from '../screens/other/AboutFUXI';
 import CreateAccountScreen from '../screens/CreateAccountScreen';
 import SignInScreen from '../screens/SignInScreen';
-import ListenerProfileMain from '../screens/ListenerProfileMain';
-import ListenerProfileScreen3 from '../screens/ListenerProfileScreen3';
-import ResetPassword from '../screens/ResetPassword';
-import ResetPasswordCheckEmail from '../screens/ResetPasswordCheckEmail';
-import ResetPasswordNew from '../screens/ResetPasswordNew';
+import ListenerProfileMain from '../screens/listener-profile-new-account/ListenerProfileMain';
+import ListenerProfileScreen3 from '../screens/listener-profile-new-account/ListenerProfileScreen3';
+import ResetPassword from '../screens/reset-password/ResetPassword';
+import ResetPasswordCheckEmail from '../screens/reset-password/ResetPasswordCheckEmail';
+import ResetPasswordNew from '../screens/reset-password/ResetPasswordNew';
 
 const Stack = createNativeStackNavigator();
 

@@ -1,11 +1,13 @@
-import { Dimensions, Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
-import RenderItemSong from './RenderItemSong';
+import SongItem from './SongItem';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
 
-const RenderListSong = ({ item, statusLikeEnum, statusDislikeEnum, setIsDialogVisible, setDialogProps, dataTracksOrigin }) => {
+const ReactSongItem = ({ item, setIsDialogVisible, setDialogProps, dataTracksOrigin }) => {
     const navigation = useNavigation();
+    const statusLikeEnum = { Normal: '#137882', High: '#FFC857' };
+    const statusDislikeEnum = { Normal: '#222C2D', High: '#C31E1E' };
     const [statusLike, setStatusLike] = useState(statusLikeEnum.Normal);
     const [statusDislike, setStatusDislike] = useState(statusDislikeEnum.Normal);
 
@@ -58,7 +60,7 @@ const RenderListSong = ({ item, statusLikeEnum, statusDislikeEnum, setIsDialogVi
     };
 
     return (
-        <RenderItemSong
+        <SongItem
             item={item}
             iconRight={
                 <>
@@ -79,6 +81,4 @@ const RenderListSong = ({ item, statusLikeEnum, statusDislikeEnum, setIsDialogVi
     );
 };
 
-export default RenderListSong;
-
-const styles = StyleSheet.create({});
+export default ReactSongItem;
