@@ -1,10 +1,9 @@
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
 
-const ResetPassword = () => {
+const ResetPassword = ({ labelHeader }) => {
     const navigation = useNavigation();
     const [isValid, setIsValid] = useState(false);
 
@@ -65,10 +64,7 @@ const ResetPassword = () => {
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
-                <TouchableOpacity onPress={() => navigation.navigate('SignInScreen')}>
-                    <Ionicons name="arrow-back-outline" size={24} style={styles.iconArrowBack} />
-                </TouchableOpacity>
-                <Text style={styles.headerText}>Reset password</Text>
+                <Text style={styles.headerText}>{labelHeader}</Text>
                 <Text style={styles.descriptionText}>Please enter your account's email.</Text>
                 <View style={styles.form}>
                     <TextInputEffectLabel
@@ -97,7 +93,7 @@ const ResetPassword = () => {
                                     },
                                 ]}
                             >
-                                Sign in
+                                Continue
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -113,9 +109,10 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: '#fff',
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+        paddingTop: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0),
     },
     container: {
+        flex: 1,
         paddingHorizontal: 20,
     },
     iconArrowBack: {

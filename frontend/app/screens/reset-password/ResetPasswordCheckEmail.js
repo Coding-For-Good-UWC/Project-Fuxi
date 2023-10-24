@@ -1,6 +1,5 @@
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const ResetPasswordCheckEmail = () => {
@@ -28,8 +27,9 @@ const ResetPasswordCheckEmail = () => {
     };
 
     const handleSubmit = () => {
-        setIsValid(false);
-        setSeconds(5);
+        // setIsValid(false);
+        // setSeconds(5);
+        navigation.navigate('ResetPasswordNew');
     };
 
     useEffect(() => {
@@ -42,9 +42,6 @@ const ResetPasswordCheckEmail = () => {
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
-                <TouchableOpacity onPress={() => navigation.navigate('SignInScreen')}>
-                    <Ionicons name="arrow-back-outline" size={24} style={styles.iconArrowBack} />
-                </TouchableOpacity>
                 <Text style={styles.headerText}>Check your email</Text>
                 <Text style={styles.descriptionText}>
                     We’ve sent password reset instructions to your email <Text style={styles.email}>{email}.</Text>
@@ -84,9 +81,10 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: '#fff',
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+        paddingTop: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0),
     },
     container: {
+        flex: 1,
         paddingHorizontal: 20,
     },
     iconArrowBack: {

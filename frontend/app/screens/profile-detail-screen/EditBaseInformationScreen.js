@@ -1,24 +1,10 @@
-import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import React from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import SelectElementEffectLabel from '../../components/SelectElementEffectLabel';
 import { countries } from '../../utils/Diversity';
 
-const EditBaseInformationScreen = () => {
-    const [isValid, setIsValid] = useState(false);
-
-    const [formData, setFormData] = useState({
-        nameListener: '',
-        yearBirth: '',
-        language: '',
-    });
-
-    const [errors, setErrors] = useState({
-        nameListener: '',
-        yearBirth: '',
-        language: '',
-    });
-
+const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors }) => {
     const years = [];
     const currentYear = new Date().getFullYear();
     for (let year = currentYear; year >= 1900; year--) {
@@ -53,36 +39,6 @@ const EditBaseInformationScreen = () => {
             ...prevErrors,
             [field]: error,
         }));
-    };
-
-    useEffect(() => {
-        if (formData.nameListener.length < 6) {
-            setIsValid(false);
-        } else {
-            validateNullFormData(formData) ? setIsValid(false) : setIsValid(true);
-        }
-    }, [formData, errors]);
-
-    const handleSubmit = () => {
-        const { nameListener, yearBirth, language } = formData;
-
-        if (validateNullFormData(formData)) {
-            alert('Please fix the validation errors');
-            return;
-        }
-
-        console.log('formData:', formData);
-    };
-
-    const validateNullFormData = (formData) => {
-        for (const key in formData) {
-            if (formData.hasOwnProperty(key)) {
-                if (formData[key] === null || formData[key] === '') {
-                    return true;
-                }
-            }
-        }
-        return false;
     };
 
     return (

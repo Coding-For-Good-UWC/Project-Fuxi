@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
 import React, { useState } from 'react';
 import { languages } from '../../utils/Diversity';
 import { Chip } from 'react-native-paper';
@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         flexDirection: 'column',
         gap: 20,
+        marginBottom: 88,
     },
     text: {
         fontWeight: '500',

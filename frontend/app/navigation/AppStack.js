@@ -15,6 +15,9 @@ import EditProfileNavigator from './EditProfileNavigator';
 import AboutFUXI from '../screens/other/AboutFUXI';
 import TermsAndConditions from '../screens/other/TermsAndConditions';
 import PrivacyPolicy from '../screens/other/PrivacyPolicy';
+import ResetPassword from '../screens/reset-password/ResetPassword';
+import ResetPasswordCheckEmail from '../screens/reset-password/ResetPasswordCheckEmail';
+import ResetPasswordNew from '../screens/reset-password/ResetPasswordNew';
 
 const Stack = createNativeStackNavigator();
 
@@ -68,14 +71,22 @@ const AppStack = () => {
                 name="ProfileDetailNavigator"
                 component={ProfileDetailNavigator}
                 options={{
-                    headerShown: false,
+                    headerTransparent: true,
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#fff',
+                    },
                 }}
             />
             <Stack.Screen
                 name="EditProfileNavigator"
                 component={EditProfileNavigator}
                 options={{
-                    headerShown: false,
+                    headerTransparent: true,
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#fff',
+                    },
                 }}
             />
             <Stack.Screen
@@ -105,6 +116,43 @@ const AppStack = () => {
             <Stack.Screen
                 name="PrivacyPolicy"
                 component={PrivacyPolicy}
+                options={{
+                    headerTitle: '',
+                    headerTransparent: true,
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#fff',
+                    },
+                }}
+            />
+            <Stack.Screen
+                name="ResetPassword"
+                options={{
+                    headerTitle: '',
+                    headerTransparent: true,
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#fff',
+                    },
+                }}
+            >
+                {() => <ResetPassword labelHeader={'Change password'} />}
+            </Stack.Screen>
+            <Stack.Screen
+                name="ResetPasswordCheckEmail"
+                component={ResetPasswordCheckEmail}
+                options={{
+                    headerTitle: '',
+                    headerTransparent: true,
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#fff',
+                    },
+                }}
+            />
+            <Stack.Screen
+                name="ResetPasswordNew"
+                component={ResetPasswordNew}
                 options={{
                     headerTitle: '',
                     headerTransparent: true,

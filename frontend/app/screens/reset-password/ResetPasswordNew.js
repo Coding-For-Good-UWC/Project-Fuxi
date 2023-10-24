@@ -1,11 +1,12 @@
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useContext, useEffect, useState } from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../../context/AuthContext';
 
-const ResetPasswordNew = () => {
+const ResetPasswordNew = ({ messageToast, navigationTo }) => {
     const navigation = useNavigation();
+    const { userToken } = useContext(AuthContext);
     const [isValid, setIsValid] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -68,7 +69,7 @@ const ResetPasswordNew = () => {
     const handleSubmit = () => {
         if (validateFormData(formData) && validateErrors(errors)) {
             console.log(formData);
-            // navigation.navigate('');
+            navigationTo();
         }
     };
 
@@ -86,7 +87,7 @@ const ResetPasswordNew = () => {
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
                 <Text style={styles.headerText}>Reset password</Text>
-                <Text style={styles.descriptionText}>Please enter your account's email.</Text>
+                <Text style={styles.descriptionText}>Please enter your new password below.</Text>
                 <View style={styles.form}>
                     <TextInputEffectLabel
                         label="Password"
@@ -124,12 +125,11 @@ const ResetPasswordNew = () => {
                                 Done
                             </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.toggleInactive}
-                            // onPress={() => navigation.navigate('ResetPassword')}
-                        >
-                            <Text style={styles.inactiveText}>Back to Sign in</Text>
-                        </TouchableOpacity>
+                        {userToken === null && (
+                            <TouchableOpacity style={styles.toggleInactive} onPress={() => navigation.navigate('SignInScreen')}>
+                                <Text style={styles.inactiveText}>Back to Sign in</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
             </View>
@@ -143,11 +143,11 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: '#fff',
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+        paddingTop: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0),
     },
     container: {
+        flex: 1,
         paddingHorizontal: 20,
-        marginTop: 40,
     },
     iconArrowBack: {
         paddingLeft: 0,

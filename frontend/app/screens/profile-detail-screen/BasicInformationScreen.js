@@ -1,12 +1,7 @@
-import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/core';
+import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import React from 'react';
 
 const BasicInformationScreen = () => {
-    const navigation = useNavigation();
-
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
@@ -27,14 +22,6 @@ const BasicInformationScreen = () => {
                         <Text style={styles.fieldValue}>English</Text>
                     </View>
                 </View>
-                <TouchableOpacity
-                    onPress={() => navigation.navigate('EditProfileNavigator')}
-                    style={{ backgroundColor: '#EEF8F9', alignItems: 'center', justifyContent: 'center', borderRadius: 100, marginTop: 'auto' }}
-                >
-                    <Text style={{ fontWeight: '500', fontSize: 16, lineHeight: 24, color: '#222C2D', paddingVertical: 12, paddingHorizontal: 20 }}>
-                        Edit
-                    </Text>
-                </TouchableOpacity>
             </View>
         </SafeAreaView>
     );
@@ -53,6 +40,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         flexDirection: 'column',
         gap: 20,
+        marginBottom: 88,
     },
     profileInfo: {
         flexDirection: 'column',

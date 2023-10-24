@@ -1,11 +1,11 @@
-import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import Empty from '../../components/Empty';
 import playlist from '../../data/data';
 import ReactSongItem from '../../components/ReactSongItem';
 import CustomGridLayout from '../../components/CustomGridLayout';
 
-const DislikedSongsScreen = () => {
+const DislikedSongsScreen = ({ setIsDialogVisible, setDialogProps }) => {
     const [isEmpty, setIsEmpty] = useState(true);
 
     const NotEmpty = () => (
@@ -24,7 +24,7 @@ const DislikedSongsScreen = () => {
                         <View style={{ flex: 1 }}>
                             <CustomGridLayout
                                 data={playlist?.tracks?.map((item, index) => (
-                                    <ReactSongItem item={item} />
+                                    <ReactSongItem item={item} setIsDialogVisible={setIsDialogVisible} setDialogProps={setDialogProps} />
                                 ))}
                                 columns={1}
                             />
@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         flexDirection: 'column',
         gap: 20,
+        marginBottom: 88,
     },
     section: {
         flex: 1,

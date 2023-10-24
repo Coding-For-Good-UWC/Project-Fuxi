@@ -29,7 +29,7 @@ const SettingScreen = () => {
                     <View style={styles.sectionView}>
                         <Text style={styles.textHeaderSection}>Account</Text>
                         <View style={styles.sectionContainer}>
-                            <TouchableOpacity style={styles.sectionRowItem}>
+                            <TouchableOpacity style={styles.sectionRowItem} onPress={() => navigation.navigate('ResetPassword')}>
                                 <Ionicons name="key-outline" color={'#757575'} size={20} style={styles.iconItem} />
                                 <Text style={styles.sectionRowItemText}>Change password</Text>
                             </TouchableOpacity>
