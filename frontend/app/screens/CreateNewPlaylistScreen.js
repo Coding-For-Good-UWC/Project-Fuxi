@@ -8,16 +8,16 @@ import { getStoreData } from '../utils/AsyncStorage';
 import { createPlaylist } from '../api/playlist';
 import SongItem from '../components/SongItem';
 import ToggleButton from '../components/ToggleButton';
-import { AuthContext } from './../context/AuthContext';
+import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 
 const CreateNewPlaylistScreen = () => {
     const navigation = useNavigation();
-    const { setIsLoading } = useContext(AuthContext);
+    const [isLoading, setIsLoading] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [namePlaylistText, setNamePlaylistText] = useState('');
     const [isSelected, setIsSelected] = useState(false);
     const [selectedItems, setSelectedItems] = useState([]);
-    const [renderTracks, setRenderTracks] = useState([]);
+    const [dataTracks, setDataTracks] = useState([]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -70,9 +70,8 @@ const CreateNewPlaylistScreen = () => {
             try {
                 const response = await searchTrack(newText, 1);
                 const { code, data, message } = JSON.parse(response);
-
                 if (code == 200) {
-                    setRenderTracks(data.map((item, index) => <RenderItem item={item} key={index} />));
+                    setDataTracks(data);
                 } else {
                     alert(message);
                 }
@@ -82,7 +81,7 @@ const CreateNewPlaylistScreen = () => {
                 return;
             }
         } else {
-            setRenderTracks([]);
+            setDataTracks([]);
         }
     };
 
@@ -90,7 +89,6 @@ const CreateNewPlaylistScreen = () => {
         try {
             setIsLoading(true);
             const profileData = await getStoreData('profile0');
-            console.log(profileData);
             const { _id } = JSON.parse(profileData);
             const response = await createPlaylist(_id, namePlaylistText, selectedItems);
             const { code, message } = JSON.parse(response);
@@ -119,6 +117,7 @@ const CreateNewPlaylistScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <CustomAnimatedLoader visible={isLoading} />
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.headerText}>Create new playlist</Text>
@@ -149,8 +148,14 @@ const CreateNewPlaylistScreen = () => {
                         </View>
                     </View>
                     <View style={styles.contentSearch}>
-                        {renderTracks.length !== 0 ? (
-                            <CustomGridLayout data={renderTracks} columns={1} styleLayout={{}} />
+                        {dataTracks.length !== 0 ? (
+                            <CustomGridLayout
+                                data={dataTracks?.map((item, index) => (
+                                    <RenderItem item={item} key={index} />
+                                ))}
+                                columns={1}
+                                styleLayout={{}}
+                            />
                         ) : (
                             <View style={styles.emptyView}>
                                 <Text style={styles.emptyText}>No songs found</Text>
