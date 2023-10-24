@@ -4,24 +4,45 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
 
+const colorEllipse = ['#137882', '#FFC857', '#679436', '#613F75', '#FF6B6B', '#28B5B9', '#C1D43E', '#9B3D12', '#D8A7CA'];
+const profileFullname = [
+    'Trần Thị Hà Vi',
+    'Trần Thị Mỹ Uyên',
+    'Nguyễn Văn An',
+    'Lê Thị Ngọc',
+    'Phạm Minh Hải',
+    'Bùi Hồng Lâm',
+    'Lê Thị Hạnh',
+    'Nguyễn Văn Nam',
+    'Trần Thị Linh',
+    'Phan Đình Đức',
+    'Vũ Thị Thảo',
+];
+
 const AllListenerProfilesScreen = () => {
     const navigation = useNavigation();
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
-                <Text style={styles.headerText}>All listener profiles 1</Text>
-                <TouchableOpacity style={styles.addNewListener}>
+                <Text style={styles.headerText}>All listener profiles</Text>
+                <TouchableOpacity style={styles.addNewListener} onPress={() => navigation.navigate('EditProfileNavigator')}>
                     <MaterialIcons name="person-add-alt" size={24} color={'#137882'} />
                     <Text style={styles.addNewListenerText}>Add new listener</Text>
                 </TouchableOpacity>
                 <ScrollView vertical={true} showsVerticalScrollIndicator={false}>
                     <View style={styles.allProfile}>
-                        <TouchableOpacity style={styles.profileItem} onPress={() => navigation.navigate('ProfileDetailNavigator')}>
-                            <Ionicons name="ellipse" color={'#137882'} size={16} />
-                            <Text style={styles.nameProfileText} numberOfLines={1}>
-                                ninaazarova
-                            </Text>
-                        </TouchableOpacity>
+                        {profileFullname.map((fullname, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                style={styles.profileItem}
+                                onPress={() => navigation.navigate('ProfileDetailNavigator', { dataProfileItem: { fullname: fullname } })}
+                            >
+                                <Ionicons name="ellipse" color={colorEllipse[index % colorEllipse.length]} size={16} />
+                                <Text style={styles.nameProfileText} numberOfLines={1}>
+                                    {fullname}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
                 </ScrollView>
             </View>

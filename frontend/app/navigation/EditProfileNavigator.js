@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { StyleSheet, Dimensions, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { useNavigation } from '@react-navigation/core';
+import { useNavigation, useRoute } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import EditBaseInformationScreen from '../screens/profile-detail-screen/EditBaseInformationScreen';
 import EditMusicTasteScreen from '../screens/profile-detail-screen/EditMusicTasteScreen';
@@ -10,6 +10,8 @@ const Tab = createMaterialTopTabNavigator();
 
 const EditProfileNavigator = () => {
     const navigation = useNavigation();
+    const route = useRoute();
+    const [dataProfile, setDataProfile] = useState(route.params?.dataProfileItem || {});
     const [isValid, setIsValid] = useState(false);
     const [selectedItems, setSelectedItems] = useState([]);
 
@@ -28,7 +30,7 @@ const EditProfileNavigator = () => {
     useLayoutEffect(() => {
         navigation.setOptions({
             headerTransparent: true,
-            headerTitle: 'ninaazarova',
+            headerTitle: dataProfile.fullname || 'Create new profile',
             headerTintColor: '#3C4647',
             headerLeft: () => (
                 <TouchableOpacity style={{ marginRight: Platform.OS === 'android' ? 20 : 0, padding: 5 }} onPress={() => navigation.goBack()}>

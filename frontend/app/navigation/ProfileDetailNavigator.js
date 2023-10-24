@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useState } from 'react';
 import { Dimensions, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { useNavigation } from '@react-navigation/core';
+import { useNavigation, useRoute } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import BasicInformationScreen from '../screens/profile-detail-screen/BasicInformationScreen';
 import DislikedSongsScreen from '../screens/profile-detail-screen/DislikedSongsScreen';
@@ -12,17 +12,34 @@ const Tab = createMaterialTopTabNavigator();
 
 const ProfileDetailNavigator = () => {
     const navigation = useNavigation();
+    const route = useRoute();
+    const [dataProfile, setDataProfile] = useState(route.params?.dataProfileItem || {});
     const [isDialogVisible, setIsDialogVisible] = useState(false);
+    const [isDialogDelete, setIsDialogDelete] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
+
+    const handleShowDialogDelete = () => {
+        setIsDialogDelete(!isDialogDelete);
+    };
+
+    const handleSubmitDelete = () => {
+        console.log(123);
+        setIsDialogDelete(false);
+    };
 
     useLayoutEffect(() => {
         navigation.setOptions({
             headerTransparent: true,
-            headerTitle: 'ninaazarova',
+            headerTitle: dataProfile.fullname || '',
             headerTintColor: '#3C4647',
             headerLeft: () => (
                 <TouchableOpacity style={{ marginRight: Platform.OS === 'android' ? 20 : 0, padding: 5 }} onPress={() => navigation.goBack()}>
                     <Ionicons name="close" size={26} color={'#3C4647'} />
+                </TouchableOpacity>
+            ),
+            headerRight: () => (
+                <TouchableOpacity style={{ padding: 3 }} onPress={() => handleShowDialogDelete()}>
+                    <Ionicons name="trash-outline" size={24} color={'#3C4647'} />
                 </TouchableOpacity>
             ),
         });
@@ -95,8 +112,18 @@ const ProfileDetailNavigator = () => {
                 onPressNo={dialogProps.onPressNo}
                 styleBtnYes={dialogProps.styleBtnYes}
             />
+            <ToggleDialog
+                visible={isDialogDelete}
+                title={`Delete profile “Homer Robert”?`}
+                desc={'This profile will be deleted immediately. This can’t be undone.'}
+                labelYes={'Delete'}
+                labelNo={'No, go back'}
+                onPressYes={() => handleSubmitDelete()}
+                onPressNo={() => setIsDialogDelete(!isDialogDelete)}
+                styleBtnYes={{ backgroundColor: '#E84C4C' }}
+            />
             <TouchableOpacity
-                onPress={() => navigation.navigate('EditProfileNavigator')}
+                onPress={() => navigation.navigate('EditProfileNavigator', { dataProfileItem: { fullname: 'Trần Thị Hà Vi' } })}
                 style={{
                     position: 'absolute',
                     bottom: 20,

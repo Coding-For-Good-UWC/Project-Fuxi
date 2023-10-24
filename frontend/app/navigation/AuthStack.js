@@ -110,9 +110,7 @@ const AuthStack = () => {
                     },
                 }}
             >
-                {() => <ResetPasswordNew messageToast={'Password changed successfully!'}
-                //  navigationTo={() => navigation.navigate('SignInScreen')} 
-                 />}
+                {() => <ResetPasswordNew navigationTo={() => navigation.navigate('SignInScreen')} />}
             </Stack.Screen>
         </Stack.Navigator>
     );

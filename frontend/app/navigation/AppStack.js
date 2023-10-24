@@ -18,10 +18,12 @@ import PrivacyPolicy from '../screens/other/PrivacyPolicy';
 import ResetPassword from '../screens/reset-password/ResetPassword';
 import ResetPasswordCheckEmail from '../screens/reset-password/ResetPasswordCheckEmail';
 import ResetPasswordNew from '../screens/reset-password/ResetPasswordNew';
+import { useNavigation } from '@react-navigation/core';
 
 const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
+    const navigation = useNavigation();
     return (
         <Stack.Navigator>
             <Stack.Screen name="TabNavigator" component={TabNavigator} options={{ headerTitle: '', headerTransparent: true, headerShown: false }} />
@@ -152,7 +154,6 @@ const AppStack = () => {
             />
             <Stack.Screen
                 name="ResetPasswordNew"
-                component={ResetPasswordNew}
                 options={{
                     headerTitle: '',
                     headerTransparent: true,
@@ -161,7 +162,9 @@ const AppStack = () => {
                         backgroundColor: '#fff',
                     },
                 }}
-            />
+            >
+                {() => <ResetPasswordNew navigationTo={() => navigation.navigate('TabNavigator')} />}
+            </Stack.Screen>
         </Stack.Navigator>
     );
 };
