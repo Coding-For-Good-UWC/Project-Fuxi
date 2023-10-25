@@ -22,5 +22,6 @@ const schema = new Schema(
     },
     { timestamps: true },
 );
+schema.index({ profileId: 1 });
 
 module.exports = model('playlist', schema);

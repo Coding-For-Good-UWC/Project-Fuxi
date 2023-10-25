@@ -1,13 +1,18 @@
-import { Dimensions, Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useLayoutEffect, useState } from 'react';
+import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import playlist from '../data/data';
 import CustomGridLayout from '../components/CustomGridLayout';
-import SongItem from '../components/SongItem';
+import { getStoreData } from '../utils/AsyncStorage';
+import { getLikeTrackByProfileId } from '../api/profileReact';
+import { secondsToTimeString, totalDurationTracks } from '../utils/AudioUtils';
+import ReactSongItem from '../components/ReactSongItem';
 
 const LikedSongsScreen = () => {
     const navigation = useNavigation();
+    const [countTracks, setCountTracks] = useState(0);
+    const [totalDuration, setTotalDuration] = useState(0);
+    const [dataLikedTrack, setDataLikedTrack] = useState([]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -29,6 +34,37 @@ const LikedSongsScreen = () => {
         });
     }, [navigation]);
 
+    async function getPlaylist() {
+        try {
+            const profile0 = await getStoreData('profile0');
+            const { _id } = JSON.parse(profile0);
+            const response = await getLikeTrackByProfileId(_id);
+            const { code, message, data } = JSON.parse(response);
+            if (code == 200) {
+                setCountTracks(data[0]?.reactTracks.length);
+                setDataLikedTrack(data[0]?.reactTracks?.map((item) => item.track) || []);
+                setTotalDuration(
+                    await totalDurationTracks(
+                        data[0]?.reactTracks?.map((item) => {
+                            return {
+                                URI: item.track.URI,
+                            };
+                        }),
+                    ),
+                );
+            } else {
+                alert(message);
+            }
+        } catch (error) {
+            alert(error.message);
+            return;
+        }
+    }
+
+    useEffect(() => {
+        getPlaylist();
+    }, []);
+
     const EmptySongs = () => (
         <>
             <Text style={styles.headerText}>Liked songs</Text>
@@ -43,32 +79,34 @@ const LikedSongsScreen = () => {
         <>
             <Text style={styles.headerText}>Liked songs</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={styles.playListTotalName}>{playlist?.tracks?.length} songs</Text>
+                <Text style={styles.playListTotalName}>{countTracks} songs</Text>
                 <Ionicons name="ellipse" color="#E2E3E4" size={10} />
-                <Text style={styles.playListTotalName}>3h 42m</Text>
+                <Text style={styles.playListTotalName}>{secondsToTimeString(totalDuration)}</Text>
             </View>
             <View style={{ borderTopColor: '#ECEDEE', borderTopWidth: 1 }}></View>
             <View style={{ flex: 1 }}>
-                <CustomGridLayout data={RenderListSong} columns={1} styleLayout={{}} />
+                <CustomGridLayout
+                    data={dataLikedTrack?.map((dataTrack, index) => (
+                        <ReactSongItem
+                            key={index}
+                            item={dataTrack}
+                            iconRight={
+                                <TouchableOpacity>
+                                    <Ionicons name="heart" color="#137882" size={30} />
+                                </TouchableOpacity>
+                            }
+                        />
+                    ))}
+                    columns={1}
+                    styleLayout={{}}
+                />
             </View>
         </>
     );
 
-    const RenderListSong = playlist.tracks?.map((item, index) => (
-        <SongItem
-            key={index}
-            item={item}
-            iconRight={
-                <TouchableOpacity>
-                    <Ionicons name="heart" color="#137882" size={30} />
-                </TouchableOpacity>
-            }
-        />
-    ));
-
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.container}>{playlist?.tracks !== null ? <NotEmptySongs /> : <EmptySongs />}</View>
+            <View style={styles.container}>{dataLikedTrack?.reactTracks?.length !== 0 ? <NotEmptySongs /> : <EmptySongs />}</View>
         </SafeAreaView>
     );
 };

@@ -1,4 +1,4 @@
-import colours from "../config/colours";
+import colours from '../config/colours';
 
 export const getColour = (genre) => {
     switch (genre) {
@@ -28,3 +28,5 @@ export const getColour = (genre) => {
             return '#137882';
     }
 };
+
+export const colorEllipse = ['#137882', '#FFC857', '#679436', '#613F75', '#FF6B6B', '#28B5B9', '#C1D43E', '#9B3D12', '#D8A7CA'];

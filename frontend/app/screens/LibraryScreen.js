@@ -29,8 +29,6 @@ const LibraryScreen = () => {
             const { code, message, data } = JSON.parse(response);
             if (code == 200) {
                 setDataPlaylist(data);
-            } else {
-                alert(message);
             }
         } catch (error) {
             alert(error.message);
@@ -57,14 +55,17 @@ const LibraryScreen = () => {
                 <CustomGridLayout
                     columns={2}
                     gap={20}
-                    data={dataPlaylist.map((dataItem, index) => (
-                        <PlaylistItem
-                            key={index}
-                            heightItem={heightItem}
-                            data={dataItem}
-                            onPress={() => navigation.navigate('PlaylistDetailsScreen', { dataPlaylistDetail: dataItem })}
-                        />
-                    ))}
+                    data={[
+                        <PlaylistLikedSongItem heightItem={heightItem} />,
+                        ...dataPlaylist.map((dataItem, index) => (
+                            <PlaylistItem
+                                key={index}
+                                heightItem={heightItem}
+                                data={dataItem}
+                                onPress={() => navigation.navigate('PlaylistDetailsScreen', { dataPlaylistDetail: dataItem })}
+                            />
+                        )),
+                    ]}
                     styleCell={styles.cellStyle}
                     header={<Header />}
                     footer={<View style={{ height: 40 }} />}

@@ -54,8 +54,6 @@ const PlaylistDetailsScreen = () => {
                 setCountTracks(data?.tracks.length);
                 setDataPlaylistDetail(data);
                 setTotalDuration(await totalDurationTracks(data?.tracks));
-            } else {
-                alert(message);
             }
         } catch (error) {
             alert(error.message);

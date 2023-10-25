@@ -1,13 +1,14 @@
-import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import * as Animatable from 'react-native-animatable';
 import { Ionicons } from '@expo/vector-icons';
 import { getStoreData, storeData } from '../utils/AsyncStorage';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { getAllProfilesByInstituteUId, getProfileById } from '../api/profiles';
+import { colorEllipse } from '../utils/BackgroundColor';
 
 const ChangeListenerScreen = ({ visible }) => {
-    const [renderListener, setRenderListener] = useState([]);
+    const [dataListener, setDataListener] = useState([]);
 
     const handleChangeProfile = async (item) => {
         const response = await getProfileById(item._id);
@@ -15,8 +16,6 @@ const ChangeListenerScreen = ({ visible }) => {
         if (code == 200) {
             console.log(data.fullname);
             await storeData('profile0', JSON.stringify(data));
-        } else {
-            alert(message);
         }
     };
 
@@ -27,10 +26,7 @@ const ChangeListenerScreen = ({ visible }) => {
             const response = await getAllProfilesByInstituteUId(uid);
             const { code, message, data } = JSON.parse(response);
             if (code == 200) {
-                const playlistItems = data.map((item, index) => <ListenerItem key={index} data={item} onPress={() => handleChangeProfile(item)} />);
-                setRenderListener(playlistItems);
-            } else {
-                alert(message);
+                setDataListener(data);
             }
         } catch (error) {
             alert(error.message);
@@ -38,10 +34,10 @@ const ChangeListenerScreen = ({ visible }) => {
         }
     }
 
-    const ListenerItem = ({ data, onPress }) => (
+    const ListenerItem = ({ data, onPress, index }) => (
         <>
             <View style={styles.listenerItem}>
-                <Ionicons name="ellipse" color="#137882" size={20} />
+                <Ionicons name="ellipse" color={colorEllipse[index % colorEllipse.length]} size={20} />
                 <Text style={styles.nameListener} numberOfLines={1}>
                     {data.fullname}
                 </Text>
@@ -61,7 +57,13 @@ const ChangeListenerScreen = ({ visible }) => {
             <Animatable.View animation="fadeIn" duration={500} style={styles.container}>
                 <Text style={styles.headerText}>Change listener</Text>
                 <View style={styles.listenerList}>
-                    <CustomGridLayout data={renderListener} columns={1} gap={12} />
+                    <CustomGridLayout
+                        data={dataListener.map((item, index) => (
+                            <ListenerItem key={index} index={index} data={item} onPress={() => handleChangeProfile(item)} />
+                        ))}
+                        columns={1}
+                        gap={12}
+                    />
                 </View>
                 <Text style={styles.note}>
                     Manage profiles in

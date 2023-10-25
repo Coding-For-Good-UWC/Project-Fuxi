@@ -184,6 +184,9 @@ functions:
       - http:
           path: /track/rating
           method: post
+  hello:
+    handler: handler.hello
+
   getAllProfilesByInstituteUId:
     handler: lambdas/profile.getAllProfilesByInstituteUId
     events:
@@ -202,53 +205,23 @@ functions:
       - http:
           path: /profile
           method: post
-  deleteProfile:
-    handler: lambdas/profile.deleteProfile
-    events:
-      - http:
-          path: /profile
-          method: delete
   updateProfile:
     handler: lambdas/profile.updateProfile
     events:
       - http:
           path: /profile
           method: put
-  getRateTrack:
-    handler: lambdas/profileRating.getRateTrack
+  deleteProfile:
+    handler: lambdas/profile.deleteProfile
     events:
       - http:
-          path: /profileRating/getRate
-          method: post
-  createRateTrack:
-    handler: lambdas/profileRating.createRateTrack
-    events:
-      - http:
-          path: /profileRating/track
-          method: post
-  deleteRateTrack:
-    handler: lambdas/profileRating.deleteRateTrack
-    events:
-      - http:
-          path: /profileRating/track
+          path: /profile
           method: delete
-  updateRateTrack:
-    handler: lambdas/profileRating.updateRateTrack
-    events:
-      - http:
-          path: /profileRating/track
-          method: put
   getPlaylistByArtist:
     handler: lambdas/playlist.getPlaylistByArtist
     events:
       - http:
           path: /playlist/artist
-          method: post
-  createReactTrack:
-    handler: lambdas/reactTrack.createReactTrack
-    events:
-      - http:
-          path: /reactTrack
           method: post
   getPlaylistById:
     handler: lambdas/playlist.getPlaylistById
@@ -286,8 +259,42 @@ functions:
       - http:
           path: /track/searchTrack
           method: post
-  hello:
-    handler: handler.hello
+  getReactTrackByProfileId:
+    handler: lambdas/profileReact.getReactTrackByProfileId
+    events:
+      - http:
+          path: /profile-react
+          method: get
+  getLikeTrackByProfileId:
+    handler: lambdas/profileReact.getLikeTrackByProfileId
+    events:
+      - http:
+          path: /profile-react/like
+          method: get
+  createProfileReact:
+    handler: lambdas/profileReact.createProfileReact
+    events:
+      - http:
+          path: /profile-react
+          method: post
+  addReactTrack:
+    handler: lambdas/profileReact.addReactTrack
+    events:
+      - http:
+          path: /profile-react/add
+          method: put
+  removeReactTrack:
+    handler: lambdas/profileReact.removeReactTrack
+    events:
+      - http:
+          path: /profile-react/remove
+          method: put
+  deleteProfileReact:
+    handler: lambdas/profileReact.deleteProfileReact
+    events:
+      - http:
+          path: /profile-react
+          method: delete
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

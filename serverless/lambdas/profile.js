@@ -45,15 +45,14 @@ const getProfileById = async (event) => {
 const createProfile = async (event) => {
     try {
         const json = JSON.parse(event.body);
-        const { instituteUid, fullname, yearBirth, language, genres, description } = json;
-        if (!instituteUid || !fullname || !yearBirth || !language || !genres) {
+        const { instituteUid, fullname, yearBirth, genres, description } = json;
+        if (!instituteUid || !fullname || !yearBirth || !genres) {
             return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
         }
         const profile = await profileModel.create({
             uid: instituteUid,
             fullname,
             yearBirth,
-            language,
             genres,
             description,
         });

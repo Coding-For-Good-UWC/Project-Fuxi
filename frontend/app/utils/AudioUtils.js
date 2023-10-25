@@ -10,11 +10,11 @@ export const getDuration = async (uri) => {
             const durationSeconds = durationMillis / 1000;
             return durationSeconds;
         } else {
-            console.error('Unable to download song.');
+            // console.error('Unable to download song.');
             return null;
         }
     } catch (error) {
-        console.error('Error when reading song time:', error);
+        // console.error('Error when reading song time:', error);
         return null;
     } finally {
         await sound.unloadAsync();

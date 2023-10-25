@@ -34,9 +34,10 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
         setIsLoading(true);
         const { nameListener, yearBirth, language } = formData;
         console.log(formData, selectedItems);
-        const userUid = await getStoreData('UserUid');
+        const json = await getStoreData('userInfo');
+        const { uid } = JSON.parse(json);
         try {
-            const newProfile = await createProfile(userUid, nameListener, yearBirth, language, selectedItems, null);
+            const newProfile = await createProfile(uid, nameListener.trim(), yearBirth, selectedItems, null);
             const { code, message, data } = JSON.parse(newProfile);
             if (code == 201) {
                 await storeData('profile0', JSON.stringify(data));

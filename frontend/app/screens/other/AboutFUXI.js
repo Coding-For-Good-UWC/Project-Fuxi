@@ -8,7 +8,7 @@ const AboutFUXI = () => {
                 <Text style={styles.header}>About FUXI</Text>
                 <View style={styles.section}>
                     <View style={styles.background}>
-                        <Image source={require('../../assets/Aboutimage.png')} style={styles.image} />
+                        <Image source={require('../../assets/iStock-1346852801-min.jpg')} style={styles.image} />
                     </View>
                     <Text style={styles.sectionText}>
                         Research has demonstrated the effects of using familiar music as a way to increase brain activity and thereby improving
@@ -18,7 +18,7 @@ const AboutFUXI = () => {
                 </View>
                 <View style={styles.section}>
                     <View style={styles.background}>
-                        <Image source={require('../../assets/Aboutimage2.png')} style={styles.image} />
+                        <Image source={require('../../assets/iStock-1725829212-min.jpg')} style={styles.image} />
                     </View>
                     <Text style={styles.sectionText}>
                         Finding and tracking this music can be additional work for caregivers. This is where FUXI can help. By using a wealth of
@@ -28,7 +28,7 @@ const AboutFUXI = () => {
                 </View>
                 <View style={styles.section}>
                     <View style={styles.background}>
-                        <Image source={require('../../assets/Aboutimage3.png')} style={styles.image} />
+                        <Image source={require('../../assets/iStock-1392760745-min.jpg')} style={styles.image} />
                     </View>
                     <Text style={styles.sectionText}>
                         The app will remember your preferences and the more you use the app the more effective it will become. Recommended music is
@@ -63,6 +63,8 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '100%',
+        height: 250,
+        objectFit: 'cover',
         borderRadius: 10,
     },
     sectionText: {

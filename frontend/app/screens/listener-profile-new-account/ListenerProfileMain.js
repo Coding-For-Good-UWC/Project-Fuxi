@@ -19,13 +19,11 @@ const ListenerProfileMain = () => {
     const [formData, setFormData] = useState({
         nameListener: '',
         yearBirth: '',
-        language: '',
     });
 
     const [errors, setErrors] = useState({
         nameListener: '',
         yearBirth: '',
-        language: '',
     });
 
     const [selectedItems, setSelectedItems] = useState([]);

@@ -1,20 +1,17 @@
 import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
-import React, { useState } from 'react';
-import { languages } from '../../utils/Diversity';
+import React from 'react';
 import { Chip } from 'react-native-paper';
 import Empty from '../../components/Empty';
 
-const MusicTasteScreen = () => {
-    const [isEmpty, setIsEmpty] = useState(true);
-
+const MusicTasteScreen = ({ dataProfile }) => {
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
-                {isEmpty ? (
+                {dataProfile?.genres?.length !== 0 ? (
                     <>
                         <Text style={styles.text}>Favorite types of music:</Text>
                         <View style={styles.listChip}>
-                            {languages.map((item, index) => (
+                            {dataProfile?.genres.map((item, index) => (
                                 <Chip
                                     key={index}
                                     style={styles.chipWrapper}

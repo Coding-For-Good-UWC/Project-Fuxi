@@ -7,7 +7,7 @@ import PlaylistDetailsScreen from './../screens/PlaylistDetailsScreen';
 import LikedSongsScreen from '../screens/LikedSongsScreen';
 import SearchTrackScreen from '../screens/SearchTrackScreen';
 import CreateNewPlaylistScreen from '../screens/CreateNewPlaylistScreen';
-import RateSongsScreen from '../screens/RateSongsScreen';
+import RateSongsScreen from '../screens/other/RateSongsScreen';
 import OverlayMediaScreen from '../screens/OverlayMediaScreen';
 import AllListenerProfilesScreen from '../screens/AllListenerProfilesScreen';
 import ProfileDetailNavigator from './ProfileDetailNavigator';

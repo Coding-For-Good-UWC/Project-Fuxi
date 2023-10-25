@@ -26,9 +26,7 @@ const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors })
             error = 'Name must be at least 6 characters.';
         } else if (field === 'yearBirth' && value === '') {
             error = 'Year of birth is required.';
-        } else if (field === 'language' && value === '') {
-            error = 'Language is required.';
-        }
+        } 
         return error;
     };
 
@@ -58,13 +56,6 @@ const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors })
                         onValueChange={(text) => handleChangeValue('yearBirth', text)}
                         value={formData.yearBirth}
                         error={errors.yearBirth}
-                    />
-                    <SelectElementEffectLabel
-                        dataArray={countries}
-                        label="Preferred language"
-                        onValueChange={(text) => handleChangeValue('language', text)}
-                        value={formData.language}
-                        error={errors.language}
                     />
                 </View>
             </View>

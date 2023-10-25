@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, ToastAndroid, Dimensions } from 'react-native';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { searchTrack } from './../api/track';
 import { getStoreData } from '../utils/AsyncStorage';
@@ -72,8 +72,6 @@ const CreateNewPlaylistScreen = () => {
                 const { code, data, message } = JSON.parse(response);
                 if (code == 200) {
                     setDataTracks(data);
-                } else {
-                    alert(message);
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -94,8 +92,21 @@ const CreateNewPlaylistScreen = () => {
             const { code, message } = JSON.parse(response);
             if (code == 201) {
                 navigation.navigate('TabNavigator');
+                ToastAndroid.showWithGravityAndOffset(
+                    'Playlist creation successful',
+                    ToastAndroid.LONG,
+                    ToastAndroid.CENTER,
+                    0,
+                    Dimensions.get('window').height * 0.8,
+                );
             } else {
-                alert(message);
+                ToastAndroid.showWithGravityAndOffset(
+                    'Playlist creation failed',
+                    ToastAndroid.LONG,
+                    ToastAndroid.CENTER,
+                    0,
+                    Dimensions.get('window').height * 0.8,
+                );
             }
         } catch (error) {
             console.error('Error:', error);

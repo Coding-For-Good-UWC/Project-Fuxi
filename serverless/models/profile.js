@@ -16,10 +16,6 @@ const schema = new Schema(
             type: Date,
             required: true,
         },
-        language: {
-            type: String,
-            required: true,
-        },
         genres: [
             {
                 type: String,
@@ -32,5 +28,6 @@ const schema = new Schema(
     },
     { timestamps: true },
 );
+schema.index({ uid: 1 });
 
 module.exports = model('profiles', schema);

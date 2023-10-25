@@ -18,13 +18,11 @@ const EditProfileNavigator = () => {
     const [formData, setFormData] = useState({
         nameListener: '',
         yearBirth: '',
-        language: '',
     });
 
     const [errors, setErrors] = useState({
         nameListener: '',
         yearBirth: '',
-        language: '',
     });
 
     useLayoutEffect(() => {
@@ -41,14 +39,13 @@ const EditProfileNavigator = () => {
     }, [navigation]);
 
     const handleSubmit = () => {
-        const { nameListener, yearBirth, language } = formData;
+        const { nameListener, yearBirth } = formData;
 
         if (validateNullFormData(formData)) {
             alert('Please fix the validation errors');
             return;
         }
         console.log(formData, selectedItems);
-        showToastMessage('Profile updated');
     };
 
     const validateNullFormData = (formData) => {
@@ -122,16 +119,18 @@ const EditProfileNavigator = () => {
                 </Tab.Screen>
             </Tab.Navigator>
             <View style={styles.bottomButton}>
-                <TouchableOpacity style={[styles.button, styles.buttonCancel]} onPress={() => navigation.goBack()}>
-                    <Text style={[styles.buttonText, { color: '#4A4D4F' }]}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.button, { backgroundColor: isValid ? '#315F64' : '#EFEFF1' }]}
-                    disabled={!isValid}
-                    onPress={() => handleSubmit()}
-                >
-                    <Text style={[styles.buttonText, { color: isValid ? '#fff' : '#CACECE' }]}>Save</Text>
-                </TouchableOpacity>
+                <View style={styles.bottomButtonWrapper}>
+                    <TouchableOpacity style={[styles.button, styles.buttonCancel]} onPress={() => navigation.goBack()}>
+                        <Text style={[styles.buttonText, { color: '#4A4D4F' }]}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.button, { backgroundColor: isValid ? '#315F64' : '#EFEFF1' }]}
+                        disabled={!isValid}
+                        onPress={() => handleSubmit()}
+                    >
+                        <Text style={[styles.buttonText, { color: isValid ? '#fff' : '#CACECE' }]}>Save</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     );
@@ -147,9 +146,16 @@ const styles = StyleSheet.create({
     },
     bottomButton: {
         position: 'absolute',
-        bottom: 20,
-        right: 20,
-        width: Dimensions.get('screen').width - 40,
+        bottom: 0,
+        right: 0,
+        width: '100%',
+        height: 90,
+        paddingHorizontal: 20,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    bottomButtonWrapper: {
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',

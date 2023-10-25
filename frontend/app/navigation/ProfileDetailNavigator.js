@@ -81,18 +81,20 @@ const ProfileDetailNavigator = () => {
             >
                 <Tab.Screen
                     name="BasicInformationScreen"
-                    component={BasicInformationScreen}
                     options={{
                         title: 'Basic information',
                     }}
-                />
+                >
+                    {() => <BasicInformationScreen dataProfile={dataProfile} />}
+                </Tab.Screen>
                 <Tab.Screen
                     name="MusicTasteScreen"
-                    component={MusicTasteScreen}
                     options={{
                         title: 'Music taste',
                     }}
-                />
+                >
+                    {() => <MusicTasteScreen dataProfile={dataProfile} />}
+                </Tab.Screen>
                 <Tab.Screen
                     name="DislikedSongsScreen"
                     options={{
@@ -114,7 +116,7 @@ const ProfileDetailNavigator = () => {
             />
             <ToggleDialog
                 visible={isDialogDelete}
-                title={`Delete profile “Homer Robert”?`}
+                title={`Delete profile "${dataProfile.fullname}”?`}
                 desc={'This profile will be deleted immediately. This can’t be undone.'}
                 labelYes={'Delete'}
                 labelNo={'No, go back'}

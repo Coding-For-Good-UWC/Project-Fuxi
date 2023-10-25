@@ -28,6 +28,7 @@ const schema = new Schema(
     },
     { timestamps: true },
 );
+schema.index({ uid: 1, email: 1 });
 
 schema.pre('save', async function (next) {
     try {

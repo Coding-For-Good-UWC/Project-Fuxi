@@ -115,7 +115,7 @@ const CreateAccountScreen = () => {
             const { statusCode, body } = JSON.parse(institutesNew);
 
             if (statusCode == 200) {
-                storeData('UserUid', body.userUid);
+                storeData('userInfo', JSON.stringify({ uid: body.userUid, token: body.token }));
                 navigation.navigate('ListenerProfileMain', { token: body.token });
                 console.log(body.token);
             } else if (statusCode == 400) {

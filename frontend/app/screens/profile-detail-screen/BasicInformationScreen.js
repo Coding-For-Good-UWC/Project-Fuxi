@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
 import React from 'react';
 
-const BasicInformationScreen = () => {
+const BasicInformationScreen = ({ dataProfile }) => {
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
@@ -10,16 +10,16 @@ const BasicInformationScreen = () => {
                     <View style={styles.field}>
                         <Text style={styles.labelField}>Name of listener</Text>
                         <Text style={styles.fieldValue} numberOfLines={1}>
-                            ninaazarova
+                            {dataProfile.fullname}
                         </Text>
                     </View>
                     <View style={styles.field}>
                         <Text style={styles.labelField}>Year of birth</Text>
-                        <Text style={styles.fieldValue}>-</Text>
+                        <Text style={styles.fieldValue}>{new Date(dataProfile.yearBirth).getUTCFullYear()}</Text>
                     </View>
                     <View style={styles.field}>
                         <Text style={styles.labelField}>Preferred language</Text>
-                        <Text style={styles.fieldValue}>English</Text>
+                        <Text style={styles.fieldValue}>{dataProfile.language}</Text>
                     </View>
                 </View>
             </View>

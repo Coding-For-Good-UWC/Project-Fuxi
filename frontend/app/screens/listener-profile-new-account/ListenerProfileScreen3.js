@@ -9,8 +9,7 @@ const ListenerProfileScreen3 = () => {
     const { loginAuthContext } = useContext(AuthContext);
     const navigation = useNavigation();
     const route = useRoute();
-    const nameProfile = route.params.nameProfile;
-    const token = route.params.token;
+    const { nameProfile, token } = route.params;
 
     const handleGoToHomeScreen = async () => {
         await loginAuthContext(token);
@@ -28,7 +27,7 @@ const ListenerProfileScreen3 = () => {
                 <Text style={styles.subtitleText}>You can managed all your profiles later in Settings.</Text>
             </View>
             <View style={styles.buttonContainer}>
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={[
                         styles.button,
                         {
@@ -38,7 +37,7 @@ const ListenerProfileScreen3 = () => {
                     onPress={handleGoToPlayMediaScreen}
                 >
                     <Text style={[styles.buttonText, { color: '#fff' }]}>Welcome, let's play some music now</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <TouchableOpacity
                     style={[
                         styles.button,

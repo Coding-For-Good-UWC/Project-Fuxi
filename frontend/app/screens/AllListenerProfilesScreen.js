@@ -1,10 +1,12 @@
-import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
-import React from 'react';
+import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, ScrollView, ToastAndroid, Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
+import { colorEllipse } from '../utils/BackgroundColor';
+import { getAllProfilesByInstituteUId } from '../api/profiles';
+import { getStoreData } from '../utils/AsyncStorage';
 
-const colorEllipse = ['#137882', '#FFC857', '#679436', '#613F75', '#FF6B6B', '#28B5B9', '#C1D43E', '#9B3D12', '#D8A7CA'];
 const profileFullname = [
     'Trần Thị Hà Vi',
     'Trần Thị Mỹ Uyên',
@@ -21,6 +23,29 @@ const profileFullname = [
 
 const AllListenerProfilesScreen = () => {
     const navigation = useNavigation();
+    const [dataProfiles, setDataProfiles] = useState([]);
+
+    async function getAllProfile() {
+        try {
+            const userInfo = await getStoreData('userInfo');
+            const { uid } = JSON.parse(userInfo);
+            const response = await getAllProfilesByInstituteUId(uid);
+            const { code, message, data } = JSON.parse(response);
+            if (code == 200) {
+                setDataProfiles(data);
+            } else {
+                ToastAndroid.showWithGravityAndOffset(message, ToastAndroid.LONG, ToastAndroid.CENTER, 0, Dimensions.get('window').height * 0.8);
+            }
+        } catch (error) {
+            alert(error.message);
+            return;
+        }
+    }
+
+    useEffect(() => {
+        getAllProfile();
+    }, []);
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
@@ -31,15 +56,15 @@ const AllListenerProfilesScreen = () => {
                 </TouchableOpacity>
                 <ScrollView vertical={true} showsVerticalScrollIndicator={false}>
                     <View style={styles.allProfile}>
-                        {profileFullname.map((fullname, index) => (
+                        {dataProfiles.map((profile, index) => (
                             <TouchableOpacity
                                 key={index}
                                 style={styles.profileItem}
-                                onPress={() => navigation.navigate('ProfileDetailNavigator', { dataProfileItem: { fullname: fullname } })}
+                                onPress={() => navigation.navigate('ProfileDetailNavigator', { dataProfileItem: profile })}
                             >
                                 <Ionicons name="ellipse" color={colorEllipse[index % colorEllipse.length]} size={16} />
                                 <Text style={styles.nameProfileText} numberOfLines={1}>
-                                    {fullname}
+                                    {profile.fullname}
                                 </Text>
                             </TouchableOpacity>
                         ))}
@@ -63,6 +88,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         flexDirection: 'column',
         gap: 20,
+        marginBottom: 10,
     },
     headerText: {
         fontWeight: '600',

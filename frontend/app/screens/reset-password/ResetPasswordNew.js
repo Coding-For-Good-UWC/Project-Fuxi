@@ -1,10 +1,10 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar, ToastAndroid, Dimensions } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
 
-const ResetPasswordNew = ({ messageToast, navigationTo }) => {
+const ResetPasswordNew = ({ navigationTo }) => {
     const navigation = useNavigation();
     const { userToken } = useContext(AuthContext);
     const [isValid, setIsValid] = useState(false);
@@ -69,7 +69,8 @@ const ResetPasswordNew = ({ messageToast, navigationTo }) => {
     const handleSubmit = () => {
         if (validateFormData(formData) && validateErrors(errors)) {
             console.log(formData);
-            navigationTo();
+            // navigationTo();
+            ToastAndroid.showWithGravityAndOffset('message', ToastAndroid.LONG, ToastAndroid.CENTER, 0, Dimensions.get('window').height * 0.8);
         }
     };
 
