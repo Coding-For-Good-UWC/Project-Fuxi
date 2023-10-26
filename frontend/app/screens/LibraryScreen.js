@@ -1,5 +1,5 @@
 import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import colours from '../config/colours';
 import CustomGridLayout from '../components/CustomGridLayout';
@@ -10,8 +10,10 @@ import PlaylistItem from '../components/PlaylistItem';
 import PlaylistLikedSongItem from '../components/PlaylistLikedSongItem';
 import { getAllPlayListByProfileId } from '../api/playlist';
 import { getStoreData } from '../utils/AsyncStorage';
+import { AppContext } from '../context/AppContext';
 
 const LibraryScreen = () => {
+    const { isReRender } = useContext(AppContext);
     const navigation = useNavigation();
     const { width } = Dimensions.get('screen');
     const heightItem = (width - 40 - 20) / 2;
@@ -19,7 +21,7 @@ const LibraryScreen = () => {
 
     useEffect(() => {
         getPlaylist();
-    }, []);
+    }, [isReRender]);
 
     async function getPlaylist() {
         try {

@@ -12,7 +12,7 @@ const LikedSongsScreen = () => {
     const navigation = useNavigation();
     const [countTracks, setCountTracks] = useState(0);
     const [totalDuration, setTotalDuration] = useState(0);
-    const [dataLikedTrack, setDataLikedTrack] = useState([]);
+    const [dataLikedTrack, setDataLikedTrack] = useState({});
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -41,19 +41,19 @@ const LikedSongsScreen = () => {
             const response = await getLikeTrackByProfileId(_id);
             const { code, message, data } = JSON.parse(response);
             if (code == 200) {
-                setCountTracks(data[0]?.reactTracks.length);
-                setDataLikedTrack(data[0]?.reactTracks?.map((item) => item.track) || []);
-                setTotalDuration(
-                    await totalDurationTracks(
-                        data[0]?.reactTracks?.map((item) => {
-                            return {
-                                URI: item.track.URI,
-                            };
-                        }),
-                    ),
-                );
-            } else {
-                alert(message);
+                if (data !== null) {
+                    setCountTracks(data?.reactTracks.length);
+                    setDataLikedTrack(data?.reactTracks?.map((item) => item.track));
+                    setTotalDuration(
+                        await totalDurationTracks(
+                            data?.reactTracks?.map((item) => {
+                                return {
+                                    URI: item.track.URI,
+                                };
+                            }),
+                        ),
+                    );
+                }
             }
         } catch (error) {
             alert(error.message);
@@ -68,6 +68,12 @@ const LikedSongsScreen = () => {
     const EmptySongs = () => (
         <>
             <Text style={styles.headerText}>Liked songs</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={styles.playListTotalName}>{countTracks} songs</Text>
+                <Ionicons name="ellipse" color="#E2E3E4" size={10} />
+                <Text style={styles.playListTotalName}>{secondsToTimeString(totalDuration)}</Text>
+            </View>
+            <View style={{ borderTopColor: '#ECEDEE', borderTopWidth: 1 }}></View>
             <View style={styles.emptyView}>
                 <Ionicons name="heart" color="#ECEDEE" size={60} />
                 <Text style={styles.emptyText}>All liked songs will appear here.</Text>
@@ -106,7 +112,7 @@ const LikedSongsScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.container}>{dataLikedTrack?.reactTracks?.length !== 0 ? <NotEmptySongs /> : <EmptySongs />}</View>
+            <View style={styles.container}>{Object.keys(dataLikedTrack).length !== 0 ? <NotEmptySongs /> : <EmptySongs />}</View>
         </SafeAreaView>
     );
 };
@@ -159,6 +165,24 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         fontSize: 12,
         lineHeight: 16,
+        color: '#757575',
+    },
+    emptyView: {
+        flex: 1,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 12,
+    },
+    emptyText: {
+        fontWeight: '400',
+        fontSize: 14,
+        lineHeight: 20,
         color: '#757575',
     },
 });

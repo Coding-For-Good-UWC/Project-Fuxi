@@ -12,6 +12,7 @@ const SettingScreen = () => {
     const handleLogOut = () => {
         logoutAuthContext();
     };
+    
     return (
         <SafeAreaView style={styles.safeArea}>
             <ScrollView vertical={true} showsVerticalScrollIndicator={false}>
@@ -50,14 +51,14 @@ const SettingScreen = () => {
                                 <MaterialCommunityIcons name="shield-search" color={'#757575'} size={20} style={styles.iconItem} />
                                 <Text style={styles.sectionRowItemText}>Privacy Policy</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.sectionRowItem}>
+                            <TouchableOpacity style={styles.sectionRowItem} onPress={() => navigation.navigate('Feedback')}>
                                 <Ionicons name="pencil-outline" color={'#757575'} size={20} style={styles.iconItem} />
-                                <Text style={styles.sectionRowItemText}>Write a feedback</Text>
+                                <Text style={styles.sectionRowItemText}>Feedback</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.sectionRowItem}>
+                            {/* <TouchableOpacity style={styles.sectionRowItem}>
                                 <Ionicons name="help-circle-outline" color={'#757575'} size={20} style={styles.iconItem} />
                                 <Text style={styles.sectionRowItemText}>Help</Text>
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                             <TouchableOpacity style={styles.sectionRowItem} onPress={handleLogOut}>
                                 <Ionicons name="log-out-outline" color={'#757575'} size={20} style={styles.iconItem} />
                                 <Text style={styles.sectionRowItemText}>Logout</Text>

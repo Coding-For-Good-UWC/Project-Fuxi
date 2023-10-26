@@ -15,10 +15,6 @@ const getAllProfilesByInstituteUId = async (event) => {
         if (!uid) {
             return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
         }
-        const institute = await instituteModel.find({ uid: uid });
-        if (!institute) {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Institute not found'));
-        }
         const profiles = await profileModel.find({ uid: uid });
         return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all profile success', profiles));
     } catch (err) {

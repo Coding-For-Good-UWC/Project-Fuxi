@@ -7,7 +7,7 @@ const PrivacyPolicy = () => {
             <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
                 <View style={styles.container}>
                     <Text style={styles.header}>Privacy Policy</Text>
-                    <Text style={styles.desc}>
+                    {/* <Text style={styles.desc}>
                         These terms and conditions create a contract between you and Apple (the “Agreement”). Please read the Agreement carefully.
                     </Text>
                     <Text style={styles.headerSection}>A. INTRODUCTION TO OUR SERVICES</Text>
@@ -22,7 +22,7 @@ const PrivacyPolicy = () => {
                         access (fees may apply). Our Services’ performance may be affected by these factors.
                     </Text>
                     <Text style={styles.headerSection}>B. USING OUR SERVICES</Text>
-                    <Text style={styles.desc2}>PAYMENTS, TAXES, AND REFUNDS</Text>
+                    <Text style={styles.desc2}>PAYMENTS, TAXES, AND REFUNDS</Text> */}
                 </View>
             </ScrollView>
         </SafeAreaView>

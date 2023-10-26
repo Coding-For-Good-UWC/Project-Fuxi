@@ -1,21 +1,32 @@
 import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import * as Animatable from 'react-native-animatable';
 import { Ionicons } from '@expo/vector-icons';
 import { getStoreData, storeData } from '../utils/AsyncStorage';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { getAllProfilesByInstituteUId, getProfileById } from '../api/profiles';
 import { colorEllipse } from '../utils/BackgroundColor';
+import { AppContext } from '../context/AppContext';
 
 const ChangeListenerScreen = ({ visible }) => {
     const [dataListener, setDataListener] = useState([]);
+    const { isReRender, setIsReRender } = useContext(AppContext);
 
     const handleChangeProfile = async (item) => {
-        const response = await getProfileById(item._id);
-        const { code, message, data } = JSON.parse(response);
-        if (code == 200) {
-            console.log(data.fullname);
-            await storeData('profile0', JSON.stringify(data));
+        const profile0 = await getStoreData('profile0');
+        const { _id } = JSON.parse(profile0);
+        if (item._id !== _id) {
+            const response = await getProfileById(item._id);
+            const { code, message, data } = JSON.parse(response);
+            if (code == 200) {
+                console.log(data.fullname);
+                await storeData('profile0', JSON.stringify(data));
+                visible(false);
+                setIsReRender(!isReRender);
+            }
+        } else {
+            visible(false);
+            console.log('You are on this profile');
         }
     };
 
@@ -34,6 +45,10 @@ const ChangeListenerScreen = ({ visible }) => {
         }
     }
 
+    useEffect(() => {
+        getAllProfile();
+    }, []);
+
     const ListenerItem = ({ data, onPress, index }) => (
         <>
             <View style={styles.listenerItem}>
@@ -47,10 +62,6 @@ const ChangeListenerScreen = ({ visible }) => {
             </View>
         </>
     );
-
-    useEffect(() => {
-        getAllProfile();
-    }, []);
 
     return (
         <SafeAreaView style={styles.safeArea}>
