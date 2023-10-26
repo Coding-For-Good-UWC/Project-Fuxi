@@ -27,7 +27,7 @@ const PlayMedia = () => {
     const [sound, setSound] = useState();
 
     const [isOverlay, setIsOverlay] = useState(false);
-    const [seconds, setSeconds] = useState(9999);
+    const [seconds, setSeconds] = useState(30);
     const bottomSheetRef = useRef(null);
 
     const expandHandler = useCallback(() => {

@@ -1,22 +1,53 @@
 import { TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SongItem from './SongItem';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
+import { removeReactTrack } from '../api/profileReact';
+import { getStoreData } from '../utils/AsyncStorage';
 
-const ReactSongItem = ({ item, setIsDialogVisible, setDialogProps, dataTracksOrigin }) => {
+const preference = {
+    SDK: {
+        status: 'strongly dislike',
+        color: '#C31E1E',
+    },
+    DK: {
+        status: 'dislike',
+        color: '#222C2D',
+    },
+    NT: {
+        status: 'neutral',
+        color: '#fff',
+    },
+    LK: {
+        status: 'like',
+        color: '#137882',
+    },
+    SLK: {
+        status: 'strongly like',
+        color: '#FFC857',
+    },
+};
+
+const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, dataTracksOrigin }) => {
     const navigation = useNavigation();
-    const statusLikeEnum = { Normal: '#137882', High: '#FFC857' };
-    const statusDislikeEnum = { Normal: '#222C2D', High: '#C31E1E' };
-    const [statusLike, setStatusLike] = useState(statusLikeEnum.Normal);
-    const [statusDislike, setStatusDislike] = useState(statusDislikeEnum.Normal);
+    const [currentReactTrack, setCurrentReactTrack] = useState({});
+
+    useEffect(() => {
+        for (const key in preference) {
+            if (preference[key].status === reactTrack) {
+                setCurrentReactTrack(preference[key]);
+                break;
+            }
+        }
+    }, [reactTrack]);
 
     const handleShowDialogLike = () => {
-        showDialogLike(item.id);
+        showDialogLike(item._id);
     };
 
     const handleShowDialogDislike = () => {
-        showDialogDislike(item.id);
+        showDialogDislike(item);
     };
 
     const handleNavigation = () => {
@@ -47,16 +78,19 @@ const ReactSongItem = ({ item, setIsDialogVisible, setDialogProps, dataTracksOri
         setIsDialogVisible(true);
     };
 
-    const handleStatusLike = (itemId) => {
+    const handleStatusLike = async (itemId) => {
         console.log(itemId);
-        setStatusLike(null);
-        setIsDialogVisible(false);
+        const profileData = await getStoreData('profile0');
+        const { _id } = JSON.parse(profileData);
+        const response = await removeReactTrack(_id, itemId);
+        if (response) {
+            setIsDialogVisible(false);
+            setCurrentReactTrack(preference.NT);
+        }
     };
 
     const handleStatusDislike = (itemId) => {
         console.log(itemId);
-        setStatusDislike(null);
-        setIsDialogVisible(false);
     };
 
     return (
@@ -64,14 +98,9 @@ const ReactSongItem = ({ item, setIsDialogVisible, setDialogProps, dataTracksOri
             item={item}
             iconRight={
                 <>
-                    {statusLike !== null && (
-                        <TouchableOpacity onPress={handleShowDialogLike}>
-                            <Ionicons name="heart" color={statusLike} size={26} />
-                        </TouchableOpacity>
-                    )}
-                    {statusDislike !== null && (
-                        <TouchableOpacity onPress={handleShowDialogDislike}>
-                            <Ionicons name="sad-outline" color={statusDislike} size={26} />
+                    {Object.keys(currentReactTrack).length !== 0 && currentReactTrack.status !== 'neutral' && (
+                        <TouchableOpacity style={{ padding: 2 }} onPress={handleShowDialogLike}>
+                            <Ionicons name="heart" color={currentReactTrack.color} size={26} />
                         </TouchableOpacity>
                     )}
                 </>

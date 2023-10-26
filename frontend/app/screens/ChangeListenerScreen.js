@@ -7,12 +7,15 @@ import CustomGridLayout from '../components/CustomGridLayout';
 import { getAllProfilesByInstituteUId, getProfileById } from '../api/profiles';
 import { colorEllipse } from '../utils/BackgroundColor';
 import { AppContext } from '../context/AppContext';
+import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 
 const ChangeListenerScreen = ({ visible }) => {
+    const [isLoading, setIsLoading] = useState(false);
     const [dataListener, setDataListener] = useState([]);
     const { isReRender, setIsReRender } = useContext(AppContext);
 
     const handleChangeProfile = async (item) => {
+        setIsLoading(true);
         const profile0 = await getStoreData('profile0');
         const { _id } = JSON.parse(profile0);
         if (item._id !== _id) {
@@ -28,6 +31,7 @@ const ChangeListenerScreen = ({ visible }) => {
             visible(false);
             console.log('You are on this profile');
         }
+        setIsLoading(false);
     };
 
     async function getAllProfile() {
@@ -65,6 +69,7 @@ const ChangeListenerScreen = ({ visible }) => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <CustomAnimatedLoader visible={isLoading} />
             <Animatable.View animation="fadeIn" duration={500} style={styles.container}>
                 <Text style={styles.headerText}>Change listener</Text>
                 <View style={styles.listenerList}>

@@ -8,6 +8,7 @@ import { createProfile } from '../../api/profiles';
 import ToggleButton from '../../components/ToggleButton';
 import CustomAnimatedLoader from '../../components/CustomAnimatedLoader';
 import { getColour } from '../../utils/BackgroundColor';
+import { createProfileReact } from '../../api/profileReact';
 
 const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, token }) => {
     const navigation = useNavigation();
@@ -39,6 +40,7 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
         try {
             const newProfile = await createProfile(uid, nameListener.trim(), yearBirth, selectedItems, null);
             const { code, message, data } = JSON.parse(newProfile);
+            await createProfileReact(data._id, []);
             if (code == 201) {
                 await storeData('profile0', JSON.stringify(data));
                 navigation.navigate('ListenerProfileScreen3', { nameProfile: formData.nameListener, token: token });

@@ -27,7 +27,7 @@ export const createProfileReact = async (profileId, reactTracks) => {
     try {
         const response = await axios.post(`${apiUrl}/dev/profile-react`, {
             profileId: profileId,
-            reactTracks: [],
+            reactTracks: reactTracks,
         });
         return response.data;
     } catch (error) {

@@ -9,8 +9,10 @@ import { createPlaylist } from '../api/playlist';
 import SongItem from '../components/SongItem';
 import ToggleButton from '../components/ToggleButton';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
+import { AppContext } from '../context/AppContext';
 
 const CreateNewPlaylistScreen = () => {
+    const { isReRender, setIsReRender } = useContext(AppContext);
     const navigation = useNavigation();
     const [isLoading, setIsLoading] = useState(false);
     const [searchText, setSearchText] = useState('');
@@ -92,6 +94,7 @@ const CreateNewPlaylistScreen = () => {
             const { code, message } = JSON.parse(response);
             if (code == 201) {
                 navigation.navigate('TabNavigator');
+                setIsReRender(!isReRender);
                 ToastAndroid.showWithGravityAndOffset(
                     'Playlist creation successful',
                     ToastAndroid.LONG,

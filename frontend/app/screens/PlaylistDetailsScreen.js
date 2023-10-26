@@ -9,6 +9,7 @@ import ToggleDialog from '../components/ToggleDialog';
 import { getPlaylistById } from '../api/playlist';
 import ReactSongItem from '../components/ReactSongItem';
 import { secondsToTimeString, totalDurationTracks } from '../utils/AudioUtils';
+import { getReactTrackByProfileId } from '../api/profileReact';
 
 const PlaylistDetailsScreen = () => {
     const route = useRoute();
@@ -20,6 +21,7 @@ const PlaylistDetailsScreen = () => {
     const [totalDuration, setTotalDuration] = useState(0);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
+    const [dataReactTracks, setDataReactTracks] = useState([]);
 
     handleLayout = (event) => {
         const { width } = event.nativeEvent.layout;
@@ -49,6 +51,11 @@ const PlaylistDetailsScreen = () => {
     async function getPlaylistDetail() {
         try {
             const response = await getPlaylistById(dataNavigation._id);
+            const responseDataReactTracks = await getReactTrackByProfileId(dataNavigation.profileId);
+            if (responseDataReactTracks) {
+                const { data } = JSON.parse(responseDataReactTracks);
+                setDataReactTracks(data?.reactTracks);
+            }
             const { code, message, data } = JSON.parse(response);
             if (code === 200) {
                 setCountTracks(data?.tracks.length);
@@ -92,15 +99,33 @@ const PlaylistDetailsScreen = () => {
                 <View style={{ flex: 1 }}>
                     <View style={{ borderTopColor: '#ECEDEE', borderTopWidth: 1 }}></View>
                     <CustomGridLayout
-                        data={dataPlaylistDetail?.tracks?.map((dataItem, index) => (
-                            <ReactSongItem
-                                key={index}
-                                item={dataItem}
-                                setIsDialogVisible={setIsDialogVisible}
-                                setDialogProps={setDialogProps}
-                                dataTracksOrigin={dataPlaylistDetail?.tracks}
-                            />
-                        ))}
+                        data={dataPlaylistDetail?.tracks?.map((dataItem, index) => {
+                            if (dataReactTracks && Array.isArray(dataReactTracks) && dataReactTracks.length > 0) {
+                                const matchPreference = dataReactTracks.find((item) => item.track === dataItem._id);
+                                const preference = matchPreference ? matchPreference.preference : '';
+                                return (
+                                    <ReactSongItem
+                                        key={index}
+                                        item={dataItem}
+                                        reactTrack={preference}
+                                        setIsDialogVisible={setIsDialogVisible}
+                                        setDialogProps={setDialogProps}
+                                        dataTracksOrigin={dataPlaylistDetail?.tracks}
+                                    />
+                                );
+                            } else {
+                                return (
+                                    <ReactSongItem
+                                        key={index}
+                                        item={dataItem}
+                                        reactTrack="" // Truyền chuỗi rỗng
+                                        setIsDialogVisible={setIsDialogVisible}
+                                        setDialogProps={setDialogProps}
+                                        dataTracksOrigin={dataPlaylistDetail?.tracks}
+                                    />
+                                );
+                            }
+                        })}
                         columns={1}
                     />
                 </View>

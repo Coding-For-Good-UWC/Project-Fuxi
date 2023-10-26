@@ -7,12 +7,15 @@ import { getStoreData } from '../utils/AsyncStorage';
 import { getLikeTrackByProfileId } from '../api/profileReact';
 import { secondsToTimeString, totalDurationTracks } from '../utils/AudioUtils';
 import ReactSongItem from '../components/ReactSongItem';
+import ToggleDialog from '../components/ToggleDialog';
 
 const LikedSongsScreen = () => {
     const navigation = useNavigation();
     const [countTracks, setCountTracks] = useState(0);
     const [totalDuration, setTotalDuration] = useState(0);
     const [dataLikedTrack, setDataLikedTrack] = useState({});
+    const [isDialogVisible, setIsDialogVisible] = useState(false);
+    const [dialogProps, setDialogProps] = useState({});
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -43,7 +46,7 @@ const LikedSongsScreen = () => {
             if (code == 200) {
                 if (data !== null) {
                     setCountTracks(data?.reactTracks.length);
-                    setDataLikedTrack(data?.reactTracks?.map((item) => item.track));
+                    setDataLikedTrack(data?.reactTracks);
                     setTotalDuration(
                         await totalDurationTracks(
                             data?.reactTracks?.map((item) => {
@@ -95,7 +98,10 @@ const LikedSongsScreen = () => {
                     data={dataLikedTrack?.map((dataTrack, index) => (
                         <ReactSongItem
                             key={index}
-                            item={dataTrack}
+                            item={dataTrack.track}
+                            reactTrack={dataTrack.preference}
+                            setIsDialogVisible={setIsDialogVisible}
+                            setDialogProps={setDialogProps}
                             iconRight={
                                 <TouchableOpacity>
                                     <Ionicons name="heart" color="#137882" size={30} />
@@ -107,6 +113,16 @@ const LikedSongsScreen = () => {
                     styleLayout={{}}
                 />
             </View>
+            <ToggleDialog
+                visible={isDialogVisible}
+                title={dialogProps.title}
+                desc={dialogProps.desc}
+                labelYes={dialogProps.labelYes}
+                labelNo={dialogProps.labelNo}
+                onPressYes={dialogProps.onPressYes}
+                onPressNo={dialogProps.onPressNo}
+                styleBtnYes={dialogProps.styleBtnYes}
+            />
         </>
     );
 

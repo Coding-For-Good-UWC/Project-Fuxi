@@ -21,7 +21,7 @@ const getReactTrackByProfileId = async (event) => {
     try {
         const response = await profileReactModel.find({ profileId });
         if (response) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Data retrieved successfully.', response));
+            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Data retrieved successfully.', response[0]));
         } else {
             return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile with this ID was not found.'));
         }
