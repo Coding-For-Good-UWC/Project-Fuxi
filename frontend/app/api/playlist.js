@@ -23,6 +23,16 @@ export const getAllPlayListByProfileId = async (profileId) => {
     }
 };
 
+export const getPlaylistSuggestions = async (profileId, pageNumber) => {
+    try {
+        const response = await axios.get(`${apiUrl}/dev/playlist/suggest?profileId=${profileId}&pageNumber=${pageNumber}`);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
+
 export const createPlaylist = async (profileId, namePlaylist, tracks) => {
     try {
         const response = await axios.post(`${apiUrl}/dev/playlist`, {

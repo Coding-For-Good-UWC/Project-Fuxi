@@ -235,6 +235,12 @@ functions:
       - http:
           path: /playlists
           method: get
+  getPlaylistSuggestions:
+    handler: lambdas/playlist.getPlaylistSuggestions
+    events:
+      - http:
+          path: /playlist/suggest
+          method: get
   createPlaylist:
     handler: lambdas/playlist.createPlaylist
     events:

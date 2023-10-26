@@ -11,6 +11,7 @@ import PlaylistLikedSongItem from '../components/PlaylistLikedSongItem';
 import { getAllPlayListByProfileId } from '../api/playlist';
 import { getStoreData } from '../utils/AsyncStorage';
 import { AppContext } from '../context/AppContext';
+import SuggestTrack from '../components/SuggestTrack';
 
 const LibraryScreen = () => {
     const { isReRender } = useContext(AppContext);
@@ -59,6 +60,7 @@ const LibraryScreen = () => {
                     gap={20}
                     data={[
                         <PlaylistLikedSongItem heightItem={heightItem} />,
+                        <SuggestTrack heightItem={heightItem} />,
                         ...dataPlaylist.map((dataItem, index) => (
                             <PlaylistItem
                                 key={index}

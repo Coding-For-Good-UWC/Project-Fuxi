@@ -21,6 +21,7 @@ import ResetPasswordNew from '../screens/reset-password/ResetPasswordNew';
 import { useNavigation } from '@react-navigation/core';
 import Feedback from '../screens/other/Feedback';
 import { AppProvider } from '../context/AppContext';
+import SuggestTrackScreen from '../screens/SuggestTrackScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -141,6 +142,18 @@ const AppStack = () => {
                 <Stack.Screen
                     name="Feedback"
                     component={Feedback}
+                    options={{
+                        headerTitle: '',
+                        headerTransparent: true,
+                        headerShown: true,
+                        headerStyle: {
+                            backgroundColor: '#fff',
+                        },
+                    }}
+                />
+                <Stack.Screen
+                    name="SuggestTrackScreen"
+                    component={SuggestTrackScreen}
                     options={{
                         headerTitle: '',
                         headerTransparent: true,

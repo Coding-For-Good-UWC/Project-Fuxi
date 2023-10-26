@@ -3,7 +3,8 @@
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 const mongoose = require('mongoose');
 const { connectDb } = require('../lib/mongodb');
-require('../models/track');
+const trackModel = require('../models/track');
+const profileModel = require('../models/profile');
 const playlistModel = require('../models/playlist');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 
@@ -59,6 +60,19 @@ const getAllPlayListByProfileId = async (event) => {
         return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
     }
 };
+const getPlaylistSuggestions = async (event) => {
+    const { profileId, pageNumber, pageSize = 15 } = event.queryStringParameters;
+    const skipCount = (pageNumber - 1) * pageSize;
+
+    const profile = await profileModel.findById(profileId);
+
+    const getTrackSuggestions = await trackModel
+        .find({ Language: { $in: profile.genres } })
+        .skip(skipCount)
+        .limit(pageSize)
+        .exec();
+    return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', getTrackSuggestions));
+};
 
 const createPlaylist = async (event) => {
     const json = JSON.parse(event.body);
@@ -103,4 +117,4 @@ const deletePlaylist = async (event) => {
     }
 };
 
-module.exports = { getPlaylistById, getAllPlayListByProfileId, createPlaylist, updatePlaylist, deletePlaylist };
+module.exports = { getPlaylistById, getAllPlayListByProfileId, getPlaylistSuggestions, createPlaylist, updatePlaylist, deletePlaylist };
