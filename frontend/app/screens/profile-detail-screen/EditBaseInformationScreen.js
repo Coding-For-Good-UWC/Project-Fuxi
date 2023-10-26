@@ -2,7 +2,6 @@ import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
 import React from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import SelectElementEffectLabel from '../../components/SelectElementEffectLabel';
-import { countries } from '../../utils/Diversity';
 
 const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors }) => {
     const years = [];
@@ -26,7 +25,7 @@ const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors })
             error = 'Name must be at least 6 characters.';
         } else if (field === 'yearBirth' && value === '') {
             error = 'Year of birth is required.';
-        } 
+        }
         return error;
     };
 

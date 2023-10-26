@@ -127,8 +127,7 @@ const removeReactTrack = async (event) => {
 };
 
 const deleteProfileReact = async (event) => {
-    const json = JSON.parse(event.body);
-    const { profileId } = json;
+    const { profileId } = event.queryStringParameters;
 
     if (!profileId) {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));

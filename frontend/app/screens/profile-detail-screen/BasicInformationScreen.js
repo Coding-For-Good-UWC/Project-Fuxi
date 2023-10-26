@@ -17,10 +17,6 @@ const BasicInformationScreen = ({ dataProfile }) => {
                         <Text style={styles.labelField}>Year of birth</Text>
                         <Text style={styles.fieldValue}>{new Date(dataProfile.yearBirth).getUTCFullYear()}</Text>
                     </View>
-                    <View style={styles.field}>
-                        <Text style={styles.labelField}>Preferred language</Text>
-                        <Text style={styles.fieldValue}>{dataProfile.language}</Text>
-                    </View>
                 </View>
             </View>
         </SafeAreaView>

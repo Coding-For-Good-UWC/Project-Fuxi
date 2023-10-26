@@ -34,7 +34,6 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
     const handleSubmit = async () => {
         setIsLoading(true);
         const { nameListener, yearBirth, language } = formData;
-        console.log(formData, selectedItems);
         const json = await getStoreData('userInfo');
         const { uid } = JSON.parse(json);
         try {

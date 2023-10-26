@@ -259,6 +259,12 @@ functions:
       - http:
           path: /playlist
           method: delete
+  deleteAllPlaylist:
+    handler: lambdas/playlist.deleteAllPlaylist
+    events:
+      - http:
+          path: /playlists
+          method: delete
   searchTrack:
     handler: lambdas/track.searchTrack
     events:

@@ -61,7 +61,7 @@ const getAllPlayListByProfileId = async (event) => {
     }
 };
 const getPlaylistSuggestions = async (event) => {
-    const { profileId, pageNumber, pageSize = 15 } = event.queryStringParameters;
+    const { profileId, pageNumber, pageSize = 50 } = event.queryStringParameters;
     const skipCount = (pageNumber - 1) * pageSize;
 
     const profile = await profileModel.findById(profileId);
@@ -117,4 +117,30 @@ const deletePlaylist = async (event) => {
     }
 };
 
-module.exports = { getPlaylistById, getAllPlayListByProfileId, getPlaylistSuggestions, createPlaylist, updatePlaylist, deletePlaylist };
+const deleteAllPlaylist = async (event) => {
+    const { profileId } = event.queryStringParameters;
+    if (!profileId) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
+    try {
+        const deletedPlaylists = await playlistModel.deleteMany({ profileId: profileId });
+        if (deletedPlaylists.deletedCount > 0) {
+            return JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte playlist success'));
+        } else {
+            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found'));
+        }
+    } catch (err) {
+        console.log(err);
+        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+    }
+};
+
+module.exports = {
+    getPlaylistById,
+    getAllPlayListByProfileId,
+    getPlaylistSuggestions,
+    createPlaylist,
+    updatePlaylist,
+    deletePlaylist,
+    deleteAllPlaylist,
+};

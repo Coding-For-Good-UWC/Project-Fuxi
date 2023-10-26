@@ -1,27 +1,15 @@
 import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, ScrollView, ToastAndroid, Dimensions } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
 import { colorEllipse } from '../utils/BackgroundColor';
 import { getAllProfilesByInstituteUId } from '../api/profiles';
 import { getStoreData } from '../utils/AsyncStorage';
-
-const profileFullname = [
-    'Trần Thị Hà Vi',
-    'Trần Thị Mỹ Uyên',
-    'Nguyễn Văn An',
-    'Lê Thị Ngọc',
-    'Phạm Minh Hải',
-    'Bùi Hồng Lâm',
-    'Lê Thị Hạnh',
-    'Nguyễn Văn Nam',
-    'Trần Thị Linh',
-    'Phan Đình Đức',
-    'Vũ Thị Thảo',
-];
+import { AppContext } from '../context/AppContext';
 
 const AllListenerProfilesScreen = () => {
+    const { isReRender } = useContext(AppContext);
     const navigation = useNavigation();
     const [dataProfiles, setDataProfiles] = useState([]);
 
@@ -44,7 +32,7 @@ const AllListenerProfilesScreen = () => {
 
     useEffect(() => {
         getAllProfile();
-    }, []);
+    }, [isReRender]);
 
     return (
         <SafeAreaView style={styles.safeArea}>

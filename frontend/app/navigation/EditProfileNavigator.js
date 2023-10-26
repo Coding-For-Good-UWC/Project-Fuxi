@@ -1,19 +1,26 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { StyleSheet, Dimensions, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation, useRoute } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import EditBaseInformationScreen from '../screens/profile-detail-screen/EditBaseInformationScreen';
 import EditMusicTasteScreen from '../screens/profile-detail-screen/EditMusicTasteScreen';
+import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
+import { getStoreData, storeData } from '../utils/AsyncStorage';
+import { createProfile } from '../api/profiles';
+import { createProfileReact } from '../api/profileReact';
+import { AppContext } from '../context/AppContext';
 
 const Tab = createMaterialTopTabNavigator();
 
 const EditProfileNavigator = () => {
+    const { isReRender, setIsReRender } = useContext(AppContext);
     const navigation = useNavigation();
     const route = useRoute();
     const [dataProfile, setDataProfile] = useState(route.params?.dataProfileItem || {});
+    const [selectedItems, setSelectedItems] = useState(route.params?.dataProfileItem?.genres || []);
     const [isValid, setIsValid] = useState(false);
-    const [selectedItems, setSelectedItems] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         nameListener: '',
@@ -38,14 +45,36 @@ const EditProfileNavigator = () => {
         });
     }, [navigation]);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const { nameListener, yearBirth } = formData;
-
         if (validateNullFormData(formData)) {
             alert('Please fix the validation errors');
             return;
         }
-        console.log(formData, selectedItems);
+
+        setIsLoading(true);
+        const json = await getStoreData('userInfo');
+        const { uid } = JSON.parse(json);
+        try {
+            const newProfile = await createProfile(uid, nameListener.trim(), yearBirth, selectedItems, null);
+            const { code, message, data } = JSON.parse(newProfile);
+            await createProfileReact(data._id, []);
+            if (code == 201) {
+                await storeData('profile0', JSON.stringify(data));
+                navigation.navigate('AllListenerProfilesScreen');
+                setIsReRender(!isReRender);
+            } else if (code == 400) {
+                alert(message);
+            } else {
+                alert(message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Create profile unsuccessful');
+            return;
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const validateNullFormData = (formData) => {
@@ -69,6 +98,7 @@ const EditProfileNavigator = () => {
 
     return (
         <View style={styles.container}>
+            <CustomAnimatedLoader visible={isLoading} />
             <Tab.Navigator
                 style={{ backgroundColor: '#fff' }}
                 screenOptions={{
@@ -107,7 +137,18 @@ const EditProfileNavigator = () => {
                         title: 'Basic information',
                     }}
                 >
-                    {() => <EditBaseInformationScreen formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />}
+                    {() => (
+                        <EditBaseInformationScreen
+                            formData={
+                                Object.keys(dataProfile).length !== 0
+                                    ? { nameListener: dataProfile.fullname, yearBirth: new Date(dataProfile.yearBirth).getUTCFullYear() }
+                                    : formData
+                            }
+                            setFormData={setFormData}
+                            errors={errors}
+                            setErrors={setErrors}
+                        />
+                    )}
                 </Tab.Screen>
                 <Tab.Screen
                     name="EditMusicTasteScreen"

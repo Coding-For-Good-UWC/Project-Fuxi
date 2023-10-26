@@ -58,3 +58,13 @@ export const deletePlaylist = async (playlistId) => {
         throw error;
     }
 };
+
+export const deleteAllPlaylist = async (profileId) => {
+    try {
+        const response = await axios.delete(`${apiUrl}/dev/playlists?profileId=${profileId}`);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};

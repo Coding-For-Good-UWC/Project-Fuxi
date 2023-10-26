@@ -1,17 +1,12 @@
 import { StyleSheet, Text, View, Animated } from 'react-native';
 import React, { useState, useRef, useEffect } from 'react';
 import { Picker } from '@react-native-picker/picker';
-import { faL } from '@fortawesome/free-solid-svg-icons';
 
-const SelectElementEffectLabel = ({
-    dataArray,
-    label,
-    error,
-    onValueChange,
-}) => {
-    const [selectedItem, setSelectedItem] = useState('');
+const SelectElementEffectLabel = ({ dataArray, label, error, onValueChange, value }) => {
+    const [selectedItem, setSelectedItem] = useState(value || '');
     const [pickerSelected, setPickerSelected] = useState(false);
     const placeholderAnim = useRef(new Animated.Value(0)).current;
+
     const handleFocus = () => {
         setPickerSelected(true);
         Animated.timing(placeholderAnim, {
@@ -61,24 +56,17 @@ const SelectElementEffectLabel = ({
                     {label}
                 </Animated.Text>
                 <Picker
-                    selectedValue={pickerSelected ? selectedItem : null}
+                    selectedValue={selectedItem}
                     onValueChange={handlePickerChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
                     style={{
                         marginHorizontal: -16,
                         marginVertical: -12,
                     }}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
                 >
                     {pickerSelected &&
-                        dataArray.map((item, index) => (
-                            <Picker.Item
-                                key={index}
-                                label={item}
-                                value={item}
-                                style={{ color: '#3C4647' }}
-                            />
-                        ))}
+                        dataArray.map((item, index) => <Picker.Item key={index} label={item} value={item} style={{ color: '#3C4647' }} />)}
                 </Picker>
             </View>
             <Animated.View

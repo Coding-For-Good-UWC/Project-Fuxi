@@ -1,13 +1,20 @@
 import React, { useState, useRef } from 'react';
 import { View, TextInput, Animated, StyleSheet, Text } from 'react-native';
-import colours from '../config/colours';
 import { Ionicons } from '@expo/vector-icons';
 
-const TextInputEffectLabel = ({ type = 'text', label, onChangeText, error, style, styleInput }) => {
+const TextInputEffectLabel = ({ type = 'text', label, onChangeText, error, style, styleInput, value }) => {
     const [text, setText] = useState('');
     const placeholderAnim = useRef(new Animated.Value(0)).current;
     const isPassword = type === 'password';
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+    if (value) {
+        Animated.timing(placeholderAnim, {
+            toValue: 1,
+            duration: 0,
+            useNativeDriver: false,
+        }).start();
+    }
 
     const handleFocus = () => {
         if (text == '') {
@@ -78,6 +85,7 @@ const TextInputEffectLabel = ({ type = 'text', label, onChangeText, error, style
                     secureTextEntry={isPassword && !isPasswordVisible}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
+                    value={value}
                 />
                 {isPassword && (
                     <Ionicons

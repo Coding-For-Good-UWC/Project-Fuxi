@@ -1,5 +1,5 @@
-import React, { useLayoutEffect, useState } from 'react';
-import { Dimensions, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import React, { useContext, useLayoutEffect, useState } from 'react';
+import { Dimensions, Platform, StatusBar, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation, useRoute } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,13 +7,21 @@ import BasicInformationScreen from '../screens/profile-detail-screen/BasicInform
 import DislikedSongsScreen from '../screens/profile-detail-screen/DislikedSongsScreen';
 import MusicTasteScreen from '../screens/profile-detail-screen/MusicTasteScreen';
 import ToggleDialog from '../components/ToggleDialog';
+import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
+import { deleteAllPlaylist } from '../api/playlist';
+import { deleteProfileReact } from '../api/profileReact';
+import { deleteProfile } from '../api/profiles';
+import { AppContext } from '../context/AppContext';
+import { getStoreData } from '../utils/AsyncStorage';
 
 const Tab = createMaterialTopTabNavigator();
 
 const ProfileDetailNavigator = () => {
+    const { isReRender, setIsReRender } = useContext(AppContext);
     const navigation = useNavigation();
     const route = useRoute();
     const [dataProfile, setDataProfile] = useState(route.params?.dataProfileItem || {});
+    const [isLoading, setIsLoading] = useState(false);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [isDialogDelete, setIsDialogDelete] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
@@ -22,9 +30,48 @@ const ProfileDetailNavigator = () => {
         setIsDialogDelete(!isDialogDelete);
     };
 
-    const handleSubmitDelete = () => {
-        console.log(123);
-        setIsDialogDelete(false);
+    const handleSubmitDelete = async () => {
+        const profile0 = await getStoreData('profile0');
+        const { _id } = JSON.parse(profile0);
+        if (_id !== dataProfile._id) {
+            setIsLoading(true);
+            try {
+                setIsDialogDelete(false);
+                const { _id } = dataProfile;
+                await deleteAllPlaylist(_id);
+                await deleteProfileReact(_id);
+                await deleteProfile(_id);
+                navigation.navigate('AllListenerProfilesScreen');
+                setIsReRender(!isReRender);
+                ToastAndroid.showWithGravityAndOffset(
+                    'Delete profile successfully',
+                    ToastAndroid.LONG,
+                    ToastAndroid.CENTER,
+                    0,
+                    Dimensions.get('window').height * 0.8,
+                );
+            } catch (error) {
+                ToastAndroid.showWithGravityAndOffset(
+                    'Profile deletion failed',
+                    ToastAndroid.LONG,
+                    ToastAndroid.CENTER,
+                    0,
+                    Dimensions.get('window').height * 0.8,
+                );
+                console.error('Error:', error);
+                return;
+            } finally {
+                setIsLoading(false);
+            }
+        } else {
+            ToastAndroid.showWithGravityAndOffset(
+                'You are in this profile and you cannot delete it',
+                ToastAndroid.LONG,
+                ToastAndroid.CENTER,
+                0,
+                Dimensions.get('window').height * 0.8,
+            );
+        }
     };
 
     useLayoutEffect(() => {
@@ -47,6 +94,7 @@ const ProfileDetailNavigator = () => {
 
     return (
         <View style={{ flex: 1, paddingTop: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0), backgroundColor: '#fff' }}>
+            <CustomAnimatedLoader visible={isLoading} />
             <Tab.Navigator
                 style={{ backgroundColor: '#fff' }}
                 screenOptions={{
@@ -125,7 +173,7 @@ const ProfileDetailNavigator = () => {
                 styleBtnYes={{ backgroundColor: '#E84C4C' }}
             />
             <TouchableOpacity
-                onPress={() => navigation.navigate('EditProfileNavigator', { dataProfileItem: { fullname: 'Trần Thị Hà Vi' } })}
+                onPress={() => navigation.navigate('EditProfileNavigator', { dataProfileItem: dataProfile })}
                 style={{
                     position: 'absolute',
                     bottom: 20,

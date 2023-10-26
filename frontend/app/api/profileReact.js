@@ -64,12 +64,12 @@ export const removeReactTrack = async (profileId, trackId) => {
     }
 };
 
-export const deleteProfileReact = async (profileId, trackId) => {
+export const deleteProfileReact = async (profileId) => {
     try {
-        const response = await axios.delete(`${apiUrl}/dev/profile-react?profileId=${profileId}&trackId=${trackId}`);
+        const response = await axios.delete(`${apiUrl}/dev/profile-react?profileId=${profileId}`);
         return response.data;
     } catch (error) {
-        console.error('Lỗi:', error);
+        console.error('Error:', error);
         throw error;
     }
 };
