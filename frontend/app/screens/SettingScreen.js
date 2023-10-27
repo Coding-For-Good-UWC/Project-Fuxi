@@ -12,7 +12,7 @@ const SettingScreen = () => {
     const handleLogOut = () => {
         logoutAuthContext();
     };
-    
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <ScrollView vertical={true} showsVerticalScrollIndicator={false}>
@@ -27,7 +27,7 @@ const SettingScreen = () => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <View style={styles.sectionView}>
+                    {/* <View style={styles.sectionView}>
                         <Text style={styles.textHeaderSection}>Account</Text>
                         <View style={styles.sectionContainer}>
                             <TouchableOpacity style={styles.sectionRowItem} onPress={() => navigation.navigate('ResetPassword')}>
@@ -35,7 +35,7 @@ const SettingScreen = () => {
                                 <Text style={styles.sectionRowItemText}>Change password</Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
+                    </View> */}
                     <View style={styles.sectionView}>
                         <Text style={styles.textHeaderSection}>Other</Text>
                         <View style={styles.sectionContainer}>
@@ -43,14 +43,14 @@ const SettingScreen = () => {
                                 <Ionicons name="information-circle-outline" color={'#757575'} size={20} style={styles.iconItem} />
                                 <Text style={styles.sectionRowItemText}>About FUXI</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.sectionRowItem} onPress={() => navigation.navigate('TermsAndConditions')}>
+                            {/* <TouchableOpacity style={styles.sectionRowItem} onPress={() => navigation.navigate('TermsAndConditions')}>
                                 <MaterialIcons name="gavel" color={'#757575'} size={20} style={styles.iconItem} />
                                 <Text style={styles.sectionRowItemText}>Terms & Conditions</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.sectionRowItem} onPress={() => navigation.navigate('PrivacyPolicy')}>
                                 <MaterialCommunityIcons name="shield-search" color={'#757575'} size={20} style={styles.iconItem} />
                                 <Text style={styles.sectionRowItemText}>Privacy Policy</Text>
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                             <TouchableOpacity style={styles.sectionRowItem} onPress={() => navigation.navigate('Feedback')}>
                                 <Ionicons name="pencil-outline" color={'#757575'} size={20} style={styles.iconItem} />
                                 <Text style={styles.sectionRowItemText}>Feedback</Text>

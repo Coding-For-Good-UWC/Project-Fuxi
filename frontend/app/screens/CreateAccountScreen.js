@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useNavigation } from '@react-navigation/native';
 import colours from '../config/colours';
@@ -140,6 +140,17 @@ const CreateAccountScreen = () => {
         return /\S+@\S+\.\S+/.test(email);
     };
 
+    useEffect(() => {
+        const isFormValid = Object.values(formData).every((value) => value !== '') && Object.values(errors).every((error) => error === '');
+
+        if (isFormValid) {
+            setIsChecked(true);
+            console.log('Form is valid');
+        } else {
+            setIsChecked(false);
+        }
+    }, [formData, errors]);
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <CustomAnimatedLoader visible={isLoading} />
@@ -174,7 +185,7 @@ const CreateAccountScreen = () => {
                     value={formData.confirmPassword}
                     error={errors.confirmPassword}
                 />
-                <View style={styles.policy}>
+                {/* <View style={styles.policy}>
                     <BouncyCheckbox
                         isChecked={isChecked}
                         onPress={() => setIsChecked(!isChecked)}
@@ -196,7 +207,7 @@ const CreateAccountScreen = () => {
                         I have read and agreed to the <Text style={styles.primaryText}>Terms of Service</Text> &{' '}
                         <Text style={styles.primaryText}>Privacy Policy</Text> of Project FUXI.
                     </Text>
-                </View>
+                </View> */}
                 <View style={styles.toggle}>
                     <TouchableOpacity
                         style={[
