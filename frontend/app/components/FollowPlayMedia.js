@@ -95,22 +95,24 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
             setIsDialogVisible(true);
         } else if (reactTrack.status == 'strongly like') {
             setDialogProps({
-                title: 'Like this song?',
-                desc: 'This song will be played more frequently for you.',
-                labelYes: 'Yes, I like it',
+                title: 'Dislike this song?',
+                desc: 'This song will be played less frequently for you.',
+                labelYes: 'I don’t like it',
                 labelNo: 'No, go back',
-                onPressYes: () => handleStatusLike(),
+                onPressYes: () => handleStatusDislike(),
                 onPressNo: () => setIsDialogVisible(false),
+                styleBtnYes: { backgroundColor: '#E84C4C' },
             });
             setIsDialogVisible(true);
         } else if (reactTrack.status == 'like') {
             setDialogProps({
-                title: 'Like this song?',
-                desc: 'This song will be played more frequently for you.',
-                labelYes: 'Yes, I like it',
+                title: 'Dislike this song?',
+                desc: 'This song will be played less frequently for you.',
+                labelYes: 'I don’t like it',
                 labelNo: 'No, go back',
-                onPressYes: () => handleStatusLike(),
+                onPressYes: () => handleStatusDislike(),
                 onPressNo: () => setIsDialogVisible(false),
+                styleBtnYes: { backgroundColor: '#E84C4C' },
             });
             setIsDialogVisible(true);
         }
@@ -173,7 +175,11 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
                 <View style={styles.followingWrapper}>
                     <TouchableOpacity style={styles.center} onPress={() => showDialogLike()}>
                         <Ionicons
-                            name={Object.keys(reactTrack).length !== 0 ? 'heart' : 'heart-outline'}
+                            name={
+                                Object.keys(reactTrack).length !== 0 && (reactTrack.status === 'strongly like' || reactTrack.status === 'like')
+                                    ? 'heart'
+                                    : 'heart-outline'
+                            }
                             size={50}
                             color={
                                 Object.keys(reactTrack).length !== 0 && (reactTrack.status === 'strongly like' || reactTrack.status === 'like')

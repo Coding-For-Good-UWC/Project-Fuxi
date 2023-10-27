@@ -4,7 +4,6 @@ require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 const ObjectId = require('mongoose').Types.ObjectId;
 const { connectDb } = require('../lib/mongodb');
 
-const profileModel = require('../models/profile');
 const trackModel = require('../models/track');
 const profileReactModel = require('../models/profileReact');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
@@ -33,11 +32,10 @@ const getReactTrackByProfileId = async (event) => {
 
 const getLikeTrackByProfileId = async (event) => {
     const { profileId } = event.queryStringParameters;
-
     if (!profileId) {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }
-
+    
     try {
         const response = await profileReactModel
             .find({
@@ -46,7 +44,13 @@ const getLikeTrackByProfileId = async (event) => {
             })
             .populate('reactTracks.track');
         if (response) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Data retrieved successfully.', response[0]));
+            return JSON.stringify(
+                ApiResponse.success(
+                    HttpStatus.OK,
+                    'Data retrieved successfully.',
+                    response[0].reactTracks.filter((item) => item.preference === 'like' || item.preference === 'strongly like'),
+                ),
+            );
         } else {
             return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile with this ID was not found.'));
         }

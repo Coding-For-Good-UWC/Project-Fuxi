@@ -13,7 +13,7 @@ const LikedSongsScreen = () => {
     const navigation = useNavigation();
     const [countTracks, setCountTracks] = useState(0);
     const [totalDuration, setTotalDuration] = useState(0);
-    const [dataLikedTrack, setDataLikedTrack] = useState({});
+    const [dataLikedTrack, setDataLikedTrack] = useState([]);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
 
@@ -45,11 +45,11 @@ const LikedSongsScreen = () => {
             const { code, message, data } = JSON.parse(response);
             if (code == 200) {
                 if (data !== null) {
-                    setCountTracks(data?.reactTracks.length);
-                    setDataLikedTrack(data?.reactTracks);
+                    setCountTracks(data.length);
+                    setDataLikedTrack(data);
                     setTotalDuration(
                         await totalDurationTracks(
-                            data?.reactTracks?.map((item) => {
+                            data.map((item) => {
                                 return {
                                     URI: item.track.URI,
                                 };
@@ -100,6 +100,7 @@ const LikedSongsScreen = () => {
                             key={index}
                             item={dataTrack.track}
                             reactTrack={dataTrack.preference}
+                            dataTracksOrigin={dataLikedTrack.map((item) => item.track)}
                             setIsDialogVisible={setIsDialogVisible}
                             setDialogProps={setDialogProps}
                             iconRight={

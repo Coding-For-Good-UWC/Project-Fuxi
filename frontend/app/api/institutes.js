@@ -1,20 +1,7 @@
-import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 import Constants from 'expo-constants';
 
 const apiUrl = Constants.expoConfig.extra.apiUrl;
-
-export const getInstitute = async () => {
-    const idToken = await getAuth().currentUser.getIdToken(); // id token
-
-    const response = await fetch(`https://project-fuxi-fsugt.ondigitalocean.app/institute/`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json', token: idToken },
-    });
-    const data = await response.json();
-
-    return data.institute;
-};
 
 export const signUpInstitute = async (name, email, password) => {
     try {

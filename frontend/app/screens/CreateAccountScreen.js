@@ -142,10 +142,8 @@ const CreateAccountScreen = () => {
 
     useEffect(() => {
         const isFormValid = Object.values(formData).every((value) => value !== '') && Object.values(errors).every((error) => error === '');
-
         if (isFormValid) {
             setIsChecked(true);
-            console.log('Form is valid');
         } else {
             setIsChecked(false);
         }

@@ -3,7 +3,6 @@
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 const ObjectId = require('mongoose').Types.ObjectId;
 const { connectDb } = require('../lib/mongodb');
-const instituteModel = require('../models/institute');
 const profileModel = require('../models/profile');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 
