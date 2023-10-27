@@ -17,11 +17,13 @@ import FollowPlayMedia from '../components/FollowPlayMedia';
 const PlayMedia = () => {
     const route = useRoute();
     const navigation = useNavigation();
+    const { dataTracksOrigin, currentReactTrack } = route.params;
+    const [reactTrack, setReactTrack] = useState(currentReactTrack || {});
     const [selectSound, setSelectSound] = useState(route.params?.track || null);
-    const [dataTracksOrigin, setDataTracksOrigin] = useState(route.params?.dataTracksOrigin || []);
+    const [dataTracks, setDataTracksOrigin] = useState(dataTracksOrigin || []);
 
     const [isOverlay, setIsOverlay] = useState(false);
-    const [seconds, setSeconds] = useState(10);
+    const [seconds, setSeconds] = useState(90);
     const bottomSheetRef = useRef(null);
 
     const expandHandler = useCallback(() => {
@@ -70,19 +72,19 @@ const PlayMedia = () => {
                 <BottomSheetModalProvider>
                     <SafeAreaView style={styles.safeArea}>
                         <OverlayMediaScreen
+                            song={selectSound}
                             isModalVisible={isOverlay}
                             isOverlay={handleSubmitHideOverlay}
-                            song={selectSound}
-                            followPlayMedia={<FollowPlayMedia />}
+                            followPlayMedia={<FollowPlayMedia song={selectSound} reactTrack={reactTrack} setReactTrack={setReactTrack} />}
                         />
-                        <PlayMediaComponent song={selectSound} dataTracksOrigin={dataTracksOrigin} />
-                        <FollowPlayMedia />
+                        <PlayMediaComponent song={selectSound} dataTracksOrigin={dataTracks} />
+                        <FollowPlayMedia song={selectSound} reactTrack={reactTrack} setReactTrack={setReactTrack} />
                         <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
                             <Text style={styles.viewPlaylistText}>View playlist</Text>
                         </TouchableOpacity>
                         <BottomSheetScrollView ref={bottomSheetRef} snapTo={'50%'} backgroundColor="#fff" backDropColor="#000">
                             <CustomGridLayout
-                                data={dataTracksOrigin?.map((item, index) => (
+                                data={dataTracks?.map((item, index) => (
                                     <SongItem key={index} item={item} onPress={() => setSelectSound(item)} />
                                 ))}
                                 columns={1}

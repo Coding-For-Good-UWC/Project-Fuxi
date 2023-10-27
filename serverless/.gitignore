@@ -55,6 +55,3 @@ yarn-error.log
 
 # Webpack
 dist/
-
-
-firebase.json

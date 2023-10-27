@@ -295,6 +295,12 @@ functions:
       - http:
           path: /profile-react/add
           method: put
+  updateReactTrack:
+    handler: lambdas/profileReact.updateReactTrack
+    events:
+      - http:
+          path: /profile-react/update
+          method: put
   removeReactTrack:
     handler: lambdas/profileReact.removeReactTrack
     events:

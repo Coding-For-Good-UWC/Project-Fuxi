@@ -29,7 +29,7 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
     };
 
     const handleNavigation = () => {
-        navigation.navigate('PlayMedia', { track: item, dataTracksOrigin: dataTracksOrigin });
+        navigation.navigate('PlayMedia', { track: item, currentReactTrack: currentReactTrack, dataTracksOrigin: dataTracksOrigin });
     };
 
     const showDialogLike = (itemId) => {
@@ -57,12 +57,12 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
     };
 
     const handleRemoveReact = async (itemId) => {
+        setIsDialogVisible(false);
         const profileData = await getStoreData('profile0');
         const { _id } = JSON.parse(profileData);
         const response = await removeReactTrack(_id, itemId);
         if (response) {
-            setIsDialogVisible(false);
-            setCurrentReactTrack(preference.NT);
+            setCurrentReactTrack({});
         }
     };
 

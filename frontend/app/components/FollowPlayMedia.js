@@ -1,35 +1,25 @@
-import { StyleSheet, Text, View, Animated, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions, ToastAndroid } from 'react-native';
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import ToggleDialog from './ToggleDialog';
+import { preference } from '../utils/utils';
+import { addReactTrack, updateReactTrack } from '../api/profileReact';
+import { getStoreData } from '../utils/AsyncStorage';
 
-const FollowPlayMedia = () => {
+const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
-    const statusLikeEnum = { Normal: '#222C2D', Medium: '#137882', High: '#FFC857' };
-    const [statusLike, setStatusLike] = useState(null);
-    const [statusDislike, setStatusDislike] = useState(null);
-
-    const [isVisible, setIsVisible] = useState(false);
-
-    const handleViewClick = () => {
-        setIsVisible(true);
-        setTimeout(() => {
-            setIsVisible(false);
-        }, 3000);
-    };
 
     const showDialogLike = () => {
-        if (statusLike == null) {
-            setDialogProps({
-                title: 'Like this song?',
-                desc: 'This song will be played more frequently for you.',
-                labelYes: 'Yes, I like it',
-                labelNo: 'No, go back',
-                onPressYes: () => handleStatusLike(),
-                onPressNo: () => setIsDialogVisible(false),
-            });
-        } else if (statusLike == statusLikeEnum.Medium) {
+        if (reactTrack.status == 'strongly like') {
+            ToastAndroid.showWithGravityAndOffset(
+                'Maximum liking achieved',
+                ToastAndroid.LONG,
+                ToastAndroid.CENTER,
+                0,
+                Dimensions.get('window').height * 0.8,
+            );
+        } else if (reactTrack.status == 'like') {
             setDialogProps({
                 title: 'Like this song?',
                 desc: 'We’ll play this song more frequently for you.',
@@ -38,7 +28,8 @@ const FollowPlayMedia = () => {
                 onPressYes: () => handleStatusLike(),
                 onPressNo: () => setIsDialogVisible(false),
             });
-        } else {
+            setIsDialogVisible(true);
+        } else if (reactTrack.status == undefined) {
             setDialogProps({
                 title: 'Like this song?',
                 desc: 'This song will be played more frequently for you.',
@@ -47,12 +38,40 @@ const FollowPlayMedia = () => {
                 onPressYes: () => handleStatusLike(),
                 onPressNo: () => setIsDialogVisible(false),
             });
+            setIsDialogVisible(true);
+        } else if (reactTrack.status == 'strongly dislike') {
+            setDialogProps({
+                title: 'Like this song?',
+                desc: 'This song will be played more frequently for you.',
+                labelYes: 'Yes, I like it',
+                labelNo: 'No, go back',
+                onPressYes: () => handleStatusLike(),
+                onPressNo: () => setIsDialogVisible(false),
+            });
+            setIsDialogVisible(true);
+        } else if (reactTrack.status == 'dislike') {
+            setDialogProps({
+                title: 'Like this song?',
+                desc: 'This song will be played more frequently for you.',
+                labelYes: 'Yes, I like it',
+                labelNo: 'No, go back',
+                onPressYes: () => handleStatusLike(),
+                onPressNo: () => setIsDialogVisible(false),
+            });
+            setIsDialogVisible(true);
         }
-        setIsDialogVisible(true);
     };
 
     const showDialogDislike = () => {
-        if (statusLike == null) {
+        if (reactTrack.status == 'strongly dislike') {
+            ToastAndroid.showWithGravityAndOffset(
+                'Maximum disliking achieved',
+                ToastAndroid.LONG,
+                ToastAndroid.CENTER,
+                0,
+                Dimensions.get('window').height * 0.8,
+            );
+        } else if (reactTrack.status == 'dislike') {
             setDialogProps({
                 title: 'Dislike this song?',
                 desc: 'This song will be played less frequently for you.',
@@ -62,7 +81,8 @@ const FollowPlayMedia = () => {
                 onPressNo: () => setIsDialogVisible(false),
                 styleBtnYes: { backgroundColor: '#E84C4C' },
             });
-        } else if (statusLike == statusLikeEnum.Medium) {
+            setIsDialogVisible(true);
+        } else if (reactTrack.status == undefined) {
             setDialogProps({
                 title: 'Dislike this song?',
                 desc: 'This song will be played less frequently for you.',
@@ -72,64 +92,106 @@ const FollowPlayMedia = () => {
                 onPressNo: () => setIsDialogVisible(false),
                 styleBtnYes: { backgroundColor: '#E84C4C' },
             });
-        } else {
+            setIsDialogVisible(true);
+        } else if (reactTrack.status == 'strongly like') {
             setDialogProps({
-                title: 'Dislike this song?',
-                desc: 'This song will be played less frequently for you.',
-                labelYes: 'I don’t like it',
+                title: 'Like this song?',
+                desc: 'This song will be played more frequently for you.',
+                labelYes: 'Yes, I like it',
                 labelNo: 'No, go back',
-                onPressYes: () => handleStatusDislike(),
+                onPressYes: () => handleStatusLike(),
                 onPressNo: () => setIsDialogVisible(false),
-                styleBtnYes: { backgroundColor: '#E84C4C' },
             });
+            setIsDialogVisible(true);
+        } else if (reactTrack.status == 'like') {
+            setDialogProps({
+                title: 'Like this song?',
+                desc: 'This song will be played more frequently for you.',
+                labelYes: 'Yes, I like it',
+                labelNo: 'No, go back',
+                onPressYes: () => handleStatusLike(),
+                onPressNo: () => setIsDialogVisible(false),
+            });
+            setIsDialogVisible(true);
         }
-        setIsDialogVisible(true);
     };
 
-    const handleStatusLike = () => {
-        if (statusLike == null) {
-            setStatusLike(statusLikeEnum.Medium);
-        } else if (statusLike == statusLikeEnum.Medium) {
-            setStatusLike(statusLikeEnum.High);
-        } else {
-            setStatusLike(null);
+    const handleStatusLike = async () => {
+        const profile0 = await getStoreData('profile0');
+        const { _id } = JSON.parse(profile0);
+        if (reactTrack.status == 'like') {
+            setReactTrack(preference.SLK);
+            setIsDialogVisible(false);
+            await updateReactTrack(_id, song._id, preference.SLK.status);
+        } else if (reactTrack.status == undefined) {
+            setReactTrack(preference.LK);
+            setIsDialogVisible(false);
+            await addReactTrack(_id, song._id, preference.LK.status);
+        } else if (reactTrack.status == 'strongly dislike') {
+            setReactTrack(preference.LK);
+            setIsDialogVisible(false);
+            await updateReactTrack(_id, song._id, preference.LK.status);
+        } else if (reactTrack.status == 'dislike') {
+            setReactTrack(preference.LK);
+            setIsDialogVisible(false);
+            await updateReactTrack(_id, song._id, preference.LK.status);
         }
-        setIsDialogVisible(false);
     };
 
-    const handleStatusDislike = () => {
-        if (statusDislike == null) {
-            setStatusDislike(statusLikeEnum.Medium);
-        } else if (statusDislike == statusLikeEnum.Medium) {
-            setStatusDislike(statusLikeEnum.High);
-        } else {
-            setStatusDislike(null);
+    const handleStatusDislike = async () => {
+        const profile0 = await getStoreData('profile0');
+        const { _id } = JSON.parse(profile0);
+        if (reactTrack.status == 'dislike') {
+            setReactTrack(preference.SDK);
+            setIsDialogVisible(false);
+            await updateReactTrack(_id, song._id, preference.SDK.status);
+        } else if (reactTrack.status == undefined) {
+            setReactTrack(preference.DK);
+            setIsDialogVisible(false);
+            await addReactTrack(_id, song._id, preference.DK.status);
+        } else if (reactTrack.status == 'strongly like') {
+            setReactTrack(preference.DK);
+            setIsDialogVisible(false);
+            await updateReactTrack(_id, song._id, preference.DK.status);
+        } else if (reactTrack.status == 'like') {
+            setReactTrack(preference.DK);
+            setIsDialogVisible(false);
+            await updateReactTrack(_id, song._id, preference.DK.status);
         }
-        setIsDialogVisible(false);
-        handleViewClick();
+        ToastAndroid.showWithGravityAndOffset(
+            'Song has been hidden in “Happy mood”',
+            ToastAndroid.LONG,
+            ToastAndroid.CENTER,
+            0,
+            Dimensions.get('window').height * 0.8,
+        );
     };
+
     return (
         <>
             <View style={styles.following}>
-                {isVisible && (
-                    <View style={styles.viewMessageDislike}>
-                        <Text style={styles.messageText}>Song has been hidden in “Happy mood”.</Text>
-                    </View>
-                )}
                 <View style={styles.followingWrapper}>
                     <TouchableOpacity style={styles.center} onPress={() => showDialogLike()}>
                         <Ionicons
-                            name={statusLike !== null ? 'heart' : 'heart-outline'}
+                            name={Object.keys(reactTrack).length !== 0 ? 'heart' : 'heart-outline'}
                             size={50}
-                            color={statusLike !== null ? statusLike : '#222C2D'}
+                            color={
+                                Object.keys(reactTrack).length !== 0 && (reactTrack.status === 'strongly like' || reactTrack.status === 'like')
+                                    ? reactTrack.color
+                                    : '#222C2D'
+                            }
                         />
-                        <Text>{statusLike === statusLikeEnum.High ? 'Super Like' : 'Like'}</Text>
+                        <Text>{reactTrack.status === 'strongly like' ? 'Super Like' : 'Like'}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.center} onPress={() => showDialogDislike()}>
                         <Ionicons
                             name="sad-outline"
                             size={50}
-                            color={statusDislike !== null ? statusDislike : '#222C2D'}
+                            color={
+                                Object.keys(reactTrack).length !== 0 && (reactTrack.status === 'strongly dislike' || reactTrack.status === 'dislike')
+                                    ? reactTrack.color
+                                    : '#222C2D'
+                            }
                         />
                         <Text>Dislike</Text>
                     </TouchableOpacity>
@@ -156,9 +218,9 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
     },
     followingWrapper: {
+        flex: 1,
         backgroundColor: '#fff',
         borderRadius: 100,
         flexDirection: 'row',
@@ -167,6 +229,7 @@ const styles = StyleSheet.create({
         paddingVertical: 24,
         paddingHorizontal: 60,
         gap: 60,
+        minHeight: 130,
     },
     center: {
         flexDirection: 'column',

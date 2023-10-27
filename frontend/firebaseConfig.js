@@ -1,12 +1,15 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from "firebase/auth";
+import { getAuth } from 'firebase/auth';
 
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: 'AIzaSyA8TIuruwyk5H86oxNfSpzCbsz70uYIbCs',
-  authDomain: 'project-fuxi-6edd2.firebaseapp.com',
-  projectId: 'project-fuxi-6edd2',
-  appId: '1:1099222569385:ios:11c53e494e3aac8df434b8',
+    apiKey: 'AIzaSyAl08ocy8nN4XcVsPoRq-DArSTMdFrB1zo',
+    authDomain: 'fuxi-app.firebaseapp.com',
+    projectId: 'fuxi-app',
+    storageBucket: 'fuxi-app.appspot.com',
+    messagingSenderId: '312659603389',
+    appId: '1:312659603389:web:7b349494f867f67c7eecd4',
+    measurementId: 'G-CTP5R8MDW2',
 };
 
 const app = initializeApp(firebaseConfig);

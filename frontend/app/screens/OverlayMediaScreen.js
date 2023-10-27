@@ -59,12 +59,14 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         gap: 50,
+        alignItems: 'center',
     },
     image: {
         borderWidth: 6,
         borderColor: '#fff',
         backgroundColor: '#fff',
         borderRadius: 18,
+        width: '70%',
     },
     aboutFeel: {
         flexDirection: 'column',

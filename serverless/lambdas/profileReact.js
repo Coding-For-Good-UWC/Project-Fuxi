@@ -103,6 +103,32 @@ const addReactTrack = async (event) => {
     }
 };
 
+const updateReactTrack = async (event) => {
+    const json = JSON.parse(event.body);
+    const { profileId, trackId, preference } = json;
+    try {
+        const updatedReactTrack = await profileReactModel.findOneAndUpdate(
+            {
+                profileId: profileId,
+                'reactTracks.track': new ObjectId(trackId),
+            },
+            {
+                $set: {
+                    'reactTracks.$.preference': preference,
+                },
+            },
+        );
+        if (updatedReactTrack) {
+            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Updated react track preference success'));
+        } else {
+            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'React track not found'));
+        }
+    } catch (error) {
+        console.error(error);
+        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+    }
+};
+
 const removeReactTrack = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, trackId } = json;
@@ -147,4 +173,12 @@ const deleteProfileReact = async (event) => {
     }
 };
 
-module.exports = { getReactTrackByProfileId, getLikeTrackByProfileId, createProfileReact, addReactTrack, removeReactTrack, deleteProfileReact };
+module.exports = {
+    getReactTrackByProfileId,
+    getLikeTrackByProfileId,
+    createProfileReact,
+    addReactTrack,
+    updateReactTrack,
+    removeReactTrack,
+    deleteProfileReact,
+};
