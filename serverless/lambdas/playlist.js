@@ -61,7 +61,7 @@ const getAllPlayListByProfileId = async (event) => {
     }
 };
 const getPlaylistSuggestions = async (event) => {
-    const { profileId, pageNumber, pageSize = 50 } = event.queryStringParameters;
+    const { profileId, pageNumber, pageSize = 15 } = event.queryStringParameters;
     const skipCount = (pageNumber - 1) * pageSize;
 
     const profile = await profileModel.findById(profileId);

@@ -1,5 +1,5 @@
-import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import CustomGridLayout from '../components/CustomGridLayout';
 import ReactSongItem from '../components/ReactSongItem';
 import { getPlaylistSuggestions } from '../api/playlist';
@@ -15,11 +15,9 @@ const SuggestTrackScreen = () => {
     async function getPlaylistSuggestion() {
         try {
             const profile0 = await getStoreData('profile0');
-            console.log(profile0);
             const { _id } = JSON.parse(profile0);
             const response = await getPlaylistSuggestions(_id);
             const { code, message, data } = JSON.parse(response);
-            console.log(data);
             if (code == 200) {
                 setDataTracks(data);
             }
@@ -37,7 +35,7 @@ const SuggestTrackScreen = () => {
                 <View style={{ flex: 1 }}>
                     <CustomGridLayout
                         data={dataTracks?.map((track, index) => (
-                            <ReactSongItem key={index} item={track} />
+                            <ReactSongItem key={index} item={track} dataTracksOrigin={dataTracks} />
                         ))}
                         columns={1}
                     />
@@ -60,7 +58,6 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         gap: 20,
-        paddingBottom: 30,
     },
     header: {
         fontWeight: '600',

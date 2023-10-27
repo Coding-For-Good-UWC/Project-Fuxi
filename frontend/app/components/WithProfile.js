@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import ChangeListenerScreen from '../screens/ChangeListenerScreen';
 import { getStoreData } from '../utils/AsyncStorage';
 
-const WithProfile = ({ data }) => {
+const WithProfile = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [fullname, setFullname] = useState('');
 

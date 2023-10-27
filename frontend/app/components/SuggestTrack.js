@@ -7,10 +7,7 @@ const SuggestTrack = ({ heightItem }) => {
     return (
         <TouchableOpacity onPress={() => navigation.navigate('SuggestTrackScreen')}>
             <View style={{ height: heightItem }}>
-                <Image
-                    source={{ uri: 'https://res.cloudinary.com/dusmue7d9/image/upload/v1695711862/MP3/default_l8mbsa.png' }}
-                    style={{ width: '100%', height: '100%', borderRadius: 6 }}
-                />
+                <Image source={require('../assets/default_l8mbsa.png')} style={{ width: '100%', height: '100%', borderRadius: 6 }} />
             </View>
             <Text style={styles.likesSongText}>Suggestion for you</Text>
         </TouchableOpacity>

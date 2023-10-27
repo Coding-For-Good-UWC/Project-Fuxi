@@ -1,20 +1,91 @@
 import 'react-native-gesture-handler';
 import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions } from 'react-native';
-import React, { useState } from 'react';
-import Slider from '@react-native-community/slider';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { Audio } from 'expo-av';
+import { useNavigation } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
-import FollowPlayMedia from './FollowPlayMedia';
-import { formatTime } from '../utils/AudioUtils';
+import PlayMediaSlider from './PlayMediaSlider';
 
-const PlayMediaComponent = ({ song, duration, position, handleSliderChange, isPlaying, handlePause, handlePlay }) => {
-    const defaultSong = {
-        Artist: '',
-        Title: 'Choose song in playlist',
-        ImageURL: 'https://res.cloudinary.com/dusmue7d9/image/upload/v1695711862/default_l8mbsa.png',
-        URI: '',
+const defaultSong = {
+    Artist: '',
+    Title: 'Choose song in playlist',
+    ImageURL: require('../assets/default_l8mbsa.png'),
+    URI: '',
+};
+
+function findPreviousTrack(tracks, trackId) {
+    const index = tracks.findIndex((track) => track._id === trackId);
+    if (index === -1) {
+        return null;
+    }
+    const previousIndex = index === 0 ? tracks.length - 1 : index - 1;
+    return tracks[previousIndex];
+}
+
+function findNextTrack(tracks, trackId) {
+    const index = tracks.findIndex((track) => track._id === trackId);
+    if (index === -1) {
+        return null;
+    }
+    const nextIndex = index === tracks.length - 1 ? 0 : index + 1;
+    return tracks[nextIndex];
+}
+
+const PlayMediaComponent = ({ song, dataTracksOrigin }) => {
+    const navigation = useNavigation();
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [sound, setSound] = useState();
+    const [duration, setDuration] = useState(0);
+    const [currentSong, setCurrentSong] = useState(song || defaultSong);
+
+    useLayoutEffect(() => {
+        if (song) {
+            handleTrackPress(song);
+        }
+    }, [navigation]);
+
+    const handlePlay = async () => {
+        if (sound) {
+            await sound.playAsync();
+            setIsPlaying(true);
+        }
+    };
+    const handlePause = async () => {
+        if (sound) {
+            await sound.pauseAsync();
+            setIsPlaying(false);
+        }
     };
 
-    const currentSong = song || defaultSong;
+    const handleTrackPress = async (item) => {
+        console.log(item.Title);
+        setCurrentSong(item);
+        const { sound, status } = await Audio.Sound.createAsync({
+            uri: item.URI,
+        });
+        setSound(sound);
+        setDuration(status.durationMillis / 1000);
+        setIsPlaying(true);
+        await sound.playAsync();
+    };
+
+    const handlePrevTrack = () => {
+        handleTrackPress(findPreviousTrack(dataTracksOrigin, currentSong._id));
+    };
+
+    const handleNextTrack = () => {
+        handleTrackPress(findNextTrack(dataTracksOrigin, currentSong._id));
+    };
+
+    useEffect(() => {
+        const unloadSound = async () => {
+            if (sound) {
+                await sound.unloadAsync();
+            }
+        };
+        unloadSound();
+        handleTrackPress(song);
+    }, [song]);
 
     return (
         <>
@@ -29,34 +100,17 @@ const PlayMediaComponent = ({ song, duration, position, handleSliderChange, isPl
                     {currentSong.Artist}
                 </Text>
             </View>
-            <View style={styles.playmediaCenter}>
-                <View style={styles.progressBarView}>
-                    <Slider
-                        style={styles.progressBar}
-                        minimumValue={0}
-                        maximumValue={duration}
-                        value={position}
-                        onValueChange={handleSliderChange}
-                        thumbTintColor="#137882"
-                        minimumTrackTintColor="#009688"
-                        maximumTrackTintColor="#000000"
-                    />
-                </View>
-                <View style={styles.progressLevelDuration}>
-                    <Text style={styles.progressLabelText}>{formatTime(position)}</Text>
-                    <Text style={styles.progressLabelText}>{formatTime(duration)}</Text>
-                </View>
-                <View style={styles.navigationPlayer}>
-                    <TouchableOpacity>
-                        <Ionicons name="play-skip-back" size={40} color={'#222C2D'} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={isPlaying ? handlePause : handlePlay}>
-                        <Ionicons name={isPlaying ? 'pause-circle' : 'play-circle'} size={60} color={'#222C2D'} />
-                    </TouchableOpacity>
-                    <TouchableOpacity>
-                        <Ionicons name="play-skip-forward" size={40} color={'#222C2D'} />
-                    </TouchableOpacity>
-                </View>
+            <PlayMediaSlider sound={sound} duration={duration} isPlaying={isPlaying} setIsPlaying={setIsPlaying} />
+            <View style={styles.navigationPlayer}>
+                <TouchableOpacity onPress={handlePrevTrack}>
+                    <Ionicons name="play-skip-back" size={40} color={'#222C2D'} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={isPlaying ? handlePause : handlePlay}>
+                    <Ionicons name={isPlaying ? 'pause-circle' : 'play-circle'} size={60} color={'#222C2D'} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleNextTrack}>
+                    <Ionicons name="play-skip-forward" size={40} color={'#222C2D'} />
+                </TouchableOpacity>
             </View>
         </>
     );
@@ -93,17 +147,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#222C2D',
         marginTop: 10,
-        paddingHorizontal: 20,
+        textAlign: 'center',
     },
     patientText: {
         fontSize: 16,
         color: '#757575',
-    },
-    playmediaCenter: {
-        flex: 1,
-    },
-    progressBarView: {
-        width: 370,
     },
     navigationPlayer: {
         marginTop: 30,
@@ -118,15 +166,6 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         backgroundColor: '#1A1A1A',
     },
-    progressBar: {
-        width: '100%',
-    },
-    progressLevelDuration: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    progressLabelText: {},
     listSongs: {},
     rowItem: {
         flexDirection: 'row',

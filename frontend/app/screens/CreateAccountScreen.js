@@ -117,7 +117,6 @@ const CreateAccountScreen = () => {
             if (statusCode == 200) {
                 storeData('userInfo', JSON.stringify({ uid: body.userUid, token: body.token }));
                 navigation.navigate('ListenerProfileMain', { token: body.token });
-                console.log(body.token);
             } else if (statusCode == 400) {
                 alert(body.message);
             } else if (statusCode == 409) {

@@ -5,29 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
 import { removeReactTrack } from '../api/profileReact';
 import { getStoreData } from '../utils/AsyncStorage';
-
-const preference = {
-    SDK: {
-        status: 'strongly dislike',
-        color: '#C31E1E',
-    },
-    DK: {
-        status: 'dislike',
-        color: '#222C2D',
-    },
-    NT: {
-        status: 'neutral',
-        color: '#fff',
-    },
-    LK: {
-        status: 'like',
-        color: '#137882',
-    },
-    SLK: {
-        status: 'strongly like',
-        color: '#FFC857',
-    },
-};
+import { preference } from '../utils/utils';
 
 const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, dataTracksOrigin }) => {
     const navigation = useNavigation();
@@ -47,7 +25,7 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
     };
 
     const handleShowDialogDislike = () => {
-        showDialogDislike(item);
+        showDialogDislike(item._id);
     };
 
     const handleNavigation = () => {
@@ -60,7 +38,7 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
             desc: 'This song will be played less frequently for you.',
             labelYes: 'Confirm',
             labelNo: 'No, go back',
-            onPressYes: () => handleStatusLike(itemId),
+            onPressYes: () => handleRemoveReact(itemId),
             onPressNo: () => setIsDialogVisible(false),
         });
         setIsDialogVisible(true);
@@ -72,14 +50,13 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
             desc: 'This song will be played more frequently for you.',
             labelYes: 'Confirm',
             labelNo: 'No, go back',
-            onPressYes: () => handleStatusDislike(itemId),
+            onPressYes: () => handleRemoveReact(itemId),
             onPressNo: () => setIsDialogVisible(false),
         });
         setIsDialogVisible(true);
     };
 
-    const handleStatusLike = async (itemId) => {
-        console.log(itemId);
+    const handleRemoveReact = async (itemId) => {
         const profileData = await getStoreData('profile0');
         const { _id } = JSON.parse(profileData);
         const response = await removeReactTrack(_id, itemId);
@@ -89,20 +66,25 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
         }
     };
 
-    const handleStatusDislike = (itemId) => {
-        console.log(itemId);
-    };
-
     return (
         <SongItem
             item={item}
             iconRight={
                 <>
-                    {Object.keys(currentReactTrack).length !== 0 && currentReactTrack.status !== 'neutral' && (
-                        <TouchableOpacity style={{ padding: 2 }} onPress={handleShowDialogLike}>
-                            <Ionicons name="heart" color={currentReactTrack.color} size={26} />
-                        </TouchableOpacity>
-                    )}
+                    {Object.keys(currentReactTrack).length !== 0 &&
+                        currentReactTrack.status !== 'dislike' &&
+                        currentReactTrack.status !== 'strongly dislike' && (
+                            <TouchableOpacity style={{ padding: 2 }} onPress={handleShowDialogLike}>
+                                <Ionicons name="heart" color={currentReactTrack.color} size={26} />
+                            </TouchableOpacity>
+                        )}
+                    {Object.keys(currentReactTrack).length !== 0 &&
+                        currentReactTrack.status !== 'like' &&
+                        currentReactTrack.status !== 'strongly like' && (
+                            <TouchableOpacity style={{ padding: 2 }} onPress={handleShowDialogDislike}>
+                                <Ionicons name="sad-outline" color={currentReactTrack.color} size={26} />
+                            </TouchableOpacity>
+                        )}
                 </>
             }
             onPress={handleNavigation}

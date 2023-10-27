@@ -18,8 +18,7 @@ const schema = new Schema(
                 },
                 preference: {
                     type: String,
-                    enum: ['strongly dislike', 'dislike', 'neutral', 'like', 'strongly like'],
-                    default: 'neutral',
+                    enum: ['strongly dislike', 'dislike', 'like', 'strongly like'],
                 },
             },
         ],

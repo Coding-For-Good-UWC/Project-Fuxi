@@ -51,15 +51,11 @@ const ListenerProfileScreen1 = ({ goToScreen, formData, setFormData, errors, set
 
     const handleSubmit = () => {
         const { nameListener, yearBirth, language } = formData;
-
         if (validateNullFormData(formData)) {
             alert('Please fix the validation errors');
             return;
         }
-
         goToScreen();
-
-        console.log('formData:', formData);
     };
 
     const validateNullFormData = (formData) => {

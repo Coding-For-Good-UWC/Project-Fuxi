@@ -37,7 +37,6 @@ export const createProfileReact = async (profileId, reactTracks) => {
 };
 
 export const addReactTrack = async (profileId, trackId, preference) => {
-    // preference = Enum['strongly dislike', 'dislike', 'neutral', 'like', 'strongly like']
     try {
         const response = await axios.put(`${apiUrl}/dev/profile-react/add`, {
             profileId: profileId,

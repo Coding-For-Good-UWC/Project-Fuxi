@@ -1,17 +1,15 @@
-import { Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, Modal } from 'react-native';
 import React, { useState } from 'react';
-import * as Animatable from 'react-native-animatable';
-import FollowPlayMedia from '../components/FollowPlayMedia';
 
 const defaultSong = {
     id: 1,
     Title: 'Please choose a song',
     Artist: '',
-    ImageURL: 'https://res.cloudinary.com/dusmue7d9/image/upload/v1695711862/MP3/default_l8mbsa.png',
+    ImageURL: require('../assets/default_l8mbsa.png'),
     songURL: '',
 };
 
-const OverlayMediaScreen = ({ isOverlay, song }) => {
+const OverlayMediaScreen = ({ isModalVisible, isOverlay, song, followPlayMedia }) => {
     const [heightItem, setHeightItem] = useState(0);
     const [track, setTrack] = useState(song || defaultSong);
 
@@ -21,31 +19,30 @@ const OverlayMediaScreen = ({ isOverlay, song }) => {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <Animatable.View animation="fadeIn" duration={500} style={{ flex: 1, flexDirection: 'column', gap: 50 }}>
-                <View style={styles.image} onLayout={this.handleLayout}>
-                    <Image
-                        source={{ uri: track.ImageURL }}
-                        style={{ borderRadius: 12, width: '100%', height: heightItem }}
-                    />
-                </View>
-                <View style={styles.aboutFeel}>
-                    <View style={styles.aboutFeelHeader}>
-                        <Text style={styles.aboutFeelText}>How do you feel about</Text>
-                        <Text style={styles.aboutFeelText} numberOfLines={2}>
-                            {track.Title}
+        <Modal style={{ flex: 1 }} visible={isModalVisible} transparent animationType="fade">
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.container}>
+                    <View style={styles.image} onLayout={this.handleLayout}>
+                        <Image source={{ uri: track.ImageURL }} style={{ borderRadius: 12, width: '100%', height: heightItem }} />
+                    </View>
+                    <View style={styles.aboutFeel}>
+                        <View style={styles.aboutFeelHeader}>
+                            <Text style={styles.aboutFeelText}>How do you feel about</Text>
+                            <Text style={styles.aboutFeelText} numberOfLines={2}>
+                                {track.Title}
+                            </Text>
+                        </View>
+                        <Text style={styles.descFeel}>
+                            Rate it now to help us recommend better songs for you! This message will disappear in 15s.
                         </Text>
                     </View>
-                    <Text style={styles.descFeel}>
-                        Rate it now to help us recommend better songs for you! This message will disappear in 15s.
-                    </Text>
+                    {followPlayMedia}
+                    <TouchableOpacity style={styles.bottom} onPress={isOverlay}>
+                        <Text style={styles.bottomText}>Back to Media Player</Text>
+                    </TouchableOpacity>
                 </View>
-                <FollowPlayMedia />
-                <TouchableOpacity style={styles.bottom} onPress={isOverlay}>
-                    <Text style={styles.bottomText}>Back to Media Player</Text>
-                </TouchableOpacity>
-            </Animatable.View>
-        </SafeAreaView>
+            </SafeAreaView>
+        </Modal>
     );
 };
 
@@ -57,6 +54,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#000',
         paddingTop: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0),
         paddingHorizontal: 45,
+    },
+    container: {
+        flex: 1,
+        flexDirection: 'column',
+        gap: 50,
     },
     image: {
         borderWidth: 6,
