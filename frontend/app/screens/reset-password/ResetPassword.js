@@ -6,7 +6,7 @@ import { resetPassword } from '../../api/institutes';
 import { storeData } from '../../utils/AsyncStorage';
 import CustomAnimatedLoader from '../../components/CustomAnimatedLoader';
 
-const ResetPassword = ({ labelHeader }) => {
+const ResetPassword = () => {
     const navigation = useNavigation();
     const [isValid, setIsValid] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -84,7 +84,7 @@ const ResetPassword = ({ labelHeader }) => {
         <SafeAreaView style={styles.safeArea}>
             <CustomAnimatedLoader visible={isLoading} />
             <View style={styles.container}>
-                <Text style={styles.headerText}>{labelHeader}</Text>
+                <Text style={styles.headerText}>Reset password</Text>
                 <Text style={styles.descriptionText}>Please enter your account's email.</Text>
                 <View style={styles.form}>
                     <TextInputEffectLabel

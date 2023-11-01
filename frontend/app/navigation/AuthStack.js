@@ -10,12 +10,10 @@ import ListenerProfileScreen3 from '../screens/listener-profile-new-account/List
 import ResetPassword from '../screens/reset-password/ResetPassword';
 import ResetPasswordCheckEmail from '../screens/reset-password/ResetPasswordCheckEmail';
 import ResetPasswordNew from '../screens/reset-password/ResetPasswordNew';
-import { useNavigation } from '@react-navigation/core';
 
 const Stack = createNativeStackNavigator();
 
 const AuthStack = () => {
-    const navigation = useNavigation();
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen
@@ -76,6 +74,7 @@ const AuthStack = () => {
             />
             <Stack.Screen
                 name="ResetPassword"
+                component={ResetPassword}
                 options={{
                     headerTitle: '',
                     headerTransparent: true,
@@ -84,9 +83,7 @@ const AuthStack = () => {
                         backgroundColor: '#fff',
                     },
                 }}
-            >
-                {() => <ResetPassword labelHeader={'Reset password'} />}
-            </Stack.Screen>
+            />
             <Stack.Screen
                 name="ResetPasswordCheckEmail"
                 component={ResetPasswordCheckEmail}
@@ -101,6 +98,7 @@ const AuthStack = () => {
             />
             <Stack.Screen
                 name="ResetPasswordNew"
+                component={ResetPasswordNew}
                 options={{
                     headerTitle: '',
                     headerTransparent: true,
@@ -109,9 +107,7 @@ const AuthStack = () => {
                         backgroundColor: '#fff',
                     },
                 }}
-            >
-                {() => <ResetPasswordNew navigationTo={() => navigation.navigate('SignInScreen')} />}
-            </Stack.Screen>
+            />
         </Stack.Navigator>
     );
 };
