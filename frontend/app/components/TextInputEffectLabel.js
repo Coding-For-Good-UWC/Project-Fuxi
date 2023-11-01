@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, TextInput, Animated, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const TextInputEffectLabel = ({ type = 'text', label, onChangeText, error, style, styleInput, value }) => {
+const TextInputEffectLabel = ({ type = 'text', label, onChangeText, error, style, styleInput, value, keyboardType = 'default' }) => {
     const [text, setText] = useState('');
     const placeholderAnim = useRef(new Animated.Value(0)).current;
     const isPassword = type === 'password';
@@ -86,6 +86,7 @@ const TextInputEffectLabel = ({ type = 'text', label, onChangeText, error, style
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     value={value}
+                    keyboardType={keyboardType}
                 />
                 {isPassword && (
                     <Ionicons

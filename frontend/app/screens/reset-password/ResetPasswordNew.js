@@ -3,18 +3,24 @@ import React, { useContext, useEffect, useState } from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
+import { getStoreData } from '../../utils/AsyncStorage';
+import { changePasswordInReset } from '../../api/institutes';
+import CustomAnimatedLoader from '../../components/CustomAnimatedLoader';
 
-const ResetPasswordNew = ({ navigationTo }) => {
+const ResetPasswordNew = () => {
     const navigation = useNavigation();
     const { userToken } = useContext(AuthContext);
     const [isValid, setIsValid] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
+        CodeOTP: '',
         password: '',
         confirmPassword: '',
     });
 
     const [errors, setErrors] = useState({
+        CodeOTP: '',
         password: '',
         confirmPassword: '',
     });
@@ -26,7 +32,9 @@ const ResetPasswordNew = ({ navigationTo }) => {
         }));
 
         let error = '';
-        if (field === 'password' && value === '') {
+        if (field === 'CodeOTP' && value === '') {
+            error = 'OTP is required.';
+        } else if (field === 'password' && value === '') {
             error = 'Password is required.';
         } else if (field === 'password' && value.length < 8) {
             error = 'Password must be at least 8 characters.';
@@ -66,11 +74,57 @@ const ResetPasswordNew = ({ navigationTo }) => {
         return isValid;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        setIsLoading(true);
         if (validateFormData(formData) && validateErrors(errors)) {
-            console.log(formData);
-            // navigationTo();
-            ToastAndroid.showWithGravityAndOffset('message', ToastAndroid.LONG, ToastAndroid.CENTER, 0, Dimensions.get('window').height * 0.8);
+            const token = await getStoreData('tokenResetPassword');
+            try {
+                const { CodeOTP, password, confirmPassword } = formData;
+                if (password === confirmPassword) {
+                    const response = await changePasswordInReset(token, parseInt(CodeOTP, 10), password);
+                    const { code, message, data } = JSON.parse(response);
+                    console.log(message);
+                    if (code === 200) {
+                        navigation.navigate('SignInScreen');
+                        ToastAndroid.showWithGravityAndOffset(
+                            message,
+                            ToastAndroid.LONG,
+                            ToastAndroid.CENTER,
+                            0,
+                            Dimensions.get('window').height * 0.8,
+                        );
+                    } else {
+                        ToastAndroid.showWithGravityAndOffset(
+                            message,
+                            ToastAndroid.LONG,
+                            ToastAndroid.CENTER,
+                            0,
+                            Dimensions.get('window').height * 0.8,
+                        );
+                    }
+                } else {
+                    ToastAndroid.showWithGravityAndOffset(
+                        'Confirm password is required',
+                        ToastAndroid.LONG,
+                        ToastAndroid.CENTER,
+                        0,
+                        Dimensions.get('window').height * 0.8,
+                    );
+                }
+            } catch (err) {
+                console.error('Error decoding or checking token:', err);
+                return;
+            } finally {
+                setIsLoading(false);
+            }
+        } else {
+            ToastAndroid.showWithGravityAndOffset(
+                'Confirm password is required',
+                ToastAndroid.LONG,
+                ToastAndroid.CENTER,
+                0,
+                Dimensions.get('window').height * 0.8,
+            );
         }
     };
 
@@ -86,10 +140,18 @@ const ResetPasswordNew = ({ navigationTo }) => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <CustomAnimatedLoader visible={isLoading} />
             <View style={styles.container}>
                 <Text style={styles.headerText}>Reset password</Text>
                 <Text style={styles.descriptionText}>Please enter your new password below.</Text>
                 <View style={styles.form}>
+                    <TextInputEffectLabel
+                        label="Enter OTP"
+                        onChangeText={(text) => handleInputChange('CodeOTP', text)}
+                        value={formData.CodeOTP}
+                        error={errors.CodeOTP}
+                        keyboardType="numeric"
+                    />
                     <TextInputEffectLabel
                         label="Password"
                         type="password"
@@ -126,7 +188,7 @@ const ResetPasswordNew = ({ navigationTo }) => {
                                 Done
                             </Text>
                         </TouchableOpacity>
-                        {userToken === null && (
+                        {!userToken && (
                             <TouchableOpacity style={styles.toggleInactive} onPress={() => navigation.navigate('SignInScreen')}>
                                 <Text style={styles.inactiveText}>Back to Sign in</Text>
                             </TouchableOpacity>

@@ -1,12 +1,16 @@
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import CustomAnimatedLoader from '../../components/CustomAnimatedLoader';
+import { resetPassword } from '../../api/institutes';
+import { storeData } from '../../utils/AsyncStorage';
 
 const ResetPasswordCheckEmail = () => {
-    const [isValid, setIsValid] = useState(false);
     const navigation = useNavigation();
-    const [seconds, setSeconds] = useState(5);
+    const [seconds, setSeconds] = useState(120);
     const [text, setText] = useState('Resend email');
+    const [isValid, setIsValid] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const route = useRoute();
     const email = route.params.email;
@@ -26,10 +30,25 @@ const ResetPasswordCheckEmail = () => {
         return intervalId;
     };
 
-    const handleSubmit = () => {
-        // setIsValid(false);
-        // setSeconds(5);
-        navigation.navigate('ResetPasswordNew');
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        try {
+            const response = await resetPassword(email);
+            const { code, message, data } = JSON.parse(response);
+            if (code == 200) {
+                await storeData('tokenResetPassword', data);
+            } else {
+                alert('Error sending email');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message);
+            return;
+        } finally {
+            setIsValid(false);
+            setSeconds(180);
+            setIsLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -41,6 +60,7 @@ const ResetPasswordCheckEmail = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <CustomAnimatedLoader visible={isLoading} />
             <View style={styles.container}>
                 <Text style={styles.headerText}>Check your email</Text>
                 <Text style={styles.descriptionText}>
@@ -67,6 +87,28 @@ const ResetPasswordCheckEmail = () => {
                             ]}
                         >
                             {text}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.toggle}>
+                    <TouchableOpacity
+                        style={[
+                            styles.toggleActive,
+                            {
+                                backgroundColor: '#315F64',
+                            },
+                        ]}
+                        onPress={() => navigation.navigate('ResetPasswordNew')}
+                    >
+                        <Text
+                            style={[
+                                styles.activeText,
+                                {
+                                    color: '#fff',
+                                },
+                            ]}
+                        >
+                            Move to change password
                         </Text>
                     </TouchableOpacity>
                 </View>

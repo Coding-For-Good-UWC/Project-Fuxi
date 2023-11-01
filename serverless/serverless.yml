@@ -23,6 +23,8 @@ frameworkVersion: "3"
 provider:
   name: aws
   runtime: nodejs18.x
+  state: dev
+  region: ap-southeast-1
 
 # you can overwrite defaults here
 #  stage: dev
@@ -87,6 +89,24 @@ functions:
     events:
       - http:
           path: /institute/signin
+          method: post
+  resetPassword:
+    handler: lambdas/institute.resetPassword
+    events:
+      - http:
+          path: /institute/reset-password
+          method: post
+  changePassword:
+    handler: lambdas/institute.changePassword
+    events:
+      - http:
+          path: /institute/change-password
+          method: post
+  changePasswordInReset:
+    handler: lambdas/institute.changePasswordInReset
+    events:
+      - http:
+          path: /institute/change-reset-password
           method: post
   getAllProfilesByInstituteUId:
     handler: lambdas/profile.getAllProfilesByInstituteUId

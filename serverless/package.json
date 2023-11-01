@@ -1,24 +1,30 @@
 {
-  "name": "fuxibackend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "handler.js",
-  "scripts": {},
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "aws-sdk": "^2.1453.0",
-    "bcrypt": "^5.1.1",
-    "dotenv": "^16.3.1",
-    "firebase-admin": "^11.10.1",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^7.5.2",
-    "node-rsa": "^1.1.1"
-  },
-  "devDependencies": {
-    "serverless-middleware": "^3.2.0",
-    "serverless-offline": "^12.0.4",
-    "serverless-offline-watcher": "^1.1.0"
-  }
+    "name": "fuxibackend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "handler.js",
+    "scripts": {
+        "start": "serverless offline --host 0.0.0.0",
+        "deploy": "serverless deploy",
+        "deploy-function": "serverless deploy function -f myFunc"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "aws-sdk": "^2.1453.0",
+        "bcrypt": "^5.1.1",
+        "bcryptjs": "^2.4.3",
+        "dotenv": "^16.3.1",
+        "firebase-admin": "^11.10.1",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^7.5.2",
+        "node-rsa": "^1.1.1",
+        "nodemailer": "^6.9.7"
+    },
+    "devDependencies": {
+        "serverless-middleware": "^3.2.0",
+        "serverless-offline": "^12.0.4",
+        "serverless-offline-watcher": "^1.1.0"
+    }
 }

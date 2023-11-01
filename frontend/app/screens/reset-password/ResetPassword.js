@@ -2,10 +2,14 @@ import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, Statu
 import React, { useEffect, useState } from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
+import { resetPassword } from '../../api/institutes';
+import { storeData } from '../../utils/AsyncStorage';
+import CustomAnimatedLoader from '../../components/CustomAnimatedLoader';
 
 const ResetPassword = ({ labelHeader }) => {
     const navigation = useNavigation();
     const [isValid, setIsValid] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         email: '',
@@ -49,11 +53,26 @@ const ResetPassword = ({ labelHeader }) => {
         return isValid;
     };
 
-    const handleSubmit = () => {
-        const { email, password } = formData;
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        const { email } = formData;
         if (validateNullFormData(formData)) {
-            console.log(formData);
-            navigation.navigate('ResetPasswordCheckEmail', { email: formData.email });
+            try {
+                const response = await resetPassword(email);
+                const { code, message, data } = JSON.parse(response);
+                if (code == 200) {
+                    await storeData('tokenResetPassword', data);
+                    navigation.navigate('ResetPasswordCheckEmail', { email: email });
+                } else {
+                    alert('Error sending email');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+                return;
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -63,6 +82,7 @@ const ResetPassword = ({ labelHeader }) => {
     }, [formData]);
     return (
         <SafeAreaView style={styles.safeArea}>
+            <CustomAnimatedLoader visible={isLoading} />
             <View style={styles.container}>
                 <Text style={styles.headerText}>{labelHeader}</Text>
                 <Text style={styles.descriptionText}>Please enter your account's email.</Text>

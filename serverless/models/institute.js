@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcryptjs = require('bcryptjs');
 
 const { Schema, model, Types } = mongoose;
 
@@ -25,6 +25,9 @@ const schema = new Schema(
             required: true,
             selected: false,
         },
+        OTPResetPassword: {
+            type: Number,
+        },
     },
     { timestamps: true },
 );
@@ -32,8 +35,8 @@ schema.index({ uid: 1, email: 1 });
 
 schema.pre('save', async function (next) {
     try {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(this.password, salt);
+        const salt = await bcryptjs.genSalt(10);
+        const hashedPassword = await bcryptjs.hash(this.password, salt);
         this.password = hashedPassword;
         next();
     } catch (err) {
