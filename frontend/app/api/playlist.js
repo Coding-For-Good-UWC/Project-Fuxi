@@ -49,9 +49,37 @@ export const createPlaylist = async (profileId, namePlaylist, tracks) => {
 
 export const updatePlaylist = async () => {};
 
+export const addTrackInPlaylist = async (profileId, trackId) => {
+    try {
+        const response = await axios.put(`${apiUrl}/dev/playlist/add-track`, {
+            profileId: profileId,
+            trackId: trackId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
+
+export const removeTrackInPlaylist = async (profileId, trackId) => {
+    try {
+        const response = await axios.put(`${apiUrl}/dev/playlist/remove-track`, {
+            profileId: profileId,
+            trackId: trackId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
+
 export const deletePlaylist = async (playlistId) => {
     try {
-        const response = await axios.delete(`${apiUrl}/dev/playlist?playlistId=${playlistId}`);
+        const response = await axios.delete(`${apiUrl}/dev/playlist`, {
+            playlistId: playlistId,
+        });
         return response.data;
     } catch (error) {
         console.error(error);
@@ -61,7 +89,9 @@ export const deletePlaylist = async (playlistId) => {
 
 export const deleteAllPlaylist = async (profileId) => {
     try {
-        const response = await axios.delete(`${apiUrl}/dev/playlists?profileId=${profileId}`);
+        const response = await axios.delete(`${apiUrl}/dev/playlists`, {
+            profileId: profileId,
+        });
         return response.data;
     } catch (error) {
         console.error(error);

@@ -12,11 +12,9 @@ connectDb();
 
 const getReactTrackByProfileId = async (event) => {
     const { profileId } = event.queryStringParameters;
-
     if (!profileId) {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }
-
     try {
         const response = await profileReactModel.find({ profileId });
         if (response) {
@@ -35,7 +33,6 @@ const getLikeTrackByProfileId = async (event) => {
     if (!profileId) {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }
-    
     try {
         const response = await profileReactModel
             .find({
@@ -63,11 +60,9 @@ const getLikeTrackByProfileId = async (event) => {
 const createProfileReact = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, reactTracks } = json;
-
     if (!profileId) {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }
-
     try {
         const response = await profileReactModel.create({ profileId, reactTracks });
         if (response) {
@@ -84,6 +79,9 @@ const createProfileReact = async (event) => {
 const addReactTrack = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, trackId, preference } = json;
+    if (!profileId || !trackId || !preference) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
     try {
         const updatedReactTrack = await profileReactModel.findOneAndUpdate(
             { profileId: profileId },
@@ -110,6 +108,9 @@ const addReactTrack = async (event) => {
 const updateReactTrack = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, trackId, preference } = json;
+    if (!profileId || !trackId || !preference) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
     try {
         const updatedReactTrack = await profileReactModel.findOneAndUpdate(
             {
@@ -136,6 +137,9 @@ const updateReactTrack = async (event) => {
 const removeReactTrack = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, trackId } = json;
+    if (!profileId || !trackId) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
     try {
         const updatedProfile = await profileReactModel.findOneAndUpdate(
             { profileId: profileId },
@@ -157,12 +161,11 @@ const removeReactTrack = async (event) => {
 };
 
 const deleteProfileReact = async (event) => {
-    const { profileId } = event.queryStringParameters;
-
+    const json = JSON.parse(event.body);
+    const { profileId } = json;
     if (!profileId) {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }
-
     try {
         const existingReactTrack = await profileReactModel.deleteOne({ profileId: new ObjectId(profileId) });
 

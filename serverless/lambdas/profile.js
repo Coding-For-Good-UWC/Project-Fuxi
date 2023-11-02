@@ -9,11 +9,11 @@ const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 connectDb();
 
 const getAllProfilesByInstituteUId = async (event) => {
+    const { uid } = event.queryStringParameters;
+    if (!uid) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
     try {
-        const { uid } = event.queryStringParameters;
-        if (!uid) {
-            return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
-        }
         const profiles = await profileModel.find({ uid: uid });
         return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all profile success', profiles));
     } catch (err) {
@@ -22,11 +22,11 @@ const getAllProfilesByInstituteUId = async (event) => {
 };
 
 const getProfileById = async (event) => {
+    const { id } = event.queryStringParameters;
+    if (!id) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
     try {
-        const { id } = event.queryStringParameters;
-        if (!id) {
-            return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
-        }
         const profile = await profileModel.findOne({ _id: new ObjectId(id) });
         if (!profile) {
             return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found'));
@@ -38,12 +38,12 @@ const getProfileById = async (event) => {
 };
 
 const createProfile = async (event) => {
+    const json = JSON.parse(event.body);
+    const { instituteUid, fullname, yearBirth, genres, description } = json;
+    if (!instituteUid || !fullname || !yearBirth || !genres) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
     try {
-        const json = JSON.parse(event.body);
-        const { instituteUid, fullname, yearBirth, genres, description } = json;
-        if (!instituteUid || !fullname || !yearBirth || !genres) {
-            return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
-        }
         const profile = await profileModel.create({
             uid: instituteUid,
             fullname,
@@ -63,11 +63,12 @@ const createProfile = async (event) => {
 };
 
 const deleteProfile = async (event) => {
+    const json = JSON.parse(event.body);
+    const { id } = json;
+    if (!id) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
     try {
-        const { id } = event.queryStringParameters;
-        if (!id) {
-            return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
-        }
         const deleteProfile = await profileModel.findByIdAndDelete(id);
         if (deleteProfile) {
             return JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte profile success'));
@@ -81,12 +82,12 @@ const deleteProfile = async (event) => {
 };
 
 const updateProfile = async (event) => {
+    const json = JSON.parse(event.body);
+    const { id, fullname, yearBirth, language, genres, description } = json;
+    if (!id || !fullname || !yearBirth) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
     try {
-        const json = JSON.parse(event.body);
-        const { id, fullname, yearBirth, language, genres, description } = json;
-        if (!id || !fullname || !yearBirth) {
-            return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
-        }
         const updateProfile = await profileModel.findOneAndUpdate(
             { _id: new ObjectId(id) },
             {

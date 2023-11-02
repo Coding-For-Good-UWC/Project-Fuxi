@@ -31,7 +31,7 @@ function findNextTrack(tracks, trackId) {
     return tracks[nextIndex];
 }
 
-const PlayMediaComponent = ({ song, dataTracksOrigin }) => {
+const PlayMediaComponent = ({ song, dataTracksOrigin, reactTrack }) => {
     const navigation = useNavigation();
     const [isPlaying, setIsPlaying] = useState(false);
     const [sound, setSound] = useState();
@@ -86,6 +86,12 @@ const PlayMediaComponent = ({ song, dataTracksOrigin }) => {
         unloadSound();
         handleTrackPress(song);
     }, [song]);
+
+    useEffect(() => {
+        if (reactTrack.status === 'dislike' || reactTrack.status === 'strongly dislike') {
+            handleNextTrack();
+        }
+    }, [reactTrack]);
 
     return (
         <>

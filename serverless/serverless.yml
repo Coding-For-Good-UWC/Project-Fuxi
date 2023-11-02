@@ -174,6 +174,18 @@ functions:
       - http:
           path: /playlist
           method: put
+  addTrackInPlaylist:
+    handler: lambdas/playlist.addTrackInPlaylist
+    events:
+      - http:
+          path: /playlist/add-track
+          method: put
+  removeTrackInPlaylist:
+    handler: lambdas/playlist.removeTrackInPlaylist
+    events:
+      - http:
+          path: /playlist/remove-track
+          method: put
   deletePlaylist:
     handler: lambdas/playlist.deletePlaylist
     events:
@@ -191,7 +203,19 @@ functions:
     events:
       - http:
           path: /track/searchTrack
-          method: post
+          method: get
+  getTracksByArtist:
+    handler: lambdas/track.getTracksByArtist
+    events:
+      - http:
+          path: /track/artist
+          method: get
+  getTrackById:
+    handler: lambdas/track.getTrackById
+    events:
+      - http:
+          path: /track
+          method: get
   getReactTrackByProfileId:
     handler: lambdas/profileReact.getReactTrackByProfileId
     events:

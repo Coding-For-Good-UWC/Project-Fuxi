@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
 import React, { useContext } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/core';
 

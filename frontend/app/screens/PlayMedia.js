@@ -77,7 +77,7 @@ const PlayMedia = () => {
                             isOverlay={handleSubmitHideOverlay}
                             followPlayMedia={<FollowPlayMedia song={selectSound} reactTrack={reactTrack} setReactTrack={setReactTrack} />}
                         />
-                        <PlayMediaComponent song={selectSound} dataTracksOrigin={dataTracks} />
+                        <PlayMediaComponent song={selectSound} dataTracksOrigin={dataTracks} reactTrack={reactTrack} />
                         <FollowPlayMedia song={selectSound} reactTrack={reactTrack} setReactTrack={setReactTrack} />
                         <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
                             <Text style={styles.viewPlaylistText}>View playlist</Text>

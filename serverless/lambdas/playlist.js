@@ -99,8 +99,61 @@ const createPlaylist = async (event) => {
 
 const updatePlaylist = async (event) => {};
 
+const addTrackInPlaylist = async (event) => {
+    const json = JSON.parse(event.body);
+    const { profileId, trackId } = json;
+    if (!profileId || !trackId) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
+    try {
+        const addTrack = await playlistModel.findOneAndUpdate(
+            { profileId: profileId },
+            {
+                $push: {
+                    tracks: new mongoose.Types.ObjectId(trackId),
+                },
+            },
+        );
+        if (addTrack) {
+            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added track success'));
+        } else {
+            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found'));
+        }
+    } catch (error) {
+        console.error(error);
+        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+    }
+};
+
+const removeTrackInPlaylist = async (event) => {
+    const json = JSON.parse(event.body);
+    const { profileId, trackId } = json;
+    if (!profileId || !trackId) {
+        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    }
+    try {
+        const updatedProfile = await playlistModel.findOneAndUpdate(
+            { profileId: profileId },
+            {
+                $pull: {
+                    tracks: new mongoose.Types.ObjectId(trackId),
+                },
+            },
+        );
+        if (updatedProfile) {
+            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success'));
+        } else {
+            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found'));
+        }
+    } catch (error) {
+        console.error(error);
+        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+    }
+};
+
 const deletePlaylist = async (event) => {
-    const { playlistId } = event.queryStringParameters;
+    const json = JSON.parse(event.body);
+    const { playlistId } = json;
     if (!playlistId) {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }
@@ -118,7 +171,8 @@ const deletePlaylist = async (event) => {
 };
 
 const deleteAllPlaylist = async (event) => {
-    const { profileId } = event.queryStringParameters;
+    const json = JSON.parse(event.body);
+    const { profileId } = json;
     if (!profileId) {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }
@@ -141,6 +195,8 @@ module.exports = {
     getPlaylistSuggestions,
     createPlaylist,
     updatePlaylist,
+    addTrackInPlaylist,
+    removeTrackInPlaylist,
     deletePlaylist,
     deleteAllPlaylist,
 };

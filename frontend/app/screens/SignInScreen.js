@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar, ToastAndroid, Dimensions } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import colours from '../config/colours';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
@@ -76,21 +76,41 @@ const SignInScreen = () => {
             try {
                 setIsLoading(true);
                 const login = await signInInstitute(email, password);
-                const { statusCode, message, institute, token } = JSON.parse(login);
-                const getProfile0 = await getAllProfilesByInstituteUId(institute.uid);
-                const { data } = JSON.parse(getProfile0);
-                if (statusCode == 200) {
-                    await storeData('userInfo', JSON.stringify(institute));
-                    await storeData('profile0', JSON.stringify(data[0]));
-                    loginAuthContext(token);
-                } else if (statusCode == 400) {
-                    alert(message);
-                } else if (statusCode == 401) {
-                    alert(message);
+                const dataLogin = JSON.parse(login);
+                if (dataLogin?.code === 200) {
+                    if (dataLogin?.data?.institute) {
+                        const getProfile0 = await getAllProfilesByInstituteUId(dataLogin?.data?.institute?.uid);
+                        const dataGetProfile0 = JSON.parse(getProfile0);
+                        await storeData('userInfo', JSON.stringify(dataLogin.data.institute));
+                        await storeData('profile0', JSON.stringify(dataGetProfile0.data[0]));
+                        loginAuthContext(dataLogin.data.token);
+                    } else {
+                        ToastAndroid.showWithGravityAndOffset(
+                            'Email ID or password is invalid',
+                            ToastAndroid.LONG,
+                            ToastAndroid.CENTER,
+                            0,
+                            Dimensions.get('window').height * 0.8,
+                        );
+                    }
+                } else {
+                    ToastAndroid.showWithGravityAndOffset(
+                        'Email ID or password is invalid',
+                        ToastAndroid.LONG,
+                        ToastAndroid.CENTER,
+                        0,
+                        Dimensions.get('window').height * 0.8,
+                    );
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert(error.message);
+                ToastAndroid.showWithGravityAndOffset(
+                    'Email ID or password is invalid',
+                    ToastAndroid.LONG,
+                    ToastAndroid.CENTER,
+                    0,
+                    Dimensions.get('window').height * 0.8,
+                );
                 return;
             } finally {
                 setIsLoading(false);

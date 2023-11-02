@@ -118,7 +118,7 @@ const PlaylistDetailsScreen = () => {
                                     <ReactSongItem
                                         key={index}
                                         item={dataItem}
-                                        reactTrack="" // Truyền chuỗi rỗng
+                                        reactTrack=""
                                         setIsDialogVisible={setIsDialogVisible}
                                         setDialogProps={setDialogProps}
                                         dataTracksOrigin={dataPlaylistDetail?.tracks}

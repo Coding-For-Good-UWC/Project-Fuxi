@@ -41,7 +41,9 @@ export const createProfile = async (userUid, fullname, yearBirth, genres, descri
 
 export const deleteProfile = async (id) => {
     try {
-        const response = await axios.delete(`${apiUrl}/dev/profile?id=${id}`);
+        const response = await axios.delete(`${apiUrl}/dev/profile`, {
+            id: id,
+        });
         return response.data;
     } catch (error) {
         console.error('Error:', error);

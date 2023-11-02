@@ -3,7 +3,7 @@
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 require('dotenv').config();
 const admin = require('firebase-admin');
-const bcrypt = require('bcrypt');
+const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { connectDb } = require('../lib/mongodb');
 const { firebaseConfig } = require('../config/config');
@@ -78,48 +78,40 @@ const signup = async (event) => {
 };
 
 const signin = async (event) => {
+    const { email, password } = JSON.parse(event.body);
+    if (!email || !password) return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     try {
-        const { email, password } = JSON.parse(event.body);
-        if (!email || !password)
-            return JSON.stringify({
-                statusCode: 400,
-                message: 'Missing required fields',
-            });
-
         const credentials = await loginWithCredentials(email);
-        const createToken = await admin.auth().createCustomToken(credentials.uid);
+        if (credentials === null) {
+            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Email ID or password is invalid'));
+        }
 
+        const createToken = await admin.auth().createCustomToken(credentials.uid);
         const institute = await instituteModel.findOne({ uid: credentials.uid }).exec();
-        const resultPassword = await bcrypt.compare(password, institute.password);
+        const resultPassword = await bcryptjs.compare(password, institute.password);
 
         if (!institute) {
-            return JSON.stringify({
-                statusCode: 400,
-                message: 'Invalid credentials',
-            });
+            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Email ID or password is invalid'));
         } else {
             if (resultPassword) {
-                return JSON.stringify({
-                    statusCode: 200,
-                    message: 'Successfully signed in',
-                    institute: {
-                        id: institute._id,
-                        uid: institute.uid,
-                        email: institute.email,
-                        name: institute.name,
-                    },
-                    token: createToken,
-                });
+                return JSON.stringify(
+                    ApiResponse.success(HttpStatus.OK, 'Successfully signed in', {
+                        institute: {
+                            id: institute._id,
+                            uid: institute.uid,
+                            email: institute.email,
+                            name: institute.name,
+                        },
+                        token: createToken,
+                    }),
+                );
             } else {
-                return JSON.stringify({
-                    statusCode: 401,
-                    message: 'Incorrect password',
-                });
+                return JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Email ID or password is invalid'));
             }
         }
     } catch (err) {
         console.log(err);
-        return JSON.stringify({ statusCode: 500, message: 'Server error' });
+        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
     }
 };
 
@@ -160,14 +152,14 @@ const changePassword = async (event) => {
             return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'User not found'));
         }
 
-        const passwordMatch = await bcrypt.compare(oldPassword, institute.password);
+        const passwordMatch = await bcryptjs.compare(oldPassword, institute.password);
 
         if (!passwordMatch) {
             return JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Invalid old password'));
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        const salt = await bcryptjs.genSalt(10);
+        const hashedPassword = await bcryptjs.hash(newPassword, salt);
 
         await instituteModel.findOneAndUpdate({ email: email }, { $set: { password: hashedPassword } });
 
@@ -200,8 +192,8 @@ const changePasswordInReset = async (event) => {
                 }
 
                 if (OTP === institute.OTPResetPassword) {
-                    const salt = await bcrypt.genSalt(10);
-                    const hashedPassword = await bcrypt.hash(newPassword, salt);
+                    const salt = await bcryptjs.genSalt(10);
+                    const hashedPassword = await bcryptjs.hash(newPassword, salt);
 
                     await instituteModel.findOneAndUpdate({ email: email }, { $set: { password: hashedPassword } });
                     return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Password changed successfully'));

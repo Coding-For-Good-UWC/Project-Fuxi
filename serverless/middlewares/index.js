@@ -43,7 +43,7 @@ const loginWithCredentials = async (email) => {
         return userCredential;
     } catch (error) {
         console.error('Error signing in user:', error);
-        throw error;
+        return null;
     }
 };
 

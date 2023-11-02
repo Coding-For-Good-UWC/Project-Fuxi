@@ -5,6 +5,7 @@ import ToggleDialog from './ToggleDialog';
 import { preference } from '../utils/utils';
 import { addReactTrack, updateReactTrack } from '../api/profileReact';
 import { getStoreData } from '../utils/AsyncStorage';
+import { removeTrackInPlaylist } from '../api/playlist';
 
 const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
     const [isDialogVisible, setIsDialogVisible] = useState(false);
@@ -167,6 +168,7 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
             0,
             Dimensions.get('window').height * 0.8,
         );
+        await removeTrackInPlaylist(_id, song._id);
     };
 
     return (
