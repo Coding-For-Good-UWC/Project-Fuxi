@@ -71,11 +71,15 @@ const PlayMediaComponent = ({ song, dataTracksOrigin, reactTrack, setSeconds }) 
     };
 
     const handlePrevTrack = () => {
-        handleTrackPress(findPreviousTrack(dataTracksOrigin, currentSong._id));
+        if (Object.keys(dataTracksOrigin).length !== 0) {
+            handleTrackPress(findPreviousTrack(dataTracksOrigin, currentSong._id));
+        }
     };
 
     const handleNextTrack = () => {
-        handleTrackPress(findNextTrack(dataTracksOrigin, currentSong._id));
+        if (Object.keys(dataTracksOrigin).length !== 0) {
+            handleTrackPress(findNextTrack(dataTracksOrigin, currentSong._id));
+        }
     };
 
     useEffect(() => {
@@ -107,7 +111,13 @@ const PlayMediaComponent = ({ song, dataTracksOrigin, reactTrack, setSeconds }) 
                     {currentSong.Artist}
                 </Text>
             </View>
-            <PlayMediaSlider sound={sound} duration={duration} isPlaying={isPlaying} setIsPlaying={setIsPlaying} />
+            <PlayMediaSlider
+                sound={sound}
+                duration={duration}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+                autoNextTrack={() => handleNextTrack()}
+            />
             <View style={styles.navigationPlayer}>
                 <TouchableOpacity onPress={handlePrevTrack}>
                     <Ionicons name="play-skip-back" size={40} color={'#222C2D'} />

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Slider from '@react-native-community/slider';
 import { formatTime } from '../utils/AudioUtils';
 
-const PlayMediaSlider = ({ sound, duration, isPlaying, setIsPlaying }) => {
+const PlayMediaSlider = ({ sound, duration, isPlaying, setIsPlaying, autoNextTrack }) => {
     const [position, setPosition] = useState(0);
 
     const handleSliderChange = (value) => {
@@ -29,6 +29,10 @@ const PlayMediaSlider = ({ sound, duration, isPlaying, setIsPlaying }) => {
             sound.setOnPlaybackStatusUpdate((status) => {
                 if (typeof status.positionMillis === 'number' && !isNaN(status.positionMillis)) {
                     setPosition(status.positionMillis / 1000);
+                    if (status.positionMillis / 1000 >= duration && autoNextTrack) {
+                        setIsPlaying(false);
+                        autoNextTrack();
+                    }
                 }
             });
         }

@@ -16,7 +16,7 @@ const getReactTrackByProfileId = async (event) => {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }
     try {
-        const response = await profileReactModel.find({ profileId: new ObjectId(profileId) });
+        const response = await profileReactModel.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
         if (response) {
             return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Data retrieved successfully.', response[0]));
         } else {
@@ -34,12 +34,13 @@ const getLikeTrackByProfileId = async (event) => {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }
     try {
-        const response = await profileReactModel
-            .find({
-                profileId: profileId,
-                'reactTracks.preference': { $in: ['like', 'strongly like'] },
-            })
-            .populate('reactTracks.track');
+        // const response = await profileReactModel
+        //     .find({
+        //         profileId: profileId,
+        //         'reactTracks.preference': { $in: ['like', 'strongly like'] }, // Not working
+        //     })
+        //     .populate('reactTracks.track');
+        const response = await profileReactModel.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
         if (response) {
             return JSON.stringify(
                 ApiResponse.success(

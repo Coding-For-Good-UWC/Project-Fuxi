@@ -149,7 +149,7 @@ const ProfileDetailNavigator = () => {
                         title: 'Disliked songs',
                     }}
                 >
-                    {() => <DislikedSongsScreen setIsDialogVisible={setIsDialogVisible} setDialogProps={setDialogProps} />}
+                    {() => <DislikedSongsScreen setIsDialogVisible={setIsDialogVisible} setDialogProps={setDialogProps} dataProfile={dataProfile} />}
                 </Tab.Screen>
             </Tab.Navigator>
             <ToggleDialog

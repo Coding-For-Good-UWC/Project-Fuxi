@@ -79,9 +79,11 @@ const PlayMedia = () => {
                         />
                         <PlayMediaComponent song={selectSound} dataTracksOrigin={dataTracks} reactTrack={reactTrack} setSeconds={setSeconds} />
                         <FollowPlayMedia song={selectSound} reactTrack={reactTrack} setReactTrack={setReactTrack} />
-                        <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
-                            <Text style={styles.viewPlaylistText}>View playlist</Text>
-                        </TouchableOpacity>
+                        {Object.keys(dataTracks).length !== 0 && (
+                            <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
+                                <Text style={styles.viewPlaylistText}>View playlist</Text>
+                            </TouchableOpacity>
+                        )}
                         <BottomSheetScrollView ref={bottomSheetRef} snapTo={'50%'} backgroundColor="#fff" backDropColor="#000">
                             <CustomGridLayout
                                 data={dataTracks?.map((item, index) => (

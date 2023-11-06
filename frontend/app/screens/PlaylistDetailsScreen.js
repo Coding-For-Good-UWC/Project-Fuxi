@@ -104,7 +104,7 @@ const PlaylistDetailsScreen = () => {
                     <CustomGridLayout
                         data={dataPlaylistDetail?.tracks?.map((dataItem, index) => {
                             if (dataReactTracks && Array.isArray(dataReactTracks) && dataReactTracks.length > 0) {
-                                const matchPreference = dataReactTracks.find((item) => item.track === dataItem._id);
+                                const matchPreference = dataReactTracks.find((item) => item.track._id === dataItem._id);
                                 const preference = matchPreference ? matchPreference.preference : '';
                                 return (
                                     <ReactSongItem

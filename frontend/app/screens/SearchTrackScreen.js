@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { searchTrack } from '../api/track';
-import SongItem from '../components/SongItem';
+import ReactSongItem from '../components/ReactSongItem';
 
 const SearchTrackScreen = () => {
     const navigation = useNavigation();
@@ -67,7 +67,7 @@ const SearchTrackScreen = () => {
                 {dataTracks.length !== 0 ? (
                     <CustomGridLayout
                         data={dataTracks?.map((item, index) => (
-                            <SongItem key={index} item={item} />
+                            <ReactSongItem key={index} item={item} />
                         ))}
                         columns={1}
                         handleEndReached={() => setPage(page + 1)}
