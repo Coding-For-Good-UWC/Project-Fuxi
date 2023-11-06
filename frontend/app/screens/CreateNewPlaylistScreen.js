@@ -16,6 +16,7 @@ const CreateNewPlaylistScreen = () => {
     const navigation = useNavigation();
     const [isLoading, setIsLoading] = useState(false);
     const [searchText, setSearchText] = useState('');
+    const [page, setPage] = useState(1);
     const [namePlaylistText, setNamePlaylistText] = useState('');
     const [isSelected, setIsSelected] = useState(false);
     const [selectedItems, setSelectedItems] = useState([]);
@@ -34,27 +35,21 @@ const CreateNewPlaylistScreen = () => {
         });
     }, [navigation]);
 
-    const toggleItem = (item) => {
-        setSelectedItems((prevSelectedItems) => {
-            if (prevSelectedItems.includes(item)) {
-                return prevSelectedItems.filter((selected) => selected !== item);
-            } else {
-                return [...prevSelectedItems, item];
-            }
-        });
-    };
-
     const RenderItem = ({ item }) => {
-        const isSelected = selectedItems.some((selectedItem) => selectedItem === item._id);
+        const isSelected = selectedItems.includes(item._id);
         const [select, setSelect] = useState(isSelected);
-        const renderIconRight = (item) => {
+
+        const toggleItemAndSelect = () => {
+            if (isSelected) {
+                setSelectedItems((prevSelectedItems) => prevSelectedItems.filter((selected) => selected !== item._id));
+            } else {
+                setSelectedItems((prevSelectedItems) => [...prevSelectedItems, item._id]);
+            }
+        };
+
+        const renderIconRight = () => {
             return (
-                <TouchableOpacity
-                    onPress={() => {
-                        toggleItem(item._id);
-                        setSelect(!select);
-                    }}
-                >
+                <TouchableOpacity onPress={toggleItemAndSelect}>
                     {select ? (
                         <Text style={styles.removeText}>Remove</Text>
                     ) : (
@@ -63,37 +58,44 @@ const CreateNewPlaylistScreen = () => {
                 </TouchableOpacity>
             );
         };
-        return <SongItem item={item} iconRight={renderIconRight(item)} />;
+
+        return <SongItem item={item} iconRight={renderIconRight()} />;
     };
 
-    const handleTextChange = async (newText) => {
-        setSearchText(newText);
-        if (newText !== '') {
-            try {
-                const response = await searchTrack(newText, 1);
-                const { code, data, message } = JSON.parse(response);
-                if (code == 200) {
-                    setDataTracks(data);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message);
-                return;
+    useEffect(() => {
+        setPage(1);
+        setDataTracks([]);
+    }, [searchText]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            await getData(searchText, page);
+        };
+        fetchData();
+    }, [page, searchText]);
+
+    const getData = async (text, page) => {
+        try {
+            const response = await searchTrack(text, page);
+            const { code, message, data } = JSON.parse(response);
+            if (code === 200) {
+                setDataTracks((prevData) => [...prevData, ...data]);
             }
-        } else {
-            setDataTracks([]);
+        } catch (error) {
+            console.error('Error:', error);
+            return;
         }
     };
 
     const handleSubmit = async () => {
+        setIsLoading(true);
         try {
-            setIsLoading(true);
             const profileData = await getStoreData('profile0');
             const { _id } = JSON.parse(profileData);
             const response = await createPlaylist(_id, namePlaylistText, selectedItems);
-            const { code, message } = JSON.parse(response);
+            const { code, message, data } = JSON.parse(response);
             if (code == 201) {
-                navigation.navigate('TabNavigator');
+                navigation.navigate('PlayMedia', { dataTracksOrigin: data?.tracks });
                 setIsReRender(!isReRender);
                 ToastAndroid.showWithGravityAndOffset(
                     'Playlist creation successful',
@@ -121,7 +123,6 @@ const CreateNewPlaylistScreen = () => {
     };
 
     useEffect(() => {
-        console.log(selectedItems);
         if (selectedItems.length < 1 || namePlaylistText === '') {
             setIsSelected(false);
         } else {
@@ -152,7 +153,12 @@ const CreateNewPlaylistScreen = () => {
                         <View style={styles.headerSearch}>
                             <View style={styles.search}>
                                 <Ionicons name="search" color="#757575" size={24} style={{ padding: 10 }} />
-                                <TextInput placeholder="Search" style={styles.inputStyle} onChangeText={handleTextChange} value={searchText} />
+                                <TextInput
+                                    placeholder="Search"
+                                    style={styles.inputStyle}
+                                    onChangeText={(text) => setSearchText(text)}
+                                    value={searchText}
+                                />
                                 {searchText !== '' ? (
                                     <Ionicons name="close" size={24} style={{ padding: 10 }} onPress={() => handleTextChange('')} />
                                 ) : (
@@ -168,7 +174,7 @@ const CreateNewPlaylistScreen = () => {
                                     <RenderItem item={item} key={index} />
                                 ))}
                                 columns={1}
-                                styleLayout={{}}
+                                handleEndReached={() => setPage(page + 1)}
                             />
                         ) : (
                             <View style={styles.emptyView}>

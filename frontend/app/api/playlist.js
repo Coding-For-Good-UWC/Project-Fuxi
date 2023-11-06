@@ -78,7 +78,9 @@ export const removeTrackInPlaylist = async (profileId, trackId) => {
 export const deletePlaylist = async (playlistId) => {
     try {
         const response = await axios.delete(`${apiUrl}/dev/playlist`, {
-            playlistId: playlistId,
+            data: {
+                playlistId: playlistId,
+            },
         });
         return response.data;
     } catch (error) {
@@ -90,7 +92,9 @@ export const deletePlaylist = async (playlistId) => {
 export const deleteAllPlaylist = async (profileId) => {
     try {
         const response = await axios.delete(`${apiUrl}/dev/playlists`, {
-            profileId: profileId,
+            data: {
+                profileId: profileId,
+            },
         });
         return response.data;
     } catch (error) {

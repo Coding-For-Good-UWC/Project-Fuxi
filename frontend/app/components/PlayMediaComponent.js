@@ -31,7 +31,7 @@ function findNextTrack(tracks, trackId) {
     return tracks[nextIndex];
 }
 
-const PlayMediaComponent = ({ song, dataTracksOrigin, reactTrack }) => {
+const PlayMediaComponent = ({ song, dataTracksOrigin, reactTrack, setSeconds }) => {
     const navigation = useNavigation();
     const [isPlaying, setIsPlaying] = useState(false);
     const [sound, setSound] = useState();
@@ -59,6 +59,7 @@ const PlayMediaComponent = ({ song, dataTracksOrigin, reactTrack }) => {
 
     const handleTrackPress = async (item) => {
         console.log(item.Title);
+        setSeconds(90);
         setCurrentSong(item);
         const { sound, status } = await Audio.Sound.createAsync({
             uri: item.URI,

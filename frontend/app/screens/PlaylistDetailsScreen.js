@@ -13,7 +13,7 @@ import { getReactTrackByProfileId } from '../api/profileReact';
 
 const PlaylistDetailsScreen = () => {
     const route = useRoute();
-    const dataNavigation = route.params.dataPlaylistDetail;
+    const dataNavigation = route?.params?.dataPlaylistDetail;
     const navigation = useNavigation();
     const [heightItem, setHeightItem] = useState(0);
     const [dataPlaylistDetail, setDataPlaylistDetail] = useState({});
@@ -92,7 +92,10 @@ const PlaylistDetailsScreen = () => {
                         <Text style={styles.playListTotalName}>{secondsToTimeString(totalDuration)}</Text>
                     </View>
                 </View>
-                <TouchableOpacity style={styles.buttonPlay} onPress={() => navigation.navigate('PlayMedia')}>
+                <TouchableOpacity
+                    style={styles.buttonPlay}
+                    onPress={() => navigation.navigate('PlayMedia', { dataTracksOrigin: dataPlaylistDetail?.tracks })}
+                >
                     <Ionicons name="play" color="#fff" size={20} />
                     <Text style={styles.playText}>Play</Text>
                 </TouchableOpacity>

@@ -1,9 +1,19 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 
-const CustomGridLayout = ({ columns, gap = 0, data, styleLayout, styleCell, header, footer }) => {
+const CustomGridLayout = ({ columns, gap = 0, data, styleLayout, styleCell, header, footer, handleEndReached }) => {
     const calculateRows = () => {
         return Math.ceil(data?.length / columns);
+    };
+
+    const handleScroll = (event) => {
+        if (handleEndReached) {
+            const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+            const endReachedThreshold = contentSize.height * 0.2;
+            if (contentOffset.y + layoutMeasurement.height >= contentSize.height - endReachedThreshold) {
+                handleEndReached();
+            }
+        }
     };
 
     const renderGrid = () => {
@@ -50,7 +60,7 @@ const CustomGridLayout = ({ columns, gap = 0, data, styleLayout, styleCell, head
     };
 
     return (
-        <ScrollView vertical={true} showsVerticalScrollIndicator={false} style={[styles.gridLayout, styleLayout]}>
+        <ScrollView onScroll={handleScroll} vertical={true} showsVerticalScrollIndicator={false} style={[styles.gridLayout, styleLayout]}>
             {header}
             {renderGrid()}
             {footer}

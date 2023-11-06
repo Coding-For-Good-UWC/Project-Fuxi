@@ -79,7 +79,11 @@ const signup = async (event) => {
 
 const signin = async (event) => {
     const { email, password } = JSON.parse(event.body);
-    if (!email || !password) return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+    if (!email || !password)
+        return {
+            statusCode: 400,
+            body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')),
+        };
     try {
         const credentials = await loginWithCredentials(email);
         if (credentials === null) {

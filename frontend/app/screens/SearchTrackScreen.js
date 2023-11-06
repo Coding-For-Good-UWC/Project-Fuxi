@@ -10,6 +10,7 @@ const SearchTrackScreen = () => {
     const navigation = useNavigation();
     const textInputRef = useRef(null);
     const [text, setText] = useState('');
+    const [page, setPage] = useState(1);
     const [dataTracks, setDataTracks] = useState([]);
 
     useEffect(() => {
@@ -18,17 +19,28 @@ const SearchTrackScreen = () => {
         }
     }, []);
 
-    const handleTextChange = async (newText) => {
-        setText(newText);
+    useEffect(() => {
+        setPage(1);
+        setDataTracks([]);
+    }, [text]);
+
+    useEffect(() => {
+        console.log(page);
+        const fetchData = async () => {
+            await getData(text, page);
+        };
+        fetchData();
+    }, [page, text]);
+
+    const getData = async (text, page) => {
         try {
-            const response = await searchTrack(newText, 1);
+            const response = await searchTrack(text, page);
             const { code, message, data } = JSON.parse(response);
-            if (code == 200) {
-                setDataTracks(data);
+            if (code === 200) {
+                setDataTracks((prevData) => [...prevData, ...data]);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert(error.message);
             return;
         }
     };
@@ -42,10 +54,10 @@ const SearchTrackScreen = () => {
                         ref={textInputRef}
                         placeholder="Find in Playlist"
                         style={styles.inputStyle}
-                        onChangeText={handleTextChange}
+                        onChangeText={(text) => setText(text)}
                         value={text}
                     />
-                    {text !== '' ? <Ionicons name="close" size={24} style={{ padding: 10 }} onPress={() => handleTextChange('')} /> : ''}
+                    {text !== '' ? <Ionicons name="close" size={24} style={{ padding: 10 }} onPress={() => setText('')} /> : ''}
                 </View>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -58,6 +70,7 @@ const SearchTrackScreen = () => {
                             <SongItem key={index} item={item} />
                         ))}
                         columns={1}
+                        handleEndReached={() => setPage(page + 1)}
                     />
                 ) : (
                     <View style={styles.emptyView}>

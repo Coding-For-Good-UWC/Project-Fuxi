@@ -81,13 +81,14 @@ const createPlaylist = async (event) => {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }
     try {
-        const response = await playlistModel.create({
+        const playlist = await playlistModel.create({
             profileId: new mongoose.Types.ObjectId(profileId),
             namePlaylist,
             tracks: tracks.map((trackId) => new mongoose.Types.ObjectId(trackId)),
         });
-        if (response) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Created react track success', response));
+        await playlistModel.populate(playlist, 'tracks');
+        if (playlist) {
+            return JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Created playlist success', playlist));
         } else {
             return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Create failure'));
         }

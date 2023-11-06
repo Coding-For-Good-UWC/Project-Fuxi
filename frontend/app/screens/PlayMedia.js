@@ -19,7 +19,7 @@ const PlayMedia = () => {
     const navigation = useNavigation();
     const { dataTracksOrigin, currentReactTrack } = route.params;
     const [reactTrack, setReactTrack] = useState(currentReactTrack || {});
-    const [selectSound, setSelectSound] = useState(route.params?.track || null);
+    const [selectSound, setSelectSound] = useState(route.params?.track || dataTracksOrigin[0]);
     const [dataTracks, setDataTracksOrigin] = useState(dataTracksOrigin || []);
 
     const [isOverlay, setIsOverlay] = useState(false);
@@ -77,7 +77,7 @@ const PlayMedia = () => {
                             isOverlay={handleSubmitHideOverlay}
                             followPlayMedia={<FollowPlayMedia song={selectSound} reactTrack={reactTrack} setReactTrack={setReactTrack} />}
                         />
-                        <PlayMediaComponent song={selectSound} dataTracksOrigin={dataTracks} reactTrack={reactTrack} />
+                        <PlayMediaComponent song={selectSound} dataTracksOrigin={dataTracks} reactTrack={reactTrack} setSeconds={setSeconds} />
                         <FollowPlayMedia song={selectSound} reactTrack={reactTrack} setReactTrack={setReactTrack} />
                         <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
                             <Text style={styles.viewPlaylistText}>View playlist</Text>

@@ -16,7 +16,7 @@ const getReactTrackByProfileId = async (event) => {
         return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
     }
     try {
-        const response = await profileReactModel.find({ profileId });
+        const response = await profileReactModel.find({ profileId: new ObjectId(profileId) });
         if (response) {
             return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Data retrieved successfully.', response[0]));
         } else {
