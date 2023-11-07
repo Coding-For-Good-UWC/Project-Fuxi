@@ -1,8 +1,8 @@
 const nodemailer = require('nodemailer');
 
 function ResetPasswordEmail(recipient, CodeOTP) {
-    const username = 'hungnmps24605@fpt.edu.vn';
-    const password = 'huxk hsqk xskp cnhu';
+    const username = 'fuximusicapp@gmail.com';
+    const password = 'tzuh tuui xxeo mnrj';
 
     const transporter = nodemailer.createTransport({
         service: 'Gmail',
