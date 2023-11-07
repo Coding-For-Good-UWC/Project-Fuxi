@@ -138,12 +138,6 @@ functions:
       - http:
           path: /profile
           method: delete
-  getPlaylistByArtist:
-    handler: lambdas/playlist.getPlaylistByArtist
-    events:
-      - http:
-          path: /playlist/artist
-          method: post
   getPlaylistById:
     handler: lambdas/playlist.getPlaylistById
     events:
@@ -168,12 +162,6 @@ functions:
       - http:
           path: /playlist
           method: post
-  updatePlaylist:
-    handler: lambdas/playlist.updatePlaylist
-    events:
-      - http:
-          path: /playlist
-          method: put
   addTrackInPlaylist:
     handler: lambdas/playlist.addTrackInPlaylist
     events:

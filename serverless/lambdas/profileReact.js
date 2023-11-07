@@ -13,25 +13,25 @@ connectDb();
 const getReactTrackByProfileId = async (event) => {
     const { profileId } = event.queryStringParameters;
     if (!profileId) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const response = await profileReactModel.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
         if (response) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Data retrieved successfully.', response[0]));
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Data retrieved successfully.', response[0])) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile with this ID was not found.'));
+            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile with this ID was not found.')) };
         }
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
 const getLikeTrackByProfileId = async (event) => {
     const { profileId } = event.queryStringParameters;
     if (!profileId) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         // const response = await profileReactModel
@@ -42,19 +42,22 @@ const getLikeTrackByProfileId = async (event) => {
         //     .populate('reactTracks.track');
         const response = await profileReactModel.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
         if (response) {
-            return JSON.stringify(
-                ApiResponse.success(
-                    HttpStatus.OK,
-                    'Data retrieved successfully.',
-                    response[0].reactTracks.filter((item) => item.preference === 'like' || item.preference === 'strongly like'),
+            return {
+                statusCode: 200,
+                body: JSON.stringify(
+                    ApiResponse.success(
+                        HttpStatus.OK,
+                        'Data retrieved successfully.',
+                        response[0].reactTracks.filter((item) => item.preference === 'like' || item.preference === 'strongly like'),
+                    ),
                 ),
-            );
+            };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile with this ID was not found.'));
+            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile with this ID was not found.')) };
         }
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -62,18 +65,18 @@ const createProfileReact = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, reactTracks } = json;
     if (!profileId) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const response = await profileReactModel.create({ profileId, reactTracks });
         if (response) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Created react profile success', response));
+            return { statusCode: 201, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Created react profile success', response)) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Create failure'));
+            return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Create failure')) };
         }
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -81,7 +84,7 @@ const addReactTrack = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, trackId, preference } = json;
     if (!profileId || !trackId || !preference) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const updatedReactTrack = await profileReactModel.findOneAndUpdate(
@@ -96,13 +99,13 @@ const addReactTrack = async (event) => {
             },
         );
         if (updatedReactTrack) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added a new react track success'));
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added a new react track success')) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found'));
+            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -110,7 +113,7 @@ const updateReactTrack = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, trackId, preference } = json;
     if (!profileId || !trackId || !preference) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const updatedReactTrack = await profileReactModel.findOneAndUpdate(
@@ -125,13 +128,13 @@ const updateReactTrack = async (event) => {
             },
         );
         if (updatedReactTrack) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Updated react track preference success'));
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Updated react track preference success')) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'React track not found'));
+            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'React track not found')) };
         }
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -139,7 +142,7 @@ const removeReactTrack = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, trackId } = json;
     if (!profileId || !trackId) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const updatedProfile = await profileReactModel.findOneAndUpdate(
@@ -151,13 +154,13 @@ const removeReactTrack = async (event) => {
             },
         );
         if (updatedProfile) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed a react track success'));
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed a react track success')) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found'));
+            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -165,19 +168,19 @@ const deleteProfileReact = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId } = json;
     if (!profileId) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const existingReactTrack = await profileReactModel.deleteOne({ profileId: new ObjectId(profileId) });
 
         if (existingReactTrack.deletedCount > 0) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Deleted react profile success'));
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Deleted react profile success')) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'React profile not found'));
+            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'React profile not found')) };
         }
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 

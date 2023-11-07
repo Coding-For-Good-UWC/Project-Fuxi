@@ -1,10 +1,20 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+let cachedDb = null;
 
-const connectDb = () => {
-  const mongoUrl = process.env.MONGO_URL || '';
-  mongoose.set({ strictQuery: false });
-  mongoose.connect(mongoUrl).then(() => console.log('Mongo Connected....'));
+const connectDb = async () => {
+    if (cachedDb) {
+        return cachedDb;
+    }
+
+    try {
+        const dbUrl = process.env.MONGO_URL || '';
+        cachedDb = await mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+        console.log('Connected to DocumentDB');
+        return cachedDb;
+    } catch (err) {
+        console.error('Error connecting to DocumentDB:', err);
+        throw err;
+    }
 };
 
-module.exports.connectDb = connectDb;
+module.exports = { connectDb };

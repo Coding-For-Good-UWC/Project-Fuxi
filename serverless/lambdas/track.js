@@ -9,7 +9,7 @@ connectDb();
 const searchTrack = async (event) => {
     const { title, pageNumber, pageSize = 15 } = event.queryStringParameters;
     if (!title || !pageNumber) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
 
     try {
@@ -19,17 +19,17 @@ const searchTrack = async (event) => {
             .skip(skipCount)
             .limit(pageSize)
             .exec();
-        return JSON.stringify(ApiResponse.success(HttpStatus.OK, `Get tracks by title ${title}`, tracks));
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, `Get tracks by title ${title}`, tracks)) };
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
     }
 };
 
 const getTracksByArtist = async (event) => {
     const { artist, pageNumber, pageSize = 15 } = event.queryStringParameters;
     if (!artist || !pageNumber) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const skipCount = (pageNumber - 1) * pageSize;
@@ -38,24 +38,24 @@ const getTracksByArtist = async (event) => {
             .skip(skipCount)
             .limit(pageSize)
             .exec();
-        return JSON.stringify(ApiResponse.success(HttpStatus.OK, `Get tracks by artist ${artist}`, playlist));
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, `Get tracks by artist ${artist}`, playlist)) };
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
     }
 };
 
 const getTrackById = async (event) => {
     const { id } = event.queryStringParameters;
     if (!id) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const track = await trackModel.findById(id);
-        return JSON.stringify(ApiResponse.success(HttpStatus.OK, `Get track by id ${id}`, track));
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, `Get track by id ${id}`, track)) };
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
     }
 };
 

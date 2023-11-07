@@ -13,25 +13,25 @@ connectDb();
 const getPlaylistById = async (event) => {
     const { playlistId } = event.queryStringParameters;
     if (!playlistId) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const response = await playlistModel.findById(playlistId).populate('tracks');
         if (response) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', response));
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', response)) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found'));
+            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
         }
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
 const getAllPlayListByProfileId = async (event) => {
     const { profileId } = event.queryStringParameters;
     if (!profileId) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const response = await playlistModel
@@ -54,10 +54,10 @@ const getAllPlayListByProfileId = async (event) => {
                 }
             }),
         );
-        return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', result));
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', result)) };
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 const getPlaylistSuggestions = async (event) => {
@@ -71,14 +71,14 @@ const getPlaylistSuggestions = async (event) => {
         .skip(skipCount)
         .limit(pageSize)
         .exec();
-    return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', getTrackSuggestions));
+    return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', getTrackSuggestions)) };
 };
 
 const createPlaylist = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, namePlaylist, tracks } = json;
     if (!profileId || !namePlaylist || !tracks) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const playlist = await playlistModel.create({
@@ -88,23 +88,23 @@ const createPlaylist = async (event) => {
         });
         await playlistModel.populate(playlist, 'tracks');
         if (playlist) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Created playlist success', playlist));
+            return { statusCode: 201, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Created playlist success', playlist)) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Create failure'));
+            return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Create failure')) };
         }
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
-const updatePlaylist = async (event) => {};
+// const updatePlaylist = async (event) => {};
 
 const addTrackInPlaylist = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, trackId } = json;
     if (!profileId || !trackId) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const addTrack = await playlistModel.findOneAndUpdate(
@@ -116,13 +116,13 @@ const addTrackInPlaylist = async (event) => {
             },
         );
         if (addTrack) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added track success'));
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added track success')) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found'));
+            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -130,7 +130,7 @@ const removeTrackInPlaylist = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, trackId } = json;
     if (!profileId || !trackId) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const updatedProfile = await playlistModel.findOneAndUpdate(
@@ -142,13 +142,13 @@ const removeTrackInPlaylist = async (event) => {
             },
         );
         if (updatedProfile) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success'));
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success')) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found'));
+            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }
     } catch (error) {
         console.error(error);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -156,18 +156,18 @@ const deletePlaylist = async (event) => {
     const json = JSON.parse(event.body);
     const { playlistId } = json;
     if (!playlistId) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const deletePlaylist = await playlistModel.findByIdAndDelete(playlistId);
         if (deletePlaylist) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte playlist success'));
+            return { statusCode: 204, body: JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte playlist success')) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found'));
+            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }
     } catch (err) {
         console.log(err);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -175,18 +175,18 @@ const deleteAllPlaylist = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId } = json;
     if (!profileId) {
-        return JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields'));
+        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const deletedPlaylists = await playlistModel.deleteMany({ profileId: profileId });
         if (deletedPlaylists.deletedCount > 0) {
-            return JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte playlist success'));
+            return { statusCode: 204, body: JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte playlist success')) };
         } else {
-            return JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found'));
+            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }
     } catch (err) {
         console.log(err);
-        return JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error'));
+        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -195,7 +195,6 @@ module.exports = {
     getAllPlayListByProfileId,
     getPlaylistSuggestions,
     createPlaylist,
-    updatePlaylist,
     addTrackInPlaylist,
     removeTrackInPlaylist,
     deletePlaylist,
