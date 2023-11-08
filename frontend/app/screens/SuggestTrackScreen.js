@@ -7,19 +7,20 @@ import { getStoreData } from '../utils/AsyncStorage';
 
 const SuggestTrackScreen = () => {
     const [dataTracks, setDataTracks] = useState([]);
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         getPlaylistSuggestion();
-    }, []);
+    }, [page]);
 
     async function getPlaylistSuggestion() {
         try {
             const profile0 = await getStoreData('profile0');
             const { _id } = JSON.parse(profile0);
-            const response = await getPlaylistSuggestions(_id);
-            const { code, message, data } = JSON.parse(response);
+            const response = await getPlaylistSuggestions(_id, page);
+            const { code, message, data } = response;
             if (code == 200) {
-                setDataTracks(data);
+                setDataTracks((prevData) => [...prevData, ...data]);
             }
         } catch (error) {
             alert(error.message);
@@ -38,6 +39,7 @@ const SuggestTrackScreen = () => {
                             <ReactSongItem key={index} item={track} dataTracksOrigin={dataTracks} />
                         ))}
                         columns={1}
+                        handleEndReached={() => setPage(page + 1)}
                     />
                 </View>
             </View>

@@ -18,7 +18,7 @@ const AllListenerProfilesScreen = () => {
             const userInfo = await getStoreData('userInfo');
             const { uid } = JSON.parse(userInfo);
             const response = await getAllProfilesByInstituteUId(uid);
-            const { code, message, data } = JSON.parse(response);
+            const { code, message, data } = response;
             if (code == 200) {
                 setDataProfiles(data);
             } else {

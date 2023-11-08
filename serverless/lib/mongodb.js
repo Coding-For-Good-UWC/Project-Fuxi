@@ -5,7 +5,15 @@ let cachedDb = null;
 
 const filePath = path.join(__dirname, 'global-bundle.pem');
 
-const tlsCA = fs.readFileSync(filePath);
+const options = {
+    retryWrites: false,
+    ssl: true,
+    tlsAllowInvalidCertificates: true,
+    tlsCAFile: filePath,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    directConnection: true,
+};
 
 const connectDb = async () => {
     if (cachedDb) {
@@ -14,9 +22,7 @@ const connectDb = async () => {
 
     try {
         const dbUrl = process.env.MONGO_URL || '';
-        cachedDb = await mongoose.connect(dbUrl, {
-            tlsCAFile: tlsCA,
-        });
+        cachedDb = await mongoose.connect('mongodb://zany:EXm7B3b9uRwc8D2pK@localhost:27117/Project_FUXI', options);
         console.log('Connected to DocumentDB');
         return cachedDb;
     } catch (err) {

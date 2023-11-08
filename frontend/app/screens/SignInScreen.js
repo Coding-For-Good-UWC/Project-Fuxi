@@ -76,11 +76,11 @@ const SignInScreen = () => {
             try {
                 setIsLoading(true);
                 const login = await signInInstitute(email, password);
-                const dataLogin = JSON.parse(login);
+                const dataLogin = login;
                 if (dataLogin?.code === 200) {
                     if (dataLogin?.data?.institute) {
                         const getProfile0 = await getAllProfilesByInstituteUId(dataLogin?.data?.institute?.uid);
-                        const dataGetProfile0 = JSON.parse(getProfile0);
+                        const dataGetProfile0 = getProfile0;
                         await storeData('userInfo', JSON.stringify(dataLogin.data.institute));
                         await storeData('profile0', JSON.stringify(dataGetProfile0.data[0]));
                         loginAuthContext(dataLogin.data.token);

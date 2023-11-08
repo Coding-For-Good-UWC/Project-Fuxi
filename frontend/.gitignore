@@ -1,4 +1,6 @@
 node_modules/
+android/
+build/
 .expo/
 dist/
 npm-debug.*

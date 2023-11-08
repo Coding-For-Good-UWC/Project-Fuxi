@@ -38,7 +38,7 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
         const { uid } = JSON.parse(json);
         try {
             const newProfile = await createProfile(uid, nameListener.trim(), yearBirth, selectedItems, null);
-            const { code, message, data } = JSON.parse(newProfile);
+            const { code, message, data } = newProfile;
             await createProfileReact(data._id, []);
             if (code == 201) {
                 await storeData('profile0', JSON.stringify(data));

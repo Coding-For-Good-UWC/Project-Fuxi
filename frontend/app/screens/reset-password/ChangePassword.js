@@ -89,7 +89,7 @@ const ChangePassword = () => {
                 const { oldPassword, password, confirmPassword } = formData;
                 if (password === confirmPassword) {
                     const response = await changePassword(email, oldPassword, password);
-                    const { code, message, data } = JSON.parse(response);
+                    const { code, message, data } = response;
                     if (code === 200) {
                         navigation.navigate('TabNavigator');
                         ToastAndroid.showWithGravityAndOffset(
@@ -153,6 +153,7 @@ const ChangePassword = () => {
                 <View style={styles.form}>
                     <TextInputEffectLabel
                         label="Enter old password"
+                        type="password"
                         onChangeText={(text) => handleInputChange('oldPassword', text)}
                         value={formData.oldPassword}
                         error={errors.oldPassword}

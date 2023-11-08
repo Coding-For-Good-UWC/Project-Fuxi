@@ -59,7 +59,7 @@ const ResetPassword = () => {
         if (validateNullFormData(formData)) {
             try {
                 const response = await resetPassword(email);
-                const { code, message, data } = JSON.parse(response);
+                const { code, message, data } = response;
                 if (code == 200) {
                     await storeData('tokenResetPassword', data);
                     navigation.navigate('ResetPasswordCheckEmail', { email: email });

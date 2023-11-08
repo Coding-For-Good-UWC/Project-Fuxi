@@ -77,7 +77,7 @@ const CreateNewPlaylistScreen = () => {
     const getData = async (text, page) => {
         try {
             const response = await searchTrack(text, page);
-            const { code, message, data } = JSON.parse(response);
+            const { code, message, data } = response;
             if (code === 200) {
                 setDataTracks((prevData) => [...prevData, ...data]);
             }
@@ -93,7 +93,7 @@ const CreateNewPlaylistScreen = () => {
             const profileData = await getStoreData('profile0');
             const { _id } = JSON.parse(profileData);
             const response = await createPlaylist(_id, namePlaylistText, selectedItems);
-            const { code, message, data } = JSON.parse(response);
+            const { code, message, data } = response;
             if (code == 201) {
                 navigation.navigate('PlayMedia', { dataTracksOrigin: data?.tracks });
                 setIsReRender(!isReRender);
@@ -160,7 +160,7 @@ const CreateNewPlaylistScreen = () => {
                                     value={searchText}
                                 />
                                 {searchText !== '' ? (
-                                    <Ionicons name="close" size={24} style={{ padding: 10 }} onPress={() => handleTextChange('')} />
+                                    <Ionicons name="close" size={24} style={{ padding: 10 }} onPress={() => setSearchText('')} />
                                 ) : (
                                     ''
                                 )}

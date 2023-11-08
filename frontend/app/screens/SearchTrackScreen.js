@@ -25,7 +25,6 @@ const SearchTrackScreen = () => {
     }, [text]);
 
     useEffect(() => {
-        console.log(page);
         const fetchData = async () => {
             await getData(text, page);
         };
@@ -35,7 +34,7 @@ const SearchTrackScreen = () => {
     const getData = async (text, page) => {
         try {
             const response = await searchTrack(text, page);
-            const { code, message, data } = JSON.parse(response);
+            const { code, message, data } = response;
             if (code === 200) {
                 setDataTracks((prevData) => [...prevData, ...data]);
             }

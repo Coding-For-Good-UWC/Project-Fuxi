@@ -112,14 +112,14 @@ const CreateAccountScreen = () => {
         try {
             setIsLoading(true);
             const institutesNew = await signUpInstitute(name, email, password);
-            const { statusCode, body } = JSON.parse(institutesNew);
+            const { code, message, data } = institutesNew;
 
-            if (statusCode == 200) {
-                storeData('userInfo', JSON.stringify({ uid: body.userUid, token: body.token }));
-                navigation.navigate('ListenerProfileMain', { token: body.token });
-            } else if (statusCode == 400) {
+            if (code == 200) {
+                storeData('userInfo', JSON.stringify({ uid: data.userUid, token: data.token }));
+                navigation.navigate('ListenerProfileMain', { token: data.token });
+            } else if (code == 400) {
                 alert(body.message);
-            } else if (statusCode == 409) {
+            } else if (code == 409) {
                 setErrors({
                     ...errors,
                     email: body.message,

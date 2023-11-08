@@ -15,7 +15,7 @@ const DislikedSongsScreen = ({ setIsDialogVisible, setDialogProps, dataProfile }
     async function getReactTracks() {
         try {
             const response = await getReactTrackByProfileId(dataProfile._id);
-            const { code, message, data } = JSON.parse(response);
+            const { code, message, data } = response;
             if (code == 200) {
                 setDataReactTracks(data?.reactTracks);
             }

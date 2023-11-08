@@ -34,7 +34,7 @@ const ResetPasswordCheckEmail = () => {
         setIsLoading(true);
         try {
             const response = await resetPassword(email);
-            const { code, message, data } = JSON.parse(response);
+            const { code, message, data } = response;
             if (code == 200) {
                 await storeData('tokenResetPassword', data);
             } else {

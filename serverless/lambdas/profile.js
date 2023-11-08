@@ -11,29 +11,29 @@ connectDb();
 const getAllProfilesByInstituteUId = async (event) => {
     const { uid } = event.queryStringParameters;
     if (!uid) {
-        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const profiles = await profileModel.find({ uid: uid });
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all profile success', profiles)) };
     } catch (err) {
-        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
 const getProfileById = async (event) => {
     const { id } = event.queryStringParameters;
     if (!id) {
-        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const profile = await profileModel.findOne({ _id: new ObjectId(id) });
         if (!profile) {
-            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all profile success', profile)) };
     } catch (err) {
-        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -41,7 +41,7 @@ const createProfile = async (event) => {
     const json = JSON.parse(event.body);
     const { instituteUid, fullname, yearBirth, genres, description } = json;
     if (!instituteUid || !fullname || !yearBirth || !genres) {
-        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const profile = await profileModel.create({
@@ -52,13 +52,13 @@ const createProfile = async (event) => {
             description,
         });
         if (profile) {
-            return { statusCode: 201, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Profile created success', profile)) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Profile created success', profile)) };
         } else {
-            return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Create failure')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Create failure')) };
         }
     } catch (err) {
         console.log(err);
-        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -66,18 +66,18 @@ const deleteProfile = async (event) => {
     const json = JSON.parse(event.body);
     const { id } = json;
     if (!id) {
-        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const deleteProfile = await profileModel.findByIdAndDelete(id);
         if (deleteProfile) {
-            return { statusCode: 204, body: JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte profile success')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte profile success')) };
         } else {
-            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }
     } catch (err) {
         console.log(err);
-        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
@@ -85,7 +85,7 @@ const updateProfile = async (event) => {
     const json = JSON.parse(event.body);
     const { id, fullname, yearBirth, language, genres, description } = json;
     if (!id || !fullname || !yearBirth) {
-        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const updateProfile = await profileModel.findOneAndUpdate(
@@ -104,11 +104,11 @@ const updateProfile = async (event) => {
         if (updateProfile) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Update profile success')) };
         } else {
-            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }
     } catch (err) {
         console.log(err);
-        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 

@@ -18,13 +18,14 @@ firebaseConfig();
 const signup = async (event) => {
     const { email, name, password } = JSON.parse(event.body);
     if (!email || !name || !password) {
-        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
 
     try {
         const userUid = await createUserFirebase(email, password);
         if (userUid) {
             const newInstitute = await instituteModel.create({ uid: userUid, email, name, password });
+            console.log(newInstitute);
             if (newInstitute) {
                 const createToken = await admin.auth().createCustomToken(userUid);
                 return {
@@ -32,36 +33,36 @@ const signup = async (event) => {
                     body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Institute created', { userUid: userUid, token: createToken })),
                 };
             } else {
-                return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
+                return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
             }
         } else {
-            return { statusCode: 409, body: JSON.stringify(ApiResponse.error(HttpStatus.CONFLICT, 'User with email already exists')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.CONFLICT, 'User with email already exists')) };
         }
     } catch (err) {
         console.log(err);
-        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
 const signin = async (event) => {
     const { email, password } = JSON.parse(event.body);
     if (!email || !password) {
-        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
         const credentials = await loginWithCredentials(email);
         if (credentials === null) {
-            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Email ID or password is invalid')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Email ID or password is invalid')) };
         }
 
-        const createToken = await admin.auth().createCustomToken(credentials.uid);
-        const institute = await instituteModel.findOne({ uid: credentials.uid }).exec();
+        const institute = await instituteModel.findOne({ email: email }).exec();
         const resultPassword = await bcryptjs.compare(password, institute.password);
 
         if (!institute) {
-            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Email ID or password is invalid')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Email ID or password is invalid')) };
         } else {
             if (resultPassword) {
+                const createToken = await admin.auth().createCustomToken(credentials.uid);
                 return {
                     statusCode: 200,
                     body: JSON.stringify(
@@ -77,19 +78,19 @@ const signin = async (event) => {
                     ),
                 };
             } else {
-                return { statusCode: 403, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Email ID or password is invalid')) };
+                return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Email ID or password is invalid')) };
             }
         }
     } catch (err) {
         console.log(err);
-        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
 const resetPassword = async (event) => {
     const { email } = JSON.parse(event.body);
     if (!email) {
-        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
@@ -102,29 +103,29 @@ const resetPassword = async (event) => {
         if (result === 200) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Email sent successfully!', token)) };
         } else {
-            return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Error sending email')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Error sending email')) };
         }
     } catch (error) {
         console.error(error);
-        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
 
 const changePassword = async (event) => {
     const { email, oldPassword, newPassword } = JSON.parse(event.body);
     if (!email || !oldPassword || !newPassword) {
-        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
 
     try {
         const institute = await instituteModel.findOne({ email: email });
         if (!institute) {
-            return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'User not found')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'User not found')) };
         }
 
         const passwordMatch = await bcryptjs.compare(oldPassword, institute.password);
         if (!passwordMatch) {
-            return { statusCode: 403, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Invalid old password')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Invalid old password')) };
         }
 
         const salt = await bcryptjs.genSalt(10);
@@ -135,14 +136,14 @@ const changePassword = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Password changed successfully')) };
     } catch (error) {
         console.error(error);
-        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'An error occurred')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'An error occurred')) };
     }
 };
 
 const changePasswordInReset = async (event) => {
     const { token, OTP, newPassword } = JSON.parse(event.body);
     if (!token || !OTP || !newPassword) {
-        return { statusCode: 400, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
 
     try {
@@ -157,7 +158,7 @@ const changePasswordInReset = async (event) => {
                 const institute = await instituteModel.findOne({ email: email });
 
                 if (!institute) {
-                    return { statusCode: 404, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'User not found')) };
+                    return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'User not found')) };
                 }
 
                 if (OTP === institute.OTPResetPassword) {
@@ -167,7 +168,7 @@ const changePasswordInReset = async (event) => {
                     await instituteModel.findOneAndUpdate({ email: email }, { $set: { password: hashedPassword } });
                     return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Password changed successfully')) };
                 } else {
-                    return { statusCode: 403, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'OTP code is invalid')) };
+                    return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'OTP code is invalid')) };
                 }
             } else {
                 return {
@@ -176,11 +177,11 @@ const changePasswordInReset = async (event) => {
                 };
             }
         } else {
-            return { statusCode: 403, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Email information not found in token')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Email information not found in token')) };
         }
     } catch (error) {
         console.error(error);
-        return { statusCode: 500, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'An error occurred')) };
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'An error occurred')) };
     }
 };
 

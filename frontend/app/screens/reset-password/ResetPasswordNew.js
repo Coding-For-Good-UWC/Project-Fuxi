@@ -82,8 +82,7 @@ const ResetPasswordNew = () => {
                 const { CodeOTP, password, confirmPassword } = formData;
                 if (password === confirmPassword) {
                     const response = await changePasswordInReset(token, parseInt(CodeOTP, 10), password);
-                    const { code, message, data } = JSON.parse(response);
-                    console.log(message);
+                    const { code, message, data } = response;
                     if (code === 200) {
                         navigation.navigate('SignInScreen');
                         ToastAndroid.showWithGravityAndOffset(

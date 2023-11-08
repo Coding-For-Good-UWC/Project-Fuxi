@@ -20,9 +20,8 @@ const ChangeListenerScreen = ({ visible }) => {
         const { _id } = JSON.parse(profile0);
         if (item._id !== _id) {
             const response = await getProfileById(item._id);
-            const { code, message, data } = JSON.parse(response);
+            const { code, message, data } = response;
             if (code == 200) {
-                console.log(data.fullname);
                 await storeData('profile0', JSON.stringify(data));
                 visible(false);
                 setIsReRender(!isReRender);
@@ -39,7 +38,7 @@ const ChangeListenerScreen = ({ visible }) => {
             const userInfo = await getStoreData('userInfo');
             const { uid } = JSON.parse(userInfo);
             const response = await getAllProfilesByInstituteUId(uid);
-            const { code, message, data } = JSON.parse(response);
+            const { code, message, data } = response;
             if (code == 200) {
                 setDataListener(data);
             }
