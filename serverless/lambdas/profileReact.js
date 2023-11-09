@@ -2,13 +2,10 @@
 
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 const ObjectId = require('mongoose').Types.ObjectId;
-const { connectDb } = require('../lib/mongodb');
-
-const trackModel = require('../models/track');
-const profileReactModel = require('../models/profileReact');
+const { connectDb, closeDb } = require('../lib/mongodb');
+const { TrackModel } = require('../models/track');
+const { ProfileReactModal } = require('../models/profileReact');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
-
-connectDb();
 
 const getReactTrackByProfileId = async (event) => {
     await connectDb();
@@ -17,7 +14,7 @@ const getReactTrackByProfileId = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const response = await profileReactModel.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
+        const response = await ProfileReactModal.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
         if (response) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Data retrieved successfully.', response[0])) };
         } else {
@@ -38,13 +35,13 @@ const getLikeTrackByProfileId = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        // const response = await profileReactModel
+        // const response = await ProfileReactModal
         //     .find({
         //         profileId: profileId,
         //         'reactTracks.preference': { $in: ['like', 'strongly like'] }, // Not working
         //     })
         //     .populate('reactTracks.track');
-        const response = await profileReactModel.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
+        const response = await ProfileReactModal.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
         if (response) {
             return {
                 statusCode: 200,
@@ -75,7 +72,7 @@ const createProfileReact = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const response = await profileReactModel.create({ profileId, reactTracks });
+        const response = await ProfileReactModal.create({ profileId, reactTracks });
         if (response) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Created react profile success', response)) };
         } else {
@@ -97,7 +94,7 @@ const addReactTrack = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const updatedReactTrack = await profileReactModel.findOneAndUpdate(
+        const updatedReactTrack = await ProfileReactModal.findOneAndUpdate(
             { profileId: profileId },
             {
                 $push: {
@@ -129,7 +126,7 @@ const updateReactTrack = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const updatedReactTrack = await profileReactModel.findOneAndUpdate(
+        const updatedReactTrack = await ProfileReactModal.findOneAndUpdate(
             {
                 profileId: profileId,
                 'reactTracks.track': new ObjectId(trackId),
@@ -161,7 +158,7 @@ const removeReactTrack = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const updatedProfile = await profileReactModel.findOneAndUpdate(
+        const updatedProfile = await ProfileReactModal.findOneAndUpdate(
             { profileId: profileId },
             {
                 $pull: {
@@ -190,7 +187,7 @@ const deleteProfileReact = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const existingReactTrack = await profileReactModel.deleteOne({ profileId: new ObjectId(profileId) });
+        const existingReactTrack = await ProfileReactModal.deleteOne({ profileId: new ObjectId(profileId) });
 
         if (existingReactTrack.deletedCount > 0) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Deleted react profile success')) };

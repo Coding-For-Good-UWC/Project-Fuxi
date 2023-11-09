@@ -84,6 +84,18 @@ functions:
       - http:
           path: /hello-world
           method: get
+  createUserFirebase:
+    handler: middlewares/index.createUserFirebase
+    events:
+      - http:
+          path: /firebase/create-user
+          method: post
+  loginWithCredentials:
+    handler: middlewares/index.loginWithCredentials
+    events:
+      - http:
+          path: /firebase/user-login
+          method: post
   signup:
     handler: lambdas/institute.signup
     events:

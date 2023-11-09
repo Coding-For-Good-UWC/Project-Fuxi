@@ -1,10 +1,9 @@
 'use strict';
 
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
-const trackModel = require('../models/track');
-const { connectDb } = require('../lib/mongodb');
+const { connectDb, closeDb } = require('../lib/mongodb');
+const { TrackModel } = require('../models/track');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
-connectDb();
 
 const searchTrack = async (event) => {
     await connectDb();
@@ -15,8 +14,7 @@ const searchTrack = async (event) => {
 
     try {
         const skipCount = (pageNumber - 1) * pageSize;
-        const tracks = await trackModel
-            .find({ Title: { $regex: new RegExp(title, 'i') } })
+        const tracks = await TrackModel.find({ Title: { $regex: new RegExp(title, 'i') } })
             .skip(skipCount)
             .limit(pageSize)
             .exec();
@@ -37,8 +35,7 @@ const getTracksByArtist = async (event) => {
     }
     try {
         const skipCount = (pageNumber - 1) * pageSize;
-        const playlist = await trackModel
-            .find({ Artist: { $regex: new RegExp(artist, 'i') } })
+        const playlist = await TrackModel.find({ Artist: { $regex: new RegExp(artist, 'i') } })
             .skip(skipCount)
             .limit(pageSize)
             .exec();
@@ -58,7 +55,7 @@ const getTrackById = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const track = await trackModel.findById(id);
+        const track = await TrackModel.findById(id);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, `Get track by id ${id}`, track)) };
     } catch (error) {
         console.error(error);

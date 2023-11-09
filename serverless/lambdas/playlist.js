@@ -2,10 +2,10 @@
 
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 const mongoose = require('mongoose');
-const { connectDb } = require('../lib/mongodb');
-const trackModel = require('../models/track');
-const profileModel = require('../models/profile');
-const playlistModel = require('../models/playlist');
+const { connectDb, closeDb } = require('../lib/mongodb');
+const { TrackModel } = require('../models/track');
+const { ProfileModel } = require('../models/profile');
+const { PlaylistModel } = require('../models/playlist');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 
 const getPlaylistById = async (event) => {
@@ -15,7 +15,7 @@ const getPlaylistById = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const response = await playlistModel.findById(playlistId).populate('tracks');
+        const response = await PlaylistModel.findById(playlistId).populate('tracks');
         if (response) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', response)) };
         } else {
@@ -36,8 +36,7 @@ const getAllPlayListByProfileId = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const response = await playlistModel
-            .find({ profileId: new mongoose.Types.ObjectId(profileId) })
+        const response = await PlaylistModel.find({ profileId: new mongoose.Types.ObjectId(profileId) })
             .populate('tracks')
             .sort({ updatedAt: 'desc' });
         const result = await Promise.all(
@@ -69,10 +68,9 @@ const getPlaylistSuggestions = async (event) => {
     const { profileId, pageNumber, pageSize = 15 } = event.queryStringParameters;
     const skipCount = (pageNumber - 1) * pageSize;
 
-    const profile = await profileModel.findById(profileId);
+    const profile = await ProfileModel.findById(profileId);
 
-    const getTrackSuggestions = await trackModel
-        .find({ Language: { $in: profile.genres } })
+    const getTrackSuggestions = await TrackModel.find({ Language: { $in: profile.genres } })
         .skip(skipCount)
         .limit(pageSize)
         .exec();
@@ -88,12 +86,12 @@ const createPlaylist = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const playlist = await playlistModel.create({
+        const playlist = await PlaylistModel.create({
             profileId: new mongoose.Types.ObjectId(profileId),
             namePlaylist,
             tracks: tracks.map((trackId) => new mongoose.Types.ObjectId(trackId)),
         });
-        await playlistModel.populate(playlist, 'tracks');
+        await PlaylistModel.populate(playlist, 'tracks');
         if (playlist) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Created playlist success', playlist)) };
         } else {
@@ -117,7 +115,7 @@ const addTrackInPlaylist = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const addTrack = await playlistModel.findOneAndUpdate(
+        const addTrack = await PlaylistModel.findOneAndUpdate(
             { profileId: profileId },
             {
                 $push: {
@@ -146,7 +144,7 @@ const removeTrackInPlaylist = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const updatedProfile = await playlistModel.findOneAndUpdate(
+        const updatedProfile = await PlaylistModel.findOneAndUpdate(
             { profileId: profileId },
             {
                 $pull: {
@@ -175,7 +173,7 @@ const deletePlaylist = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const deletePlaylist = await playlistModel.findByIdAndDelete(playlistId);
+        const deletePlaylist = await PlaylistModel.findByIdAndDelete(playlistId);
         if (deletePlaylist) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte playlist success')) };
         } else {
@@ -197,7 +195,7 @@ const deleteAllPlaylist = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const deletedPlaylists = await playlistModel.deleteMany({ profileId: profileId });
+        const deletedPlaylists = await PlaylistModel.deleteMany({ profileId: profileId });
         if (deletedPlaylists.deletedCount > 0) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte playlist success')) };
         } else {

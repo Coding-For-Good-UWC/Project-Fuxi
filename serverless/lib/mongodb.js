@@ -21,7 +21,6 @@ const connectDb = async () => {
     }
 
     try {
-        const dbUrl = process.env.MONGO_URL || '';
         cachedDb = await mongoose.connect(
             'mongodb://zany:EXm7B3b9uRwc8D2pK@fuxi-app.cluster-cw2bftuqzp8d.ap-southeast-1.docdb.amazonaws.com:27017/Project_FUXI',
             options,

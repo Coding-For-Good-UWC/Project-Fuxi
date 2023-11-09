@@ -2,8 +2,8 @@
 
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 const ObjectId = require('mongoose').Types.ObjectId;
-const { connectDb } = require('../lib/mongodb');
-const profileModel = require('../models/profile');
+const { connectDb, closeDb } = require('../lib/mongodb');
+const { ProfileModel } = require('../models/profile');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 
 const getAllProfilesByInstituteUId = async (event) => {
@@ -13,7 +13,7 @@ const getAllProfilesByInstituteUId = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const profiles = await profileModel.find({ uid: uid });
+        const profiles = await ProfileModel.find({ uid: uid });
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all profile success', profiles)) };
     } catch (err) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
@@ -29,7 +29,7 @@ const getProfileById = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const profile = await profileModel.findOne({ _id: new ObjectId(id) });
+        const profile = await ProfileModel.findOne({ _id: new ObjectId(id) });
         if (!profile) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }
@@ -49,7 +49,7 @@ const createProfile = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const profile = await profileModel.create({
+        const profile = await ProfileModel.create({
             uid: instituteUid,
             fullname,
             yearBirth,
@@ -77,7 +77,7 @@ const deleteProfile = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const deleteProfile = await profileModel.findByIdAndDelete(id);
+        const deleteProfile = await ProfileModel.findByIdAndDelete(id);
         if (deleteProfile) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.NO_CONTENT, 'Delte profile success')) };
         } else {
@@ -99,7 +99,7 @@ const updateProfile = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const updateProfile = await profileModel.findOneAndUpdate(
+        const updateProfile = await ProfileModel.findOneAndUpdate(
             { _id: new ObjectId(id) },
             {
                 $set: {
