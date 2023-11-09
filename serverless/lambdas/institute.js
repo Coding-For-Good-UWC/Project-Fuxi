@@ -18,10 +18,11 @@ const signup = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
 
-    const newInstitute = await InstituteModel.create({ uid: userUid, email, name, password });
-    if (newInstitute) {
+    const institute = await InstituteModel.findOne({ email: email }).exec();
+    if (!institute) {
         const userUid = generateRandomString(28);
         const createToken = jwt.sign({ email }, process.env.JWT_SECRET_KEY);
+        await InstituteModel.create({ uid: userUid, email, name, password });
         return {
             statusCode: 201,
             body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Account successfully created', { userUid: userUid, token: createToken })),
