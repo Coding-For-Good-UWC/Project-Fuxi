@@ -1,7 +1,5 @@
-const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
-let cachedDb = null;
 
 const filePath = path.join(__dirname, 'global-bundle.pem');
 
@@ -15,6 +13,8 @@ const options = {
     directConnection: true,
 };
 
+let cachedDb = null;
+
 const connectDb = async () => {
     if (cachedDb) {
         return cachedDb;
@@ -22,7 +22,10 @@ const connectDb = async () => {
 
     try {
         const dbUrl = process.env.MONGO_URL || '';
-        cachedDb = await mongoose.connect('mongodb://zany:EXm7B3b9uRwc8D2pK@localhost:27117/Project_FUXI', options);
+        cachedDb = await mongoose.connect(
+            'mongodb://zany:EXm7B3b9uRwc8D2pK@fuxi-app.cluster-cw2bftuqzp8d.ap-southeast-1.docdb.amazonaws.com:27017/Project_FUXI',
+            options,
+        );
         console.log('Connected to DocumentDB');
         return cachedDb;
     } catch (err) {
@@ -31,4 +34,11 @@ const connectDb = async () => {
     }
 };
 
-module.exports = { connectDb };
+const closeDb = async () => {
+    if (cachedDb) {
+        await cachedDb.disconnect();
+        console.log('Disconnected from DocumentDB');
+    }
+};
+
+module.exports = { connectDb, closeDb };

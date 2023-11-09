@@ -7,6 +7,7 @@ const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 connectDb();
 
 const searchTrack = async (event) => {
+    await connectDb();
     const { title, pageNumber, pageSize = 15 } = event.queryStringParameters;
     if (!title || !pageNumber) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
@@ -23,10 +24,13 @@ const searchTrack = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
+    } finally {
+        await closeDb();
     }
 };
 
 const getTracksByArtist = async (event) => {
+    await connectDb();
     const { artist, pageNumber, pageSize = 15 } = event.queryStringParameters;
     if (!artist || !pageNumber) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
@@ -42,10 +46,13 @@ const getTracksByArtist = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
+    } finally {
+        await closeDb();
     }
 };
 
 const getTrackById = async (event) => {
+    await connectDb();
     const { id } = event.queryStringParameters;
     if (!id) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
@@ -56,6 +63,8 @@ const getTrackById = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
+    } finally {
+        await closeDb();
     }
 };
 

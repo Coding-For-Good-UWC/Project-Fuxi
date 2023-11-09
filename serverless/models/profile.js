@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const { Schema, model, Types } = mongoose;
+const { Schema, model } = mongoose;
 
 const schema = new Schema(
     {
@@ -30,4 +30,6 @@ const schema = new Schema(
 );
 schema.index({ uid: 1 });
 
-module.exports = model('profiles', schema);
+const ProfileModel = model('profiles', schema);
+
+module.exports = { ProfileModel };

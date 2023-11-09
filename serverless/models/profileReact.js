@@ -27,4 +27,6 @@ const schema = new Schema(
 );
 schema.index({ profileId: 1 });
 
-module.exports = model('profileReact', schema);
+const ProfileReactModal = model('profileReact', schema);
+
+module.exports = { ProfileReactModal };

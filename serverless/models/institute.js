@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs');
 
-const { Schema, model, Types } = mongoose;
+const { Schema, model } = mongoose;
 
 const schema = new Schema(
     {
@@ -44,12 +44,6 @@ schema.pre('save', async function (next) {
     }
 });
 
-schema.virtual('patients', {
-    // institute.patients
-    ref: 'patients',
-    localField: '_id', // patient points to institute by id
-    foreignField: 'institute', // patients have institute property
-    justOne: false,
-});
+const InstituteModel = model('institutes', schema);
 
-module.exports = model('institutes', schema);
+module.exports = { InstituteModel };

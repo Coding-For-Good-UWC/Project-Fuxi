@@ -1,10 +1,10 @@
 export default {
     expo: {
-        name: 'ProjectFUXI',
-        slug: 'ProjectFUXI',
+        name: 'FUXI',
+        slug: 'FUXI',
         version: '1.0.0',
         orientation: 'portrait',
-        icon: './app/assets/icon.png',
+        icon: './app/assets/ic_launcher.png',
         userInterfaceStyle: 'light',
         splash: {
             image: './app/assets/splash.png',
@@ -23,16 +23,16 @@ export default {
         },
         android: {
             adaptiveIcon: {
-                foregroundImage: './app/assets/adaptive-icon.png',
+                foregroundImage: './app/assets/ic_launcher.png',
                 backgroundColor: '#FFFFFF',
             },
             package: 'com.codingforgood.projectfuxi',
         },
         web: {
-            favicon: './app/assets/favicon.png',
+            favicon: './app/assets/ic_launcher.png',
         },
         extra: {
-            apiUrl: process.env.BACKEND_HOST || 'http://10.10.12.33:3000',
+            apiUrl: process.env.BACKEND_HOST || 'https://b1xnoo0jdd.execute-api.ap-southeast-1.amazonaws.com',
             serviceacc: process.env.SERVICE_ACCOUNT_EMAILJS || 'service_2ltnpw6',
             templateid: process.env.TEMPLATE_ID_EMAILJS || 'template_v3e5qxl',
             publicapikey: process.env.PUBLIC_API_KEY_EMAILJS || 'Pqb-hgicf_LaXv1mp',

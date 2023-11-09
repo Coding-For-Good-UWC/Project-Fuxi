@@ -1,56 +1,52 @@
-const mongoose = require ("mongoose");
+const mongoose = require('mongoose');
 
-const { Schema, model, Types } = mongoose; 
+const { Schema, model } = mongoose;
 
-const schema = new Schema ({
-    Title:
-    {
-        type: String, 
-        unique: false,
-        required: true
-    },
-    YtId:
-    {
-        type: String,
-        unique: true, 
-        required: true
-    },
-    Artist:
-    {
+const schema = new Schema({
+    Title: {
         type: String,
         unique: false,
-        required: false
+        required: true,
     },
-    Language:
-    {
+    YtId: {
+        type: String,
+        unique: true,
+        required: true,
+    },
+    Artist: {
         type: String,
         unique: false,
-        required: true
+        required: false,
     },
-    Genre:
-    {
+    Language: {
         type: String,
         unique: false,
-        required: false
+        required: true,
     },
-    ImageURL:
-    {
+    Genre: {
         type: String,
         unique: false,
-        required: true
+        required: false,
     },
-	Era:
-	{
-		type: Number,
-		unique: false,
-		required: false
-	},
-    URI: // store uri to loaded mp3 file from s3 bucket
-    {
+    ImageURL: {
         type: String,
         unique: false,
-        required: false
-    }
-})
+        required: true,
+    },
+    Era: {
+        type: Number,
+        unique: false,
+        required: false,
+    },
+    // store uri to loaded mp3 file from s3 bucket
+    URI: {
+        type: String,
+        unique: false,
+        required: false,
+    },
+});
+schema.index({ Title: 1 });
 
-module.exports = model ("tracks", schema); 
+const TrackModel = model('tracks', schema);
+
+module.exports = { TrackModel };

@@ -11,6 +11,7 @@ const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 connectDb();
 
 const getReactTrackByProfileId = async (event) => {
+    await connectDb();
     const { profileId } = event.queryStringParameters;
     if (!profileId) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
@@ -25,10 +26,13 @@ const getReactTrackByProfileId = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    } finally {
+        await closeDb();
     }
 };
 
 const getLikeTrackByProfileId = async (event) => {
+    await connectDb();
     const { profileId } = event.queryStringParameters;
     if (!profileId) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
@@ -58,10 +62,13 @@ const getLikeTrackByProfileId = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    } finally {
+        await closeDb();
     }
 };
 
 const createProfileReact = async (event) => {
+    await connectDb();
     const json = JSON.parse(event.body);
     const { profileId, reactTracks } = json;
     if (!profileId) {
@@ -77,10 +84,13 @@ const createProfileReact = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    } finally {
+        await closeDb();
     }
 };
 
 const addReactTrack = async (event) => {
+    await connectDb();
     const json = JSON.parse(event.body);
     const { profileId, trackId, preference } = json;
     if (!profileId || !trackId || !preference) {
@@ -106,10 +116,13 @@ const addReactTrack = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    } finally {
+        await closeDb();
     }
 };
 
 const updateReactTrack = async (event) => {
+    await connectDb();
     const json = JSON.parse(event.body);
     const { profileId, trackId, preference } = json;
     if (!profileId || !trackId || !preference) {
@@ -135,10 +148,13 @@ const updateReactTrack = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    } finally {
+        await closeDb();
     }
 };
 
 const removeReactTrack = async (event) => {
+    await connectDb();
     const json = JSON.parse(event.body);
     const { profileId, trackId } = json;
     if (!profileId || !trackId) {
@@ -161,10 +177,13 @@ const removeReactTrack = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    } finally {
+        await closeDb();
     }
 };
 
 const deleteProfileReact = async (event) => {
+    await connectDb();
     const json = JSON.parse(event.body);
     const { profileId } = json;
     if (!profileId) {
@@ -181,6 +200,8 @@ const deleteProfileReact = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    } finally {
+        await closeDb();
     }
 };
 

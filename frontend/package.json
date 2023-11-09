@@ -31,6 +31,8 @@
     "expo-cli": "^4.0.17",
     "expo-constants": "~14.4.2",
     "expo-linear-gradient": "~12.3.0",
+    "expo-splash-screen": "~0.20.5",
+    "expo-status-bar": "~1.6.0",
     "firebase": "^9.21.0",
     "lottie-react-native": "^5.1.6",
     "react": "18.2.0",
@@ -48,12 +50,11 @@
     "react-native-screens": "~3.22.0",
     "react-native-svg": "13.9.0",
     "react-native-tab-view": "^3.5.2",
-    "react-native-vector-icons": "^10.0.0",
-    "expo-splash-screen": "~0.20.5",
-    "expo-status-bar": "~1.6.0"
+    "react-native-vector-icons": "^10.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "sharp-cli": "^4.1.1"
   },
   "private": true
 }

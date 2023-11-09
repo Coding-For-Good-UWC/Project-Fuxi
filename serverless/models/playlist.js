@@ -24,4 +24,6 @@ const schema = new Schema(
 );
 schema.index({ profileId: 1 });
 
-module.exports = model('playlist', schema);
+const PlaylistModel = model('playlist', schema);
+
+module.exports = { PlaylistModel };
