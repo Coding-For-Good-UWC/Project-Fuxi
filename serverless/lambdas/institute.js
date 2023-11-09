@@ -2,12 +2,11 @@
 
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 require('dotenv').config();
-const admin = require('firebase-admin');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { connectDb } = require('../lib/mongodb');
 const { InstituteModel } = require('../models/institute');
-const { createUserFirebase, loginWithCredentials, authenticationToken } = require('../middlewares/index');
+const { generateRandomString } = require('../utils/index');
 const { ResetPasswordEmail } = require('../utils/mailer');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 
@@ -19,26 +18,16 @@ const signup = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
 
-    try {
-        const userUid = await createUserFirebase(email, password);
-        if (userUid) {
-            const newInstitute = await InstituteModel.create({ uid: userUid, email, name, password });
-            console.log(newInstitute);
-            if (newInstitute) {
-                const createToken = await admin.auth().createCustomToken(userUid);
-                return {
-                    statusCode: 201,
-                    body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'InstituteModel created', { userUid: userUid, token: createToken })),
-                };
-            } else {
-                return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
-            }
-        } else {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.CONFLICT, 'User with email already exists')) };
-        }
-    } catch (err) {
-        console.log(err);
-        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    const newInstitute = await InstituteModel.create({ uid: userUid, email, name, password });
+    if (newInstitute) {
+        const userUid = generateRandomString(28);
+        const createToken = jwt.sign({ email }, process.env.JWT_SECRET_KEY);
+        return {
+            statusCode: 201,
+            body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Account successfully created', { userUid: userUid, token: createToken })),
+        };
+    } else {
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.CONFLICT, 'User with email already exists')) };
     }
 };
 
@@ -47,10 +36,6 @@ const signin = async (event) => {
     if (!email || !password) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
-    const credentials = await loginWithCredentials(email);
-    if (credentials === null) {
-        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Email ID or password is invalid')) };
-    }
 
     const institute = await InstituteModel.findOne({ email: email }).exec();
     if (!institute) {
@@ -58,7 +43,7 @@ const signin = async (event) => {
     } else {
         const resultPassword = await bcryptjs.compare(password, institute.password);
         if (resultPassword) {
-            const createToken = await admin.auth().createCustomToken(credentials.uid);
+            const createToken = jwt.sign({ email }, process.env.JWT_SECRET_KEY);
             return {
                 statusCode: 200,
                 body: JSON.stringify(
