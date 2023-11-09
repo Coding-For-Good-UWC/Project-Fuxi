@@ -6,8 +6,9 @@ const { connectDb, closeDb } = require('../lib/mongodb');
 const { ProfileModel } = require('../models/profile');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 
+connectDb();
+
 const getAllProfilesByInstituteUId = async (event) => {
-    await connectDb();
     const { uid } = event.queryStringParameters;
     if (!uid) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
@@ -17,13 +18,10 @@ const getAllProfilesByInstituteUId = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all profile success', profiles)) };
     } catch (err) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 
 const getProfileById = async (event) => {
-    await connectDb();
     const { id } = event.queryStringParameters;
     if (!id) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
@@ -36,13 +34,10 @@ const getProfileById = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all profile success', profile)) };
     } catch (err) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 
 const createProfile = async (event) => {
-    await connectDb();
     const json = JSON.parse(event.body);
     const { instituteUid, fullname, yearBirth, genres, description } = json;
     if (!instituteUid || !fullname || !yearBirth || !genres) {
@@ -64,13 +59,10 @@ const createProfile = async (event) => {
     } catch (err) {
         console.log(err);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 
 const deleteProfile = async (event) => {
-    await connectDb();
     const json = JSON.parse(event.body);
     const { id } = json;
     if (!id) {
@@ -86,13 +78,10 @@ const deleteProfile = async (event) => {
     } catch (err) {
         console.log(err);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 
 const updateProfile = async (event) => {
-    await connectDb();
     const json = JSON.parse(event.body);
     const { id, fullname, yearBirth, language, genres, description } = json;
     if (!id || !fullname || !yearBirth) {
@@ -120,8 +109,6 @@ const updateProfile = async (event) => {
     } catch (err) {
         console.log(err);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 

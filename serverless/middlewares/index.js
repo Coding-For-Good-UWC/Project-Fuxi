@@ -1,5 +1,8 @@
 const admin = require('firebase-admin');
+const { firebaseConfig } = require('../config/config');
 const { decodeJWT } = require('../middlewares/decode');
+
+firebaseConfig();
 
 const authenticationToken = async (userToken) => {
     try {
@@ -47,14 +50,8 @@ const loginWithCredentials = async (email) => {
     }
 };
 
-const getUserUidByEmail = async (email) => {
-    const userCredential = await admin.auth().getUserByEmail(email);
-    return userCredential.uid;
-};
-
 module.exports = {
     authenticationToken,
     createUserFirebase,
     loginWithCredentials,
-    getUserUidByEmail,
 };

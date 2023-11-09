@@ -8,8 +8,9 @@ const { ProfileModel } = require('../models/profile');
 const { PlaylistModel } = require('../models/playlist');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 
+connectDb();
+
 const getPlaylistById = async (event) => {
-    await connectDb();
     const { playlistId } = event.queryStringParameters;
     if (!playlistId) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
@@ -24,13 +25,10 @@ const getPlaylistById = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 
 const getAllPlayListByProfileId = async (event) => {
-    await connectDb();
     const { profileId } = event.queryStringParameters;
     if (!profileId) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
@@ -59,12 +57,9 @@ const getAllPlayListByProfileId = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 const getPlaylistSuggestions = async (event) => {
-    await connectDb();
     const { profileId, pageNumber, pageSize = 15 } = event.queryStringParameters;
     const skipCount = (pageNumber - 1) * pageSize;
 
@@ -74,12 +69,10 @@ const getPlaylistSuggestions = async (event) => {
         .skip(skipCount)
         .limit(pageSize)
         .exec();
-    await closeDb();
     return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', getTrackSuggestions)) };
 };
 
 const createPlaylist = async (event) => {
-    await connectDb();
     const json = JSON.parse(event.body);
     const { profileId, namePlaylist, tracks } = json;
     if (!profileId || !namePlaylist || !tracks) {
@@ -100,15 +93,12 @@ const createPlaylist = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 
 // const updatePlaylist = async (event) => {};
 
 const addTrackInPlaylist = async (event) => {
-    await connectDb();
     const json = JSON.parse(event.body);
     const { profileId, trackId } = json;
     if (!profileId || !trackId) {
@@ -131,13 +121,10 @@ const addTrackInPlaylist = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 
 const removeTrackInPlaylist = async (event) => {
-    await connectDb();
     const json = JSON.parse(event.body);
     const { profileId, trackId } = json;
     if (!profileId || !trackId) {
@@ -160,13 +147,10 @@ const removeTrackInPlaylist = async (event) => {
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 
 const deletePlaylist = async (event) => {
-    await connectDb();
     const json = JSON.parse(event.body);
     const { playlistId } = json;
     if (!playlistId) {
@@ -182,13 +166,10 @@ const deletePlaylist = async (event) => {
     } catch (err) {
         console.log(err);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 
 const deleteAllPlaylist = async (event) => {
-    await connectDb();
     const json = JSON.parse(event.body);
     const { profileId } = json;
     if (!profileId) {
@@ -204,8 +185,6 @@ const deleteAllPlaylist = async (event) => {
     } catch (err) {
         console.log(err);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
-    } finally {
-        await closeDb();
     }
 };
 
