@@ -5,7 +5,7 @@ import { Linking } from 'react-native';
 const Feedback = () => {
     const openEmailApp = async () => {
         try {
-            await Linking.openURL('mailto:elo@gapps.uwcsea.edu.sg');
+            await Linking.openURL('mailto:fuximusicapp@gmail.com');
         } catch (error) {
             console.error('Error opening email app: ', error);
         }
