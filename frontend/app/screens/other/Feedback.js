@@ -18,7 +18,7 @@ const Feedback = () => {
                     <Text>
                         <Text style={styles.desc}>Please send all feedback or inquiries related to specific issues to the email address</Text>
                         <TouchableOpacity onPress={openEmailApp} style={{ marginTop: 10 }}>
-                            <Text style={{ fontWeight: '500', fontSize: 16, color: '#137882' }}>elo@gapps.uwcsea.edu.sg</Text>
+                            <Text style={{ fontWeight: '500', fontSize: 16, color: '#137882' }}>fuximusicapp@gmail.com</Text>
                         </TouchableOpacity>
                         <Text style={styles.desc}>
                             . We greatly appreciate your input to help us improve our services and address any potential issues. Our support team will

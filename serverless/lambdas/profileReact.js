@@ -85,9 +85,10 @@ const getReactTrackByTrackId = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const response = await ProfileReactModal.findOne({ profileId: profileId, 'reactTracks.track': new ObjectId(trackId) });
+        const response = await ProfileReactModal.findOne({ profileId: profileId });
+        const desiredObject = response.reactTracks.find((item) => item.track.equals(new ObjectId(trackId)));
         if (response) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get the react track', response)) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get the react track', desiredObject)) };
         } else {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'React track not found')) };
         }
