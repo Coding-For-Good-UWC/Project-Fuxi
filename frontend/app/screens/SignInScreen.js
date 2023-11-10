@@ -41,7 +41,7 @@ const SignInScreen = () => {
             error = 'Email is required';
         } else if (field === 'email' && !isValidEmail(value)) {
             error = 'Invalid email address.';
-        } else if (field === 'password' && value.length < 8) {
+        } else if (field === 'password' && value.trim().length < 8) {
             error = 'Password must be at least 8 characters.';
         }
 

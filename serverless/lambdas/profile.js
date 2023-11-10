@@ -83,25 +83,23 @@ const deleteProfile = async (event) => {
 
 const updateProfile = async (event) => {
     const json = JSON.parse(event.body);
-    const { id, fullname, yearBirth, language, genres, description } = json;
-    if (!id || !fullname || !yearBirth) {
+    const { profileId, fullname, yearBirth, genres } = json;
+    if (!profileId || !fullname || !yearBirth) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const updateProfile = await ProfileModel.findOneAndUpdate(
-            { _id: new ObjectId(id) },
+        const exitsUpdateProfile = await ProfileModel.findOneAndUpdate(
+            { _id: new ObjectId(profileId) },
             {
                 $set: {
                     fullname,
                     yearBirth,
-                    language,
                     genres,
-                    description,
                 },
             },
             { new: true },
         );
-        if (updateProfile) {
+        if (exitsUpdateProfile) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Update profile success')) };
         } else {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };

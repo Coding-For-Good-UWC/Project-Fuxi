@@ -21,7 +21,7 @@ const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors })
         let error = '';
         if (field === 'nameListener' && value === '') {
             error = 'Name is required.';
-        } else if (field === 'nameListener' && value.length < 6) {
+        } else if (field === 'nameListener' && value.trim().length < 6) {
             error = 'Name must be at least 6 characters.';
         } else if (field === 'yearBirth' && value === '') {
             error = 'Year of birth is required.';
@@ -43,17 +43,11 @@ const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors })
             <View style={styles.container}>
                 <Text style={styles.headerDesc}>These information helps us personalize our music therapy for the listener.</Text>
                 <View style={styles.formProfile}>
-                    <TextInputEffectLabel
-                        label="Name"
-                        onChangeText={(text) => handleChangeValue('nameListener', text)}
-                        value={formData.nameListener}
-                        error={errors.nameListener}
-                    />
+                    <TextInputEffectLabel label="Name" onChangeText={(text) => handleChangeValue('nameListener', text)} error={errors.nameListener} />
                     <SelectElementEffectLabel
                         dataArray={years}
                         label="Year of birth"
                         onValueChange={(text) => handleChangeValue('yearBirth', text)}
-                        value={formData.yearBirth}
                         error={errors.yearBirth}
                     />
                 </View>

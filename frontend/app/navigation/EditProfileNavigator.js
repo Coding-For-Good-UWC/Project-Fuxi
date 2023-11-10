@@ -7,8 +7,7 @@ import EditBaseInformationScreen from '../screens/profile-detail-screen/EditBase
 import EditMusicTasteScreen from '../screens/profile-detail-screen/EditMusicTasteScreen';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 import { getStoreData, storeData } from '../utils/AsyncStorage';
-import { createProfile } from '../api/profiles';
-import { createProfileReact } from '../api/profileReact';
+import { updateProfile } from '../api/profiles';
 import { AppContext } from '../context/AppContext';
 
 const Tab = createMaterialTopTabNavigator();
@@ -53,24 +52,18 @@ const EditProfileNavigator = () => {
         }
 
         setIsLoading(true);
-        const json = await getStoreData('userInfo');
-        const { uid } = JSON.parse(json);
         try {
-            const newProfile = await createProfile(uid, nameListener.trim(), yearBirth, selectedItems, null);
-            const { code, message, data } = newProfile;
-            await createProfileReact(data._id, []);
-            if (code == 201) {
-                await storeData('profile0', JSON.stringify(data));
+            const update = await updateProfile(dataProfile._id, nameListener, yearBirth, selectedItems);
+            const { code, message } = update;
+            if (code == 200) {
                 navigation.navigate('AllListenerProfilesScreen');
                 setIsReRender(!isReRender);
-            } else if (code == 400) {
-                alert(message);
             } else {
                 alert(message);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Create profile unsuccessful');
+            alert('Update profile unsuccessful');
             return;
         } finally {
             setIsLoading(false);

@@ -24,7 +24,7 @@ const ListenerProfileScreen1 = ({ goToScreen, formData, setFormData, errors, set
         let error = '';
         if (field === 'nameListener' && value === '') {
             error = 'Name is required.';
-        } else if (field === 'nameListener' && value.length < 6) {
+        } else if (field === 'nameListener' && value.trim().length < 6) {
             error = 'Name must be at least 6 characters.';
         } else if (field === 'yearBirth' && value === '') {
             error = 'Year of birth is required.';
@@ -50,7 +50,6 @@ const ListenerProfileScreen1 = ({ goToScreen, formData, setFormData, errors, set
     }, [formData, errors]);
 
     const handleSubmit = () => {
-        const { nameListener, yearBirth, language } = formData;
         if (validateNullFormData(formData)) {
             alert('Please fix the validation errors');
             return;

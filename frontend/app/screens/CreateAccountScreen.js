@@ -36,11 +36,11 @@ const CreateAccountScreen = () => {
         let error = '';
         if (field === 'name' && !value) {
             error = 'Name is required.';
-        } else if (field === 'name' && value.length < 6) {
+        } else if (field === 'name' && value.trim().length < 6) {
             error = 'Name must be at least 6 characters.';
         } else if (field === 'email' && !isValidEmail(value)) {
             error = 'Invalid email address.';
-        } else if (field === 'password' && value.length < 8) {
+        } else if (field === 'password' && value.trim().length < 8) {
             error = 'Password must be at least 8 characters.';
         } else if (field === 'confirmPassword' && value !== formData.password) {
             error = 'Passwords do not match.';

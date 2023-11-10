@@ -87,7 +87,7 @@ const getReactTrackByTrackId = async (event) => {
     try {
         const response = await ProfileReactModal.findOne({ profileId: profileId, 'reactTracks.track': new ObjectId(trackId) });
         if (response) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get the react track', response.reactTracks[0])) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get the react track', response)) };
         } else {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'React track not found')) };
         }

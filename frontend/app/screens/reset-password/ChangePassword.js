@@ -32,11 +32,11 @@ const ChangePassword = () => {
         let error = '';
         if (field === 'oldPassword' && value === '') {
             error = 'OTP is required.';
-        } else if (field === 'oldPassword' && value.length < 8) {
+        } else if (field === 'oldPassword' && value.trim().length < 8) {
             error = 'Password must be at least 8 characters.';
         } else if (field === 'password' && value === '') {
             error = 'Password is required.';
-        } else if (field === 'password' && value.length < 8) {
+        } else if (field === 'password' && value.trim().length < 8) {
             error = 'Password must be at least 8 characters.';
         } else if (field === 'confirmPassword' && value === '') {
             error = 'Confirm password is required.';
