@@ -79,6 +79,24 @@ const createProfileReact = async (event) => {
     }
 };
 
+const getReactTrackByTrackId = async (event) => {
+    const { profileId, trackId } = event.queryStringParameters;
+    if (!profileId || !trackId) {
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+    }
+    try {
+        const response = await ProfileReactModal.findOne({ profileId: profileId, 'reactTracks.track': new ObjectId(trackId) });
+        if (response) {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get the react track', response.reactTracks[0])) };
+        } else {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'React track not found')) };
+        }
+    } catch (error) {
+        console.error(error);
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    }
+};
+
 const addReactTrack = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, trackId, preference } = json;
@@ -187,6 +205,7 @@ module.exports = {
     getReactTrackByProfileId,
     getLikeTrackByProfileId,
     createProfileReact,
+    getReactTrackByTrackId,
     addReactTrack,
     updateReactTrack,
     removeReactTrack,

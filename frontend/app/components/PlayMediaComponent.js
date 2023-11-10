@@ -2,16 +2,11 @@ import 'react-native-gesture-handler';
 import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions } from 'react-native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Audio } from 'expo-av';
-import { useNavigation } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import PlayMediaSlider from './PlayMediaSlider';
-
-const defaultSong = {
-    Artist: '',
-    Title: 'Choose song in playlist',
-    ImageURL: require('../assets/default_l8mbsa.png'),
-    URI: '',
-};
+import { getReactTrackByTrackId } from '../api/profileReact';
+import { preference } from '../utils/utils';
+import { getStoreData } from '../utils/AsyncStorage';
 
 function findPreviousTrack(tracks, trackId) {
     const index = tracks.findIndex((track) => track._id === trackId);
@@ -31,18 +26,27 @@ function findNextTrack(tracks, trackId) {
     return tracks[nextIndex];
 }
 
-const PlayMediaComponent = ({ song, dataTracksOrigin, reactTrack, setSeconds }) => {
-    const navigation = useNavigation();
+const getReact = async (trackId) => {
+    const profile0 = await getStoreData('profile0');
+    const { _id } = JSON.parse(profile0);
+
+    const response = await getReactTrackByTrackId(_id, trackId);
+    const { data } = response;
+
+    if (data?.preference !== undefined) {
+        for (const key in preference) {
+            if (preference[key].status === data.preference) {
+                console.log(preference[key]);
+                return preference[key];
+            }
+        }
+    }
+};
+
+const PlayMediaComponent = ({ selectSound, setSelectSound, reactTrack, setReactTrack, setSeconds, dataTracksOrigin }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [sound, setSound] = useState();
     const [duration, setDuration] = useState(0);
-    const [currentSong, setCurrentSong] = useState(song || defaultSong);
-
-    useLayoutEffect(() => {
-        if (song) {
-            handleTrackPress(song);
-        }
-    }, [navigation]);
 
     const handlePlay = async () => {
         if (sound) {
@@ -60,7 +64,7 @@ const PlayMediaComponent = ({ song, dataTracksOrigin, reactTrack, setSeconds }) 
     const handleTrackPress = async (item) => {
         console.log(item.Title);
         setSeconds(90);
-        setCurrentSong(item);
+        setSelectSound(item);
         const { sound, status } = await Audio.Sound.createAsync({
             uri: item.URI,
         });
@@ -70,15 +74,15 @@ const PlayMediaComponent = ({ song, dataTracksOrigin, reactTrack, setSeconds }) 
         await sound.playAsync();
     };
 
-    const handlePrevTrack = () => {
+    const handlePrevTrack = async () => {
         if (Object.keys(dataTracksOrigin).length !== 0) {
-            handleTrackPress(findPreviousTrack(dataTracksOrigin, currentSong._id));
+            handleTrackPress(findPreviousTrack(dataTracksOrigin, selectSound._id));
         }
     };
 
-    const handleNextTrack = () => {
+    const handleNextTrack = async () => {
         if (Object.keys(dataTracksOrigin).length !== 0) {
-            handleTrackPress(findNextTrack(dataTracksOrigin, currentSong._id));
+            handleTrackPress(findNextTrack(dataTracksOrigin, selectSound._id));
         }
     };
 
@@ -89,8 +93,17 @@ const PlayMediaComponent = ({ song, dataTracksOrigin, reactTrack, setSeconds }) 
             }
         };
         unloadSound();
-        handleTrackPress(song);
-    }, [song]);
+        handleTrackPress(selectSound);
+        const getReactTrack = async () => {
+            const react = await getReact(selectSound._id);
+            if (react !== undefined) {
+                setReactTrack(react);
+            } else {
+                setReactTrack([]);
+            }
+        };
+        getReactTrack();
+    }, [selectSound]);
 
     useEffect(() => {
         if (reactTrack.status === 'dislike' || reactTrack.status === 'strongly dislike') {
@@ -102,13 +115,13 @@ const PlayMediaComponent = ({ song, dataTracksOrigin, reactTrack, setSeconds }) 
         <>
             <View style={styles.playlistHeader}>
                 <View style={styles.viewImage}>
-                    <Image style={styles.image} source={{ uri: currentSong.ImageURL }} />
+                    <Image style={styles.image} source={{ uri: selectSound.ImageURL }} />
                 </View>
                 <Text style={styles.trackText} numberOfLines={2}>
-                    {currentSong.Title}
+                    {selectSound.Title}
                 </Text>
                 <Text style={styles.patientText} numberOfLines={1}>
-                    {currentSong.Artist}
+                    {selectSound.Artist}
                 </Text>
             </View>
             <PlayMediaSlider

@@ -66,26 +66,23 @@ const signin = async (event) => {
 };
 
 const resetPassword = async (event) => {
-    const { email } = JSON.parse(event.body);
+    const json = JSON.parse(event.body);
+    const { email } = json;
     if (!email) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+    console.log(token);
 
     const randomNumber = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
     await InstituteModel.findOneAndUpdate({ email: email }, { $set: { OTPResetPassword: randomNumber } }, { upsert: false });
 
-    try {
-        const result = await ResetPasswordEmail(email, randomNumber);
-        if (result === 200) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Email sent successfully!', token)) };
-        } else {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Error sending email')) };
-        }
-    } catch (error) {
-        console.error(error);
-        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    const result = ResetPasswordEmail(email, randomNumber);
+    if (result === 200) {
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Email sent successfully!', token)) };
+    } else {
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Error sending email')) };
     }
 };
 

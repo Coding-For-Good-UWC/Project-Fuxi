@@ -36,6 +36,16 @@ export const createProfileReact = async (profileId, reactTracks) => {
     }
 };
 
+export const getReactTrackByTrackId = async (profileId, trackId) => {
+    try {
+        const response = await axios.get(`${apiUrl}/dev/profile-react/track?profileId=${profileId}&trackId=${trackId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+};
+
 export const addReactTrack = async (profileId, trackId, preference) => {
     try {
         const response = await axios.put(`${apiUrl}/dev/profile-react/add`, {

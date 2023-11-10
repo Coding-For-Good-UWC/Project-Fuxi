@@ -1,10 +1,10 @@
-const nodemailer = require('nodemailer');
+const { createTransport } = require('nodemailer');
 
-function ResetPasswordEmail(recipient, CodeOTP) {
+const ResetPasswordEmail = async (recipient, CodeOTP) => {
     const username = 'fuximusicapp@gmail.com';
     const password = 'tzuh tuui xxeo mnrj';
 
-    const transporter = nodemailer.createTransport({
+    const transporter = createTransport({
         service: 'Gmail',
         auth: {
             user: username,
@@ -19,24 +19,17 @@ function ResetPasswordEmail(recipient, CodeOTP) {
         html: htmlContent(CodeOTP),
     };
 
-    return new Promise((resolve, reject) => {
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error('Error sending email:', error);
-                reject(401);
-            } else {
-                console.log('Email sent successfully!', info.response);
-                resolve(200);
-            }
-        });
-    });
-}
+    const result = await transporter.sendMail(mailOptions);
 
-module.exports = {
-    ResetPasswordEmail,
+    console.log(result);
+    if (result) {
+        return 200;
+    } else {
+        return 401;
+    }
 };
 
-function htmlContent(CodeOTP) {
+const htmlContent = (CodeOTP) => {
     return `   
     <html>
     <head></head>
@@ -163,4 +156,8 @@ function htmlContent(CodeOTP) {
 </html>
 
    `;
-}
+};
+
+module.exports = {
+    ResetPasswordEmail,
+};

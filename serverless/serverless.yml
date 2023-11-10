@@ -228,6 +228,12 @@ functions:
       - http:
           path: /profile-react/add
           method: put
+  getReactTrackByTrackId:
+    handler: lambdas/profileReact.getReactTrackByTrackId
+    events:
+      - http:
+          path: /profile-react/track
+          method: get
   updateReactTrack:
     handler: lambdas/profileReact.updateReactTrack
     events:

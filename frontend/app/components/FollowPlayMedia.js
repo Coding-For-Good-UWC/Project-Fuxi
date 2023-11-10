@@ -7,7 +7,7 @@ import { addReactTrack, updateReactTrack } from '../api/profileReact';
 import { getStoreData } from '../utils/AsyncStorage';
 import { removeTrackInPlaylist } from '../api/playlist';
 
-const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
+const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack }) => {
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
 
@@ -26,7 +26,9 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
                 desc: 'We’ll play this song more frequently for you.',
                 labelYes: 'Yes, I like it',
                 labelNo: 'No, go back',
-                onPressYes: () => handleStatusLike(),
+                onPressYes: async () => {
+                    await handleStatusLike();
+                },
                 onPressNo: () => setIsDialogVisible(false),
             });
             setIsDialogVisible(true);
@@ -36,7 +38,9 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
                 desc: 'This song will be played more frequently for you.',
                 labelYes: 'Yes, I like it',
                 labelNo: 'No, go back',
-                onPressYes: () => handleStatusLike(),
+                onPressYes: async () => {
+                    await handleStatusLike();
+                },
                 onPressNo: () => setIsDialogVisible(false),
             });
             setIsDialogVisible(true);
@@ -46,7 +50,9 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
                 desc: 'This song will be played more frequently for you.',
                 labelYes: 'Yes, I like it',
                 labelNo: 'No, go back',
-                onPressYes: () => handleStatusLike(),
+                onPressYes: async () => {
+                    await handleStatusLike();
+                },
                 onPressNo: () => setIsDialogVisible(false),
             });
             setIsDialogVisible(true);
@@ -56,14 +62,16 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
                 desc: 'This song will be played more frequently for you.',
                 labelYes: 'Yes, I like it',
                 labelNo: 'No, go back',
-                onPressYes: () => handleStatusLike(),
+                onPressYes: async () => {
+                    await handleStatusLike();
+                },
                 onPressNo: () => setIsDialogVisible(false),
             });
             setIsDialogVisible(true);
         }
     };
 
-    const showDialogDislike = () => {
+    const showDialogDislike = async () => {
         if (reactTrack.status == 'strongly dislike') {
             ToastAndroid.showWithGravityAndOffset(
                 'Maximum disliking achieved',
@@ -78,7 +86,9 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
                 desc: 'This song will be played less frequently for you.',
                 labelYes: 'I don’t like it',
                 labelNo: 'No, go back',
-                onPressYes: () => handleStatusDislike(),
+                onPressYes: async () => {
+                    await handleStatusDislike();
+                },
                 onPressNo: () => setIsDialogVisible(false),
                 styleBtnYes: { backgroundColor: '#E84C4C' },
             });
@@ -89,7 +99,9 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
                 desc: 'This song will be played less frequently for you.',
                 labelYes: 'I don’t like it',
                 labelNo: 'No, go back',
-                onPressYes: () => handleStatusDislike(),
+                onPressYes: async () => {
+                    await handleStatusDislike();
+                },
                 onPressNo: () => setIsDialogVisible(false),
                 styleBtnYes: { backgroundColor: '#E84C4C' },
             });
@@ -100,7 +112,9 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
                 desc: 'This song will be played less frequently for you.',
                 labelYes: 'I don’t like it',
                 labelNo: 'No, go back',
-                onPressYes: () => handleStatusDislike(),
+                onPressYes: async () => {
+                    await handleStatusDislike();
+                },
                 onPressNo: () => setIsDialogVisible(false),
                 styleBtnYes: { backgroundColor: '#E84C4C' },
             });
@@ -111,7 +125,9 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
                 desc: 'This song will be played less frequently for you.',
                 labelYes: 'I don’t like it',
                 labelNo: 'No, go back',
-                onPressYes: () => handleStatusDislike(),
+                onPressYes: async () => {
+                    await handleStatusDislike();
+                },
                 onPressNo: () => setIsDialogVisible(false),
                 styleBtnYes: { backgroundColor: '#E84C4C' },
             });
@@ -125,19 +141,19 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
         if (reactTrack.status == 'like') {
             setReactTrack(preference.SLK);
             setIsDialogVisible(false);
-            await updateReactTrack(_id, song._id, preference.SLK.status);
+            await updateReactTrack(_id, selectSound._id, preference.SLK.status);
         } else if (reactTrack.status == undefined) {
             setReactTrack(preference.LK);
             setIsDialogVisible(false);
-            await addReactTrack(_id, song._id, preference.LK.status);
+            await addReactTrack(_id, selectSound._id, preference.LK.status);
         } else if (reactTrack.status == 'strongly dislike') {
             setReactTrack(preference.LK);
             setIsDialogVisible(false);
-            await updateReactTrack(_id, song._id, preference.LK.status);
+            await updateReactTrack(_id, selectSound._id, preference.LK.status);
         } else if (reactTrack.status == 'dislike') {
             setReactTrack(preference.LK);
             setIsDialogVisible(false);
-            await updateReactTrack(_id, song._id, preference.LK.status);
+            await updateReactTrack(_id, selectSound._id, preference.LK.status);
         }
     };
 
@@ -147,20 +163,21 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
         if (reactTrack.status == 'dislike') {
             setReactTrack(preference.SDK);
             setIsDialogVisible(false);
-            await updateReactTrack(_id, song._id, preference.SDK.status);
+            await updateReactTrack(_id, selectSound._id, preference.SDK.status);
         } else if (reactTrack.status == undefined) {
             setReactTrack(preference.DK);
             setIsDialogVisible(false);
-            await addReactTrack(_id, song._id, preference.DK.status);
+            await addReactTrack(_id, selectSound._id, preference.DK.status);
         } else if (reactTrack.status == 'strongly like') {
             setReactTrack(preference.DK);
             setIsDialogVisible(false);
-            await updateReactTrack(_id, song._id, preference.DK.status);
+            await updateReactTrack(_id, selectSound._id, preference.DK.status);
         } else if (reactTrack.status == 'like') {
             setReactTrack(preference.DK);
             setIsDialogVisible(false);
-            await updateReactTrack(_id, song._id, preference.DK.status);
+            await updateReactTrack(_id, selectSound._id, preference.DK.status);
         }
+        await removeTrackInPlaylist(_id, selectSound._id);
         ToastAndroid.showWithGravityAndOffset(
             'Song has been hidden in “Happy mood”',
             ToastAndroid.LONG,
@@ -168,7 +185,6 @@ const FollowPlayMedia = ({ song, reactTrack, setReactTrack }) => {
             0,
             Dimensions.get('window').height * 0.8,
         );
-        await removeTrackInPlaylist(_id, song._id);
     };
 
     return (

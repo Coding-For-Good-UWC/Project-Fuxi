@@ -9,9 +9,9 @@ const defaultSong = {
     songURL: '',
 };
 
-const OverlayMediaScreen = ({ isModalVisible, isOverlay, song, followPlayMedia }) => {
+const OverlayMediaScreen = ({ isModalVisible, isOverlay, selectSound, followPlayMedia }) => {
     const [heightItem, setHeightItem] = useState(0);
-    const [track, setTrack] = useState(song || defaultSong);
+    const [track, setTrack] = useState(selectSound || defaultSong);
 
     handleLayout = (event) => {
         const { width, height } = event.nativeEvent.layout;

@@ -14,12 +14,19 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BottomSheetScrollView from '../components/BottomSheetScrollView';
 import FollowPlayMedia from '../components/FollowPlayMedia';
 
+const defaultSong = {
+    Artist: '',
+    Title: 'Choose song in playlist',
+    ImageURL: require('../assets/default_l8mbsa.png'),
+    URI: '',
+};
+
 const PlayMedia = () => {
     const route = useRoute();
     const navigation = useNavigation();
     const { dataTracksOrigin, currentReactTrack } = route.params;
     const [reactTrack, setReactTrack] = useState(currentReactTrack || {});
-    const [selectSound, setSelectSound] = useState(route.params?.track || dataTracksOrigin[0]);
+    const [selectSound, setSelectSound] = useState(route.params?.track || dataTracksOrigin[0] || defaultSong);
     const [dataTracks, setDataTracksOrigin] = useState(dataTracksOrigin || []);
 
     const [isOverlay, setIsOverlay] = useState(false);
@@ -72,13 +79,25 @@ const PlayMedia = () => {
                 <BottomSheetModalProvider>
                     <SafeAreaView style={styles.safeArea}>
                         <OverlayMediaScreen
-                            song={selectSound}
+                            selectSound={selectSound}
                             isModalVisible={isOverlay}
                             isOverlay={handleSubmitHideOverlay}
-                            followPlayMedia={<FollowPlayMedia song={selectSound} reactTrack={reactTrack} setReactTrack={setReactTrack} />}
+                            followPlayMedia={<FollowPlayMedia selectSound={selectSound} reactTrack={reactTrack} setReactTrack={setReactTrack} />}
                         />
-                        <PlayMediaComponent song={selectSound} dataTracksOrigin={dataTracks} reactTrack={reactTrack} setSeconds={setSeconds} />
-                        <FollowPlayMedia song={selectSound} reactTrack={reactTrack} setReactTrack={setReactTrack} />
+                        <PlayMediaComponent
+                            selectSound={selectSound}
+                            setSelectSound={setSelectSound}
+                            dataTracksOrigin={dataTracks}
+                            reactTrack={reactTrack}
+                            setReactTrack={setReactTrack}
+                            setSeconds={setSeconds}
+                        />
+                        <FollowPlayMedia
+                            selectSound={selectSound}
+                            setSelectSound={setSelectSound}
+                            reactTrack={reactTrack}
+                            setReactTrack={setReactTrack}
+                        />
                         {Object.keys(dataTracks).length !== 0 && (
                             <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
                                 <Text style={styles.viewPlaylistText}>View playlist</Text>

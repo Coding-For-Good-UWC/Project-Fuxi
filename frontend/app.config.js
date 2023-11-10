@@ -4,10 +4,10 @@ export default {
         slug: 'FUXI',
         version: '1.0.0',
         orientation: 'portrait',
-        icon: './app/assets/ic_launcher.png',
+        icon: './app/assets/fuxi-high-resolution-logo.png',
         userInterfaceStyle: 'light',
         splash: {
-            image: './app/assets/splash.png',
+            image: './app/assets/fuxi-high-resolution-logo-transparent.png',
             resizeMode: 'contain',
             backgroundColor: '#ffffff',
         },
@@ -23,13 +23,13 @@ export default {
         },
         android: {
             adaptiveIcon: {
-                foregroundImage: './app/assets/ic_launcher.png',
+                foregroundImage: './app/assets/fuxi-high-resolution-logo.png',
                 backgroundColor: '#FFFFFF',
             },
             package: 'com.codingforgood.projectfuxi',
         },
         web: {
-            favicon: './app/assets/ic_launcher.png',
+            favicon: './app/assets/fuxi-high-resolution-logo.png',
         },
         extra: {
             apiUrl: process.env.BACKEND_HOST || 'https://b1xnoo0jdd.execute-api.ap-southeast-1.amazonaws.com',

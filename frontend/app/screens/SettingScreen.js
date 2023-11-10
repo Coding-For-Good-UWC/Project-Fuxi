@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, ScrollView, Linking } from 'react-native';
 import React, { useContext } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
@@ -54,10 +54,17 @@ const SettingScreen = () => {
                                 <Ionicons name="pencil-outline" color={'#757575'} size={20} style={styles.iconItem} />
                                 <Text style={styles.sectionRowItemText}>Feedback</Text>
                             </TouchableOpacity>
-                            {/* <TouchableOpacity style={styles.sectionRowItem}>
+                            <TouchableOpacity
+                                style={styles.sectionRowItem}
+                                onPress={async () =>
+                                    await Linking.openURL(
+                                        'https://docs.google.com/document/d/1hnWiLJDQ2RVbycCTYSW3ePsEiXN-6CTFvMaT_Xb2H-8/edit?usp=sharing',
+                                    )
+                                }
+                            >
                                 <Ionicons name="help-circle-outline" color={'#757575'} size={20} style={styles.iconItem} />
                                 <Text style={styles.sectionRowItemText}>Help</Text>
-                            </TouchableOpacity> */}
+                            </TouchableOpacity>
                             <TouchableOpacity style={styles.sectionRowItem} onPress={handleLogOut}>
                                 <Ionicons name="log-out-outline" color={'#757575'} size={20} style={styles.iconItem} />
                                 <Text style={styles.sectionRowItemText}>Logout</Text>
