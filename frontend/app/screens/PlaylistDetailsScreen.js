@@ -4,7 +4,6 @@ import { useNavigation } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import CustomGridLayout from './../components/CustomGridLayout';
-import SlotPlayer from '../components/SlotPlayer';
 import ToggleDialog from '../components/ToggleDialog';
 import { getPlaylistById } from '../api/playlist';
 import ReactSongItem from '../components/ReactSongItem';
@@ -133,8 +132,6 @@ const PlaylistDetailsScreen = () => {
                     />
                 </View>
             </View>
-            {/* <SlotPlayer /> */}
-
             <ToggleDialog
                 visible={isDialogVisible}
                 title={dialogProps.title}

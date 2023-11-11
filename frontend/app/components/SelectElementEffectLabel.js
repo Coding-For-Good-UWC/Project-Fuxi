@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Animated } from 'react-native';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Picker } from '@react-native-picker/picker';
 
 const SelectElementEffectLabel = ({ dataArray, label, error, onValueChange, value }) => {

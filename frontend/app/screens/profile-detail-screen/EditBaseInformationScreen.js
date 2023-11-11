@@ -4,11 +4,14 @@ import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import SelectElementEffectLabel from '../../components/SelectElementEffectLabel';
 
 const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors }) => {
-    const years = [];
-    const currentYear = new Date().getFullYear();
-    for (let year = currentYear; year >= 1900; year--) {
-        years.push(year.toString());
-    }
+    const listYear = () => {
+        const years = [];
+        const currentYear = new Date().getFullYear();
+        for (let year = currentYear; year >= 1900; year--) {
+            years.push(year.toString());
+        }
+        return years;
+    };
 
     const updateFormData = (field, value) => {
         setFormData((prevData) => ({
@@ -45,7 +48,7 @@ const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors })
                 <View style={styles.formProfile}>
                     <TextInputEffectLabel label="Name" onChangeText={(text) => handleChangeValue('nameListener', text)} error={errors.nameListener} />
                     <SelectElementEffectLabel
-                        dataArray={years}
+                        dataArray={listYear()}
                         label="Year of birth"
                         onValueChange={(text) => handleChangeValue('yearBirth', text)}
                         error={errors.yearBirth}
