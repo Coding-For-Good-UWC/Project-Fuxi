@@ -32,44 +32,54 @@ const ProfileDetailNavigator = () => {
 
     const handleSubmitDelete = async () => {
         const profile0 = await getStoreData('profile0');
-        const { _id } = JSON.parse(profile0);
-        if (_id !== dataProfile._id) {
-            setIsLoading(true);
-            try {
-                setIsDialogDelete(false);
-                const { _id } = dataProfile;
-                await deleteAllPlaylist(_id);
-                await deleteProfileReact(_id);
-                await deleteProfile(_id);
-                navigation.navigate('AllListenerProfilesScreen');
-                setIsReRender(!isReRender);
+        if (profile0 !== null) {
+            const { _id } = JSON.parse(profile0);
+            if (_id !== dataProfile._id) {
+                setIsLoading(true);
+                try {
+                    setIsDialogDelete(false);
+                    const { _id } = dataProfile;
+                    await deleteAllPlaylist(_id);
+                    await deleteProfileReact(_id);
+                    await deleteProfile(_id);
+                    navigation.navigate('AllListenerProfilesScreen');
+                    setIsReRender(!isReRender);
+                    ToastAndroid.showWithGravityAndOffset(
+                        'Delete profile successfully',
+                        ToastAndroid.LONG,
+                        ToastAndroid.CENTER,
+                        0,
+                        Dimensions.get('window').height * 0.8,
+                    );
+                } catch (error) {
+                    ToastAndroid.showWithGravityAndOffset(
+                        'Profile deletion failed',
+                        ToastAndroid.LONG,
+                        ToastAndroid.CENTER,
+                        0,
+                        Dimensions.get('window').height * 0.8,
+                    );
+                    console.error('Error:', error);
+                    return;
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
                 ToastAndroid.showWithGravityAndOffset(
-                    'Delete profile successfully',
+                    'You are in this profile and you cannot delete it',
                     ToastAndroid.LONG,
                     ToastAndroid.CENTER,
                     0,
                     Dimensions.get('window').height * 0.8,
                 );
-            } catch (error) {
-                ToastAndroid.showWithGravityAndOffset(
-                    'Profile deletion failed',
-                    ToastAndroid.LONG,
-                    ToastAndroid.CENTER,
-                    0,
-                    Dimensions.get('window').height * 0.8,
-                );
-                console.error('Error:', error);
-                return;
-            } finally {
-                setIsLoading(false);
             }
         } else {
             ToastAndroid.showWithGravityAndOffset(
-                'You are in this profile and you cannot delete it',
+                'Please create a profile to use this feature',
                 ToastAndroid.LONG,
                 ToastAndroid.CENTER,
                 0,
-                Dimensions.get('window').height * 0.8,
+                Dimensions.get('window').height * 0.7,
             );
         }
     };

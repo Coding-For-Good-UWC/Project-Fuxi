@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useContext, useState } from 'react';
+import { Dimensions, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import React, { useContext } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRoute } from '@react-navigation/native';
@@ -13,10 +13,7 @@ const ListenerProfileScreen3 = () => {
 
     const handleGoToHomeScreen = async () => {
         await loginAuthContext(token);
-    };
-
-    const handleGoToPlayMediaScreen = async () => {
-        await loginAuthContext(token);
+        ToastAndroid.showWithGravityAndOffset('Welcome to FUXI', ToastAndroid.LONG, ToastAndroid.CENTER, 0, Dimensions.get('window').height * 0.8);
     };
 
     return (
@@ -27,17 +24,6 @@ const ListenerProfileScreen3 = () => {
                 <Text style={styles.subtitleText}>You can managed all your profiles later in Settings.</Text>
             </View>
             <View style={styles.buttonContainer}>
-                {/* <TouchableOpacity
-                    style={[
-                        styles.button,
-                        {
-                            backgroundColor: '#315F64',
-                        },
-                    ]}
-                    onPress={handleGoToPlayMediaScreen}
-                >
-                    <Text style={[styles.buttonText, { color: '#fff' }]}>Welcome, let's play some music now</Text>
-                </TouchableOpacity> */}
                 <TouchableOpacity
                     style={[
                         styles.button,
@@ -48,7 +34,7 @@ const ListenerProfileScreen3 = () => {
                         },
                     ]}
                     onPress={() => {
-                        navigation.navigate('ListenerProfileMain', { resetState: true });
+                        navigation.navigate('ListenerProfileMain');
                     }}
                 >
                     <Text style={[styles.buttonText, { color: '#137882' }]}>Create another profile</Text>

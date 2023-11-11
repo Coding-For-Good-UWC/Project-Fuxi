@@ -39,7 +39,7 @@ const getProfileById = async (event) => {
 
 const createProfile = async (event) => {
     const json = JSON.parse(event.body);
-    const { instituteUid, fullname, yearBirth, genres, description } = json;
+    const { instituteUid, fullname, yearBirth, genres } = json;
     if (!instituteUid || !fullname || !yearBirth || !genres) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
@@ -49,7 +49,6 @@ const createProfile = async (event) => {
             fullname,
             yearBirth,
             genres,
-            description,
         });
         if (profile) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Profile created success', profile)) };

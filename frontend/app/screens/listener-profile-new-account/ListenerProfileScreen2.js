@@ -10,7 +10,7 @@ import CustomAnimatedLoader from '../../components/CustomAnimatedLoader';
 import { getColour } from '../../utils/BackgroundColor';
 import { createProfileReact } from '../../api/profileReact';
 
-const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, token }) => {
+const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, token, resetState }) => {
     const navigation = useNavigation();
     const [isLoading, setIsLoading] = useState(false);
     const [isSelected, setIsSelected] = useState(false);
@@ -34,17 +34,15 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
     const handleSubmit = async () => {
         setIsLoading(true);
         const { nameListener, yearBirth } = formData;
-        const json = await getStoreData('userInfo');
-        const { uid } = JSON.parse(json);
+        const userInfo = await getStoreData('userInfo');
+        const { uid } = JSON.parse(userInfo);
         try {
-            const newProfile = await createProfile(uid, nameListener, yearBirth, selectedItems, null);
+            const newProfile = await createProfile(uid, nameListener, yearBirth, selectedItems);
             const { code, message, data } = newProfile;
             await createProfileReact(data._id, []);
             if (code == 201) {
                 await storeData('profile0', JSON.stringify(data));
                 navigation.navigate('ListenerProfileScreen3', { nameProfile: formData.nameListener, token: token });
-            } else if (code == 400) {
-                alert(message);
             } else {
                 alert(message);
             }
@@ -54,6 +52,7 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
             return;
         } finally {
             setIsLoading(false);
+            resetState();
         }
     };
 

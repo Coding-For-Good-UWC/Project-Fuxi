@@ -23,14 +23,13 @@ export const getProfileById = async (id) => {
     }
 };
 
-export const createProfile = async (userUid, fullname, yearBirth, genres, description) => {
+export const createProfile = async (userUid, fullname, yearBirth, genres) => {
     try {
         const response = await axios.post(`${apiUrl}/dev/profile `, {
             instituteUid: userUid,
             fullname: fullname,
             yearBirth: yearBirth,
             genres: genres,
-            description: description,
         });
         return response.data;
     } catch (error) {

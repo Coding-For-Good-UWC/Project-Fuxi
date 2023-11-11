@@ -1,4 +1,4 @@
-import { TouchableOpacity } from 'react-native';
+import { Dimensions, ToastAndroid, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import SongItem from './SongItem';
 import { Ionicons } from '@expo/vector-icons';
@@ -58,11 +58,21 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
 
     const handleRemoveReact = async (itemId) => {
         setIsDialogVisible(false);
-        const profileData = await getStoreData('profile0');
-        const { _id } = JSON.parse(profileData);
-        const response = await removeReactTrack(_id, itemId);
-        if (response) {
-            setCurrentReactTrack({});
+        const profile0 = await getStoreData('profile0');
+        if (profile0 !== null) {
+            const { _id } = JSON.parse(profile0);
+            const response = await removeReactTrack(_id, itemId);
+            if (response) {
+                setCurrentReactTrack({});
+            }
+        } else {
+            ToastAndroid.showWithGravityAndOffset(
+                'Please create a profile to use this feature',
+                ToastAndroid.LONG,
+                ToastAndroid.CENTER,
+                0,
+                Dimensions.get('window').height * 0.7,
+            );
         }
     };
 

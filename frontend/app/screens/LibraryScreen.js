@@ -27,11 +27,15 @@ const LibraryScreen = () => {
     async function getPlaylist() {
         try {
             const profile0 = await getStoreData('profile0');
-            const { _id } = JSON.parse(profile0);
-            const response = await getAllPlayListByProfileId(_id);
-            const { code, message, data } = response;
-            if (code == 200) {
-                setDataPlaylist(data);
+            if (profile0 !== null) {
+                const { _id } = JSON.parse(profile0);
+                const response = await getAllPlayListByProfileId(_id);
+                const { code, message, data } = response;
+                if (code == 200) {
+                    setDataPlaylist(data);
+                }
+            } else {
+                setDataPlaylist([]);
             }
         } catch (error) {
             alert(error.message);

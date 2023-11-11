@@ -7,8 +7,9 @@ import EditBaseInformationScreen from '../screens/profile-detail-screen/EditBase
 import EditMusicTasteScreen from '../screens/profile-detail-screen/EditMusicTasteScreen';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 import { getStoreData, storeData } from '../utils/AsyncStorage';
-import { updateProfile } from '../api/profiles';
+import { createProfile, updateProfile } from '../api/profiles';
 import { AppContext } from '../context/AppContext';
+import { createProfileReact } from '../api/profileReact';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -50,23 +51,44 @@ const EditProfileNavigator = () => {
             alert('Please fix the validation errors');
             return;
         }
-
         setIsLoading(true);
-        try {
-            const update = await updateProfile(dataProfile._id, nameListener, yearBirth, selectedItems);
-            const { code, message } = update;
-            if (code == 200) {
-                navigation.navigate('AllListenerProfilesScreen');
-                setIsReRender(!isReRender);
-            } else {
-                alert(message);
+
+        if (Object.keys(dataProfile).length !== 0) {
+            try {
+                const response = await updateProfile(dataProfile._id, nameListener, yearBirth, selectedItems);
+                const { code, message } = response;
+                if (code == 200) {
+                    navigation.navigate('AllListenerProfilesScreen');
+                    setIsReRender(!isReRender);
+                } else {
+                    alert(message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                return;
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Update profile unsuccessful');
-            return;
-        } finally {
-            setIsLoading(false);
+        } else {
+            try {
+                const userInfo = await getStoreData('userInfo');
+                const { uid } = JSON.parse(userInfo);
+                const newProfile = await createProfile(uid, nameListener, yearBirth, selectedItems);
+                const { code, message, data } = newProfile;
+                await createProfileReact(data._id, []);
+                if (code == 201) {
+                    await storeData('profile0', JSON.stringify(data));
+                    navigation.navigate('AllListenerProfilesScreen');
+                    setIsReRender(!isReRender);
+                } else {
+                    alert(message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                return;
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 

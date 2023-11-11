@@ -28,16 +28,16 @@ function findNextTrack(tracks, trackId) {
 
 const getReact = async (trackId) => {
     const profile0 = await getStoreData('profile0');
-    const { _id } = JSON.parse(profile0);
-
-    const response = await getReactTrackByTrackId(_id, trackId);
-    const { data } = response;
-
-    if (data?.preference !== undefined) {
-        for (const key in preference) {
-            if (preference[key].status === data.preference) {
-                console.log(preference[key]);
-                return preference[key];
+    if (profile0 !== null) {
+        const { _id } = JSON.parse(profile0);
+        const response = await getReactTrackByTrackId(_id, trackId);
+        const { data } = response;
+        if (data?.preference !== undefined) {
+            for (const key in preference) {
+                if (preference[key].status === data.preference) {
+                    console.log(preference[key]);
+                    return preference[key];
+                }
             }
         }
     }

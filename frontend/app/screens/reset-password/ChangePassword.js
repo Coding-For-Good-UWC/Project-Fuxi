@@ -82,8 +82,8 @@ const ChangePassword = () => {
     const handleSubmit = async () => {
         setIsLoading(true);
         if (validateFormData(formData) && validateErrors(errors)) {
-            const json = await getStoreData('userInfo');
-            const { email } = JSON.parse(json);
+            const userInfo = await getStoreData('userInfo');
+            const { email } = JSON.parse(userInfo);
             try {
                 console.log(formData);
                 const { oldPassword, password, confirmPassword } = formData;

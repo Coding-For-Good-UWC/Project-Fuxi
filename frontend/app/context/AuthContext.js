@@ -16,6 +16,8 @@ export const AuthProvider = (props) => {
 
     const logoutAuthContext = async () => {
         await deleteData('userToken');
+        await deleteData('userInfo');
+        await deleteData('profile0');
         setUserToken(null);
     };
 

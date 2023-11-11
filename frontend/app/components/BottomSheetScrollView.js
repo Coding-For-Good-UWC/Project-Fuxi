@@ -1,21 +1,11 @@
 import { Dimensions, StyleSheet, View } from 'react-native';
 import React, { forwardRef, useImperativeHandle, useCallback, useState } from 'react';
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withSpring,
-    withTiming,
-    useAnimatedScrollHandler,
-    runOnJS,
-} from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, useAnimatedScrollHandler, runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import BackDrop from './BackDrop';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default forwardRef(function BottomSheetScrollView(
-    { snapTo, children, backgroundColor, backDropColor, ...rest },
-    ref,
-) {
+export default forwardRef(function BottomSheetScrollView({ snapTo, children, backgroundColor, backDropColor, ...rest }, ref) {
     const inset = useSafeAreaInsets();
     const { height } = Dimensions.get('screen');
     const percentage = parseFloat(snapTo.replace('%', '')) / 100;
@@ -105,13 +95,10 @@ export default forwardRef(function BottomSheetScrollView(
                 });
             } else if (event.translationY > 0 && scrollY.value === 0) {
                 runOnJS(setEnableScroll)(false);
-                topAnimation.value = withSpring(
-                    Math.max(context.value + event.translationY - scrollBegin.value, openHeight),
-                    {
-                        damping: 100,
-                        stiffness: 400,
-                    },
-                );
+                topAnimation.value = withSpring(Math.max(context.value + event.translationY - scrollBegin.value, openHeight), {
+                    damping: 100,
+                    stiffness: 400,
+                });
             }
         })
         .onEnd(() => {
@@ -133,13 +120,7 @@ export default forwardRef(function BottomSheetScrollView(
 
     return (
         <>
-            <BackDrop
-                topAnimation={topAnimation}
-                backDropColor={backDropColor}
-                closeHeight={closeHeight}
-                openHeight={openHeight}
-                close={close}
-            />
+            <BackDrop topAnimation={topAnimation} backDropColor={backDropColor} closeHeight={closeHeight} openHeight={openHeight} close={close} />
             <GestureDetector gesture={pan}>
                 <Animated.View
                     style={[
@@ -155,13 +136,7 @@ export default forwardRef(function BottomSheetScrollView(
                         <View style={styles.line} />
                     </View>
                     <GestureDetector gesture={Gesture.Simultaneous(scrollViewGesture, panScroll)}>
-                        <Animated.ScrollView
-                            {...rest}
-                            scrollEnabled={enableScroll}
-                            bounces={false}
-                            scrollEventThrottle={16}
-                            onScroll={onScroll}
-                        >
+                        <Animated.ScrollView {...rest} scrollEnabled={enableScroll} bounces={false} scrollEventThrottle={16} onScroll={onScroll}>
                             {children}
                         </Animated.ScrollView>
                     </GestureDetector>

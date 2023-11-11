@@ -53,7 +53,7 @@ const PlaylistDetailsScreen = () => {
             const response = await getPlaylistById(dataNavigation._id);
             const responseDataReactTracks = await getReactTrackByProfileId(dataNavigation.profileId);
             if (responseDataReactTracks) {
-                const { data } = (responseDataReactTracks);
+                const { data } = responseDataReactTracks;
                 setDataReactTracks(data?.reactTracks);
             }
             const { code, message, data } = response;

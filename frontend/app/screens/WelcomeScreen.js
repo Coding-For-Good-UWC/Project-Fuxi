@@ -16,10 +16,7 @@ const WelcomeScreen = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
             <View style={styles.center}>
-                <TouchableOpacity
-                    style={styles.toggleActive}
-                    onPress={() => navigation.navigate('CreateAccountScreen')}
-                >
+                <TouchableOpacity style={styles.toggleActive} onPress={() => navigation.navigate('CreateAccountScreen')}>
                     <Text style={styles.activeText}>Create new account</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.toggleInactive} onPress={() => navigation.navigate('SignInScreen')}>

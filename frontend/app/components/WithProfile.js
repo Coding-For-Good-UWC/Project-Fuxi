@@ -11,8 +11,14 @@ const WithProfile = () => {
     const getFullname = async () => {
         try {
             const profile0 = await getStoreData('profile0');
-            const { fullname } = JSON.parse(profile0);
-            setFullname(fullname);
+            if (profile0 !== null) {
+                const { fullname } = JSON.parse(profile0);
+                setFullname(fullname);
+            } else {
+                const userInfo = await getStoreData('userInfo');
+                const { name } = JSON.parse(userInfo);
+                setFullname(name);
+            }
         } catch (error) {
             console.error(error);
         }

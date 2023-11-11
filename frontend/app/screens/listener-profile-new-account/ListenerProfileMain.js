@@ -1,20 +1,36 @@
-import { StyleSheet, Text, View, SafeAreaView, StatusBar, Dimensions, TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, StatusBar, Dimensions, TouchableOpacity, ToastAndroid } from 'react-native';
+import React, { useContext, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import Dialog from 'react-native-dialog';
 import { useRoute } from '@react-navigation/native';
 import ListenerProfileScreen1 from './ListenerProfileScreen1';
 import ListenerProfileScreen2 from './ListenerProfileScreen2';
 import CustomProgressBar from '../../components/CustomProgressBar';
+import { AuthContext } from '../../context/AuthContext';
 
 const ListenerProfileMain = () => {
+    const route = useRoute();
+    const { loginAuthContext } = useContext(AuthContext);
+    const token = route.params?.token || '123asd123';
     const width = Dimensions.get('window').width;
     const height = Dimensions.get('window').height;
     const [currentScreen, setCurrentScreen] = useState(0);
     const [progressBarValue, setProgressBarValue] = useState(0.5);
     const [visible, setVisible] = useState(false);
-    const route = useRoute();
-    const token = route.params.token;
+
+    const resetState = () => {
+        setCurrentScreen(0);
+        setProgressBarValue(0.5);
+        setFormData({
+            nameListener: '',
+            yearBirth: '',
+        });
+        setErrors({
+            nameListener: '',
+            yearBirth: '',
+        });
+        setSelectedItems([]);
+    };
 
     const [formData, setFormData] = useState({
         nameListener: '',
@@ -28,16 +44,10 @@ const ListenerProfileMain = () => {
 
     const [selectedItems, setSelectedItems] = useState([]);
 
-    const showDialog = () => {
-        setVisible(true);
-    };
-
-    const handleCancel = () => {
+    const handleSkip = async () => {
         setVisible(false);
-    };
-
-    const handleDelete = () => {
-        setVisible(false);
+        await loginAuthContext(token);
+        ToastAndroid.showWithGravityAndOffset('Welcome to FUXI', ToastAndroid.LONG, ToastAndroid.CENTER, 0, Dimensions.get('window').height * 0.8);
     };
 
     const screens = [
@@ -51,7 +61,13 @@ const ListenerProfileMain = () => {
             errors={errors}
             setErrors={setErrors}
         />,
-        <ListenerProfileScreen2 selectedItems={selectedItems} setSelectedItems={setSelectedItems} formData={formData} token={token} />,
+        <ListenerProfileScreen2
+            selectedItems={selectedItems}
+            setSelectedItems={setSelectedItems}
+            formData={formData}
+            token={token}
+            resetState={resetState}
+        />,
     ];
 
     return (
@@ -66,7 +82,7 @@ const ListenerProfileMain = () => {
                     duration={250}
                     progressStyle={{ width: '90%' }}
                 />
-                <TouchableOpacity style={styles.skip} onPress={showDialog}>
+                <TouchableOpacity style={styles.skip} onPress={() => setVisible(true)}>
                     <Text style={styles.skipText}>Skip</Text>
                 </TouchableOpacity>
             </View>
@@ -86,8 +102,8 @@ const ListenerProfileMain = () => {
                     <Dialog.Description style={styles.dialogDescription}>
                         You haven’t finished setting up this profile yet. Are you sure?
                     </Dialog.Description>
-                    <Dialog.Button style={styles.dialogButtonNo} label="No, go back" onPress={handleCancel} />
-                    <Dialog.Button style={styles.dialogButtonYes} label="Skip anyway" onPress={handleDelete} />
+                    <Dialog.Button style={styles.dialogButtonNo} label="No, go back" onPress={() => setVisible(false)} />
+                    <Dialog.Button style={styles.dialogButtonYes} label="Skip anyway" onPress={handleSkip} />
                 </Dialog.Container>
             </View>
         </SafeAreaView>

@@ -73,13 +73,7 @@ const BottomSheet = forwardRef(({ snapTo, children, backgroundColor, backDropCol
 
     return (
         <>
-            <BackDrop
-                topAnimation={topAnimation}
-                backDropColor={backDropColor}
-                closeHeight={closeHeight}
-                openHeight={openHeight}
-                close={close}
-            />
+            <BackDrop topAnimation={topAnimation} backDropColor={backDropColor} closeHeight={closeHeight} openHeight={openHeight} close={close} />
             <GestureDetector gesture={pan}>
                 <Animated.View
                     style={[

@@ -115,7 +115,7 @@ const CreateAccountScreen = () => {
             const { code, message, data } = institutesNew;
 
             if (code == 200) {
-                storeData('userInfo', JSON.stringify({ uid: data.userUid, token: data.token }));
+                await storeData('userInfo', JSON.stringify(data.institute));
                 navigation.navigate('ListenerProfileMain', { token: data.token });
             } else if (code == 400) {
                 alert(body.message);

@@ -22,10 +22,20 @@ const signup = async (event) => {
     if (!institute) {
         const userUid = generateRandomString(28);
         const createToken = jwt.sign({ email }, process.env.JWT_SECRET_KEY);
-        await InstituteModel.create({ uid: userUid, email, name, password });
+        const newInStitutes = await InstituteModel.create({ uid: userUid, email, name, password });
         return {
             statusCode: 201,
-            body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Account successfully created', { userUid: userUid, token: createToken })),
+            body: JSON.stringify(
+                ApiResponse.success(HttpStatus.OK, 'Account successfully created', {
+                    institute: {
+                        id: newInStitutes._id,
+                        uid: userUid,
+                        email: email,
+                        name: name,
+                    },
+                    token: createToken,
+                }),
+            ),
         };
     } else {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.CONFLICT, 'User with email already exists')) };

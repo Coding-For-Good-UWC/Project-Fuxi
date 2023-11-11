@@ -40,11 +40,11 @@ const LikedSongsScreen = () => {
     async function getPlaylist() {
         try {
             const profile0 = await getStoreData('profile0');
-            const { _id } = JSON.parse(profile0);
-            const response = await getLikeTrackByProfileId(_id);
-            const { code, message, data } = response;
-            if (code == 200) {
-                if (data !== null) {
+            if (profile0 !== null) {
+                const { _id } = JSON.parse(profile0);
+                const response = await getLikeTrackByProfileId(_id);
+                const { code, message, data } = response;
+                if (code == 200) {
                     setCountTracks(data.length);
                     setDataLikedTrack(data);
                     setTotalDuration(
@@ -57,6 +57,10 @@ const LikedSongsScreen = () => {
                         ),
                     );
                 }
+            } else {
+                setCountTracks(0);
+                setDataLikedTrack([]);
+                setTotalDuration(0);
             }
         } catch (error) {
             alert(error.message);

@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react';
 import CustomGridLayout from '../components/CustomGridLayout';
 import ReactSongItem from '../components/ReactSongItem';
 import { getPlaylistSuggestions } from '../api/playlist';
+
 import { getStoreData } from '../utils/AsyncStorage';
+import { searchTrack } from '../api/track';
 
 const SuggestTrackScreen = () => {
     const [dataTracks, setDataTracks] = useState([]);
@@ -16,11 +18,19 @@ const SuggestTrackScreen = () => {
     async function getPlaylistSuggestion() {
         try {
             const profile0 = await getStoreData('profile0');
-            const { _id } = JSON.parse(profile0);
-            const response = await getPlaylistSuggestions(_id, page);
-            const { code, message, data } = response;
-            if (code == 200) {
-                setDataTracks((prevData) => [...prevData, ...data]);
+            if (profile0 !== null) {
+                const { _id } = JSON.parse(profile0);
+                const response = await getPlaylistSuggestions(_id, page);
+                const { code, message, data } = response;
+                if (code == 200) {
+                    setDataTracks((prevData) => [...prevData, ...data]);
+                }
+            } else {
+                const response = await searchTrack(' ', page);
+                const { code, message, data } = response;
+                if (code == 200) {
+                    setDataTracks((prevData) => [...prevData, ...data]);
+                }
             }
         } catch (error) {
             alert(error.message);

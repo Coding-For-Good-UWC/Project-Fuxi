@@ -10,6 +10,7 @@ import { AppContext } from '../context/AppContext';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 
 const ChangeListenerScreen = ({ visible }) => {
+    const height = Dimensions.get('window').height;
     const [isLoading, setIsLoading] = useState(false);
     const [dataListener, setDataListener] = useState([]);
     const { isReRender, setIsReRender } = useContext(AppContext);
@@ -17,20 +18,30 @@ const ChangeListenerScreen = ({ visible }) => {
     const handleChangeProfile = async (item) => {
         setIsLoading(true);
         const profile0 = await getStoreData('profile0');
-        const { _id } = JSON.parse(profile0);
-        if (item._id !== _id) {
-            const response = await getProfileById(item._id);
-            const { code, message, data } = response;
-            if (code == 200) {
-                await storeData('profile0', JSON.stringify(data));
+        if (profile0 !== null) {
+            const { _id } = JSON.parse(profile0);
+            if (item._id !== _id) {
+                const response = await getProfileById(item._id);
+                const { code, message, data } = response;
+                if (code == 200) {
+                    await storeData('profile0', JSON.stringify(data));
+                    visible(false);
+                    setIsReRender(!isReRender);
+                }
+            } else {
                 visible(false);
-                setIsReRender(!isReRender);
+                console.log('You are on this profile');
             }
+            setIsLoading(false);
         } else {
-            visible(false);
-            console.log('You are on this profile');
+            ToastAndroid.showWithGravityAndOffset(
+                'Please create a profile to use this feature',
+                ToastAndroid.LONG,
+                ToastAndroid.CENTER,
+                0,
+                Dimensions.get('window').height * 0.7,
+            );
         }
-        setIsLoading(false);
     };
 
     async function getAllProfile() {
@@ -41,10 +52,11 @@ const ChangeListenerScreen = ({ visible }) => {
             const { code, message, data } = response;
             if (code == 200) {
                 setDataListener(data);
+            } else {
+                setDataListener([]);
             }
         } catch (error) {
-            alert(error.message);
-            return;
+            setDataListener([]);
         }
     }
 
@@ -71,7 +83,7 @@ const ChangeListenerScreen = ({ visible }) => {
             <CustomAnimatedLoader visible={isLoading} />
             <Animatable.View animation="fadeIn" duration={500} style={styles.container}>
                 <Text style={styles.headerText}>Change listener</Text>
-                <View style={styles.listenerList}>
+                <View style={[styles.listenerList, { maxHeight: height - 300 }]}>
                     <CustomGridLayout
                         data={dataListener.map((item, index) => (
                             <ListenerItem key={index} index={index} data={item} onPress={() => handleChangeProfile(item)} />
@@ -119,6 +131,7 @@ const styles = StyleSheet.create({
         color: '#222C2D',
     },
     listenerList: {
+        flex: 1,
         flexDirection: 'column',
     },
     listenerItem: {

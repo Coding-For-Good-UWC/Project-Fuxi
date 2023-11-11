@@ -90,27 +90,37 @@ const CreateNewPlaylistScreen = () => {
     const handleSubmit = async () => {
         setIsLoading(true);
         try {
-            const profileData = await getStoreData('profile0');
-            const { _id } = JSON.parse(profileData);
-            const response = await createPlaylist(_id, namePlaylistText, selectedItems);
-            const { code, message, data } = response;
-            if (code == 201) {
-                navigation.navigate('PlayMedia', { dataTracksOrigin: data?.tracks });
-                setIsReRender(!isReRender);
-                ToastAndroid.showWithGravityAndOffset(
-                    'Playlist creation successful',
-                    ToastAndroid.LONG,
-                    ToastAndroid.CENTER,
-                    0,
-                    Dimensions.get('window').height * 0.8,
-                );
+            const profile0 = await getStoreData('profile0');
+            if (profile0 !== null) {
+                const { _id } = JSON.parse(profile0);
+                const response = await createPlaylist(_id, namePlaylistText, selectedItems);
+                const { code, message, data } = response;
+                if (code == 201) {
+                    navigation.navigate('PlayMedia', { dataTracksOrigin: data?.tracks });
+                    setIsReRender(!isReRender);
+                    ToastAndroid.showWithGravityAndOffset(
+                        'Playlist creation successful',
+                        ToastAndroid.LONG,
+                        ToastAndroid.CENTER,
+                        0,
+                        Dimensions.get('window').height * 0.8,
+                    );
+                } else {
+                    ToastAndroid.showWithGravityAndOffset(
+                        'Playlist creation failed',
+                        ToastAndroid.LONG,
+                        ToastAndroid.CENTER,
+                        0,
+                        Dimensions.get('window').height * 0.8,
+                    );
+                }
             } else {
                 ToastAndroid.showWithGravityAndOffset(
-                    'Playlist creation failed',
+                    'Please create a profile to use this feature',
                     ToastAndroid.LONG,
                     ToastAndroid.CENTER,
                     0,
-                    Dimensions.get('window').height * 0.8,
+                    Dimensions.get('window').height * 0.7,
                 );
             }
         } catch (error) {

@@ -137,54 +137,76 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack }) => {
 
     const handleStatusLike = async () => {
         const profile0 = await getStoreData('profile0');
-        const { _id } = JSON.parse(profile0);
-        if (reactTrack.status == 'like') {
-            setReactTrack(preference.SLK);
+        if (profile0 !== null) {
+            const { _id } = JSON.parse(profile0);
+            if (reactTrack.status == 'like') {
+                setReactTrack(preference.SLK);
+                setIsDialogVisible(false);
+                await updateReactTrack(_id, selectSound._id, preference.SLK.status);
+            } else if (reactTrack.status == undefined) {
+                setReactTrack(preference.LK);
+                setIsDialogVisible(false);
+                await addReactTrack(_id, selectSound._id, preference.LK.status);
+            } else if (reactTrack.status == 'strongly dislike') {
+                setReactTrack(preference.LK);
+                setIsDialogVisible(false);
+                await updateReactTrack(_id, selectSound._id, preference.LK.status);
+            } else if (reactTrack.status == 'dislike') {
+                setReactTrack(preference.LK);
+                setIsDialogVisible(false);
+                await updateReactTrack(_id, selectSound._id, preference.LK.status);
+            }
+        } else {
             setIsDialogVisible(false);
-            await updateReactTrack(_id, selectSound._id, preference.SLK.status);
-        } else if (reactTrack.status == undefined) {
-            setReactTrack(preference.LK);
-            setIsDialogVisible(false);
-            await addReactTrack(_id, selectSound._id, preference.LK.status);
-        } else if (reactTrack.status == 'strongly dislike') {
-            setReactTrack(preference.LK);
-            setIsDialogVisible(false);
-            await updateReactTrack(_id, selectSound._id, preference.LK.status);
-        } else if (reactTrack.status == 'dislike') {
-            setReactTrack(preference.LK);
-            setIsDialogVisible(false);
-            await updateReactTrack(_id, selectSound._id, preference.LK.status);
+            ToastAndroid.showWithGravityAndOffset(
+                'Please create a profile to use this feature',
+                ToastAndroid.LONG,
+                ToastAndroid.CENTER,
+                0,
+                Dimensions.get('window').height * 0.7,
+            );
         }
     };
 
     const handleStatusDislike = async () => {
         const profile0 = await getStoreData('profile0');
-        const { _id } = JSON.parse(profile0);
-        if (reactTrack.status == 'dislike') {
-            setReactTrack(preference.SDK);
+        if (profile0 !== null) {
+            const { _id } = JSON.parse(profile0);
+            if (reactTrack.status == 'dislike') {
+                setReactTrack(preference.SDK);
+                setIsDialogVisible(false);
+                await updateReactTrack(_id, selectSound._id, preference.SDK.status);
+            } else if (reactTrack.status == undefined) {
+                setReactTrack(preference.DK);
+                setIsDialogVisible(false);
+                await addReactTrack(_id, selectSound._id, preference.DK.status);
+            } else if (reactTrack.status == 'strongly like') {
+                setReactTrack(preference.DK);
+                setIsDialogVisible(false);
+                await updateReactTrack(_id, selectSound._id, preference.DK.status);
+            } else if (reactTrack.status == 'like') {
+                setReactTrack(preference.DK);
+                setIsDialogVisible(false);
+                await updateReactTrack(_id, selectSound._id, preference.DK.status);
+            }
+            await removeTrackInPlaylist(_id, selectSound._id);
+            ToastAndroid.showWithGravityAndOffset(
+                'Song has been hidden in “Happy mood”',
+                ToastAndroid.LONG,
+                ToastAndroid.CENTER,
+                0,
+                Dimensions.get('window').height * 0.8,
+            );
+        } else {
             setIsDialogVisible(false);
-            await updateReactTrack(_id, selectSound._id, preference.SDK.status);
-        } else if (reactTrack.status == undefined) {
-            setReactTrack(preference.DK);
-            setIsDialogVisible(false);
-            await addReactTrack(_id, selectSound._id, preference.DK.status);
-        } else if (reactTrack.status == 'strongly like') {
-            setReactTrack(preference.DK);
-            setIsDialogVisible(false);
-            await updateReactTrack(_id, selectSound._id, preference.DK.status);
-        } else if (reactTrack.status == 'like') {
-            setReactTrack(preference.DK);
-            setIsDialogVisible(false);
-            await updateReactTrack(_id, selectSound._id, preference.DK.status);
+            ToastAndroid.showWithGravityAndOffset(
+                'Please create a profile to use this feature',
+                ToastAndroid.LONG,
+                ToastAndroid.CENTER,
+                0,
+                Dimensions.get('window').height * 0.7,
+            );
         }
-        await removeTrackInPlaylist(_id, selectSound._id);
-        ToastAndroid.showWithGravityAndOffset(
-            'Song has been hidden in “Happy mood”',
-            ToastAndroid.LONG,
-            ToastAndroid.CENTER,
-            0,
-            Dimensions.get('window').height * 0.8,
-        );
     };
 
     return (

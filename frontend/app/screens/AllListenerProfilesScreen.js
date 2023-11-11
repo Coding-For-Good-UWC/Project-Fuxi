@@ -22,11 +22,10 @@ const AllListenerProfilesScreen = () => {
             if (code == 200) {
                 setDataProfiles(data);
             } else {
-                ToastAndroid.showWithGravityAndOffset(message, ToastAndroid.LONG, ToastAndroid.CENTER, 0, Dimensions.get('window').height * 0.8);
+                setDataProfiles([]);
             }
         } catch (error) {
-            alert(error.message);
-            return;
+            setDataProfiles([]);
         }
     }
 

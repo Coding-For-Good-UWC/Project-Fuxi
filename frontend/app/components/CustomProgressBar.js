@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 
-function CustomProgressBar({
-    progress,
-    color,
-    backgroundColor,
-    duration,
-    radius,
-    height = 10,
-    sliderStyle,
-    progressStyle,
-}) {
+function CustomProgressBar({ progress, color, backgroundColor, duration, radius, height = 10, sliderStyle, progressStyle }) {
     const [animatedWidth, setAnimatedWidth] = useState(new Animated.Value(0));
 
     useEffect(() => {
