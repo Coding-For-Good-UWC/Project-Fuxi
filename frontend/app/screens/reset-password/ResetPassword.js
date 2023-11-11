@@ -2,7 +2,8 @@ import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, Statu
 import React, { useEffect, useState } from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
-import { resetPassword } from '../../api/institutes';
+import { resetPasswordSendOTP } from '../../api/mailer';
+import { resetPasswordUpdateOTP } from '../../api/institutes';
 import { storeData } from '../../utils/AsyncStorage';
 import CustomAnimatedLoader from '../../components/CustomAnimatedLoader';
 
@@ -58,17 +59,18 @@ const ResetPassword = () => {
         const { email } = formData;
         if (validateNullFormData(formData)) {
             try {
-                const response = await resetPassword(email);
-                const { code, message, data } = response;
+                const CodeOTP = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+                const responseUpdateOTP = await resetPasswordUpdateOTP(email, CodeOTP);
+                const { code, message, data } = responseUpdateOTP;
                 if (code == 200) {
+                    await resetPasswordSendOTP(email, CodeOTP);
                     await storeData('tokenResetPassword', data);
                     navigation.navigate('ResetPasswordCheckEmail', { email: email });
                 } else {
                     alert('Error sending email');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert(error.message);
+                alert('Error sending email');
                 return;
             } finally {
                 setIsLoading(false);

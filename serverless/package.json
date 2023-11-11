@@ -18,8 +18,7 @@
         "firebase-admin": "^11.10.1",
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^7.5.2",
-        "node-rsa": "^1.1.1",
-        "nodemailer": "^6.9.7"
+        "node-rsa": "^1.1.1"
     },
     "devDependencies": {
         "serverless-middleware": "^3.2.0",

@@ -90,8 +90,8 @@ functions:
       - http:
           path: /institute/signin
           method: post
-  resetPassword:
-    handler: lambdas/institute.resetPassword
+  resetPasswordUpdateOTP:
+    handler: lambdas/institute.resetPasswordUpdateOTP
     events:
       - http:
           path: /institute/reset-password

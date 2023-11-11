@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken');
 const { connectDb } = require('../lib/mongodb');
 const { InstituteModel } = require('../models/institute');
 const { generateRandomString } = require('../utils/index');
-const { ResetPasswordEmail } = require('../utils/mailer');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 
 connectDb();
@@ -75,23 +74,19 @@ const signin = async (event) => {
     }
 };
 
-const resetPassword = async (event) => {
+const resetPasswordUpdateOTP = async (event) => {
     const json = JSON.parse(event.body);
-    const { email } = json;
-    if (!email) {
+    const { email, CodeOTP } = json;
+    if (!email || !CodeOTP) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
 
-    const randomNumber = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
-    await InstituteModel.findOneAndUpdate({ email: email }, { $set: { OTPResetPassword: randomNumber } }, { upsert: false });
-
-    const result = await ResetPasswordEmail(email, randomNumber);
-    console.log('result send email: ' + result);
-    if (result === 200) {
+    try {
+        await InstituteModel.findOneAndUpdate({ email: email }, { $set: { OTPResetPassword: CodeOTP } }, { upsert: false });
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Email sent successfully!', token)) };
-    } else {
+    } catch (error) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Error sending email')) };
     }
 };
@@ -173,7 +168,7 @@ const changePasswordInReset = async (event) => {
 module.exports = {
     signup,
     signin,
-    resetPassword,
+    resetPasswordUpdateOTP,
     changePassword,
     changePasswordInReset,
 };

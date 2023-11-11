@@ -30,10 +30,11 @@ export const signInInstitute = async (email, password) => {
     }
 };
 
-export const resetPassword = async (email) => {
+export const resetPasswordUpdateOTP = async (email, CodeOTP) => {
     try {
         const response = await axios.post(`${apiUrl}/dev/institute/reset-password`, {
             email: email,
+            CodeOTP: CodeOTP,
         });
         return response.data;
     } catch (error) {
