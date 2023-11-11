@@ -2,17 +2,9 @@ import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
 import React from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import SelectElementEffectLabel from '../../components/SelectElementEffectLabel';
+import { listArrayObjectYear } from '../../utils/utils';
 
-const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors }) => {
-    const listYear = () => {
-        const years = [];
-        const currentYear = new Date().getFullYear();
-        for (let year = currentYear; year >= 1900; year--) {
-            years.push(year.toString());
-        }
-        return years;
-    };
-
+const EditBaseInformationScreen = ({ setFormData, errors, setErrors }) => {
     const updateFormData = (field, value) => {
         setFormData((prevData) => ({
             ...prevData,
@@ -48,7 +40,7 @@ const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors })
                 <View style={styles.formProfile}>
                     <TextInputEffectLabel label="Name" onChangeText={(text) => handleChangeValue('nameListener', text)} error={errors.nameListener} />
                     <SelectElementEffectLabel
-                        dataArray={listYear()}
+                        dataArrayObject={listArrayObjectYear()}
                         label="Year of birth"
                         onValueChange={(text) => handleChangeValue('yearBirth', text)}
                         error={errors.yearBirth}

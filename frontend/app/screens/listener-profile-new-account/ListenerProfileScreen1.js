@@ -2,19 +2,10 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import SelectElementEffectLabel from '../../components/SelectElementEffectLabel';
+import { listArrayObjectYear } from '../../utils/utils';
 
 const ListenerProfileScreen1 = ({ goToScreen, formData, setFormData, errors, setErrors }) => {
     const [isValid, setIsValid] = useState(false);
-
-    const listYear = () => {
-        const years = [];
-        const currentYear = new Date().getFullYear();
-        for (let year = currentYear; year >= 1900; year--) {
-            years.push(year.toString());
-        }
-        return years;
-    };
-
     const updateFormData = (field, value) => {
         setFormData((prevData) => ({
             ...prevData,
@@ -84,7 +75,7 @@ const ListenerProfileScreen1 = ({ goToScreen, formData, setFormData, errors, set
                     error={errors.nameListener}
                 />
                 <SelectElementEffectLabel
-                    dataArray={listYear()}
+                    dataArrayObject={listArrayObjectYear()}
                     label="Year of birth"
                     onValueChange={(text) => handleChangeValue('yearBirth', text)}
                     value={formData.yearBirth}
