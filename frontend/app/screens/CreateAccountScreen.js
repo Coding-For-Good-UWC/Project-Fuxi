@@ -1,6 +1,5 @@
 import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useNavigation } from '@react-navigation/native';
 import colours from '../config/colours';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
@@ -118,14 +117,14 @@ const CreateAccountScreen = () => {
                 await storeData('userInfo', JSON.stringify(data.institute));
                 navigation.navigate('ListenerProfileMain', { token: data.token });
             } else if (code == 400) {
-                alert(body.message);
+                alert(message);
             } else if (code == 409) {
                 setErrors({
                     ...errors,
-                    email: body.message,
+                    email: message,
                 });
             } else {
-                alert(body.message);
+                alert(message);
             }
         } catch (error) {
             console.error('Error:', error);

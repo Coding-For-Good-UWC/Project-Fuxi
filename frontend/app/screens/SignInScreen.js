@@ -82,7 +82,10 @@ const SignInScreen = () => {
                         const getProfile0 = await getAllProfilesByInstituteUId(dataLogin?.data?.institute?.uid);
                         const dataGetProfile0 = getProfile0;
                         await storeData('userInfo', JSON.stringify(dataLogin.data.institute));
-                        await storeData('profile0', JSON.stringify(dataGetProfile0.data[0]));
+                        console.log(dataGetProfile0.data[0]);
+                        if (dataGetProfile0.data[0] !== undefined) {
+                            await storeData('profile0', JSON.stringify(dataGetProfile0.data[0]));
+                        }
                         loginAuthContext(dataLogin.data.token);
                     } else {
                         ToastAndroid.showWithGravityAndOffset(

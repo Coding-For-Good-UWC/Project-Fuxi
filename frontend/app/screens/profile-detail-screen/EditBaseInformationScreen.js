@@ -40,7 +40,7 @@ const EditBaseInformationScreen = ({ setFormData, errors, setErrors }) => {
                 <View style={styles.formProfile}>
                     <TextInputEffectLabel label="Name" onChangeText={(text) => handleChangeValue('nameListener', text)} error={errors.nameListener} />
                     <SelectElementEffectLabel
-                        dataArrayObject={listArrayObjectYear()}
+                        dataArray={listArrayObjectYear()}
                         label="Year of birth"
                         onValueChange={(text) => handleChangeValue('yearBirth', text)}
                         error={errors.yearBirth}

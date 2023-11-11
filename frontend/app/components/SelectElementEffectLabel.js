@@ -1,29 +1,32 @@
 import { StyleSheet, Text, View, Animated } from 'react-native';
-import React, { useState, useRef, useEffect } from 'react';
-import RNPickerSelect from 'react-native-picker-select';
+import React, { useState, useRef } from 'react';
+import { Picker } from '@react-native-picker/picker';
 
-const SelectElementEffectLabel = ({ dataArrayObject, label, error, onValueChange }) => {
-    const [selectedItem, setSelectedItem] = useState('');
+const SelectElementEffectLabel = ({ dataArray, label, error, onValueChange, value }) => {
+    const [selectedItem, setSelectedItem] = useState(value || '');
+    const [pickerSelected, setPickerSelected] = useState(false);
     const placeholderAnim = useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
-        if (selectedItem !== undefined && selectedItem !== '') {
-            Animated.timing(placeholderAnim, {
-                toValue: 1,
-                duration: 200,
-                useNativeDriver: false,
-            }).start();
-        } else {
+    const handleFocus = () => {
+        setPickerSelected(true);
+        Animated.timing(placeholderAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: false,
+        }).start();
+    };
+
+    const handleBlur = () => {
+        if (!pickerSelected) {
             Animated.timing(placeholderAnim, {
                 toValue: 0,
                 duration: 200,
                 useNativeDriver: false,
             }).start();
         }
-    }, [selectedItem]);
+    };
 
     const handlePickerChange = (itemValue) => {
-        console.log(itemValue);
         setSelectedItem(itemValue);
         onValueChange(itemValue);
     };
@@ -52,12 +55,19 @@ const SelectElementEffectLabel = ({ dataArrayObject, label, error, onValueChange
                 >
                     {label}
                 </Animated.Text>
-                <RNPickerSelect
-                    onValueChange={(value) => handlePickerChange(value)}
-                    items={dataArrayObject}
-                    placeholder={''}
-                    useNativeAndroidPickerStyle={false}
-                />
+                <Picker
+                    selectedValue={selectedItem}
+                    onValueChange={handlePickerChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                    style={{
+                        marginHorizontal: -16,
+                        marginVertical: -12,
+                    }}
+                >
+                    {pickerSelected &&
+                        dataArray.map((item, index) => <Picker.Item key={index} label={item} value={item} style={{ color: '#3C4647' }} />)}
+                </Picker>
             </View>
             <Animated.View
                 style={{

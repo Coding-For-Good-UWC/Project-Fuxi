@@ -75,7 +75,7 @@ const ListenerProfileScreen1 = ({ goToScreen, formData, setFormData, errors, set
                     error={errors.nameListener}
                 />
                 <SelectElementEffectLabel
-                    dataArrayObject={listArrayObjectYear()}
+                    dataArray={listArrayObjectYear()}
                     label="Year of birth"
                     onValueChange={(text) => handleChangeValue('yearBirth', text)}
                     value={formData.yearBirth}

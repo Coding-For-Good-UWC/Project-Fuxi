@@ -21,7 +21,7 @@ export const listArrayObjectYear = () => {
     const years = [];
     const currentYear = new Date().getFullYear();
     for (let year = currentYear; year >= 1900; year--) {
-        years.push({ key: year.toString(), label: year.toString(), value: year.toString(), color: '#3C4647' });
+        years.push(year.toString());
     }
     return years;
 };
