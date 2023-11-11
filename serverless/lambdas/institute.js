@@ -83,12 +83,12 @@ const resetPassword = async (event) => {
     }
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
-    console.log(token);
 
     const randomNumber = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
     await InstituteModel.findOneAndUpdate({ email: email }, { $set: { OTPResetPassword: randomNumber } }, { upsert: false });
 
-    const result = ResetPasswordEmail(email, randomNumber);
+    const result = await ResetPasswordEmail(email, randomNumber);
+    console.log('result send email: ' + result);
     if (result === 200) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Email sent successfully!', token)) };
     } else {

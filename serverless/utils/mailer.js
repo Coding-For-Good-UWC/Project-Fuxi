@@ -6,6 +6,7 @@ const ResetPasswordEmail = async (recipient, CodeOTP) => {
 
     const transporter = createTransport({
         service: 'Gmail',
+        port: 465,
         auth: {
             user: username,
             pass: password,
@@ -19,12 +20,10 @@ const ResetPasswordEmail = async (recipient, CodeOTP) => {
         html: htmlContent(CodeOTP),
     };
 
-    const result = await transporter.sendMail(mailOptions);
-
-    console.log(result);
-    if (result) {
+    try {
+        await transporter.sendMail(mailOptions);
         return 200;
-    } else {
+    } catch (error) {
         return 401;
     }
 };
