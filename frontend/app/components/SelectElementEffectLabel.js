@@ -1,30 +1,27 @@
-import { StyleSheet, Text, View, Animated } from 'react-native';
-import React, { useState, useRef } from 'react';
-import { Picker } from '@react-native-picker/picker';
+import { StyleSheet, Text, View, Animated, Modal, TouchableOpacity } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import Picker from './Picker';
 
 const SelectElementEffectLabel = ({ dataArray, label, error, onValueChange, value }) => {
     const [selectedItem, setSelectedItem] = useState(value || '');
-    const [pickerSelected, setPickerSelected] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
     const placeholderAnim = useRef(new Animated.Value(0)).current;
 
-    const handleFocus = () => {
-        setPickerSelected(true);
-        Animated.timing(placeholderAnim, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: false,
-        }).start();
-    };
-
-    const handleBlur = () => {
-        if (!pickerSelected) {
+    useEffect(() => {
+        if (selectedItem !== undefined && selectedItem !== '') {
+            Animated.timing(placeholderAnim, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: false,
+            }).start();
+        } else {
             Animated.timing(placeholderAnim, {
                 toValue: 0,
                 duration: 200,
                 useNativeDriver: false,
             }).start();
         }
-    };
+    }, [selectedItem]);
 
     const handlePickerChange = (itemValue) => {
         setSelectedItem(itemValue);
@@ -33,7 +30,7 @@ const SelectElementEffectLabel = ({ dataArray, label, error, onValueChange, valu
 
     return (
         <View style={{ marginBottom: 10 }}>
-            <View>
+            <TouchableOpacity onPress={() => setIsModalVisible(!isModalVisible)}>
                 <Animated.Text
                     style={{
                         position: 'absolute',
@@ -55,20 +52,24 @@ const SelectElementEffectLabel = ({ dataArray, label, error, onValueChange, valu
                 >
                     {label}
                 </Animated.Text>
-                <Picker
-                    selectedValue={selectedItem}
-                    onValueChange={handlePickerChange}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
-                    style={{
-                        marginHorizontal: -16,
-                        marginVertical: -12,
-                    }}
-                >
-                    {pickerSelected &&
-                        dataArray.map((item, index) => <Picker.Item key={index} label={item} value={item} style={{ color: '#3C4647' }} />)}
-                </Picker>
-            </View>
+                <View style={{ height: 34, justifyContent: 'center' }}>
+                    <Text
+                        style={{
+                            fontSize: 16,
+                            color: '#3C4647',
+                        }}
+                    >
+                        {selectedItem}
+                    </Text>
+                </View>
+                <Modal visible={isModalVisible} transparent animationType="fade">
+                    <Picker
+                        dataArray={dataArray}
+                        onValueChange={(item) => handlePickerChange(item)}
+                        visible={() => setIsModalVisible(!isModalVisible)}
+                    />
+                </Modal>
+            </TouchableOpacity>
             <Animated.View
                 style={{
                     borderBottomColor: error
