@@ -182,29 +182,6 @@ const CreateAccountScreen = () => {
                     value={formData.confirmPassword}
                     error={errors.confirmPassword}
                 />
-                {/* <View style={styles.policy}>
-                    <BouncyCheckbox
-                        isChecked={isChecked}
-                        onPress={() => setIsChecked(!isChecked)}
-                        style={styles.checkbox}
-                        fillColor="#539ca4"
-                        unfillColor="#fff"
-                        iconStyle={{
-                            borderColor: isChecked ? '#539ca4' : '#757575',
-                            borderRadius: 1,
-                            borderWidth: 2,
-                        }}
-                        innerIconStyle={{
-                            borderColor: isChecked ? '#539ca4' : '#757575',
-                            borderRadius: 1,
-                        }}
-                        size={20}
-                    />
-                    <Text style={styles.policyText}>
-                        I have read and agreed to the <Text style={styles.primaryText}>Terms of Service</Text> &{' '}
-                        <Text style={styles.primaryText}>Privacy Policy</Text> of Project FUXI.
-                    </Text>
-                </View> */}
                 <View style={styles.toggle}>
                     <TouchableOpacity
                         style={[

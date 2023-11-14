@@ -6,6 +6,9 @@ const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { connectDb } = require('../lib/mongodb');
 const { InstituteModel } = require('../models/institute');
+const { ProfileModel } = require('../models/profile');
+const { ProfileReactModal } = require('../models/profileReact');
+const { PlaylistModel } = require('../models/playlist');
 const { generateRandomString } = require('../utils/index');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 
@@ -165,10 +168,36 @@ const changePasswordInReset = async (event) => {
     }
 };
 
+const deleteAccount = async (event) => {
+    const { email } = JSON.parse(event.body);
+    if (!email) {
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+    }
+    try {
+        const existUser = await InstituteModel.findOneAndDelete({ email: email });
+
+        if (existUser) {
+            const profilesToDelete = await ProfileModel.find({ uid: existUser.uid });
+            for (const profile of profilesToDelete) {
+                await PlaylistModel.deleteMany({ profileId: profile._id });
+                await ProfileReactModal.deleteOne({ profileId: profile._id });
+            }
+            await ProfileModel.deleteMany({ uid: existUser.uid });
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Account Deleted Successfully!')) };
+        } else {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Account Deletion Unsuccessful')) };
+        }
+    } catch (error) {
+        console.error(error);
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    }
+};
+
 module.exports = {
     signup,
     signin,
     resetPasswordUpdateOTP,
     changePassword,
     changePasswordInReset,
+    deleteAccount,
 };

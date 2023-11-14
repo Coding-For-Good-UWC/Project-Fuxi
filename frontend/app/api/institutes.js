@@ -70,3 +70,17 @@ export const changePasswordInReset = async (token, CodeOTP, newPassword) => {
         throw error;
     }
 };
+
+export const deleteAccount = async (email) => {
+    try {
+        const response = await axios.delete(`${apiUrl}/dev/institute`, {
+            data: {
+                email: email,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+};

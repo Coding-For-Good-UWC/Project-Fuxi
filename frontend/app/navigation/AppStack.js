@@ -19,6 +19,7 @@ import Feedback from '../screens/other/Feedback';
 import { AppProvider } from '../context/AppContext';
 import SuggestTrackScreen from '../screens/SuggestTrackScreen';
 import ChangePassword from '../screens/reset-password/ChangePassword';
+import DeleteAccountScreen from '../screens/DeleteAccountScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -164,6 +165,18 @@ const AppStack = () => {
                     component={SuggestTrackScreen}
                     options={{
                         headerTitle: '',
+                        headerTransparent: true,
+                        headerShown: true,
+                        headerStyle: {
+                            backgroundColor: '#fff',
+                        },
+                    }}
+                />
+                <Stack.Screen
+                    name="DeleteAccountScreen"
+                    component={DeleteAccountScreen}
+                    options={{
+                        headerTitle: 'Delete account',
                         headerTransparent: true,
                         headerShown: true,
                         headerStyle: {

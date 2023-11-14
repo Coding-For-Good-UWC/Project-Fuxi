@@ -119,6 +119,12 @@ functions:
       - http:
           path: /institute/change-reset-password
           method: post
+  deleteAccount:
+    handler: lambdas/institute.deleteAccount
+    events:
+      - http:
+          path: /institute
+          method: delete
   getAllProfilesByInstituteUId:
     handler: lambdas/profile.getAllProfilesByInstituteUId
     events:
