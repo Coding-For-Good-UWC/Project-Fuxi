@@ -1,8 +1,11 @@
 import axios from 'axios';
+import Constants from 'expo-constants';
+
+const apiUrl = Constants.expoConfig.extra.apiUrl;
 
 export const resetPasswordSendOTP = async (email, CodeOTP) => {
     try {
-        const response = await axios.post(`https://oo5ebuu880.execute-api.ap-southeast-1.amazonaws.com/mailer/reset-password`, {
+        const response = await axios.post(`${apiUrl}/dev/mailer/reset-password`, {
             email: email,
             CodeOTP: CodeOTP,
         });

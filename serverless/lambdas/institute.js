@@ -33,7 +33,7 @@ const signup = async (event) => {
                         name: name,
                     },
                     token: createToken,
-                }),
+                })
             ),
         };
     } else {
@@ -65,7 +65,7 @@ const signin = async (event) => {
                             name: institute.name,
                         },
                         token: createToken,
-                    }),
+                    })
                 ),
             };
         } else {
@@ -152,7 +152,7 @@ const changePasswordInReset = async (event) => {
                 }
             } else {
                 return {
-                    statusCode: 403,
+                    statusCode: 200,
                     body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'The provided token has expired. Please obtain a new token')),
                 };
             }

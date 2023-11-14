@@ -36,6 +36,11 @@ plugins:
   - serverless-offline-watcher
 
 custom:
+  api:
+    cors:
+      AllowMethods: "*"
+      AllowHeaders: "*"
+      AllowOrigin: "*"
   serverless-offline:
     httpPort: 3000
   serverless-offline-watcher:
@@ -95,6 +100,12 @@ functions:
     events:
       - http:
           path: /institute/reset-password
+          method: post
+  SendEmailResetPassword:
+    handler: utils/mailer.SendEmailResetPassword
+    events:
+      - http:
+          path: /mailer/reset-password
           method: post
   changePassword:
     handler: lambdas/institute.changePassword

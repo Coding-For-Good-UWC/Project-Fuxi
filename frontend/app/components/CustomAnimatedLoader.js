@@ -5,7 +5,6 @@ import AnimatedLoader from 'react-native-animated-loader';
 // source animation in link: https://lottiefiles.com/search?q=loader&category=animations
 
 const CustomAnimatedLoader = ({ visible }) => {
-  const { height, width } = Dimensions.get('window');
   return (
     <AnimatedLoader
       visible={visible}
