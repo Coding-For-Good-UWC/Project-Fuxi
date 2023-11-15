@@ -16,9 +16,10 @@ export default {
         },
         assetBundlePatterns: ['**/*'],
         ios: {
+            bundleIdentifier: 'com.uwcfuxi.app',
             supportsTablet: true,
             infoPlist: {
-                UIBackgroundModes: ['audio'],
+                ITSAppUsesNonExemptEncryption: false,
             },
         },
         android: {

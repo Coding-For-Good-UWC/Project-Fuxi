@@ -107,6 +107,7 @@ const DeleteAccountScreen = () => {
                 );
                 return;
             } finally {
+                setIsDialogVisible(false);
                 setIsLoading(false);
             }
         }
@@ -163,6 +164,7 @@ const DeleteAccountScreen = () => {
                     labelNo="No, Cancel"
                     onPressYes={handleSubmit}
                     onPressNo={() => setIsDialogVisible(false)}
+                    styleBtnYes={{ backgroundColor: '#E84C4C' }}
                 />
             </View>
         </SafeAreaView>
