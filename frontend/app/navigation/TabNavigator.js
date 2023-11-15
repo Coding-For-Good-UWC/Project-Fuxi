@@ -26,6 +26,10 @@ const TabNavigator = () => {
             <Tab.Screen
                 name="LibraryScreen"
                 component={LibraryScreen}
+                // options={{
+                //     tabBarLabel: 'Library',
+                //     tabBarIcon: ({color}) => <Ionicons name="musical-note" color={color} size={26} />
+                // }}
                 options={({ route }) => ({
                     tabBarLabel: 'Library',
                     tabBarIcon: ({ color, size, focused }) => (
@@ -71,9 +75,6 @@ export default TabNavigator;
 
 const styles = StyleSheet.create({
     iconTab: {
-        paddingHorizontal: 20,
-        paddingVertical: 4,
         borderRadius: 20,
-        marginTop: 6,
     },
 });

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions, ToastAndroid } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import ToggleDialog from './ToggleDialog';
@@ -13,13 +13,7 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack }) => {
 
     const showDialogLike = () => {
         if (reactTrack.status == 'strongly like') {
-            ToastAndroid.showWithGravityAndOffset(
-                'Maximum liking achieved',
-                ToastAndroid.LONG,
-                ToastAndroid.CENTER,
-                0,
-                Dimensions.get('window').height * 0.8,
-            );
+            alert('Maximum liking achieved')
         } else if (reactTrack.status == 'like') {
             setDialogProps({
                 title: 'Like this song?',
@@ -73,13 +67,7 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack }) => {
 
     const showDialogDislike = async () => {
         if (reactTrack.status == 'strongly dislike') {
-            ToastAndroid.showWithGravityAndOffset(
-                'Maximum disliking achieved',
-                ToastAndroid.LONG,
-                ToastAndroid.CENTER,
-                0,
-                Dimensions.get('window').height * 0.8,
-            );
+            alert('Maximum disliking achieved')
         } else if (reactTrack.status == 'dislike') {
             setDialogProps({
                 title: 'Dislike this song?',
@@ -158,13 +146,7 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack }) => {
             }
         } else {
             setIsDialogVisible(false);
-            ToastAndroid.showWithGravityAndOffset(
-                'Please create a profile to use this feature',
-                ToastAndroid.LONG,
-                ToastAndroid.CENTER,
-                0,
-                Dimensions.get('window').height * 0.7,
-            );
+            alert('Please create a profile to use this feature')
         }
     };
 
@@ -190,22 +172,10 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack }) => {
                 await updateReactTrack(_id, selectSound._id, preference.DK.status);
             }
             await removeTrackInPlaylist(_id, selectSound._id);
-            ToastAndroid.showWithGravityAndOffset(
-                'Song has been hidden in “Happy mood”',
-                ToastAndroid.LONG,
-                ToastAndroid.CENTER,
-                0,
-                Dimensions.get('window').height * 0.8,
-            );
+            alert('Song has been hidden in “Happy mood”')
         } else {
             setIsDialogVisible(false);
-            ToastAndroid.showWithGravityAndOffset(
-                'Please create a profile to use this feature',
-                ToastAndroid.LONG,
-                ToastAndroid.CENTER,
-                0,
-                Dimensions.get('window').height * 0.7,
-            );
+            alert('Please create a profile to use this feature')
         }
     };
 

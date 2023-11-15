@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, StatusBar, Dimensions, TouchableOpacity, ToastAndroid } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, StatusBar, Dimensions, TouchableOpacity } from 'react-native';
 import React, { useContext, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import Dialog from 'react-native-dialog';
@@ -47,7 +47,7 @@ const ListenerProfileMain = () => {
     const handleSkip = async () => {
         setVisible(false);
         await loginAuthContext(token);
-        ToastAndroid.showWithGravityAndOffset('Welcome to FUXI', ToastAndroid.LONG, ToastAndroid.CENTER, 0, Dimensions.get('window').height * 0.8);
+        alert('Welcome to FUXI')
     };
 
     const screens = [

@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar, ToastAndroid, Dimensions } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import colours from '../config/colours';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
@@ -88,32 +88,14 @@ const SignInScreen = () => {
                         }
                         loginAuthContext(dataLogin.data.token);
                     } else {
-                        ToastAndroid.showWithGravityAndOffset(
-                            'Email ID or password is invalid',
-                            ToastAndroid.LONG,
-                            ToastAndroid.CENTER,
-                            0,
-                            Dimensions.get('window').height * 0.8,
-                        );
+                        alert('Email ID or password is invalid')
                     }
                 } else {
-                    ToastAndroid.showWithGravityAndOffset(
-                        'Email ID or password is invalid',
-                        ToastAndroid.LONG,
-                        ToastAndroid.CENTER,
-                        0,
-                        Dimensions.get('window').height * 0.8,
-                    );
+                    alert('Email ID or password is invalid')
                 }
             } catch (error) {
                 console.error('Error:', error);
-                ToastAndroid.showWithGravityAndOffset(
-                    'Email ID or password is invalid',
-                    ToastAndroid.LONG,
-                    ToastAndroid.CENTER,
-                    0,
-                    Dimensions.get('window').height * 0.8,
-                );
+                alert('Email ID or password is invalid')
                 return;
             } finally {
                 setIsLoading(false);

@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar, ToastAndroid, Dimensions } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
@@ -91,31 +91,13 @@ const ChangePassword = () => {
                     const response = await changePassword(email, oldPassword, password);
                     const { code, message, data } = response;
                     if (code === 200) {
+                        alert(message)
                         navigation.navigate('TabNavigator');
-                        ToastAndroid.showWithGravityAndOffset(
-                            message,
-                            ToastAndroid.LONG,
-                            ToastAndroid.CENTER,
-                            0,
-                            Dimensions.get('window').height * 0.8,
-                        );
                     } else {
-                        ToastAndroid.showWithGravityAndOffset(
-                            message,
-                            ToastAndroid.LONG,
-                            ToastAndroid.CENTER,
-                            0,
-                            Dimensions.get('window').height * 0.8,
-                        );
+                        alert(message)
                     }
                 } else {
-                    ToastAndroid.showWithGravityAndOffset(
-                        'Confirm password is required',
-                        ToastAndroid.LONG,
-                        ToastAndroid.CENTER,
-                        0,
-                        Dimensions.get('window').height * 0.8,
-                    );
+                    alert('Confirm password is required')
                 }
             } catch (err) {
                 console.error('Error decoding or checking token:', err);
@@ -124,13 +106,7 @@ const ChangePassword = () => {
                 setIsLoading(false);
             }
         } else {
-            ToastAndroid.showWithGravityAndOffset(
-                'Please enter all fields correctly',
-                ToastAndroid.LONG,
-                ToastAndroid.CENTER,
-                0,
-                Dimensions.get('window').height * 0.8,
-            );
+            alert('Please enter all fields correctly')
         }
     };
 

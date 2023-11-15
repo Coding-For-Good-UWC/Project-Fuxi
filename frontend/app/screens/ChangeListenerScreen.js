@@ -1,4 +1,4 @@
-import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import * as Animatable from 'react-native-animatable';
 import { Ionicons } from '@expo/vector-icons';
@@ -34,13 +34,7 @@ const ChangeListenerScreen = ({ visible }) => {
             }
             setIsLoading(false);
         } else {
-            ToastAndroid.showWithGravityAndOffset(
-                'Please create a profile to use this feature',
-                ToastAndroid.LONG,
-                ToastAndroid.CENTER,
-                0,
-                Dimensions.get('window').height * 0.7,
-            );
+            alert('Please create a profile to use this feature')
         }
     };
 

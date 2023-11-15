@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useContext } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -13,7 +13,7 @@ const ListenerProfileScreen3 = () => {
 
     const handleGoToHomeScreen = async () => {
         await loginAuthContext(token);
-        ToastAndroid.showWithGravityAndOffset('Welcome to FUXI', ToastAndroid.LONG, ToastAndroid.CENTER, 0, Dimensions.get('window').height * 0.8);
+        alert('Welcome to FUXI')
     };
 
     return (

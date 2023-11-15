@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar, ToastAndroid, Dimensions } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
@@ -85,30 +85,12 @@ const ResetPasswordNew = () => {
                     const { code, message, data } = response;
                     if (code === 200) {
                         navigation.navigate('SignInScreen');
-                        ToastAndroid.showWithGravityAndOffset(
-                            message,
-                            ToastAndroid.LONG,
-                            ToastAndroid.CENTER,
-                            0,
-                            Dimensions.get('window').height * 0.8,
-                        );
+                        alert(message)
                     } else {
-                        ToastAndroid.showWithGravityAndOffset(
-                            message,
-                            ToastAndroid.LONG,
-                            ToastAndroid.CENTER,
-                            0,
-                            Dimensions.get('window').height * 0.8,
-                        );
+                        alert(message)
                     }
                 } else {
-                    ToastAndroid.showWithGravityAndOffset(
-                        'Confirm password is required',
-                        ToastAndroid.LONG,
-                        ToastAndroid.CENTER,
-                        0,
-                        Dimensions.get('window').height * 0.8,
-                    );
+                    alert('Confirm password is required')
                 }
             } catch (err) {
                 console.error('Error decoding or checking token:', err);
@@ -117,13 +99,7 @@ const ResetPasswordNew = () => {
                 setIsLoading(false);
             }
         } else {
-            ToastAndroid.showWithGravityAndOffset(
-                'Confirm password is required',
-                ToastAndroid.LONG,
-                ToastAndroid.CENTER,
-                0,
-                Dimensions.get('window').height * 0.8,
-            );
+            alert('Confirm password is required')
         }
     };
 

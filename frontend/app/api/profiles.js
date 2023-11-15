@@ -25,7 +25,7 @@ export const getProfileById = async (id) => {
 
 export const createProfile = async (userUid, fullname, yearBirth, genres) => {
     try {
-        const response = await axios.post(`${apiUrl}/dev/profile `, {
+        const response = await axios.post(`${apiUrl}/dev/profile`, {
             instituteUid: userUid,
             fullname: fullname,
             yearBirth: yearBirth,

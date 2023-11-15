@@ -1,4 +1,4 @@
-import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
 import { deleteAccount } from '../api/institutes';
@@ -72,39 +72,15 @@ const DeleteAccountScreen = () => {
                     const { code, message, data } = response;
                     if (code == 200) {
                         await logoutAuthContext();
-                        ToastAndroid.showWithGravityAndOffset(
-                            message,
-                            ToastAndroid.LONG,
-                            ToastAndroid.CENTER,
-                            0,
-                            Dimensions.get('window').height * 0.8
-                        );
+                        alert(message)
                     } else {
-                        ToastAndroid.showWithGravityAndOffset(
-                            message,
-                            ToastAndroid.LONG,
-                            ToastAndroid.CENTER,
-                            0,
-                            Dimensions.get('window').height * 0.8
-                        );
+                        alert(message)
                     }
                 } else {
-                    ToastAndroid.showWithGravityAndOffset(
-                        'Your email is incorrect',
-                        ToastAndroid.LONG,
-                        ToastAndroid.CENTER,
-                        0,
-                        Dimensions.get('window').height * 0.8
-                    );
+                    alert('Your email is incorrect')
                 }
             } catch (error) {
-                ToastAndroid.showWithGravityAndOffset(
-                    'Account Deletion Unsuccessful',
-                    ToastAndroid.LONG,
-                    ToastAndroid.CENTER,
-                    0,
-                    Dimensions.get('window').height * 0.8
-                );
+                alert('Account Deletion Unsuccessful')
                 return;
             } finally {
                 setIsDialogVisible(false);
