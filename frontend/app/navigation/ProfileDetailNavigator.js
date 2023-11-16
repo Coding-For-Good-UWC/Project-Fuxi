@@ -1,5 +1,5 @@
 import React, { useContext, useLayoutEffect, useState } from 'react';
-import { Dimensions, Platform, StatusBar, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation, useRoute } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
@@ -44,43 +44,19 @@ const ProfileDetailNavigator = () => {
                     await deleteProfile(_id);
                     navigation.navigate('AllListenerProfilesScreen');
                     setIsReRender(!isReRender);
-                    ToastAndroid.showWithGravityAndOffset(
-                        'Delete profile successfully',
-                        ToastAndroid.LONG,
-                        ToastAndroid.CENTER,
-                        0,
-                        Dimensions.get('window').height * 0.8,
-                    );
+                    alert('Delete profile successfully')
                 } catch (error) {
-                    ToastAndroid.showWithGravityAndOffset(
-                        'Profile deletion failed',
-                        ToastAndroid.LONG,
-                        ToastAndroid.CENTER,
-                        0,
-                        Dimensions.get('window').height * 0.8,
-                    );
+                    alert('Profile deletion failed')
                     console.error('Error:', error);
                     return;
                 } finally {
                     setIsLoading(false);
                 }
             } else {
-                ToastAndroid.showWithGravityAndOffset(
-                    'You are in this profile and you cannot delete it',
-                    ToastAndroid.LONG,
-                    ToastAndroid.CENTER,
-                    0,
-                    Dimensions.get('window').height * 0.8,
-                );
+                alert('You are in this profile and you cannot delete it')
             }
         } else {
-            ToastAndroid.showWithGravityAndOffset(
-                'Please create a profile to use this feature',
-                ToastAndroid.LONG,
-                ToastAndroid.CENTER,
-                0,
-                Dimensions.get('window').height * 0.7,
-            );
+            alert('Please create a profile to use this feature')
         }
     };
 

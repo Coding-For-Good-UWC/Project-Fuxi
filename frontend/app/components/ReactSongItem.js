@@ -1,4 +1,4 @@
-import { Dimensions, ToastAndroid, TouchableOpacity } from 'react-native';
+import { Dimensions, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import SongItem from './SongItem';
 import { Ionicons } from '@expo/vector-icons';
@@ -66,13 +66,7 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
                 setCurrentReactTrack({});
             }
         } else {
-            ToastAndroid.showWithGravityAndOffset(
-                'Please create a profile to use this feature',
-                ToastAndroid.LONG,
-                ToastAndroid.CENTER,
-                0,
-                Dimensions.get('window').height * 0.7,
-            );
+            alert('Please create a profile to use this feature')
         }
     };
 

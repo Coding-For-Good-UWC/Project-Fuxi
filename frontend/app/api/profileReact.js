@@ -31,7 +31,7 @@ export const createProfileReact = async (profileId, reactTracks) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error:', error);
+        console.error('createProfileReact Error:', error);
         throw error;
     }
 };
