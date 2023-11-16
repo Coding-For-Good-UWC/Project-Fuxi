@@ -18,7 +18,6 @@ const schema = new Schema(
         name: {
             type: String,
             required: true,
-            unique: true,
         },
         password: {
             type: String,
@@ -29,7 +28,7 @@ const schema = new Schema(
             type: Number,
         },
     },
-    { timestamps: true },
+    { timestamps: true }
 );
 schema.index({ uid: 1, email: 1 });
 

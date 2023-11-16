@@ -8,17 +8,15 @@ const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 connectDb();
 
 const searchTrack = async (event) => {
-    const { title, pageNumber, pageSize = 15 } = event.queryStringParameters;
-    if (!title || !pageNumber) {
-        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
-    }
-
+    const { title, pageNumber = 1, pageSize = 15 } = event.queryStringParameters;
     try {
         const skipCount = (pageNumber - 1) * pageSize;
-        const tracks = await TrackModel.find({ Title: { $regex: new RegExp(title, 'i') } })
-            .skip(skipCount)
-            .limit(pageSize)
-            .exec();
+        let query = {};
+        if (title) {
+            query = { Title: { $regex: new RegExp(title, 'i') } };
+        }
+
+        const tracks = await TrackModel.find(query).skip(skipCount).limit(pageSize).exec();
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, `Get tracks by title ${title}`, tracks)) };
     } catch (error) {
         console.error(error);
