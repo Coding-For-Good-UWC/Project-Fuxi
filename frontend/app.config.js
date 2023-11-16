@@ -21,6 +21,21 @@ export default {
             supportsTablet: true,
             infoPlist: {
                 ITSAppUsesNonExemptEncryption: false,
+                LSApplicationQueriesSchemes: [
+                    "mailto",
+                    "message",
+                    "readdle-spark",
+                    "airmail",
+                    "ms-outlook",
+                    "googlegmail",
+                    "inbox-gmail",
+                    "ymail",
+                    "superhuman",
+                    "yandexmail",
+                    "fastmail",
+                    "protonmail",
+                    "szn-email",
+                ],
             },
         },
         android: {
@@ -55,5 +70,6 @@ export default {
                     "Allow $(PRODUCT_NAME) to access your microphone.",
             },
         ],
+        "react-native-email-link",
     ],
 };

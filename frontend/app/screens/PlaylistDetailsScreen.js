@@ -9,6 +9,7 @@ import { getPlaylistById } from '../api/playlist';
 import ReactSongItem from '../components/ReactSongItem';
 import { secondsToTimeString, totalDurationTracks } from '../utils/AudioUtils';
 import { getReactTrackByProfileId } from '../api/profileReact';
+import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 
 const PlaylistDetailsScreen = () => {
     const route = useRoute();
@@ -21,6 +22,8 @@ const PlaylistDetailsScreen = () => {
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
     const [dataReactTracks, setDataReactTracks] = useState([]);
+
+    const [isLoading, setIsLoading] = useState(false)
 
     handleLayout = (event) => {
         const { width } = event.nativeEvent.layout;
@@ -49,6 +52,7 @@ const PlaylistDetailsScreen = () => {
 
     async function getPlaylistDetail() {
         try {
+            setIsLoading(true)
             const response = await getPlaylistById(dataNavigation._id);
             const responseDataReactTracks = await getReactTrackByProfileId(dataNavigation.profileId);
             if (responseDataReactTracks) {
@@ -61,7 +65,9 @@ const PlaylistDetailsScreen = () => {
                 setDataPlaylistDetail(data);
                 setTotalDuration(await totalDurationTracks(data?.tracks));
             }
+            setIsLoading(false)
         } catch (error) {
+            setIsLoading(false)
             alert(error.message);
         }
     }
@@ -72,6 +78,7 @@ const PlaylistDetailsScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <CustomAnimatedLoader visible={isLoading} />
             <View style={styles.container}>
                 <View style={{ alignItems: 'center' }}>
                     <View style={{ borderRadius: 6, overflow: 'hidden', width: '70%' }} onLayout={this.handleLayout}>

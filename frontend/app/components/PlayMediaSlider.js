@@ -65,6 +65,12 @@ const PlayMediaSlider = ({ sound, duration, isPlaying, setIsPlaying, autoNextTra
 export default PlayMediaSlider;
 
 const styles = StyleSheet.create({
+    playmediaCenter: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignContent: 'center',
+        paddingHorizontal: 12,
+    },
     progressBarView: {
         width: 370,
     },

@@ -77,7 +77,7 @@ const CreateNewPlaylistScreen = () => {
     const getData = async (text, page) => {
         try {
             const response = await searchTrack(text, page);
-            const { code, message, data } = response;
+            const { code, data } = response;
             if (code === 200) {
                 setDataTracks((prevData) => [...prevData, ...data]);
             }

@@ -65,6 +65,7 @@ const PlayMediaComponent = ({ selectSound, setSelectSound, reactTrack, setReactT
         console.log(item.Title);
         setSeconds(90);
         setSelectSound(item);
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
         const { sound, status } = await Audio.Sound.createAsync({
             uri: item.URI,
         });

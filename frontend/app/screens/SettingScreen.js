@@ -3,6 +3,7 @@ import React, { useContext } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/core';
+import { openBrowserAsync } from 'expo-web-browser';
 
 const SettingScreen = () => {
     const navigation = useNavigation();
@@ -63,9 +64,10 @@ const SettingScreen = () => {
                             <TouchableOpacity
                                 style={styles.sectionRowItem}
                                 onPress={async () =>
-                                    await Linking.openURL(
-                                        'https://docs.google.com/document/d/1hnWiLJDQ2RVbycCTYSW3ePsEiXN-6CTFvMaT_Xb2H-8/edit?usp=sharing',
-                                    )
+                                    // await Linking.openURL(
+                                    //     'https://docs.google.com/document/d/1hnWiLJDQ2RVbycCTYSW3ePsEiXN-6CTFvMaT_Xb2H-8/edit?usp=sharing',
+                                    // )
+                                    await openBrowserAsync('https://docs.google.com/document/d/1hnWiLJDQ2RVbycCTYSW3ePsEiXN-6CTFvMaT_Xb2H-8/edit?usp=sharing')
                                 }
                             >
                                 <Ionicons name="help-circle-outline" color={'#757575'} size={20} style={styles.iconItem} />

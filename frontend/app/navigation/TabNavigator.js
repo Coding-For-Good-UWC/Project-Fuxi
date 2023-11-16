@@ -26,10 +26,6 @@ const TabNavigator = () => {
             <Tab.Screen
                 name="LibraryScreen"
                 component={LibraryScreen}
-                // options={{
-                //     tabBarLabel: 'Library',
-                //     tabBarIcon: ({color}) => <Ionicons name="musical-note" color={color} size={26} />
-                // }}
                 options={({ route }) => ({
                     tabBarLabel: 'Library',
                     tabBarIcon: ({ color, size, focused }) => (
@@ -42,7 +38,7 @@ const TabNavigator = () => {
                             ]}
                             name="musical-note"
                             color={color}
-                            size={26}
+                            size={size}
                         />
                     ),
                 })}
@@ -62,7 +58,7 @@ const TabNavigator = () => {
                             ]}
                             name="settings"
                             color={color}
-                            size={26}
+                            size={size}
                         />
                     ),
                 }}
