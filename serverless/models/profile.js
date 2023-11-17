@@ -14,19 +14,17 @@ const schema = new Schema(
         },
         yearBirth: {
             type: Date,
-            required: true,
         },
         genres: [
             {
                 type: String,
-                required: true,
             },
         ],
         description: {
             type: String,
         },
     },
-    { timestamps: true },
+    { timestamps: true }
 );
 schema.index({ uid: 1 });
 

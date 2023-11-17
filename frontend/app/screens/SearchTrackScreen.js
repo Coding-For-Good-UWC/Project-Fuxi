@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { searchTrack } from '../api/track';
 import ReactSongItem from '../components/ReactSongItem';
+import SongItem from '../components/SongItem';
 
 const SearchTrackScreen = () => {
     const navigation = useNavigation();
@@ -46,36 +47,38 @@ const SearchTrackScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.headerSearch}>
-                <View style={styles.search}>
-                    <Ionicons name="search" size={24} style={{ padding: 10 }} />
-                    <TextInput
-                        ref={textInputRef}
-                        placeholder="Find in Playlist"
-                        style={styles.inputStyle}
-                        onChangeText={(text) => setText(text)}
-                        value={text}
-                    />
-                    {text !== '' ? <Ionicons name="close" size={24} style={{ padding: 10 }} onPress={() => setText('')} /> : ''}
-                </View>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-            </View>
             <View style={styles.container}>
-                {dataTracks.length !== 0 ? (
-                    <CustomGridLayout
-                        data={dataTracks?.map((item, index) => (
-                            <ReactSongItem key={index} item={item} />
-                        ))}
-                        columns={1}
-                        handleEndReached={() => setPage(page + 1)}
-                    />
-                ) : (
-                    <View style={styles.emptyView}>
-                        <Text style={styles.emptyText}>No songs found</Text>
+                <View style={styles.headerSearch}>
+                    <View style={styles.search}>
+                        <Ionicons name="search" size={24} style={{ padding: 10 }} />
+                        <TextInput
+                            ref={textInputRef}
+                            placeholder="Find in Playlist"
+                            style={styles.inputStyle}
+                            onChangeText={(text) => setText(text)}
+                            value={text}
+                        />
+                        {text !== '' ? <Ionicons name="close" size={24} style={{ padding: 10 }} onPress={() => setText('')} /> : ''}
                     </View>
-                )}
+                    <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={1}>
+                        <Text style={styles.cancelButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.containerList}>
+                    {dataTracks.length !== 0 ? (
+                        <CustomGridLayout
+                            data={dataTracks?.map((item, index) => (
+                                <SongItem key={index} item={item} onPress={() => navigation.navigate('PlayMedia', { track: item })} />
+                            ))}
+                            columns={1}
+                            handleEndReached={() => setPage(page + 1)}
+                        />
+                    ) : (
+                        <View style={styles.emptyView}>
+                            <Text style={styles.emptyText}>No songs found</Text>
+                        </View>
+                    )}
+                </View>
             </View>
         </SafeAreaView>
     );
@@ -88,9 +91,11 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         paddingTop: 20 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0),
-        padding: 20,
         flexDirection: 'column',
         gap: 16,
+    },
+    container: {
+        padding: 20,
     },
     headerSearch: {
         flexDirection: 'row',
@@ -125,7 +130,7 @@ const styles = StyleSheet.create({
         padding: 16,
         paddingRight: 0,
     },
-    container: {
+    containerList: {
         flex: 1,
         // backgroundColor: 'yellow',
     },

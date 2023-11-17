@@ -7,13 +7,13 @@ import { addReactTrack, updateReactTrack } from '../api/profileReact';
 import { getStoreData } from '../utils/AsyncStorage';
 import { removeTrackInPlaylist } from '../api/playlist';
 
-const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack }) => {
+const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, dataTracks, setDataTracks, handleNextTrack }) => {
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
 
     const showDialogLike = () => {
         if (reactTrack.status == 'strongly like') {
-            alert('Maximum liking achieved')
+            alert('Maximum liking achieved');
         } else if (reactTrack.status == 'like') {
             setDialogProps({
                 title: 'Like this song?',
@@ -67,7 +67,7 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack }) => {
 
     const showDialogDislike = async () => {
         if (reactTrack.status == 'strongly dislike') {
-            alert('Maximum disliking achieved')
+            alert('Maximum disliking achieved');
         } else if (reactTrack.status == 'dislike') {
             setDialogProps({
                 title: 'Dislike this song?',
@@ -146,7 +146,7 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack }) => {
             }
         } else {
             setIsDialogVisible(false);
-            alert('Please create a profile to use this feature')
+            alert('Please create a profile to use this feature');
         }
     };
 
@@ -171,11 +171,11 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack }) => {
                 setIsDialogVisible(false);
                 await updateReactTrack(_id, selectSound._id, preference.DK.status);
             }
-            await removeTrackInPlaylist(_id, selectSound._id);
-            alert('Song has been hidden in “Happy mood”')
+            handleNextTrack();
+            alert('Song has been hidden in “Happy mood”');
         } else {
             setIsDialogVisible(false);
-            alert('Please create a profile to use this feature')
+            alert('Please create a profile to use this feature');
         }
     };
 

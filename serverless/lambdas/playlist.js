@@ -51,7 +51,7 @@ const getAllPlayListByProfileId = async (event) => {
                 } else {
                     return item;
                 }
-            }),
+            })
         );
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', result)) };
     } catch (error) {
@@ -60,15 +60,26 @@ const getAllPlayListByProfileId = async (event) => {
     }
 };
 const getPlaylistSuggestions = async (event) => {
-    const { profileId, pageNumber, pageSize = 15 } = event.queryStringParameters;
+    const { profileId, pageNumber = 1, pageSize = 15 } = event.queryStringParameters;
     const skipCount = (pageNumber - 1) * pageSize;
 
     const profile = await ProfileModel.findById(profileId);
 
-    const getTrackSuggestions = await TrackModel.find({ Language: { $in: profile.genres } })
-        .skip(skipCount)
-        .limit(pageSize)
-        .exec();
+    let getTrackSuggestions = [];
+
+    if (Object.keys(profile.genres).length !== 0) {
+        getTrackSuggestions = await TrackModel.find({
+            $or: [{ Language: { $in: profile.genres } }, { Genre: { $in: profile.genres } }],
+        })
+            .skip(skipCount)
+            .limit(pageSize)
+            .exec();
+    } else {
+        getTrackSuggestions = await TrackModel.find({ Artist: { $regex: new RegExp('', 'i') } })
+            .skip(skipCount)
+            .limit(pageSize)
+            .exec();
+    }
     return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', getTrackSuggestions)) };
 };
 
@@ -111,7 +122,7 @@ const addTrackInPlaylist = async (event) => {
                 $push: {
                     tracks: new mongoose.Types.ObjectId(trackId),
                 },
-            },
+            }
         );
         if (addTrack) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added track success')) };
@@ -137,7 +148,7 @@ const removeTrackInPlaylist = async (event) => {
                 $pull: {
                     tracks: new mongoose.Types.ObjectId(trackId),
                 },
-            },
+            }
         );
         if (updatedProfile) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success')) };

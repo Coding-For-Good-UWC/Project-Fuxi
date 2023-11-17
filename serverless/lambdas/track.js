@@ -25,7 +25,7 @@ const searchTrack = async (event) => {
 };
 
 const getTracksByArtist = async (event) => {
-    const { artist, pageNumber, pageSize = 15 } = event.queryStringParameters;
+    const { artist, pageNumber = 1, pageSize = 15 } = event.queryStringParameters;
     if (!artist || !pageNumber) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }

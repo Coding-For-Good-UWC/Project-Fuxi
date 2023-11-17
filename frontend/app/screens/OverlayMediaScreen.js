@@ -53,10 +53,10 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#000',
         paddingTop: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0),
-        paddingHorizontal: 45,
     },
     container: {
         flex: 1,
+        paddingHorizontal: 45,
         flexDirection: 'column',
         gap: 50,
         alignItems: 'center',

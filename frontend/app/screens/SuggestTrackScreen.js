@@ -64,11 +64,11 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         paddingTop: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0),
-        paddingHorizontal: 20,
     },
     container: {
         flex: 1,
         flexDirection: 'column',
+        paddingHorizontal: 20,
         gap: 20,
     },
     header: {

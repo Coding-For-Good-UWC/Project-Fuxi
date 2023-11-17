@@ -7,6 +7,10 @@ import ListenerProfileScreen1 from './ListenerProfileScreen1';
 import ListenerProfileScreen2 from './ListenerProfileScreen2';
 import CustomProgressBar from '../../components/CustomProgressBar';
 import { AuthContext } from '../../context/AuthContext';
+import { getStoreData, storeData } from '../../utils/AsyncStorage';
+import { createProfile } from '../../api/profiles';
+import { createProfileReact } from '../../api/profileReact';
+import CustomAnimatedLoader from '../../components/CustomAnimatedLoader';
 
 const ListenerProfileMain = () => {
     const route = useRoute();
@@ -14,9 +18,11 @@ const ListenerProfileMain = () => {
     const token = route.params?.token || '123asd123';
     const width = Dimensions.get('window').width;
     const height = Dimensions.get('window').height;
+
     const [currentScreen, setCurrentScreen] = useState(0);
     const [progressBarValue, setProgressBarValue] = useState(0.5);
     const [visible, setVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const resetState = () => {
         setCurrentScreen(0);
@@ -46,8 +52,31 @@ const ListenerProfileMain = () => {
 
     const handleSkip = async () => {
         setVisible(false);
+        const profile0 = await getStoreData('profile0');
+        if (profile0 === null) {
+            const userInfo = await getStoreData('userInfo');
+            const { uid, name } = JSON.parse(userInfo);
+            try {
+                setIsLoading(true);
+                const newProfile = await createProfile(uid, name, new Date().getUTCFullYear().toString(), []);
+                const { code, message, data } = newProfile;
+                console.log(data);
+                await createProfileReact(data._id, []);
+                if (code == 201) {
+                    await storeData('profile0', JSON.stringify(data));
+                } else {
+                    alert(message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Create profile unsuccessful');
+                return;
+            } finally {
+                setIsLoading(false);
+            }
+        }
         await loginAuthContext(token);
-        alert('Welcome to FUXI')
+        alert('Welcome to FUXI');
     };
 
     const screens = [
@@ -72,6 +101,7 @@ const ListenerProfileMain = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <CustomAnimatedLoader visible={isLoading} />
             <View style={styles.progressBar}>
                 <CustomProgressBar
                     progress={progressBarValue}

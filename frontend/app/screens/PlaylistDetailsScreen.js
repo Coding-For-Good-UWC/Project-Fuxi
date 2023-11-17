@@ -23,7 +23,7 @@ const PlaylistDetailsScreen = () => {
     const [dialogProps, setDialogProps] = useState({});
     const [dataReactTracks, setDataReactTracks] = useState([]);
 
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(false);
 
     handleLayout = (event) => {
         const { width } = event.nativeEvent.layout;
@@ -52,7 +52,7 @@ const PlaylistDetailsScreen = () => {
 
     async function getPlaylistDetail() {
         try {
-            setIsLoading(true)
+            setIsLoading(true);
             const response = await getPlaylistById(dataNavigation._id);
             const responseDataReactTracks = await getReactTrackByProfileId(dataNavigation.profileId);
             if (responseDataReactTracks) {
@@ -65,9 +65,9 @@ const PlaylistDetailsScreen = () => {
                 setDataPlaylistDetail(data);
                 setTotalDuration(await totalDurationTracks(data?.tracks));
             }
-            setIsLoading(false)
+            setIsLoading(false);
         } catch (error) {
-            setIsLoading(false)
+            setIsLoading(false);
             alert(error.message);
         }
     }

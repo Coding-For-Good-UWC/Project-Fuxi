@@ -66,7 +66,7 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
                 setCurrentReactTrack({});
             }
         } else {
-            alert('Please create a profile to use this feature')
+            alert('Please create a profile to use this feature');
         }
     };
 

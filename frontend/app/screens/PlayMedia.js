@@ -2,6 +2,7 @@ import 'react-native-gesture-handler';
 import { StyleSheet, Text, SafeAreaView, TouchableOpacity, Dimensions } from 'react-native';
 import React, { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import colours from '../config/colours';
@@ -21,13 +22,36 @@ const defaultSong = {
     URI: '',
 };
 
+function findPreviousTrack(tracks, trackId) {
+    const index = tracks.findIndex((track) => track._id === trackId);
+    if (index === -1) {
+        return null;
+    }
+    const previousIndex = index === 0 ? tracks.length - 1 : index - 1;
+    return tracks[previousIndex];
+}
+
+function findNextTrack(tracks, trackId) {
+    const index = tracks.findIndex((track) => track._id === trackId);
+    if (index === -1) {
+        return null;
+    }
+    const nextIndex = index === tracks.length - 1 ? 0 : index + 1;
+    return tracks[nextIndex];
+}
+
 const PlayMedia = () => {
     const route = useRoute();
     const navigation = useNavigation();
     const { dataTracksOrigin, currentReactTrack } = route.params;
+
     const [reactTrack, setReactTrack] = useState(currentReactTrack || {});
     const [selectSound, setSelectSound] = useState(route.params?.track || dataTracksOrigin[0] || defaultSong);
-    const [dataTracks, setDataTracksOrigin] = useState(dataTracksOrigin || []);
+    const [dataTracks, setDataTracks] = useState(dataTracksOrigin || []);
+
+    const [sound, setSound] = useState();
+    const [duration, setDuration] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
 
     const [isOverlay, setIsOverlay] = useState(false);
     const [seconds, setSeconds] = useState(90);
@@ -50,8 +74,30 @@ const PlayMedia = () => {
         return intervalId;
     };
 
-    const handleSubmitHideOverlay = () => {
-        setIsOverlay(false);
+    const handleTrackPress = async (item) => {
+        console.log(item.Title);
+        setSeconds(90);
+        setSelectSound(item);
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+        const { sound, status } = await Audio.Sound.createAsync({
+            uri: item.URI,
+        });
+        setSound(sound);
+        setDuration(status.durationMillis / 1000);
+        setIsPlaying(true);
+        await sound.playAsync();
+    };
+
+    const handlePrevTrack = async () => {
+        if (Object.keys(dataTracks).length !== 0) {
+            await handleTrackPress(findPreviousTrack(dataTracks, selectSound._id));
+        }
+    };
+
+    const handleNextTrack = async () => {
+        if (Object.keys(dataTracks).length !== 0) {
+            await handleTrackPress(findNextTrack(dataTracks, selectSound._id));
+        }
     };
 
     useEffect(() => {
@@ -81,22 +127,37 @@ const PlayMedia = () => {
                         <OverlayMediaScreen
                             selectSound={selectSound}
                             isModalVisible={isOverlay}
-                            isOverlay={handleSubmitHideOverlay}
-                            followPlayMedia={<FollowPlayMedia selectSound={selectSound} reactTrack={reactTrack} setReactTrack={setReactTrack} />}
+                            isOverlay={() => setIsOverlay(false)}
+                            followPlayMedia={
+                                <FollowPlayMedia
+                                    selectSound={selectSound}
+                                    reactTrack={reactTrack}
+                                    setReactTrack={setReactTrack}
+                                    dataTracks={dataTracks}
+                                    setDataTracks={setDataTracks}
+                                    handleNextTrack={handleNextTrack}
+                                />
+                            }
                         />
                         <PlayMediaComponent
                             selectSound={selectSound}
-                            setSelectSound={setSelectSound}
-                            dataTracksOrigin={dataTracks}
                             reactTrack={reactTrack}
                             setReactTrack={setReactTrack}
-                            setSeconds={setSeconds}
+                            handleTrackPress={handleTrackPress}
+                            handlePrevTrack={handlePrevTrack}
+                            handleNextTrack={handleNextTrack}
+                            sound={sound}
+                            duration={duration}
+                            isPlaying={isPlaying}
+                            setIsPlaying={setIsPlaying}
                         />
                         <FollowPlayMedia
                             selectSound={selectSound}
-                            setSelectSound={setSelectSound}
                             reactTrack={reactTrack}
                             setReactTrack={setReactTrack}
+                            dataTracks={dataTracks}
+                            setDataTracks={setDataTracks}
+                            handleNextTrack={handleNextTrack}
                         />
                         {Object.keys(dataTracks).length !== 0 && (
                             <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
@@ -126,10 +187,10 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: '#fff',
-        paddingHorizontal: 20,
     },
     playlistHeader: {
         flex: 3,
+        paddingHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
     },

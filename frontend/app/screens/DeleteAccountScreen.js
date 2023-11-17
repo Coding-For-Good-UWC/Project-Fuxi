@@ -72,15 +72,15 @@ const DeleteAccountScreen = () => {
                     const { code, message, data } = response;
                     if (code == 200) {
                         await logoutAuthContext();
-                        alert(message)
+                        alert(message);
                     } else {
-                        alert(message)
+                        alert(message);
                     }
                 } else {
-                    alert('Your email is incorrect')
+                    alert('Your email is incorrect');
                 }
             } catch (error) {
-                alert('Account Deletion Unsuccessful')
+                alert('Account Deletion Unsuccessful');
                 return;
             } finally {
                 setIsDialogVisible(false);
@@ -154,10 +154,10 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         paddingTop: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0),
-        paddingHorizontal: 20,
     },
     container: {
         flex: 1,
+        paddingHorizontal: 20,
         flexDirection: 'column',
     },
     header: {

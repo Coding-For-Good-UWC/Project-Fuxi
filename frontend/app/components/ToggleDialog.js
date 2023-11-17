@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import React from 'react';
 import Dialog from 'react-native-dialog';
 
@@ -40,6 +40,6 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         paddingVertical: 12,
         paddingHorizontal: 20,
-        marginLeft: 24,
+        marginLeft: Platform.OS === 'android' ? 24 : 0,
     },
 });

@@ -9,7 +9,7 @@ const CustomGridLayout = ({ columns, gap = 0, data, styleLayout, styleCell, head
     const handleScroll = (event) => {
         if (handleEndReached) {
             const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-            const endReachedThreshold = contentSize.height * 0.2;
+            const endReachedThreshold = 150;
             if (contentOffset.y + layoutMeasurement.height >= contentSize.height - endReachedThreshold) {
                 handleEndReached();
             }

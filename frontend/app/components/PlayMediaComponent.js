@@ -1,30 +1,11 @@
 import 'react-native-gesture-handler';
 import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions } from 'react-native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import PlayMediaSlider from './PlayMediaSlider';
 import { getReactTrackByTrackId } from '../api/profileReact';
 import { preference } from '../utils/utils';
 import { getStoreData } from '../utils/AsyncStorage';
-
-function findPreviousTrack(tracks, trackId) {
-    const index = tracks.findIndex((track) => track._id === trackId);
-    if (index === -1) {
-        return null;
-    }
-    const previousIndex = index === 0 ? tracks.length - 1 : index - 1;
-    return tracks[previousIndex];
-}
-
-function findNextTrack(tracks, trackId) {
-    const index = tracks.findIndex((track) => track._id === trackId);
-    if (index === -1) {
-        return null;
-    }
-    const nextIndex = index === tracks.length - 1 ? 0 : index + 1;
-    return tracks[nextIndex];
-}
 
 const getReact = async (trackId) => {
     const profile0 = await getStoreData('profile0');
@@ -43,11 +24,18 @@ const getReact = async (trackId) => {
     }
 };
 
-const PlayMediaComponent = ({ selectSound, setSelectSound, reactTrack, setReactTrack, setSeconds, dataTracksOrigin }) => {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [sound, setSound] = useState();
-    const [duration, setDuration] = useState(0);
-
+const PlayMediaComponent = ({
+    selectSound,
+    reactTrack,
+    setReactTrack,
+    handleTrackPress,
+    handlePrevTrack,
+    handleNextTrack,
+    sound,
+    duration,
+    isPlaying,
+    setIsPlaying,
+}) => {
     const handlePlay = async () => {
         if (sound) {
             await sound.playAsync();
@@ -61,56 +49,18 @@ const PlayMediaComponent = ({ selectSound, setSelectSound, reactTrack, setReactT
         }
     };
 
-    const handleTrackPress = async (item) => {
-        console.log(item.Title);
-        setSeconds(90);
-        setSelectSound(item);
-        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
-        const { sound, status } = await Audio.Sound.createAsync({
-            uri: item.URI,
-        });
-        setSound(sound);
-        setDuration(status.durationMillis / 1000);
-        setIsPlaying(true);
-        await sound.playAsync();
-    };
-
-    const handlePrevTrack = async () => {
-        if (Object.keys(dataTracksOrigin).length !== 0) {
-            handleTrackPress(findPreviousTrack(dataTracksOrigin, selectSound._id));
-        }
-    };
-
-    const handleNextTrack = async () => {
-        if (Object.keys(dataTracksOrigin).length !== 0) {
-            handleTrackPress(findNextTrack(dataTracksOrigin, selectSound._id));
-        }
-    };
-
     useEffect(() => {
-        const unloadSound = async () => {
+        const fetchData = async () => {
             if (sound) {
                 await sound.unloadAsync();
             }
-        };
-        unloadSound();
-        handleTrackPress(selectSound);
-        const getReactTrack = async () => {
+            await handleTrackPress(selectSound);
             const react = await getReact(selectSound._id);
-            if (react !== undefined) {
-                setReactTrack(react);
-            } else {
-                setReactTrack([]);
-            }
+            setReactTrack(react !== undefined ? react : []);
         };
-        getReactTrack();
-    }, [selectSound]);
 
-    useEffect(() => {
-        if (reactTrack.status === 'dislike' || reactTrack.status === 'strongly dislike') {
-            handleNextTrack();
-        }
-    }, [reactTrack]);
+        fetchData();
+    }, [selectSound]);
 
     return (
         <>
@@ -133,13 +83,13 @@ const PlayMediaComponent = ({ selectSound, setSelectSound, reactTrack, setReactT
                 autoNextTrack={() => handleNextTrack()}
             />
             <View style={styles.navigationPlayer}>
-                <TouchableOpacity onPress={handlePrevTrack}>
+                <TouchableOpacity onPress={() => handlePrevTrack()}>
                     <Ionicons name="play-skip-back" size={40} color={'#222C2D'} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={isPlaying ? handlePause : handlePlay}>
                     <Ionicons name={isPlaying ? 'pause-circle' : 'play-circle'} size={60} color={'#222C2D'} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleNextTrack}>
+                <TouchableOpacity onPress={() => handleNextTrack()}>
                     <Ionicons name="play-skip-forward" size={40} color={'#222C2D'} />
                 </TouchableOpacity>
             </View>

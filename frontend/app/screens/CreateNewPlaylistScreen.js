@@ -98,12 +98,12 @@ const CreateNewPlaylistScreen = () => {
                 if (code == 201) {
                     navigation.navigate('PlayMedia', { dataTracksOrigin: data?.tracks });
                     setIsReRender(!isReRender);
-                    alert('Playlist creation successful')
+                    alert('Playlist creation successful');
                 } else {
-                    alert('Playlist creation failed')
+                    alert('Playlist creation failed');
                 }
             } else {
-                alert('Please create a profile to use this feature')
+                alert('Please create a profile to use this feature');
             }
         } catch (error) {
             console.error('Error:', error);
