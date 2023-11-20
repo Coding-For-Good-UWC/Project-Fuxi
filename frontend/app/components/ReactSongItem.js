@@ -7,7 +7,7 @@ import { removeReactTrack } from '../api/profileReact';
 import { getStoreData } from '../utils/AsyncStorage';
 import { preference } from '../utils/utils';
 
-const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, dataTracksOrigin }) => {
+const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, dataTracksOrigin, playlistId }) => {
     const navigation = useNavigation();
     const [currentReactTrack, setCurrentReactTrack] = useState({});
 
@@ -29,7 +29,12 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
     };
 
     const handleNavigation = () => {
-        navigation.navigate('PlayMedia', { track: item, currentReactTrack: currentReactTrack, dataTracksOrigin: dataTracksOrigin });
+        navigation.navigate('PlayMedia', {
+            track: item,
+            currentReactTrack: currentReactTrack,
+            dataTracksOrigin: dataTracksOrigin,
+            playlistId: playlistId,
+        });
     };
 
     const showDialogLike = (itemId) => {

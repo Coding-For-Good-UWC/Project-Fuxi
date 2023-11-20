@@ -15,3 +15,29 @@ export const resetPasswordSendOTP = async (email, CodeOTP) => {
         throw error;
     }
 };
+
+export const SendEmailSignUp = async (email, CodeOTP) => {
+    try {
+        const response = await axios.post(`${apiUrl}/dev/mailer/otp-sign-up`, {
+            email: email,
+            CodeOTP: CodeOTP,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error in resetPassword:', error);
+        throw error;
+    }
+};
+
+export const SendEmailLogin = async (email, CodeOTP) => {
+    try {
+        const response = await axios.post(`${apiUrl}/dev/mailer/otp-login`, {
+            email: email,
+            CodeOTP: CodeOTP,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error in resetPassword:', error);
+        throw error;
+    }
+};

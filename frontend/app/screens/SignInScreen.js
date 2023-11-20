@@ -3,11 +3,12 @@ import React, { useContext, useEffect, useState } from 'react';
 import colours from '../config/colours';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
-import { signInInstitute } from '../api/institutes';
+import { signInInstitute, updateOTP } from '../api/institutes';
 import { AuthContext } from '../context/AuthContext';
-import { storeData } from '../utils/AsyncStorage';
+import { isItemInAsyncStorageArray, storeData } from '../utils/AsyncStorage';
 import { getAllProfilesByInstituteUId } from '../api/profiles';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
+import { SendEmailLogin } from '../api/mailer';
 
 const SignInScreen = () => {
     const navigation = useNavigation();
@@ -82,20 +83,31 @@ const SignInScreen = () => {
                         const getProfile0 = await getAllProfilesByInstituteUId(dataLogin?.data?.institute?.uid);
                         const dataGetProfile0 = getProfile0;
                         await storeData('userInfo', JSON.stringify(dataLogin.data.institute));
-                        console.log(dataGetProfile0.data[0]);
                         if (dataGetProfile0.data[0] !== undefined) {
                             await storeData('profile0', JSON.stringify(dataGetProfile0.data[0]));
                         }
-                        loginAuthContext(dataLogin.data.token);
+                        if (isItemInAsyncStorageArray('ArrayEmailVerify', email)) {
+                            loginAuthContext(dataLogin.data.token);
+                        } else {
+                            const CodeOTP = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+                            const response = await updateOTP(email, CodeOTP);
+                            await storeData('tokenVerifyAccount', response.data);
+                            await SendEmailLogin(email, CodeOTP);
+                            navigation.navigate('VerifyOTPScreen', {
+                                token: dataLogin.data.token,
+                                email: email,
+                                navigationToScreenName: 'LibraryScreen',
+                            });
+                        }
                     } else {
-                        alert('Email ID or password is invalid')
+                        alert('Email ID or password is invalid');
                     }
                 } else {
-                    alert('Email ID or password is invalid')
+                    alert('Email ID or password is invalid');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Email ID or password is invalid')
+                alert('Email ID or password is invalid');
                 return;
             } finally {
                 setIsLoading(false);

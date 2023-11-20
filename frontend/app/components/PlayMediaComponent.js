@@ -1,41 +1,15 @@
 import 'react-native-gesture-handler';
 import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions } from 'react-native';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import PlayMediaSlider from './PlayMediaSlider';
-import { getReactTrackByTrackId } from '../api/profileReact';
-import { preference } from '../utils/utils';
-import { getStoreData } from '../utils/AsyncStorage';
 
-const getReact = async (trackId) => {
-    const profile0 = await getStoreData('profile0');
-    if (profile0 !== null) {
-        const { _id } = JSON.parse(profile0);
-        const response = await getReactTrackByTrackId(_id, trackId);
-        const { data } = response;
-        if (data?.preference !== undefined) {
-            for (const key in preference) {
-                if (preference[key].status === data.preference) {
-                    console.log(preference[key]);
-                    return preference[key];
-                }
-            }
-        }
-    }
-};
+const PlayMediaComponent = ({ selectSound, handlePrevTrack, handleNextTrack }) => {
+    const [sound, setSound] = useState();
+    const [duration, setDuration] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
 
-const PlayMediaComponent = ({
-    selectSound,
-    reactTrack,
-    setReactTrack,
-    handleTrackPress,
-    handlePrevTrack,
-    handleNextTrack,
-    sound,
-    duration,
-    isPlaying,
-    setIsPlaying,
-}) => {
     const handlePlay = async () => {
         if (sound) {
             await sound.playAsync();
@@ -49,14 +23,23 @@ const PlayMediaComponent = ({
         }
     };
 
+    const AudioSound = async (item) => {
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+        const { sound, status } = await Audio.Sound.createAsync({
+            uri: item.URI,
+        });
+        setSound(sound);
+        setDuration(status.durationMillis / 1000);
+        await sound.playAsync();
+        setIsPlaying(true);
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             if (sound) {
                 await sound.unloadAsync();
             }
-            await handleTrackPress(selectSound);
-            const react = await getReact(selectSound._id);
-            setReactTrack(react !== undefined ? react : []);
+            await AudioSound(selectSound);
         };
 
         fetchData();

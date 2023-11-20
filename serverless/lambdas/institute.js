@@ -77,7 +77,7 @@ const signin = async (event) => {
     }
 };
 
-const resetPasswordUpdateOTP = async (event) => {
+const updateOTP = async (event) => {
     const json = JSON.parse(event.body);
     const { email, CodeOTP } = json;
     if (!email || !CodeOTP) {
@@ -193,11 +193,56 @@ const deleteAccount = async (event) => {
     }
 };
 
+const verifyAccount = async (event) => {
+    const { token, OTP } = JSON.parse(event.body);
+    if (!token || !OTP) {
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const email = decoded.email;
+
+        if (email) {
+            const tokenExpirationTime = decoded.exp;
+            const currentTime = Math.floor(Date.now() / 1000);
+
+            if (currentTime <= tokenExpirationTime) {
+                const institute = await InstituteModel.findOne({ email: email });
+
+                if (!institute) {
+                    return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'User not found')) };
+                }
+
+                if (OTP === institute.OTPResetPassword) {
+                    return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Account verified successfully')) };
+                } else {
+                    return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Invalid OTP code')) };
+                }
+            } else {
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Token has expired. Please obtain a new token')),
+                };
+            }
+        } else {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Email information not found in token')) };
+        }``
+    } catch (error) {
+        console.error(error);
+        return {
+            statusCode: 200,
+            body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'An error occurred during account verification')),
+        };
+    }
+};
+
 module.exports = {
     signup,
     signin,
-    resetPasswordUpdateOTP,
+    updateOTP,
     changePassword,
     changePasswordInReset,
     deleteAccount,
+    verifyAccount,
 };

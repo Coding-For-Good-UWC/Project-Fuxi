@@ -1,13 +1,31 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import ToggleDialog from './ToggleDialog';
 import { preference } from '../utils/utils';
 import { addReactTrack, updateReactTrack } from '../api/profileReact';
 import { getStoreData } from '../utils/AsyncStorage';
-import { removeTrackInPlaylist } from '../api/playlist';
+import { getReactTrackByTrackId } from '../api/profileReact';
+import { AppContext } from '../context/AppContext';
 
-const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, dataTracks, setDataTracks, handleNextTrack }) => {
+const getReact = async (trackId) => {
+    const profile0 = await getStoreData('profile0');
+    if (profile0 !== null) {
+        const { _id } = JSON.parse(profile0);
+        const response = await getReactTrackByTrackId(_id, trackId);
+        const { data } = response;
+        if (data?.preference !== undefined) {
+            for (const key in preference) {
+                if (preference[key].status === data.preference) {
+                    return preference[key];
+                }
+            }
+        }
+    }
+};
+
+const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, removeTrack, handleNextTrack }) => {
+    const { isReRender, setIsReRender } = useContext(AppContext);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
 
@@ -126,6 +144,7 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, dataTracks, s
     const handleStatusLike = async () => {
         const profile0 = await getStoreData('profile0');
         if (profile0 !== null) {
+            setIsReRender(!isReRender);
             const { _id } = JSON.parse(profile0);
             if (reactTrack.status == 'like') {
                 setReactTrack(preference.SLK);
@@ -153,6 +172,7 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, dataTracks, s
     const handleStatusDislike = async () => {
         const profile0 = await getStoreData('profile0');
         if (profile0 !== null) {
+            setIsReRender(!isReRender);
             const { _id } = JSON.parse(profile0);
             if (reactTrack.status == 'dislike') {
                 setReactTrack(preference.SDK);
@@ -172,12 +192,21 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, dataTracks, s
                 await updateReactTrack(_id, selectSound._id, preference.DK.status);
             }
             handleNextTrack();
+            removeTrack();
             alert('Song has been hidden in “Happy mood”');
         } else {
             setIsDialogVisible(false);
             alert('Please create a profile to use this feature');
         }
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const reactTrack = (await getReact(selectSound._id)) || [];
+            setReactTrack(reactTrack);
+        };
+        fetchData();
+    }, [selectSound]);
 
     return (
         <>

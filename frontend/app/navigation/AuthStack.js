@@ -10,6 +10,7 @@ import ListenerProfileScreen3 from '../screens/listener-profile-new-account/List
 import ResetPassword from '../screens/reset-password/ResetPassword';
 import ResetPasswordCheckEmail from '../screens/reset-password/ResetPasswordCheckEmail';
 import ResetPasswordNew from '../screens/reset-password/ResetPasswordNew';
+import VerifyOTPScreen from '../screens/VerifyOTPScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -101,6 +102,18 @@ const AuthStack = () => {
                 component={ResetPasswordNew}
                 options={{
                     headerTitle: '',
+                    headerTransparent: true,
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: '#fff',
+                    },
+                }}
+            />
+            <Stack.Screen
+                name="VerifyOTPScreen"
+                component={VerifyOTPScreen}
+                options={{
+                    headerTitle: 'Verify OTP',
                     headerTransparent: true,
                     headerShown: true,
                     headerStyle: {

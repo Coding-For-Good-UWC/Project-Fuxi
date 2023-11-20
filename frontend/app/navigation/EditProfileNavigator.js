@@ -23,8 +23,8 @@ const EditProfileNavigator = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
-        nameListener: '',
-        yearBirth: '',
+        nameListener: dataProfile?.fullname || '',
+        yearBirth: new Date(dataProfile?.yearBirth).getUTCFullYear() || '',
     });
 
     const [errors, setErrors] = useState({
@@ -152,18 +152,7 @@ const EditProfileNavigator = () => {
                         title: 'Basic information',
                     }}
                 >
-                    {() => (
-                        <EditBaseInformationScreen
-                            formData={
-                                Object.keys(dataProfile).length !== 0
-                                    ? { nameListener: dataProfile.fullname, yearBirth: new Date(dataProfile.yearBirth).getUTCFullYear() }
-                                    : formData
-                            }
-                            setFormData={setFormData}
-                            errors={errors}
-                            setErrors={setErrors}
-                        />
-                    )}
+                    {() => <EditBaseInformationScreen formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />}
                 </Tab.Screen>
                 <Tab.Screen
                     name="EditMusicTasteScreen"

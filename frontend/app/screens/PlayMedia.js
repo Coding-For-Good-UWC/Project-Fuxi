@@ -1,8 +1,7 @@
 import 'react-native-gesture-handler';
 import { StyleSheet, Text, SafeAreaView, TouchableOpacity, Dimensions } from 'react-native';
-import React, { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
+import React, { useContext, useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import colours from '../config/colours';
@@ -14,6 +13,9 @@ import OverlayMediaScreen from './OverlayMediaScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BottomSheetScrollView from '../components/BottomSheetScrollView';
 import FollowPlayMedia from '../components/FollowPlayMedia';
+import { deletePlaylist, removeTrackInPlaylist } from '../api/playlist';
+import { getStoreData } from '../utils/AsyncStorage';
+import { AppContext } from '../context/AppContext';
 
 const defaultSong = {
     Artist: '',
@@ -41,17 +43,14 @@ function findNextTrack(tracks, trackId) {
 }
 
 const PlayMedia = () => {
+    const { isReRender, setIsReRender } = useContext(AppContext);
     const route = useRoute();
     const navigation = useNavigation();
-    const { dataTracksOrigin, currentReactTrack } = route.params;
+    const { dataTracksOrigin, currentReactTrack, playlistId } = route.params;
 
     const [reactTrack, setReactTrack] = useState(currentReactTrack || {});
     const [selectSound, setSelectSound] = useState(route.params?.track || dataTracksOrigin[0] || defaultSong);
     const [dataTracks, setDataTracks] = useState(dataTracksOrigin || []);
-
-    const [sound, setSound] = useState();
-    const [duration, setDuration] = useState(0);
-    const [isPlaying, setIsPlaying] = useState(false);
 
     const [isOverlay, setIsOverlay] = useState(false);
     const [seconds, setSeconds] = useState(90);
@@ -78,14 +77,6 @@ const PlayMedia = () => {
         console.log(item.Title);
         setSeconds(90);
         setSelectSound(item);
-        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
-        const { sound, status } = await Audio.Sound.createAsync({
-            uri: item.URI,
-        });
-        setSound(sound);
-        setDuration(status.durationMillis / 1000);
-        setIsPlaying(true);
-        await sound.playAsync();
     };
 
     const handlePrevTrack = async () => {
@@ -97,6 +88,24 @@ const PlayMedia = () => {
     const handleNextTrack = async () => {
         if (Object.keys(dataTracks).length !== 0) {
             await handleTrackPress(findNextTrack(dataTracks, selectSound._id));
+        }
+    };
+
+    const removeTrack = async () => {
+        const trackArrRemove = dataTracks.filter((track) => track._id !== selectSound._id);
+        setDataTracks(trackArrRemove);
+        if (Object.keys(trackArrRemove).length !== 0) {
+            const profile0 = await getStoreData('profile0');
+            if (profile0 !== null) {
+                const { _id } = JSON.parse(profile0);
+                await removeTrackInPlaylist(_id, selectSound._id);
+            }
+        } else {
+            setIsReRender(!isReRender);
+            if (playlistId !== undefined) {
+                await deletePlaylist(playlistId);
+                navigation.navigate('LibraryScreen');
+            }
         }
     };
 
@@ -139,24 +148,12 @@ const PlayMedia = () => {
                                 />
                             }
                         />
-                        <PlayMediaComponent
-                            selectSound={selectSound}
-                            reactTrack={reactTrack}
-                            setReactTrack={setReactTrack}
-                            handleTrackPress={handleTrackPress}
-                            handlePrevTrack={handlePrevTrack}
-                            handleNextTrack={handleNextTrack}
-                            sound={sound}
-                            duration={duration}
-                            isPlaying={isPlaying}
-                            setIsPlaying={setIsPlaying}
-                        />
+                        <PlayMediaComponent selectSound={selectSound} handlePrevTrack={handlePrevTrack} handleNextTrack={handleNextTrack} />
                         <FollowPlayMedia
                             selectSound={selectSound}
                             reactTrack={reactTrack}
                             setReactTrack={setReactTrack}
-                            dataTracks={dataTracks}
-                            setDataTracks={setDataTracks}
+                            removeTrack={removeTrack}
                             handleNextTrack={handleNextTrack}
                         />
                         {Object.keys(dataTracks).length !== 0 && (

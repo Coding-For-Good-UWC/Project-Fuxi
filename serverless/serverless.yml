@@ -95,17 +95,35 @@ functions:
       - http:
           path: /institute/signin
           method: post
-  resetPasswordUpdateOTP:
-    handler: lambdas/institute.resetPasswordUpdateOTP
+  updateOTP:
+    handler: lambdas/institute.updateOTP
     events:
       - http:
-          path: /institute/reset-password
+          path: /institute/update-otp
+          method: post
+  verifyAccount:
+    handler: lambdas/institute.verifyAccount
+    events:
+      - http:
+          path: /institute/verify-account
           method: post
   SendEmailResetPassword:
     handler: utils/mailer.SendEmailResetPassword
     events:
       - http:
           path: /mailer/reset-password
+          method: post
+  SendEmailSignUp:
+    handler: utils/mailer.SendEmailSignUp
+    events:
+      - http:
+          path: /mailer/otp-sign-up
+          method: post
+  SendEmailLogin:
+    handler: utils/mailer.SendEmailLogin
+    events:
+      - http:
+          path: /mailer/otp-login
           method: post
   changePassword:
     handler: lambdas/institute.changePassword

@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, TextInput, Animated, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const TextInputEffectLabel = ({ type = 'text', label, onChangeText, error, style, styleInput, value, keyboardType = 'default' }) => {
-    const [text, setText] = useState('');
+const TextInputEffectLabel = ({ type = 'text', label, onChangeText, error, style, styleInput, value, defaultValue, keyboardType = 'default' }) => {
+    const [text, setText] = useState(defaultValue || '');
     const placeholderAnim = useRef(new Animated.Value(0)).current;
     const isPassword = type === 'password';
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -35,6 +35,22 @@ const TextInputEffectLabel = ({ type = 'text', label, onChangeText, error, style
             }).start();
         }
     };
+
+    useEffect(() => {
+        if (text !== undefined && text !== '') {
+            Animated.timing(placeholderAnim, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: false,
+            }).start();
+        } else {
+            Animated.timing(placeholderAnim, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: false,
+            }).start();
+        }
+    }, [text]);
 
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
@@ -85,8 +101,8 @@ const TextInputEffectLabel = ({ type = 'text', label, onChangeText, error, style
                     secureTextEntry={isPassword && !isPasswordVisible}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
-                    value={value}
                     keyboardType={keyboardType}
+                    value={text}
                 />
                 {isPassword && (
                     <Ionicons

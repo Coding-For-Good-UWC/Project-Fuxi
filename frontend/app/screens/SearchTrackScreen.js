@@ -96,6 +96,7 @@ const styles = StyleSheet.create({
     },
     container: {
         padding: 20,
+        flexDirection: 'column',
     },
     headerSearch: {
         flexDirection: 'row',
@@ -131,10 +132,8 @@ const styles = StyleSheet.create({
         paddingRight: 0,
     },
     containerList: {
-        flex: 1,
-        // backgroundColor: 'yellow',
+        marginTop: 10,
     },
-
     emptyView: {
         flex: 1,
         flexDirection: 'column',

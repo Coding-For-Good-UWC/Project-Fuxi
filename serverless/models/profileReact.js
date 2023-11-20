@@ -20,10 +20,13 @@ const schema = new Schema(
                     type: String,
                     enum: ['strongly dislike', 'dislike', 'like', 'strongly like'],
                 },
+                score: {
+                    type: Number,
+                },
             },
         ],
     },
-    { versionKey: false },
+    { versionKey: false }
 );
 schema.index({ profileId: 1 });
 

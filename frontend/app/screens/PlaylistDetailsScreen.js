@@ -1,5 +1,5 @@
 import { Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
@@ -10,8 +10,10 @@ import ReactSongItem from '../components/ReactSongItem';
 import { secondsToTimeString, totalDurationTracks } from '../utils/AudioUtils';
 import { getReactTrackByProfileId } from '../api/profileReact';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
+import { AppContext } from '../context/AppContext';
 
 const PlaylistDetailsScreen = () => {
+    const { isReRender } = useContext(AppContext);
     const route = useRoute();
     const dataNavigation = route?.params?.dataPlaylistDetail;
     const navigation = useNavigation();
@@ -74,7 +76,7 @@ const PlaylistDetailsScreen = () => {
 
     useEffect(() => {
         getPlaylistDetail();
-    }, []);
+    }, [isReRender]);
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -100,7 +102,7 @@ const PlaylistDetailsScreen = () => {
                 </View>
                 <TouchableOpacity
                     style={styles.buttonPlay}
-                    onPress={() => navigation.navigate('PlayMedia', { dataTracksOrigin: dataPlaylistDetail?.tracks })}
+                    onPress={() => navigation.navigate('PlayMedia', { dataTracksOrigin: dataPlaylistDetail?.tracks, playlistId: dataNavigation._id })}
                 >
                     <Ionicons name="play" color="#fff" size={20} />
                     <Text style={styles.playText}>Play</Text>
@@ -119,6 +121,7 @@ const PlaylistDetailsScreen = () => {
                                         reactTrack={preference}
                                         setIsDialogVisible={setIsDialogVisible}
                                         setDialogProps={setDialogProps}
+                                        playlistId={dataNavigation._id}
                                         dataTracksOrigin={dataPlaylistDetail?.tracks}
                                     />
                                 );
@@ -130,6 +133,7 @@ const PlaylistDetailsScreen = () => {
                                         reactTrack=""
                                         setIsDialogVisible={setIsDialogVisible}
                                         setDialogProps={setDialogProps}
+                                        playlistId={dataNavigation._id}
                                         dataTracksOrigin={dataPlaylistDetail?.tracks}
                                     />
                                 );

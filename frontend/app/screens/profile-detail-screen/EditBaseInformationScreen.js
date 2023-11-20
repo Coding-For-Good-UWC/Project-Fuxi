@@ -4,7 +4,7 @@ import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import SelectElementEffectLabel from '../../components/SelectElementEffectLabel';
 import { listArrayObjectYear } from '../../utils/utils';
 
-const EditBaseInformationScreen = ({ setFormData, errors, setErrors }) => {
+const EditBaseInformationScreen = ({ formData, setFormData, errors, setErrors }) => {
     const updateFormData = (field, value) => {
         setFormData((prevData) => ({
             ...prevData,
@@ -38,12 +38,18 @@ const EditBaseInformationScreen = ({ setFormData, errors, setErrors }) => {
             <View style={styles.container}>
                 <Text style={styles.headerDesc}>These information helps us personalize our music therapy for the listener.</Text>
                 <View style={styles.formProfile}>
-                    <TextInputEffectLabel label="Name" onChangeText={(text) => handleChangeValue('nameListener', text)} error={errors.nameListener} />
+                    <TextInputEffectLabel
+                        label="Name"
+                        onChangeText={(text) => handleChangeValue('nameListener', text)}
+                        error={errors.nameListener}
+                        defaultValue={formData?.nameListener || ''}
+                    />
                     <SelectElementEffectLabel
                         dataArray={listArrayObjectYear()}
                         label="Year of birth"
                         onValueChange={(text) => handleChangeValue('yearBirth', text)}
                         error={errors.yearBirth}
+                        defaultValue={formData?.yearBirth || ''}
                     />
                 </View>
             </View>

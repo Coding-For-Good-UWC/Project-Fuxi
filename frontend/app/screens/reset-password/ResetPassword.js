@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import TextInputEffectLabel from '../../components/TextInputEffectLabel';
 import { useNavigation } from '@react-navigation/native';
 import { resetPasswordSendOTP } from '../../api/mailer';
-import { resetPasswordUpdateOTP } from '../../api/institutes';
+import { updateOTP } from '../../api/institutes';
 import { storeData } from '../../utils/AsyncStorage';
 import CustomAnimatedLoader from '../../components/CustomAnimatedLoader';
 
@@ -60,7 +60,7 @@ const ResetPassword = () => {
         if (validateNullFormData(formData)) {
             try {
                 const CodeOTP = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
-                const responseUpdateOTP = await resetPasswordUpdateOTP(email, CodeOTP);
+                const responseUpdateOTP = await updateOTP(email, CodeOTP);
                 const { code, message, data } = responseUpdateOTP;
                 if (code == 200) {
                     await resetPasswordSendOTP(email, CodeOTP);

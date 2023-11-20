@@ -4,7 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import colours from '../config/colours';
 import TextInputEffectLabel from '../components/TextInputEffectLabel';
 import { storeData } from '../utils/AsyncStorage';
-import { signUpInstitute } from '../api/institutes';
+import { signUpInstitute, updateOTP } from '../api/institutes';
+import { SendEmailSignUp } from '../api/mailer';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 
 const CreateAccountScreen = () => {
@@ -115,7 +116,11 @@ const CreateAccountScreen = () => {
 
             if (code == 200) {
                 await storeData('userInfo', JSON.stringify(data.institute));
-                navigation.navigate('ListenerProfileMain', { token: data.token });
+                const CodeOTP = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+                const response = await updateOTP(email, CodeOTP);
+                await storeData('tokenVerifyAccount', response.data);
+                await SendEmailSignUp(email, CodeOTP);
+                navigation.navigate('VerifyOTPScreen', { token: data.token, email: email, navigationToScreenName: 'ListenerProfileMain' });
             } else if (code == 400) {
                 alert(message);
             } else if (code == 409) {

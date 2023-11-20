@@ -30,9 +30,9 @@ export const signInInstitute = async (email, password) => {
     }
 };
 
-export const resetPasswordUpdateOTP = async (email, CodeOTP) => {
+export const updateOTP = async (email, CodeOTP) => {
     try {
-        const response = await axios.post(`${apiUrl}/dev/institute/reset-password`, {
+        const response = await axios.post(`${apiUrl}/dev/institute/update-otp`, {
             email: email,
             CodeOTP: CodeOTP,
         });
@@ -81,6 +81,19 @@ export const deleteAccount = async (email) => {
         return response.data;
     } catch (error) {
         console.error('Error:', error);
+        throw error;
+    }
+};
+
+export const verifyAccount = async (token, OTP) => {
+    try {
+        const response = await axios.post(`${apiUrl}/dev/institute/verify-account`, {
+            token: token,
+            OTP: OTP,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error in resetPassword:', error);
         throw error;
     }
 };

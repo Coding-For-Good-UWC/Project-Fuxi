@@ -2,8 +2,8 @@ import { StyleSheet, Text, View, Animated, Modal, TouchableOpacity } from 'react
 import React, { useState, useRef, useEffect } from 'react';
 import Picker from './Picker';
 
-const SelectElementEffectLabel = ({ dataArray, label, error, onValueChange, value }) => {
-    const [selectedItem, setSelectedItem] = useState(value || '');
+const SelectElementEffectLabel = ({ dataArray, label, error, onValueChange, defaultValue }) => {
+    const [selectedItem, setSelectedItem] = useState(defaultValue || '');
     const [isModalVisible, setIsModalVisible] = useState(false);
     const placeholderAnim = useRef(new Animated.Value(0)).current;
 

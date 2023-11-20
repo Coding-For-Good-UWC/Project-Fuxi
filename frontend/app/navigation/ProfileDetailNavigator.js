@@ -25,7 +25,7 @@ const ProfileDetailNavigator = () => {
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [isDialogDelete, setIsDialogDelete] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
-
+    
     const handleShowDialogDelete = () => {
         setIsDialogDelete(!isDialogDelete);
     };
@@ -44,19 +44,19 @@ const ProfileDetailNavigator = () => {
                     await deleteProfile(_id);
                     navigation.navigate('AllListenerProfilesScreen');
                     setIsReRender(!isReRender);
-                    alert('Delete profile successfully')
+                    alert('Delete profile successfully');
                 } catch (error) {
-                    alert('Profile deletion failed')
+                    alert('Profile deletion failed');
                     console.error('Error:', error);
                     return;
                 } finally {
                     setIsLoading(false);
                 }
             } else {
-                alert('You are in this profile and you cannot delete it')
+                alert('You are in this profile and you cannot delete it');
             }
         } else {
-            alert('Please create a profile to use this feature')
+            alert('Please create a profile to use this feature');
         }
     };
 
