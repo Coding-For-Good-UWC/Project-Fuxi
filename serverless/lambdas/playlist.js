@@ -199,6 +199,47 @@ const deleteAllPlaylist = async (event) => {
     }
 };
 
+const getSuggestionsInPlaymedia = async (event) => {
+    const { artist, language, genre, era } = event.queryStringParameters;
+
+    try {
+        let listTrackByArtist = [];
+        if (artist !== undefined && artist !== null) {
+            listTrackByArtist = await TrackModel.aggregate([{ $match: { Artist: artist } }, { $sample: { size: 7 } }]);
+        }
+
+        const matchCriteria = {};
+        if (language) {
+            matchCriteria.Language = language;
+        }
+        if (genre) {
+            matchCriteria.Genre = genre;
+        }
+        const listTrackByLanguageAndGenre = await TrackModel.aggregate([{ $match: matchCriteria }, { $sample: { size: 7 } }]);
+
+        let listTrackByEra = [];
+        if (era !== undefined && era !== null) {
+            listTrackByEra = await TrackModel.aggregate([{ $match: { Era: era } }, { $sample: { size: 7 } }]);
+        } else {
+            listTrackByEra = await TrackModel.aggregate([{ $match: { Era: { $exists: false } } }, { $sample: { size: 7 } }]);
+        }
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify(
+                ApiResponse.success(HttpStatus.OK, `OK`, {
+                    listTrackByArtist: listTrackByArtist,
+                    listTrackByLanguageAndGenre: listTrackByLanguageAndGenre,
+                    listTrackByEra: listTrackByEra,
+                })
+            ),
+        };
+    } catch (error) {
+        console.error(error);
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
+    }
+};
+
 module.exports = {
     getPlaylistById,
     getAllPlayListByProfileId,
@@ -208,4 +249,5 @@ module.exports = {
     removeTrackInPlaylist,
     deletePlaylist,
     deleteAllPlaylist,
+    getSuggestionsInPlaymedia,
 };

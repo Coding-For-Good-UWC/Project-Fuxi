@@ -191,6 +191,12 @@ functions:
       - http:
           path: /playlist/suggest
           method: get
+  getSuggestionsInPlaymedia:
+    handler: lambdas/playlist.getSuggestionsInPlaymedia
+    events:
+      - http:
+          path: /playlist/suggest-media
+          method: get
   createPlaylist:
     handler: lambdas/playlist.createPlaylist
     events:

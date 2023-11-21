@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 
-const CustomGridLayout = ({ columns, gap = 0, data, styleLayout, styleCell, header, footer, handleEndReached }) => {
+const CustomGridLayout = ({ columns, gap = 0, data, styleLayout, styleCell, header, footer, handleEndReached, scrollEnabled = true }) => {
     const calculateRows = () => {
         return Math.ceil(data?.length / columns);
     };
@@ -27,7 +27,7 @@ const CustomGridLayout = ({ columns, gap = 0, data, styleLayout, styleCell, head
                     row.push(
                         <View style={[styles.column, styleCell]} key={`column_${i}_${j}`}>
                             {item}
-                        </View>,
+                        </View>
                     );
 
                     if (j < columns - 1) {
@@ -44,14 +44,14 @@ const CustomGridLayout = ({ columns, gap = 0, data, styleLayout, styleCell, head
             grid.push(
                 <View style={styles.row} key={`row_${i}`}>
                     {row}
-                </View>,
+                </View>
             );
 
             if (i < calculateRows() - 1) {
                 grid.push(
                     <View style={{ width: gap, height: gap }} key={`gapColumn_${i}`}>
                         <View style={{ width: gap }} />
-                    </View>,
+                    </View>
                 );
             }
         }
@@ -60,7 +60,13 @@ const CustomGridLayout = ({ columns, gap = 0, data, styleLayout, styleCell, head
     };
 
     return (
-        <ScrollView onScroll={handleScroll} vertical={true} showsVerticalScrollIndicator={false} style={[styles.gridLayout, styleLayout]}>
+        <ScrollView
+            scrollEnabled={scrollEnabled}
+            onScroll={handleScroll}
+            vertical={true}
+            showsVerticalScrollIndicator={false}
+            style={[styles.gridLayout, styleLayout]}
+        >
             {header}
             {renderGrid()}
             {footer}

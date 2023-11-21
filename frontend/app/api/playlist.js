@@ -102,3 +102,13 @@ export const deleteAllPlaylist = async (profileId) => {
         throw error;
     }
 };
+
+export const getSuggestionsInPlaymedia = async (artist, language, genre, era) => {
+    try {
+        const response = await axios.get(`${apiUrl}/dev/playlist/suggest-media?artist=${artist}&language=${language}&genre=${genre}&era=${era}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error in searchTrack:', error);
+        throw error;
+    }
+};

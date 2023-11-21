@@ -87,6 +87,8 @@ const styles = StyleSheet.create({
         flex: 3,
         alignItems: 'center',
         justifyContent: 'center',
+        flexDirection: 'column',
+        gap: 10,
     },
     viewImage: {
         marginTop: 30,
@@ -112,6 +114,7 @@ const styles = StyleSheet.create({
         color: '#222C2D',
         marginTop: 10,
         textAlign: 'center',
+        paddingHorizontal: 20,
     },
     patientText: {
         fontSize: 16,

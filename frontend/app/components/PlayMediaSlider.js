@@ -41,18 +41,16 @@ const PlayMediaSlider = ({ sound, duration, isPlaying, setIsPlaying, autoNextTra
     return (
         <>
             <View style={styles.playmediaCenter}>
-                <View style={styles.progressBarView}>
-                    <Slider
-                        style={styles.progressBar}
-                        minimumValue={0}
-                        maximumValue={duration}
-                        value={position}
-                        onValueChange={handleSliderChange}
-                        thumbTintColor="#137882"
-                        minimumTrackTintColor="#009688"
-                        maximumTrackTintColor="#000000"
-                    />
-                </View>
+                <Slider
+                    style={styles.progressBar}
+                    minimumValue={0}
+                    maximumValue={duration}
+                    value={position}
+                    onValueChange={handleSliderChange}
+                    thumbTintColor="#137882"
+                    minimumTrackTintColor="#009688"
+                    maximumTrackTintColor="#000000"
+                />
                 <View style={styles.progressLevelDuration}>
                     <Text style={styles.progressLabelText}>{formatTime(position)}</Text>
                     <Text style={styles.progressLabelText}>{formatTime(duration)}</Text>
@@ -71,9 +69,6 @@ const styles = StyleSheet.create({
         alignContent: 'center',
         paddingHorizontal: 12,
     },
-    progressBarView: {
-        width: 370,
-    },
     progressBar: {
         width: '100%',
     },
@@ -81,6 +76,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        paddingHorizontal: 12,
     },
     progressLabelText: {},
 });

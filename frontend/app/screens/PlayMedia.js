@@ -1,21 +1,22 @@
 import 'react-native-gesture-handler';
-import { StyleSheet, Text, SafeAreaView, TouchableOpacity, Dimensions } from 'react-native';
-import React, { useContext, useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, SafeAreaView, TouchableOpacity, Dimensions, View } from 'react-native';
+import React, { useContext, useRef, useState, useLayoutEffect, useCallback } from 'react';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import colours from '../config/colours';
+import Carousel from 'react-native-reanimated-carousel';
+import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import CustomGridLayout from './../components/CustomGridLayout';
 import SongItem from '../components/SongItem';
 import PlayMediaComponent from '../components/PlayMediaComponent';
 import OverlayMediaScreen from './OverlayMediaScreen';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BottomSheetScrollView from '../components/BottomSheetScrollView';
 import FollowPlayMedia from '../components/FollowPlayMedia';
 import { deletePlaylist, removeTrackInPlaylist } from '../api/playlist';
 import { getStoreData } from '../utils/AsyncStorage';
 import { AppContext } from '../context/AppContext';
+import PlayMediaDetailAndSuggestion from './PlayMediaDetailAndSuggestion';
 
 const defaultSong = {
     Artist: '',
@@ -43,6 +44,7 @@ function findNextTrack(tracks, trackId) {
 }
 
 const PlayMedia = () => {
+    const width = Dimensions.get('window').width;
     const { isReRender, setIsReRender } = useContext(AppContext);
     const route = useRoute();
     const navigation = useNavigation();
@@ -109,13 +111,6 @@ const PlayMedia = () => {
         }
     };
 
-    useEffect(() => {
-        const intervalId = startCountdown();
-        return () => {
-            clearInterval(intervalId);
-        };
-    }, [seconds]);
-
     useLayoutEffect(() => {
         navigation.setOptions({
             headerTransparent: true,
@@ -148,19 +143,35 @@ const PlayMedia = () => {
                                 />
                             }
                         />
-                        <PlayMediaComponent selectSound={selectSound} handlePrevTrack={handlePrevTrack} handleNextTrack={handleNextTrack} />
-                        <FollowPlayMedia
-                            selectSound={selectSound}
-                            reactTrack={reactTrack}
-                            setReactTrack={setReactTrack}
-                            removeTrack={removeTrack}
-                            handleNextTrack={handleNextTrack}
+                        <Carousel
+                            loop={false}
+                            enabled={true}
+                            width={width}
+                            height={'100%'}
+                            data={[
+                                <>
+                                    <PlayMediaComponent
+                                        selectSound={selectSound}
+                                        handlePrevTrack={handlePrevTrack}
+                                        handleNextTrack={handleNextTrack}
+                                    />
+                                    <FollowPlayMedia
+                                        selectSound={selectSound}
+                                        reactTrack={reactTrack}
+                                        setReactTrack={setReactTrack}
+                                        removeTrack={removeTrack}
+                                        handleNextTrack={handleNextTrack}
+                                    />
+                                    {Object.keys(dataTracks).length !== 0 && (
+                                        <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
+                                            <Text style={styles.viewPlaylistText}>View playlist</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                </>,
+                                <PlayMediaDetailAndSuggestion selectSound={selectSound} dataTracks={dataTracks} setDataTracks={setDataTracks} />,
+                            ]}
+                            renderItem={({ item }) => <View style={{ flex: 1 }}>{item}</View>}
                         />
-                        {Object.keys(dataTracks).length !== 0 && (
-                            <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
-                                <Text style={styles.viewPlaylistText}>View playlist</Text>
-                            </TouchableOpacity>
-                        )}
                         <BottomSheetScrollView ref={bottomSheetRef} snapTo={'50%'} backgroundColor="#fff" backDropColor="#000">
                             <CustomGridLayout
                                 data={dataTracks?.map((item, index) => (
@@ -185,102 +196,12 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
     },
-    playlistHeader: {
-        flex: 3,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    viewImage: {
-        marginTop: 30,
-        height: 250,
-        width: 250,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-        shadowOpacity: 0.06,
-    },
-    image: {
-        borderRadius: 10,
-        height: '100%',
-        width: '100%',
-        objectFit: 'cover',
-    },
-    trackText: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#222C2D',
-        marginTop: 10,
-    },
-    patientText: {
-        fontSize: 16,
-        color: '#757575',
-    },
-    playmediaCenter: {
-        flex: 1,
-    },
-    progressBarView: {
-        width: 370,
-    },
-    navigationPlayer: {
-        marginTop: 30,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 60,
-    },
-    following: {
-        height: 150,
-        marginTop: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: 180,
-    },
     viewPlaylistBottom: {
         height: 60,
         width: Dimensions.get('window').width,
         alignSelf: 'center',
         backgroundColor: '#1A1A1A',
         zIndex: 1,
-    },
-    progressBar: {
-        width: '100%',
-    },
-    progressLevelDuration: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    progressLabelText: {},
-    listSongs: {},
-    rowItem: {
-        flexDirection: 'row',
-        paddingVertical: 6,
-        paddingHorizontal: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: colours.secondary,
-    },
-    viewSong: {},
-    songImage: {
-        height: 50,
-        width: 50,
-        borderRadius: 4,
-        marginRight: 14,
-    },
-    rowItemText: {
-        justifyContent: 'center',
-    },
-    titleText: {
-        fontSize: 15,
-        fontWeight: '500',
-        marginBottom: 4,
-    },
-    artistText: {
-        fontSize: 12,
     },
     viewPlaylistText: {
         fontWeight: '500',

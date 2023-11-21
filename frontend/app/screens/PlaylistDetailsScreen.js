@@ -65,9 +65,9 @@ const PlaylistDetailsScreen = () => {
             if (code === 200) {
                 setCountTracks(data?.tracks.length);
                 setDataPlaylistDetail(data);
+                setIsLoading(false);
                 setTotalDuration(await totalDurationTracks(data?.tracks));
             }
-            setIsLoading(false);
         } catch (error) {
             setIsLoading(false);
             alert(error.message);
