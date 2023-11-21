@@ -7,6 +7,7 @@ const { TrackModel } = require('../models/track');
 const { ProfileModel } = require('../models/profile');
 const { PlaylistModel } = require('../models/playlist');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
+const { ProfileReactModal } = require('../models/profileReact');
 
 connectDb();
 
@@ -200,12 +201,19 @@ const deleteAllPlaylist = async (event) => {
 };
 
 const getSuggestionsInPlaymedia = async (event) => {
-    const { artist, language, genre, era } = event.queryStringParameters;
+    const { profileId, artist, language, genre, era } = event.queryStringParameters;
+
+    const filteredIds = [];
+    if (profileId !== undefined && profileId !== null && profileId.length <= 0) {
+        const response = await ProfileReactModal.find({ profileId: new mongoose.Types.ObjectId(profileId) });
+        const filterTrackDislike = response[0].reactTracks.filter((item) => item.preference === 'dislike' || item.preference === 'strongly dislike');
+        filteredIds = filterTrackDislike.map((item) => item._id);
+    }
 
     try {
         let listTrackByArtist = [];
         if (artist !== undefined && artist !== null) {
-            listTrackByArtist = await TrackModel.aggregate([{ $match: { Artist: artist } }, { $sample: { size: 7 } }]);
+            listTrackByArtist = await TrackModel.aggregate([{ $match: { Artist: artist, _id: { $nin: filteredIds } } }, { $sample: { size: 7 } }]);
         }
 
         const matchCriteria = {};
@@ -215,13 +223,23 @@ const getSuggestionsInPlaymedia = async (event) => {
         if (genre) {
             matchCriteria.Genre = genre;
         }
-        const listTrackByLanguageAndGenre = await TrackModel.aggregate([{ $match: matchCriteria }, { $sample: { size: 7 } }]);
+
+        let listTrackByLanguageAndGenre = await TrackModel.aggregate([
+            { $match: { _id: { $nin: filteredIds }, ...matchCriteria } },
+            { $sample: { size: 7 } },
+        ]);
 
         let listTrackByEra = [];
         if (era !== undefined && era !== null) {
-            listTrackByEra = await TrackModel.aggregate([{ $match: { Era: era } }, { $sample: { size: 7 } }]);
+            listTrackByEra = await TrackModel.aggregate([
+                { $match: { Era: parseInt(era, 10), _id: { $nin: filteredIds } } },
+                { $sample: { size: 7 } },
+            ]);
         } else {
-            listTrackByEra = await TrackModel.aggregate([{ $match: { Era: { $exists: false } } }, { $sample: { size: 7 } }]);
+            listTrackByEra = await TrackModel.aggregate([
+                { $match: { Era: { $exists: false }, _id: { $nin: filteredIds } } },
+                { $sample: { size: 7 } },
+            ]);
         }
 
         return {

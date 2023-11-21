@@ -4,6 +4,7 @@ import CustomGridLayout from '../components/CustomGridLayout';
 import SongItem from '../components/SongItem';
 import { getSuggestionsInPlaymedia } from '../api/playlist';
 import { Ionicons } from '@expo/vector-icons';
+import { getStoreData } from '../utils/AsyncStorage';
 
 const PlayMediaDetailAndSuggestion = ({ selectSound, dataTracks, setDataTracks }) => {
     const [dataSuggest, setDataSuggest] = useState({});
@@ -12,7 +13,14 @@ const PlayMediaDetailAndSuggestion = ({ selectSound, dataTracks, setDataTracks }
         const fetchData = async () => {
             if (selectSound !== undefined && selectSound !== null) {
                 try {
+                    const profile0 = await getStoreData('profile0');
+                    let profileId = null;
+                    if (profile0 !== null) {
+                        const { _id } = JSON.parse(profile0);
+                        profileId = _id;
+                    }
                     const response = await getSuggestionsInPlaymedia(
+                        profileId,
                         selectSound.Artist || '',
                         selectSound.Language || '',
                         selectSound.Genre || '',

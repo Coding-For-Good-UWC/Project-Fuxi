@@ -103,9 +103,15 @@ export const deleteAllPlaylist = async (profileId) => {
     }
 };
 
-export const getSuggestionsInPlaymedia = async (artist, language, genre, era) => {
+export const getSuggestionsInPlaymedia = async (profileId, artist, language, genre, era) => {
     try {
-        const response = await axios.get(`${apiUrl}/dev/playlist/suggest-media?artist=${artist}&language=${language}&genre=${genre}&era=${era}`);
+        let paramsProfile = null;
+        if (profileId !== undefined && profileId !== null) {
+            paramsProfile = `&profileId=${profileId}`;
+        }
+        const response = await axios.get(
+            `${apiUrl}/dev/playlist/suggest-media?artist=${artist}&language=${language}&genre=${genre}&era=${era}${paramsProfile}`
+        );
         return response.data;
     } catch (error) {
         console.error('Error in searchTrack:', error);
