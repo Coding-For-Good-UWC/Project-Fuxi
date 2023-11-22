@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { StyleSheet, Dimensions, Platform, StatusBar, Text, TouchableOpacity, View, SafeAreaView } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { StyleSheet, Platform, StatusBar, Text, TouchableOpacity, View, SafeAreaView } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation, useRoute } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,13 +8,11 @@ import EditMusicTasteScreen from '../screens/profile-detail-screen/EditMusicTast
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 import { getStoreData, storeData } from '../utils/AsyncStorage';
 import { createProfile, updateProfile } from '../api/profiles';
-import { AppContext } from '../context/AppContext';
 import { createProfileReact } from '../api/profileReact';
 
 const Tab = createMaterialTopTabNavigator();
 
 const EditProfileNavigator = () => {
-    const { isReRender, setIsReRender } = useContext(AppContext);
     const navigation = useNavigation();
     const route = useRoute();
     const [dataProfile, setDataProfile] = useState(route.params?.dataProfileItem || {});
@@ -56,10 +54,12 @@ const EditProfileNavigator = () => {
         if (Object.keys(dataProfile).length !== 0) {
             try {
                 const response = await updateProfile(dataProfile._id, nameListener, yearBirth, selectedItems);
-                const { code, message } = response;
+                const { code, message, data } = response;
                 if (code == 200) {
+                    if (dataProfile?._id === data?._id) {
+                        await storeData('profile0', JSON.stringify(data));
+                    }
                     navigation.navigate('AllListenerProfilesScreen');
-                    setIsReRender(!isReRender);
                 } else {
                     alert(message);
                 }
@@ -79,7 +79,6 @@ const EditProfileNavigator = () => {
                 if (code == 201) {
                     await storeData('profile0', JSON.stringify(data));
                     navigation.navigate('AllListenerProfilesScreen');
-                    setIsReRender(!isReRender);
                 } else {
                     alert(message);
                 }

@@ -1,19 +1,17 @@
 import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as Animatable from 'react-native-animatable';
 import { Ionicons } from '@expo/vector-icons';
 import { getStoreData, storeData } from '../utils/AsyncStorage';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { getAllProfilesByInstituteUId, getProfileById } from '../api/profiles';
 import { colorEllipse } from '../utils/BackgroundColor';
-import { AppContext } from '../context/AppContext';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 
 const ChangeListenerScreen = ({ visible }) => {
     const height = Dimensions.get('window').height;
     const [isLoading, setIsLoading] = useState(false);
     const [dataListener, setDataListener] = useState([]);
-    const { isReRender, setIsReRender } = useContext(AppContext);
 
     const handleChangeProfile = async (item) => {
         setIsLoading(true);
@@ -26,7 +24,6 @@ const ChangeListenerScreen = ({ visible }) => {
                 if (code == 200) {
                     await storeData('profile0', JSON.stringify(data));
                     visible(false);
-                    setIsReRender(!isReRender);
                 }
             } else {
                 visible(false);
@@ -34,7 +31,7 @@ const ChangeListenerScreen = ({ visible }) => {
             }
             setIsLoading(false);
         } else {
-            alert('Please create a profile to use this feature')
+            alert('Please create a profile to use this feature');
         }
     };
 

@@ -1,4 +1,4 @@
-import React, { useContext, useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { Dimensions, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation, useRoute } from '@react-navigation/core';
@@ -11,13 +11,11 @@ import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
 import { deleteAllPlaylist } from '../api/playlist';
 import { deleteProfileReact } from '../api/profileReact';
 import { deleteProfile } from '../api/profiles';
-import { AppContext } from '../context/AppContext';
 import { getStoreData } from '../utils/AsyncStorage';
 
 const Tab = createMaterialTopTabNavigator();
 
 const ProfileDetailNavigator = () => {
-    const { isReRender, setIsReRender } = useContext(AppContext);
     const navigation = useNavigation();
     const route = useRoute();
     const [dataProfile, setDataProfile] = useState(route.params?.dataProfileItem || {});
@@ -25,7 +23,7 @@ const ProfileDetailNavigator = () => {
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [isDialogDelete, setIsDialogDelete] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
-    
+
     const handleShowDialogDelete = () => {
         setIsDialogDelete(!isDialogDelete);
     };
@@ -43,7 +41,6 @@ const ProfileDetailNavigator = () => {
                     await deleteProfileReact(_id);
                     await deleteProfile(_id);
                     navigation.navigate('AllListenerProfilesScreen');
-                    setIsReRender(!isReRender);
                     alert('Delete profile successfully');
                 } catch (error) {
                     alert('Profile deletion failed');
@@ -58,6 +55,7 @@ const ProfileDetailNavigator = () => {
         } else {
             alert('Please create a profile to use this feature');
         }
+        setIsDialogDelete(false);
     };
 
     useLayoutEffect(() => {

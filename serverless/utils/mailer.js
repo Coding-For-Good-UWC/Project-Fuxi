@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-const SendEmailResetPassword = async (event) => {
+const SendEmailPasswordReset = async (event) => {
     const { email, CodeOTP } = JSON.parse(event.body);
     const username = 'fuximusicapp@gmail.com';
     const password = 'tzuh tuui xxeo mnrj';
@@ -81,7 +81,7 @@ const SendEmailLogin = async (event) => {
     };
 };
 
-module.exports = { SendEmailResetPassword, SendEmailSignUp, SendEmailLogin };
+module.exports = { SendEmailPasswordReset, SendEmailSignUp, SendEmailLogin };
 
 const htmlSendCodeResetPassword = (CodeOTP) => {
     return `   

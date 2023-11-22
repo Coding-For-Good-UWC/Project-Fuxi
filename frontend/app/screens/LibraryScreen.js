@@ -1,28 +1,31 @@
 import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import colours from '../config/colours';
 import CustomGridLayout from '../components/CustomGridLayout';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import TipComponent from './../components/TipComponent';
 import WithProfile from '../components/WithProfile';
 import PlaylistItem from '../components/PlaylistItem';
 import PlaylistLikedSongItem from '../components/PlaylistLikedSongItem';
 import { getAllPlayListByProfileId } from '../api/playlist';
 import { getStoreData } from '../utils/AsyncStorage';
-import { AppContext } from '../context/AppContext';
 import SuggestTrack from '../components/SuggestTrack';
 
 const LibraryScreen = () => {
-    const { isReRender } = useContext(AppContext);
     const navigation = useNavigation();
     const { width } = Dimensions.get('screen');
     const heightItem = (width - 40 - 20) / 2;
     const [dataPlaylist, setDataPlaylist] = useState([]);
 
-    useEffect(() => {
-        getPlaylist();
-    }, [isReRender]);
+    useFocusEffect(
+        React.useCallback(() => {
+            (async () => {
+                await getPlaylist();
+            })();
+            return;
+        }, [])
+    );
 
     async function getPlaylist() {
         try {

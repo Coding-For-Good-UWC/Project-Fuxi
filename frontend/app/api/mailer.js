@@ -5,7 +5,7 @@ const apiUrl = Constants.expoConfig.extra.apiUrl;
 
 export const resetPasswordSendOTP = async (email, CodeOTP) => {
     try {
-        const response = await axios.post(`${apiUrl}/dev/mailer/reset-password`, {
+        const response = await axios.post(`${apiUrl}/dev/mailer/otp-reset-password`, {
             email: email,
             CodeOTP: CodeOTP,
         });

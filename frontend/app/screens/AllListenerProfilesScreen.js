@@ -1,15 +1,13 @@
 import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/core';
+import { useFocusEffect, useNavigation } from '@react-navigation/core';
 import { colorEllipse } from '../utils/BackgroundColor';
 import { getAllProfilesByInstituteUId } from '../api/profiles';
 import { getStoreData } from '../utils/AsyncStorage';
-import { AppContext } from '../context/AppContext';
 
 const AllListenerProfilesScreen = () => {
-    const { isReRender } = useContext(AppContext);
     const navigation = useNavigation();
     const [dataProfiles, setDataProfiles] = useState([]);
 
@@ -29,9 +27,14 @@ const AllListenerProfilesScreen = () => {
         }
     }
 
-    useEffect(() => {
-        getAllProfile();
-    }, [isReRender]);
+    useFocusEffect(
+        React.useCallback(() => {
+            (async () => {
+                await getAllProfile();
+            })();
+            return;
+        }, [])
+    );
 
     return (
         <SafeAreaView style={styles.safeArea}>

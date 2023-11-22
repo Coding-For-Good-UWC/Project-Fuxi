@@ -1,12 +1,11 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import ToggleDialog from './ToggleDialog';
 import { preference } from '../utils/utils';
 import { addReactTrack, updateReactTrack } from '../api/profileReact';
 import { getStoreData } from '../utils/AsyncStorage';
 import { getReactTrackByTrackId } from '../api/profileReact';
-import { AppContext } from '../context/AppContext';
 
 const getReact = async (trackId) => {
     const profile0 = await getStoreData('profile0');
@@ -25,7 +24,6 @@ const getReact = async (trackId) => {
 };
 
 const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, removeTrack, handleNextTrack }) => {
-    const { isReRender, setIsReRender } = useContext(AppContext);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
 
@@ -144,7 +142,6 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, removeTrack, 
     const handleStatusLike = async () => {
         const profile0 = await getStoreData('profile0');
         if (profile0 !== null) {
-            setIsReRender(!isReRender);
             const { _id } = JSON.parse(profile0);
             if (reactTrack.status == 'like') {
                 setReactTrack(preference.SLK);
@@ -172,7 +169,6 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, removeTrack, 
     const handleStatusDislike = async () => {
         const profile0 = await getStoreData('profile0');
         if (profile0 !== null) {
-            setIsReRender(!isReRender);
             const { _id } = JSON.parse(profile0);
             if (reactTrack.status == 'dislike') {
                 setReactTrack(preference.SDK);
@@ -193,7 +189,7 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, removeTrack, 
             }
             handleNextTrack();
             removeTrack();
-            alert('Song has been hidden in “Happy mood”');
+            alert('The song is removed from the playlist');
         } else {
             setIsDialogVisible(false);
             alert('Please create a profile to use this feature');

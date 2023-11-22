@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/core';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { searchTrack } from './../api/track';
@@ -9,10 +9,8 @@ import { createPlaylist } from '../api/playlist';
 import SongItem from '../components/SongItem';
 import ToggleButton from '../components/ToggleButton';
 import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
-import { AppContext } from '../context/AppContext';
 
 const CreateNewPlaylistScreen = () => {
-    const { isReRender, setIsReRender } = useContext(AppContext);
     const navigation = useNavigation();
     const [isLoading, setIsLoading] = useState(false);
     const [searchText, setSearchText] = useState('');
@@ -34,6 +32,18 @@ const CreateNewPlaylistScreen = () => {
             ),
         });
     }, [navigation]);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            setSearchText('');
+            setPage(1);
+            setNamePlaylistText('');
+            setIsSelected(false);
+            setSelectedItems([]);
+            setDataTracks([]);
+            return;
+        }, [])
+    );
 
     const RenderItem = ({ item }) => {
         const isSelected = selectedItems.includes(item._id);
@@ -97,10 +107,9 @@ const CreateNewPlaylistScreen = () => {
                 const { code, message, data } = response;
                 if (code == 201) {
                     navigation.navigate('PlayMedia', { dataTracksOrigin: data?.tracks });
-                    setIsReRender(!isReRender);
                     alert('Playlist creation successful');
                 } else {
-                    alert('Playlist creation failed');
+                    alert(message);
                 }
             } else {
                 alert('Please create a profile to use this feature');

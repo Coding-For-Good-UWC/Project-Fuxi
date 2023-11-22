@@ -42,7 +42,7 @@ export const addItemToAsyncStorageArray = async (key, item) => {
         if (getArrayString) {
             const parseToArray = JSON.parse(getArrayString);
             const newArray = [...parseToArray, item];
-            await storeData(key, JSON.stringify(newArray));
+            await storeData(key, JSON.stringify([...new Set(newArray)]));
         } else {
             await storeData(key, JSON.stringify([item]));
         }
@@ -69,7 +69,7 @@ export const removeItemFromAsyncStorageArray = async (key, item) => {
 export const isItemInAsyncStorageArray = async (key, item) => {
     try {
         const getArrayString = await getStoreData(key);
-        if (!getArrayString) {
+        if (getArrayString == null) {
             console.log(`Array not found in AsyncStorage (${key})`);
             return false;
         }

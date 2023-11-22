@@ -96,10 +96,10 @@ const updateProfile = async (event) => {
                     genres,
                 },
             },
-            { new: true },
+            { new: true }
         );
         if (exitsUpdateProfile) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Update profile success')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Update profile success', exitsUpdateProfile)) };
         } else {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }

@@ -1,6 +1,6 @@
 import { Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/core';
+import React, { useLayoutEffect, useState } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import CustomGridLayout from './../components/CustomGridLayout';
@@ -9,23 +9,31 @@ import { getPlaylistById } from '../api/playlist';
 import ReactSongItem from '../components/ReactSongItem';
 import { secondsToTimeString, totalDurationTracks } from '../utils/AudioUtils';
 import { getReactTrackByProfileId } from '../api/profileReact';
-import CustomAnimatedLoader from '../components/CustomAnimatedLoader';
-import { AppContext } from '../context/AppContext';
 
 const PlaylistDetailsScreen = () => {
-    const { isReRender } = useContext(AppContext);
     const route = useRoute();
     const dataNavigation = route?.params?.dataPlaylistDetail;
     const navigation = useNavigation();
     const [heightItem, setHeightItem] = useState(0);
-    const [dataPlaylistDetail, setDataPlaylistDetail] = useState({});
     const [countTracks, setCountTracks] = useState(0);
     const [totalDuration, setTotalDuration] = useState(0);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
+    const [dataPlaylistDetail, setDataPlaylistDetail] = useState([]);
     const [dataReactTracks, setDataReactTracks] = useState([]);
 
-    const [isLoading, setIsLoading] = useState(false);
+    useFocusEffect(
+        React.useCallback(() => {
+            (async () => {
+                await getPlaylistDetail();
+            })();
+            return () => {
+                setDataPlaylistDetail([]);
+                setDataReactTracks([]);
+                console.log('Screen unfocused!');
+            };
+        }, [])
+    );
 
     handleLayout = (event) => {
         const { width } = event.nativeEvent.layout;
@@ -54,33 +62,32 @@ const PlaylistDetailsScreen = () => {
 
     async function getPlaylistDetail() {
         try {
-            setIsLoading(true);
-            const response = await getPlaylistById(dataNavigation._id);
-            const responseDataReactTracks = await getReactTrackByProfileId(dataNavigation.profileId);
-            if (responseDataReactTracks) {
-                const { data } = responseDataReactTracks;
-                setDataReactTracks(data?.reactTracks);
+            const [playlistResponse, reactTracksResponse] = await Promise.all([
+                getPlaylistById(dataNavigation?._id),
+                getReactTrackByProfileId(dataNavigation?.profileId),
+            ]);
+
+            const { code: playlistCode, message: playlistMessage, data: playlistData } = playlistResponse;
+            const { data: reactTracksData } = reactTracksResponse;
+
+            if (reactTracksData) {
+                setDataReactTracks(reactTracksData?.reactTracks);
             }
-            const { code, message, data } = response;
-            if (code === 200) {
-                setCountTracks(data?.tracks.length);
-                setDataPlaylistDetail(data);
-                setIsLoading(false);
-                setTotalDuration(await totalDurationTracks(data?.tracks));
+
+            if (playlistCode === 200) {
+                setCountTracks(playlistData?.tracks.length);
+                setDataPlaylistDetail(playlistData);
+                setTotalDuration(await totalDurationTracks(playlistData?.tracks));
+            } else {
+                alert(playlistMessage);
             }
         } catch (error) {
-            setIsLoading(false);
             alert(error.message);
         }
     }
 
-    useEffect(() => {
-        getPlaylistDetail();
-    }, [isReRender]);
-
     return (
         <SafeAreaView style={styles.safeArea}>
-            <CustomAnimatedLoader visible={isLoading} />
             <View style={styles.container}>
                 <View style={{ alignItems: 'center' }}>
                     <View style={{ borderRadius: 6, overflow: 'hidden', width: '70%' }} onLayout={this.handleLayout}>
@@ -93,7 +100,7 @@ const PlaylistDetailsScreen = () => {
                     </View>
                 </View>
                 <View style={styles.playListDetail}>
-                    <Text style={styles.playListName}>{dataPlaylistDetail?.namePlaylist}</Text>
+                    <Text style={styles.playListName}>{dataNavigation?.namePlaylist}</Text>
                     <View style={styles.playListTracksAndTime}>
                         <Text style={styles.playListTotalName}>{countTracks} songs</Text>
                         <Ionicons name="ellipse" color="#E2E3E4" size={10} />
@@ -102,7 +109,7 @@ const PlaylistDetailsScreen = () => {
                 </View>
                 <TouchableOpacity
                     style={styles.buttonPlay}
-                    onPress={() => navigation.navigate('PlayMedia', { dataTracksOrigin: dataPlaylistDetail?.tracks, playlistId: dataNavigation._id })}
+                    onPress={() => navigation.navigate('PlayMedia', { dataTracksOrigin: dataNavigation?.tracks, playlistId: dataNavigation?._id })}
                 >
                     <Ionicons name="play" color="#fff" size={20} />
                     <Text style={styles.playText}>Play</Text>
@@ -111,33 +118,19 @@ const PlaylistDetailsScreen = () => {
                     <View style={{ borderTopColor: '#ECEDEE', borderTopWidth: 1 }}></View>
                     <CustomGridLayout
                         data={dataPlaylistDetail?.tracks?.map((dataItem, index) => {
-                            if (dataReactTracks && Array.isArray(dataReactTracks) && dataReactTracks.length > 0) {
-                                const matchPreference = dataReactTracks.find((item) => item.track._id === dataItem._id);
-                                const preference = matchPreference ? matchPreference.preference : '';
-                                return (
-                                    <ReactSongItem
-                                        key={index}
-                                        item={dataItem}
-                                        reactTrack={preference}
-                                        setIsDialogVisible={setIsDialogVisible}
-                                        setDialogProps={setDialogProps}
-                                        playlistId={dataNavigation._id}
-                                        dataTracksOrigin={dataPlaylistDetail?.tracks}
-                                    />
-                                );
-                            } else {
-                                return (
-                                    <ReactSongItem
-                                        key={index}
-                                        item={dataItem}
-                                        reactTrack=""
-                                        setIsDialogVisible={setIsDialogVisible}
-                                        setDialogProps={setDialogProps}
-                                        playlistId={dataNavigation._id}
-                                        dataTracksOrigin={dataPlaylistDetail?.tracks}
-                                    />
-                                );
-                            }
+                            const matchPreference = dataReactTracks.find((item) => item.track._id === dataItem._id);
+                            const preference = matchPreference?.preference || '';
+                            return (
+                                <ReactSongItem
+                                    key={index}
+                                    item={dataItem}
+                                    reactTrack={preference}
+                                    setIsDialogVisible={setIsDialogVisible}
+                                    setDialogProps={setDialogProps}
+                                    playlistId={dataNavigation._id}
+                                    dataTracksOrigin={dataPlaylistDetail?.tracks}
+                                />
+                            );
                         })}
                         columns={1}
                     />

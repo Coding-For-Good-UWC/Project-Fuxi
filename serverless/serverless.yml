@@ -107,11 +107,11 @@ functions:
       - http:
           path: /institute/verify-account
           method: post
-  SendEmailResetPassword:
-    handler: utils/mailer.SendEmailResetPassword
+  SendEmailPasswordReset:
+    handler: utils/mailer.SendEmailPasswordReset
     events:
       - http:
-          path: /mailer/reset-password
+          path: /mailer/otp-reset-password
           method: post
   SendEmailSignUp:
     handler: utils/mailer.SendEmailSignUp

@@ -1,4 +1,4 @@
-import { SafeAreaView, StatusBar, StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { SafeAreaView, StatusBar, StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import CustomGridLayout from '../components/CustomGridLayout';
 import SongItem from '../components/SongItem';
@@ -84,16 +84,10 @@ const PlayMediaDetailAndSuggestion = ({ selectSound, dataTracks, setDataTracks }
         return <SongItem item={item} iconRight={renderIconRight()} />;
     };
 
-    const handleLayout = (event) => {
-        const { height } = event.nativeEvent.layout;
-        const heightScreen = Dimensions.get('window').height;
-        console.log(height, heightScreen);
-    };
-
     return (
         <SafeAreaView style={styles.safeArea}>
             <ScrollView vertical={true} showsVerticalScrollIndicator={false}>
-                <View style={styles.container} onLayout={handleLayout}>
+                <View style={styles.container}>
                     <View style={styles.detailTrack}>
                         <Image
                             source={selectSound?.ImageURL ? { uri: selectSound.ImageURL } : require('../assets/default_l8mbsa.png')}
