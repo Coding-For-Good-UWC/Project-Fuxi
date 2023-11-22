@@ -139,22 +139,36 @@ const addTrackInPlaylist = async (event) => {
 const removeTrackInPlaylist = async (event) => {
     const json = JSON.parse(event.body);
     const { profileId, trackId } = json;
+
     if (!profileId || !trackId) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
+
     try {
+        const existingProfile = await PlaylistModel.findOne({ profileId: profileId });
+
+        if (!existingProfile || !existingProfile.tracks.includes(trackId)) {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Track not found in the playlist')) };
+        }
+
+        // Remove trackId from the tracks array
+        const filteredTracks = existingProfile.tracks.filter((existingTrackId) => existingTrackId.toString() !== trackId);
+
         const updatedProfile = await PlaylistModel.findOneAndUpdate(
             { profileId: profileId },
             {
-                $pull: {
-                    tracks: new mongoose.Types.ObjectId(trackId),
+                $set: {
+                    tracks: filteredTracks,
                 },
-            }
+            },
+            { new: true } // Return the document after the update
         );
-        if (updatedProfile) {
+
+        // Check if trackId has been successfully removed from the array
+        if (updatedProfile && !updatedProfile.tracks.includes(trackId)) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success')) };
         } else {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update profile')) };
         }
     } catch (error) {
         console.error(error);

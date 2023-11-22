@@ -1,4 +1,4 @@
-import { Dimensions, TouchableOpacity } from 'react-native';
+import { Dimensions, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import SongItem from './SongItem';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,7 +7,7 @@ import { removeReactTrack } from '../api/profileReact';
 import { getStoreData } from '../utils/AsyncStorage';
 import { preference } from '../utils/utils';
 
-const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, dataTracksOrigin, playlistId }) => {
+const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, dataTracksOrigin, playlistId, icon }) => {
     const navigation = useNavigation();
     const [currentReactTrack, setCurrentReactTrack] = useState({});
 
@@ -79,7 +79,7 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
         <SongItem
             item={item}
             iconRight={
-                <>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     {Object.keys(currentReactTrack).length !== 0 &&
                         currentReactTrack.status !== 'dislike' &&
                         currentReactTrack.status !== 'strongly dislike' && (
@@ -94,7 +94,8 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
                                 <Ionicons name="sad-outline" color={currentReactTrack.color} size={26} />
                             </TouchableOpacity>
                         )}
-                </>
+                    {icon}
+                </View>
             }
             onPress={handleNavigation}
         />

@@ -95,7 +95,10 @@ const PlayMediaDetailAndSuggestion = ({ selectSound, dataTracks, setDataTracks }
             <ScrollView vertical={true} showsVerticalScrollIndicator={false}>
                 <View style={styles.container} onLayout={handleLayout}>
                     <View style={styles.detailTrack}>
-                        <Image source={{ uri: selectSound.ImageURL }} style={styles.songImage} />
+                        <Image
+                            source={selectSound?.ImageURL ? { uri: selectSound.ImageURL } : require('../assets/default_l8mbsa.png')}
+                            style={styles.songImage}
+                        />
                         <View style={styles.rowItemText}>
                             <Text style={styles.titleText} numberOfLines={1}>
                                 {selectSound?.Title || ''}
