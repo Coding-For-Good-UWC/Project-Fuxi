@@ -33,7 +33,6 @@ const SuggestTrackScreen = () => {
                 }
             }
         } catch (error) {
-            alert(error.message);
             return;
         }
     }

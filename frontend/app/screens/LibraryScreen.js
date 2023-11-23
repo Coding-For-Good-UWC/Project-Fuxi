@@ -41,7 +41,6 @@ const LibraryScreen = () => {
                 setDataPlaylist([]);
             }
         } catch (error) {
-            alert(error.message);
             return;
         }
     }

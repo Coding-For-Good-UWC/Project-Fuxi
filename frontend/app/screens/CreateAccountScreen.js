@@ -132,8 +132,6 @@ const CreateAccountScreen = () => {
                 alert(message);
             }
         } catch (error) {
-            console.error('Error:', error);
-            alert(error.message);
             return;
         } finally {
             setIsLoading(false);

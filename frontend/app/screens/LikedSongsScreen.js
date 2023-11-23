@@ -37,6 +37,21 @@ const LikedSongsScreen = () => {
         });
     }, [navigation]);
 
+    const removeTrack = async (trackId) => {
+        const trackArrRemove = dataLikedTrack.filter((item) => item.track._id !== trackId);
+        setDataLikedTrack(trackArrRemove);
+        setCountTracks(trackArrRemove.length);
+        setTotalDuration(
+            await totalDurationTracks(
+                trackArrRemove.map((item) => {
+                    return {
+                        URI: item.track.URI,
+                    };
+                })
+            )
+        );
+    };
+
     async function getPlaylist() {
         try {
             const profile0 = await getStoreData('profile0');
@@ -53,8 +68,8 @@ const LikedSongsScreen = () => {
                                 return {
                                     URI: item.track.URI,
                                 };
-                            }),
-                        ),
+                            })
+                        )
                     );
                 }
             } else {
@@ -63,7 +78,6 @@ const LikedSongsScreen = () => {
                 setTotalDuration(0);
             }
         } catch (error) {
-            alert(error.message);
             return;
         }
     }
@@ -112,6 +126,7 @@ const LikedSongsScreen = () => {
                                     <Ionicons name="heart" color="#137882" size={30} />
                                 </TouchableOpacity>
                             }
+                            removeTrack={removeTrack}
                         />
                     ))}
                     columns={1}

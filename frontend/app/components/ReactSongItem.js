@@ -7,7 +7,7 @@ import { removeReactTrack } from '../api/profileReact';
 import { getStoreData } from '../utils/AsyncStorage';
 import { preference } from '../utils/utils';
 
-const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, dataTracksOrigin, playlistId, icon }) => {
+const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, dataTracksOrigin, playlistId, icon, removeTrack }) => {
     const navigation = useNavigation();
     const [currentReactTrack, setCurrentReactTrack] = useState({});
 
@@ -68,6 +68,9 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
             const { _id } = JSON.parse(profile0);
             const response = await removeReactTrack(_id, itemId);
             if (response) {
+                if (removeTrack && typeof removeTrack === 'function') {
+                    removeTrack(itemId);
+                }
                 setCurrentReactTrack({});
             }
         } else {

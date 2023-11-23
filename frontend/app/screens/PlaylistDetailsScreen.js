@@ -30,7 +30,6 @@ const PlaylistDetailsScreen = () => {
             return () => {
                 setDataPlaylistDetail([]);
                 setDataReactTracks([]);
-                console.log('Screen unfocused!');
             };
         }, [])
     );
@@ -82,7 +81,7 @@ const PlaylistDetailsScreen = () => {
                 alert(playlistMessage);
             }
         } catch (error) {
-            alert(error.message);
+            return;
         }
     }
 

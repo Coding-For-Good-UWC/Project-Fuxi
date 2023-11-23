@@ -95,7 +95,7 @@ const createPlaylist = async (event) => {
         const existingPlaylist = await PlaylistModel.findOne({ profileId: new mongoose.Types.ObjectId(profileId), namePlaylist });
 
         if (existingPlaylist) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.CONFLICT, 'Playlist already exists')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.CONFLICT, 'Playlist with the same name already exists')) };
         }
 
         const playlist = await PlaylistModel.create({

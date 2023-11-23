@@ -59,7 +59,7 @@ const ResetPassword = () => {
         const { email } = formData;
         if (validateNullFormData(formData)) {
             try {
-                const CodeOTP = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+                const CodeOTP = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
                 const responseUpdateOTP = await updateOTP(email, CodeOTP);
                 const { code, message, data } = responseUpdateOTP;
                 if (code == 200) {

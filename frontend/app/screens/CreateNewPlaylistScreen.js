@@ -115,8 +115,6 @@ const CreateNewPlaylistScreen = () => {
                 alert('Please create a profile to use this feature');
             }
         } catch (error) {
-            console.error('Error:', error);
-            alert(error.message);
             return;
         } finally {
             setIsLoading(false);
