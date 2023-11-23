@@ -86,8 +86,11 @@ const updateOTP = async (event) => {
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
 
+    const salt = await bcryptjs.genSalt(10);
+    const hashedOTP = await bcryptjs.hash(String(CodeOTP), salt);
+
     try {
-        await InstituteModel.findOneAndUpdate({ email: email }, { $set: { OTPResetPassword: CodeOTP } }, { upsert: false });
+        await InstituteModel.findOneAndUpdate({ email: email }, { $set: { OTPResetPassword: hashedOTP } }, { upsert: false });
         return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Email sent successfully!', token)) };
     } catch (error) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Error sending email')) };
@@ -214,7 +217,9 @@ const verifyAccount = async (event) => {
                     return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'User not found')) };
                 }
 
-                if (OTP === institute.OTPResetPassword) {
+                const resultPassword = bcryptjs.compare(OTP.toString(), institute.OTPResetPassword);
+
+                if (resultPassword) {
                     return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Account verified successfully')) };
                 } else {
                     return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Invalid OTP code')) };
@@ -227,7 +232,7 @@ const verifyAccount = async (event) => {
             }
         } else {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Email information not found in token')) };
-        }``
+        }
     } catch (error) {
         console.error(error);
         return {

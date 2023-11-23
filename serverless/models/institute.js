@@ -25,7 +25,7 @@ const schema = new Schema(
             selected: false,
         },
         OTPResetPassword: {
-            type: Number,
+            type: String,
         },
     },
     { timestamps: true }
