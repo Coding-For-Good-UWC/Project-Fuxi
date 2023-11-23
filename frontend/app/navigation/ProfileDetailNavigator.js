@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from 'react';
-import { Dimensions, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Platform, StatusBar, Text, TouchableOpacity, View, SafeAreaView } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation, useRoute } from '@react-navigation/core';
 import { Ionicons } from '@expo/vector-icons';
@@ -77,7 +77,13 @@ const ProfileDetailNavigator = () => {
     }, [navigation]);
 
     return (
-        <View style={{ flex: 1, paddingTop: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0), backgroundColor: '#fff' }}>
+        <SafeAreaView
+            style={{
+                flex: 1,
+                paddingTop: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight : 0),
+                backgroundColor: '#fff',
+            }}
+        >
             <CustomAnimatedLoader visible={isLoading} />
             <Tab.Navigator
                 style={{ backgroundColor: '#fff' }}
@@ -182,7 +188,7 @@ const ProfileDetailNavigator = () => {
                     Edit
                 </Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     );
 };
 
