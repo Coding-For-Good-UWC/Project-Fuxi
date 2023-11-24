@@ -277,6 +277,46 @@ const getSuggestionsInPlaymedia = async (event) => {
     }
 };
 
+const suggestHighScoringSongs = async (event) => {
+    const { targetScore, language, genre } = event.queryStringParameters;
+
+    console.log(typeof targetScore);
+
+    try {
+        const highScoredProfiles = await ProfileReactModal.find(
+            {
+                'reactTracks.score': targetScore,
+            },
+            { 'reactTracks.track': 1, _id: 0 }
+        );
+
+        const tracksArray = highScoredProfiles.flatMap((profile) => profile.reactTracks.map((track) => track.track));
+
+        // const tracksArray = highScoredProfiles.flatMap((profile) => profile.reactTracks.map((track) => track.track));
+
+        // if (tracksArray.length === 0) {
+        //     return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'No high-scoring songs found')) };
+        // }
+
+        // const trackIds = highScoredProfiles.map((profile) => profile.track);
+
+        // const matchCriteria = {};
+        // if (language) {
+        //     matchCriteria.Language = language;
+        // }
+        // if (genre) {
+        //     matchCriteria.Genre = genre;
+        // }
+
+        // const suggestedSongs = await TrackModel.aggregate([{ $match: { _id: { $in: trackIds }, ...matchCriteria } }, { $sample: { size: 7 } }]);
+
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Suggested songs with high scores', tracksArray)) };
+    } catch (error) {
+        console.error('Error in suggestHighScoringSongs:', error);
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
+    }
+};
+
 module.exports = {
     getPlaylistById,
     getAllPlayListByProfileId,
@@ -287,4 +327,5 @@ module.exports = {
     deletePlaylist,
     deleteAllPlaylist,
     getSuggestionsInPlaymedia,
+    suggestHighScoringSongs,
 };

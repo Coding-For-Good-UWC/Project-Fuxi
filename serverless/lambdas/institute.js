@@ -147,7 +147,9 @@ const changePasswordInReset = async (event) => {
                     return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'User not found')) };
                 }
 
-                if (OTP === institute.OTPResetPassword) {
+                const resultOTP = bcryptjs.compare(OTP.toString(), institute.OTPResetPassword);
+
+                if (resultOTP) {
                     const salt = await bcryptjs.genSalt(10);
                     const hashedPassword = await bcryptjs.hash(newPassword, salt);
 
@@ -217,9 +219,9 @@ const verifyAccount = async (event) => {
                     return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'User not found')) };
                 }
 
-                const resultPassword = bcryptjs.compare(OTP.toString(), institute.OTPResetPassword);
+                const resultOTP = bcryptjs.compare(OTP.toString(), institute.OTPResetPassword);
 
-                if (resultPassword) {
+                if (resultOTP) {
                     return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Account verified successfully')) };
                 } else {
                     return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Invalid OTP code')) };

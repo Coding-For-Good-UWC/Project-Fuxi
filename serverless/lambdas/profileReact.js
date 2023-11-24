@@ -6,6 +6,7 @@ const { connectDb, closeDb } = require('../lib/mongodb');
 const { TrackModel } = require('../models/track');
 const { ProfileReactModal } = require('../models/profileReact');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
+const { getScoreByPreference } = require('../utils/index');
 
 connectDb();
 
@@ -47,8 +48,8 @@ const getLikeTrackByProfileId = async (event) => {
                     ApiResponse.success(
                         HttpStatus.OK,
                         'Data retrieved successfully.',
-                        response[0].reactTracks.filter((item) => item.preference === 'like' || item.preference === 'strongly like'),
-                    ),
+                        response[0].reactTracks.filter((item) => item.preference === 'like' || item.preference === 'strongly like')
+                    )
                 ),
             };
         } else {
@@ -112,9 +113,10 @@ const addReactTrack = async (event) => {
                     reactTracks: {
                         track: new ObjectId(trackId),
                         preference: preference,
+                        score: getScoreByPreference(preference),
                     },
                 },
-            },
+            }
         );
         if (updatedReactTrack) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added a new react track success')) };
@@ -142,8 +144,9 @@ const updateReactTrack = async (event) => {
             {
                 $set: {
                     'reactTracks.$.preference': preference,
+                    'reactTracks.$.score': getScoreByPreference(preference),
                 },
-            },
+            }
         );
         if (updatedReactTrack) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Updated react track preference success')) };
@@ -169,7 +172,7 @@ const removeReactTrack = async (event) => {
                 $pull: {
                     reactTracks: { track: new ObjectId(trackId) },
                 },
-            },
+            }
         );
         if (updatedProfile) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed a react track success')) };

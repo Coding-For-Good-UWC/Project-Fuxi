@@ -197,6 +197,12 @@ functions:
       - http:
           path: /playlist/suggest-media
           method: get
+  suggestHighScoringSongs:
+    handler: lambdas/playlist.suggestHighScoringSongs
+    events:
+      - http:
+          path: /playlist/suggest-high-score
+          method: get
   createPlaylist:
     handler: lambdas/playlist.createPlaylist
     events:
