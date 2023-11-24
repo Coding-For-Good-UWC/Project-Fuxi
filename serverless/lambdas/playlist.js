@@ -300,6 +300,8 @@ const suggestHighScoringSongs = async (event) => {
             });
         });
 
+        const uniqueTracksArray = Array.from(uniqueTracksSet);
+
         const filteredUniqueTracksArray = uniqueTracksArray.filter((track) => track.toString() !== trackId);
 
         if (filteredUniqueTracksArray.length === 0) {
