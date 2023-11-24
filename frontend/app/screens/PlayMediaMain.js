@@ -60,12 +60,19 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
 
     const removeTrack = async () => {
         const trackArrRemove = dataTracks.filter((track) => track._id !== selectSound._id);
-        setDataTracks(trackArrRemove);
+        console.log(Object.keys(trackArrRemove).length);
         if (Object.keys(trackArrRemove).length !== 0) {
             if (playlistId !== null && playlistId !== undefined) {
-                const response = await removeTrackInPlaylist(playlistId, selectSound._id);
-                console.log(response.data);
+                const profile0 = await getStoreData('profile0');
+                const { _id } = JSON.parse(profile0);
+                const response = await removeTrackInPlaylist(_id, playlistId, selectSound._id);
+                if (Object.keys(trackArrRemove).length <= 5) {
+                    setDataTracks(response.data);
+                } else {
+                    setDataTracks(trackArrRemove);
+                }
             }
+            handleNextTrack();
         } else {
             if (playlistId !== undefined) {
                 navigation.navigate('LibraryScreen');
@@ -82,13 +89,15 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
                         <View style={{ backgroundColor: '#fff', flex: 1 }}>
                             <PlayMediaComponent selectSound={selectSound} handlePrevTrack={handlePrevTrack} handleNextTrack={handleNextTrack} />
                             <FollowPlayMedia
+                                playlistId={playlistId}
                                 selectSound={selectSound}
                                 reactTrack={reactTrack}
+                                setDataTracks={setDataTracks}
                                 setReactTrack={setReactTrack}
                                 removeTrack={removeTrack}
                                 handleNextTrack={handleNextTrack}
                             />
-                            {Object.keys(dataTracks).length !== 0 && (
+                            {Object.keys(dataTracks).length !== 1 && (
                                 <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
                                     <Text style={styles.viewPlaylistText}>View playlist</Text>
                                 </TouchableOpacity>

@@ -144,36 +144,54 @@ const addTrackInPlaylist = async (event) => {
 };
 
 const removeTrackInPlaylist = async (event) => {
-    const json = JSON.parse(event.body);
-    const { playlistId, trackId } = json;
-
-    if (!playlistId || !trackId) {
-        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
-    }
-
     try {
+        const json = JSON.parse(event.body);
+        const { profileId, playlistId, trackId } = json;
+
+        if (!profileId || !playlistId || !trackId) {
+            return {
+                statusCode: 200,
+                body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields: playlistId, trackId')),
+            };
+        }
+
         const existingPlaylist = await PlaylistModel.findById(playlistId);
 
         if (!existingPlaylist) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Track not found in the playlist')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
         }
+
+        const filterTrackDislike = existingPlaylist.reactTracks.filter(
+            (item) => item.preference === 'dislike' || item.preference === 'strongly dislike'
+        );
+        const filteredTrackIdsDislike = filterTrackDislike.map((item) => item._id);
 
         const filteredTracks = existingPlaylist.tracks.filter((existingTrackId) => existingTrackId.toString() !== trackId);
 
-        const updatedProfile = await PlaylistModel.findOneAndUpdate(
-            { _id: new mongoose.Types.ObjectId(playlistId) },
-            {
-                $set: {
-                    tracks: filteredTracks,
-                },
-            },
-            { new: true }
-        );
+        const updatedPlaylist = await PlaylistModel.findByIdAndUpdate(playlistId, { $set: { tracks: filteredTracks } }, { new: true });
 
-        if (updatedProfile) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success', updatedProfile)) };
+        if (updatedPlaylist) {
+            if (filteredTracks.length <= 5) {
+                const profile = await ProfileModel.findById(profileId);
+                const randomSongs = await TrackModel.aggregate([
+                    {
+                        $match: {
+                            $or: [{ Language: { $in: profile.genres } }, { Genre: { $in: profile.genres } }],
+                            _id: { $nin: filteredTrackIdsDislike },
+                        },
+                    },
+                    { $sample: { size: 10 } },
+                ]);
+
+                const arrayTrackIds = randomSongs.map((song) => song._id);
+                const mergedArray = filteredTracks.concat(arrayTrackIds.filter((id) => !filteredTracks.includes(id)));
+                const addPlaylist = await PlaylistModel.findByIdAndUpdate(playlistId, { tracks: mergedArray }, { new: true }).populate('tracks');
+                return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success', addPlaylist?.tracks)) };
+            } else {
+                return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success', updatedPlaylist)) };
+            }
         } else {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update profile')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update playlist')) };
         }
     } catch (error) {
         console.error(error);
@@ -222,17 +240,23 @@ const deleteAllPlaylist = async (event) => {
 const getSuggestionsInPlaymedia = async (event) => {
     const { profileId, artist, language, genre, era } = event.queryStringParameters;
 
-    const filteredIds = [];
-    if (profileId !== undefined && profileId !== null && profileId.length <= 0) {
-        const response = await ProfileReactModal.find({ profileId: new mongoose.Types.ObjectId(profileId) });
-        const filterTrackDislike = response[0].reactTracks.filter((item) => item.preference === 'dislike' || item.preference === 'strongly dislike');
-        filteredIds = filterTrackDislike.map((item) => item._id);
+    let filteredTrackIds = [];
+    let filteredTrackIdsDislike = [];
+    if (profileId !== undefined && profileId !== null && profileId.length >= 0) {
+        const response = await ProfileReactModal.findOne({ profileId: new mongoose.Types.ObjectId(profileId) });
+        filteredTrackIds = response.reactTracks.map((item) => item.track);
+
+        const filterTrackDislike = response.reactTracks.filter((item) => item.preference === 'dislike' || item.preference === 'strongly dislike');
+        filteredTrackIdsDislike = filterTrackDislike.map((item) => item._id);
     }
 
     try {
         let listTrackByArtist = [];
         if (artist !== undefined && artist !== null) {
-            listTrackByArtist = await TrackModel.aggregate([{ $match: { Artist: artist, _id: { $nin: filteredIds } } }, { $sample: { size: 7 } }]);
+            listTrackByArtist = await TrackModel.aggregate([
+                { $match: { Artist: artist, _id: { $nin: filteredTrackIdsDislike } } },
+                { $sample: { size: 7 } },
+            ]);
         }
 
         const matchCriteria = {};
@@ -243,49 +267,11 @@ const getSuggestionsInPlaymedia = async (event) => {
             matchCriteria.Genre = genre;
         }
 
-        let listTrackByLanguageAndGenre = await TrackModel.aggregate([
-            { $match: { _id: { $nin: filteredIds }, ...matchCriteria } },
-            { $sample: { size: 7 } },
-        ]);
-
-        let listTrackByEra = [];
-        if (era !== undefined && era !== null) {
-            listTrackByEra = await TrackModel.aggregate([
-                { $match: { Era: parseInt(era, 10), _id: { $nin: filteredIds } } },
-                { $sample: { size: 7 } },
-            ]);
-        } else {
-            listTrackByEra = await TrackModel.aggregate([
-                { $match: { Era: { $exists: false }, _id: { $nin: filteredIds } } },
-                { $sample: { size: 7 } },
-            ]);
-        }
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify(
-                ApiResponse.success(HttpStatus.OK, `OK`, {
-                    listTrackByArtist: listTrackByArtist,
-                    listTrackByLanguageAndGenre: listTrackByLanguageAndGenre,
-                    listTrackByEra: listTrackByEra,
-                })
-            ),
-        };
-    } catch (error) {
-        console.error(error);
-        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
-    }
-};
-
-const suggestHighScoringSongs = async (event) => {
-    const { trackId, targetScore, language, genre } = event.queryStringParameters;
-
-    try {
         const highScoredProfiles = await ProfileReactModal.find(
             {
                 reactTracks: {
                     $elemMatch: {
-                        score: targetScore,
+                        score: { $in: [4, 5] },
                     },
                 },
             },
@@ -302,28 +288,44 @@ const suggestHighScoringSongs = async (event) => {
 
         const uniqueTracksArray = Array.from(uniqueTracksSet);
 
-        const filteredUniqueTracksArray = uniqueTracksArray.filter((track) => track.toString() !== trackId);
+        const filteredUniqueTracksArray = uniqueTracksArray.filter((track) => !filteredTrackIds.some((id) => id.toString() === track.toString()));
 
-        if (filteredUniqueTracksArray.length === 0) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'No high-scoring songs found')) };
-        }
-
-        const matchCriteria = {};
-        if (language) {
-            matchCriteria.Language = language;
-        }
-        if (genre) {
-            matchCriteria.Genre = genre;
-        }
-
-        const suggestedSongs = await TrackModel.aggregate([
+        let listTrackHighLike = await TrackModel.aggregate([
             { $match: { _id: { $in: filteredUniqueTracksArray }, ...matchCriteria } },
             { $sample: { size: 7 } },
         ]);
 
-        return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Suggested songs with high scores', suggestedSongs)) };
+        let listTrackByLanguageAndGenre = await TrackModel.aggregate([
+            { $match: { _id: { $nin: filteredTrackIds }, ...matchCriteria } },
+            { $sample: { size: 7 } },
+        ]);
+
+        let listTrackByEra = [];
+        if (era !== undefined && era !== null) {
+            listTrackByEra = await TrackModel.aggregate([
+                { $match: { Era: parseInt(era, 10), _id: { $nin: filteredTrackIds } } },
+                { $sample: { size: 7 } },
+            ]);
+        } else {
+            listTrackByEra = await TrackModel.aggregate([
+                { $match: { Era: { $exists: false }, _id: { $nin: filteredTrackIds } } },
+                { $sample: { size: 7 } },
+            ]);
+        }
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify(
+                ApiResponse.success(HttpStatus.OK, `OK`, {
+                    listTrackByArtist: listTrackByArtist,
+                    listTrackHighLike: listTrackHighLike,
+                    listTrackByLanguageAndGenre: listTrackByLanguageAndGenre,
+                    listTrackByEra: listTrackByEra,
+                })
+            ),
+        };
     } catch (error) {
-        console.error('Error in suggestHighScoringSongs:', error);
+        console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server Error')) };
     }
 };
@@ -338,5 +340,4 @@ module.exports = {
     deletePlaylist,
     deleteAllPlaylist,
     getSuggestionsInPlaymedia,
-    suggestHighScoringSongs,
 };

@@ -1,5 +1,5 @@
 import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import colours from '../config/colours';
 import CustomGridLayout from '../components/CustomGridLayout';
@@ -11,8 +11,10 @@ import PlaylistLikedSongItem from '../components/PlaylistLikedSongItem';
 import { getAllPlayListByProfileId } from '../api/playlist';
 import { getStoreData } from '../utils/AsyncStorage';
 import SuggestTrack from '../components/SuggestTrack';
+import { AppContext } from '../context/AppContext';
 
 const LibraryScreen = () => {
+    const { isReRender } = useContext(AppContext);
     const navigation = useNavigation();
     const { width } = Dimensions.get('screen');
     const heightItem = (width - 40 - 20) / 2;
@@ -27,6 +29,10 @@ const LibraryScreen = () => {
         }, [])
     );
 
+    useEffect(() => {
+        getPlaylist();
+    }, [isReRender]);
+
     async function getPlaylist() {
         try {
             const profile0 = await getStoreData('profile0');
@@ -35,7 +41,12 @@ const LibraryScreen = () => {
                 const response = await getAllPlayListByProfileId(_id);
                 const { code, message, data } = response;
                 if (code == 200) {
-                    setDataPlaylist(data);
+                    const sortPlaylist = data.sort((a, b) => {
+                        if (a.namePlaylist === 'Suggestion for you') return -1;
+                        if (b.namePlaylist === 'Suggestion for you') return 1;
+                        return 0;
+                    });
+                    setDataPlaylist(sortPlaylist);
                 }
             } else {
                 setDataPlaylist([]);
@@ -66,7 +77,6 @@ const LibraryScreen = () => {
                     gap={20}
                     data={[
                         <PlaylistLikedSongItem heightItem={heightItem} />,
-                        <SuggestTrack heightItem={heightItem} />,
                         ...dataPlaylist.map((dataItem, index) => (
                             <PlaylistItem
                                 key={index}

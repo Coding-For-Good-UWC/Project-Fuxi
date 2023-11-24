@@ -62,9 +62,10 @@ export const addTrackInPlaylist = async (profileId, trackId) => {
     }
 };
 
-export const removeTrackInPlaylist = async (playlistId, trackId) => {
+export const removeTrackInPlaylist = async (profileId, playlistId, trackId) => {
     try {
         const response = await axios.put(`${apiUrl}/dev/playlist/remove-track`, {
+            profileId: profileId,
             playlistId: playlistId,
             trackId: trackId,
         });

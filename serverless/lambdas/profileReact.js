@@ -7,6 +7,8 @@ const { TrackModel } = require('../models/track');
 const { ProfileReactModal } = require('../models/profileReact');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 const { getScoreByPreference } = require('../utils/index');
+const { ProfileModel } = require('../models/profile');
+const { PlaylistModel } = require('../models/playlist');
 
 connectDb();
 
@@ -101,8 +103,8 @@ const getReactTrackByTrackId = async (event) => {
 
 const addReactTrack = async (event) => {
     const json = JSON.parse(event.body);
-    const { profileId, trackId, preference } = json;
-    if (!profileId || !trackId || !preference) {
+    const { profileId, playlistId, trackId, preference } = json;
+    if (!profileId || !playlistId || !trackId || !preference) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
@@ -116,10 +118,48 @@ const addReactTrack = async (event) => {
                         score: getScoreByPreference(preference),
                     },
                 },
-            }
+            },
+            { new: true }
         );
+
+        const filterTrackDislike = updatedReactTrack.reactTracks.filter(
+            (item) => item.preference === 'dislike' || item.preference === 'strongly dislike'
+        );
+        const filteredTrackIdsDislike = filterTrackDislike.map((item) => item._id);
+
+        if (preference === 'like' || preference === 'strongly like') {
+            const profile = await ProfileModel.findById(profileId);
+
+            const randomSongs = await TrackModel.aggregate([
+                {
+                    $match: {
+                        $or: [{ Language: { $in: profile.genres } }, { Genre: { $in: profile.genres } }],
+                        _id: { $nin: filteredTrackIdsDislike },
+                    },
+                },
+                { $sample: { size: 10 } },
+            ]);
+
+            const response = await PlaylistModel.findById(playlistId);
+
+            const trackIdsPlaylist = response.tracks;
+
+            const arrayTrackIds = randomSongs.map((song) => song._id);
+
+            const mergedArray = trackIdsPlaylist.concat(arrayTrackIds.filter((id) => !trackIdsPlaylist.includes(id)));
+
+            const addPlaylist = await PlaylistModel.findByIdAndUpdate(playlistId, { tracks: mergedArray }, { new: true }).populate('tracks');
+            return {
+                statusCode: 200,
+                body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added tracks to playlist successfully', addPlaylist?.tracks)),
+            };
+        }
+
         if (updatedReactTrack) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added a new react track success')) };
+            return {
+                statusCode: 200,
+                body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added a new react track success')),
+            };
         } else {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
         }

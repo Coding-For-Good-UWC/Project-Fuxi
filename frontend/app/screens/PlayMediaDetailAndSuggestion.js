@@ -2,11 +2,11 @@ import { SafeAreaView, StatusBar, StyleSheet, Text, View, Image, ScrollView, Tou
 import React, { useEffect, useState } from 'react';
 import CustomGridLayout from '../components/CustomGridLayout';
 import SongItem from '../components/SongItem';
-import { getSuggestionsInPlaymedia } from '../api/playlist';
+import { addTrackInPlaylist, getSuggestionsInPlaymedia, removeTrackInPlaylist } from '../api/playlist';
 import { Ionicons } from '@expo/vector-icons';
 import { getStoreData } from '../utils/AsyncStorage';
 
-const PlayMediaDetailAndSuggestion = ({ selectSound, dataTracks, setDataTracks }) => {
+const PlayMediaDetailAndSuggestion = ({ playlistId, selectSound, setSelectSound, dataTracks, setDataTracks }) => {
     const [dataSuggest, setDataSuggest] = useState({});
 
     useEffect(() => {
@@ -58,12 +58,19 @@ const PlayMediaDetailAndSuggestion = ({ selectSound, dataTracks, setDataTracks }
 
     const RenderItem = ({ item }) => {
         const isSelected = dataTracks.includes(item);
-        const [select, setSelect] = useState(isSelected);
 
-        const toggleItemAndSelect = () => {
+        const toggleItemAndSelect = async () => {
             if (isSelected) {
+                if (playlistId) {
+                    await addTrackInPlaylist(playlistId, item?._id);
+                }
                 setDataTracks((prevItems) => prevItems.filter((selected) => selected !== item));
             } else {
+                if (playlistId) {
+                    const profile0 = await getStoreData('profile0');
+                    const { _id } = JSON.parse(profile0);
+                    await removeTrackInPlaylist(_id, playlistId, item?._id);
+                }
                 setDataTracks((prevItems) => [...prevItems, item]);
             }
         };
@@ -72,7 +79,7 @@ const PlayMediaDetailAndSuggestion = ({ selectSound, dataTracks, setDataTracks }
             return (
                 <TouchableOpacity onPress={toggleItemAndSelect}>
                     <Ionicons
-                        name={!select ? 'add-circle-outline' : 'remove-circle-outline'}
+                        name={!isSelected ? 'add-circle-outline' : 'remove-circle-outline'}
                         color="#757575"
                         size={30}
                         style={{ padding: 6, paddingRight: 0 }}
@@ -81,7 +88,7 @@ const PlayMediaDetailAndSuggestion = ({ selectSound, dataTracks, setDataTracks }
             );
         };
 
-        return <SongItem item={item} iconRight={renderIconRight()} />;
+        return <SongItem item={item} iconRight={renderIconRight()} onPress={() => setSelectSound(item)} />;
     };
 
     return (
@@ -98,7 +105,7 @@ const PlayMediaDetailAndSuggestion = ({ selectSound, dataTracks, setDataTracks }
                                 {selectSound?.Title || ''}
                             </Text>
                             <Text style={styles.artistText} numberOfLines={1}>
-                                Artist: {selectSound?.Artist || ''}
+                                Artist: {selectSound?.Artist || 'Unknown'}
                             </Text>
                             <Text style={styles.artistText} numberOfLines={1}>
                                 Release: {selectSound?.Era || 'Unknown'}
@@ -107,6 +114,7 @@ const PlayMediaDetailAndSuggestion = ({ selectSound, dataTracks, setDataTracks }
                     </View>
                     <View style={styles.listSection}>
                         {renderSuggestionSection(dataSuggest?.listTrackByArtist, 'Suggestion from musician', selectSound?.Artist)}
+                        {renderSuggestionSection(dataSuggest?.listTrackHighLike, 'Everyone also likes the song')}
                         {renderSuggestionSection(dataSuggest?.listTrackByLanguageAndGenre, 'Maybe you want to hear')}
                         {renderSuggestionSection(dataSuggest?.listTrackByEra, 'Songs released in the same year')}
                     </View>

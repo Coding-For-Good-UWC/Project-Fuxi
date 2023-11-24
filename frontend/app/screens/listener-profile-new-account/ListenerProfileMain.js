@@ -58,7 +58,7 @@ const ListenerProfileMain = () => {
             const { uid, name } = JSON.parse(userInfo);
             try {
                 setIsLoading(true);
-                const newProfile = await createProfile(uid, name, new Date().getUTCFullYear().toString(), []);
+                const newProfile = await createProfile(uid, name, '1950', []);
                 const { code, message, data } = newProfile;
                 console.log(data);
                 await createProfileReact(data._id, []);

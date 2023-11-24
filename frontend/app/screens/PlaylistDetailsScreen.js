@@ -75,7 +75,7 @@ const PlaylistDetailsScreen = () => {
 
             if (playlistCode === 200) {
                 setCountTracks(playlistData?.tracks.length);
-                setDataPlaylistDetail(playlistData);
+                setDataPlaylistDetail(playlistData?.tracks);
                 setTotalDuration(await totalDurationTracks(playlistData?.tracks));
             } else {
                 alert(playlistMessage);
@@ -88,16 +88,18 @@ const PlaylistDetailsScreen = () => {
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
-                <View style={{ alignItems: 'center' }}>
-                    <View style={{ borderRadius: 6, overflow: 'hidden', width: '70%' }} onLayout={this.handleLayout}>
-                        <CustomGridLayout
-                            columns={2}
-                            data={dataNavigation?.tracks?.map((item, index) => (
-                                <Image key={index} source={{ uri: item.ImageURL }} style={{ width: heightItem / 2, height: heightItem / 2 }} />
-                            ))}
-                        />
+                {dataNavigation?.namePlaylist !== 'Suggestion for you' && (
+                    <View style={{ alignItems: 'center' }}>
+                        <View style={{ borderRadius: 6, overflow: 'hidden', width: '70%' }} onLayout={this.handleLayout}>
+                            <CustomGridLayout
+                                columns={2}
+                                data={dataNavigation?.tracks?.map((item, index) => (
+                                    <Image key={index} source={{ uri: item.ImageURL }} style={{ width: heightItem / 2, height: heightItem / 2 }} />
+                                ))}
+                            />
+                        </View>
                     </View>
-                </View>
+                )}
                 <View style={styles.playListDetail}>
                     <Text style={styles.playListName}>{dataNavigation?.namePlaylist}</Text>
                     <View style={styles.playListTracksAndTime}>
@@ -108,7 +110,11 @@ const PlaylistDetailsScreen = () => {
                 </View>
                 <TouchableOpacity
                     style={styles.buttonPlay}
-                    onPress={() => navigation.navigate('PlayMedia', { dataTracksOrigin: dataNavigation?.tracks, playlistId: dataNavigation?._id })}
+                    onPress={() => {
+                        if (dataPlaylistDetail.length > 0) {
+                            navigation.navigate('PlayMedia', { dataTracksOrigin: dataPlaylistDetail, playlistId: dataNavigation?._id });
+                        }
+                    }}
                 >
                     <Ionicons name="play" color="#fff" size={20} />
                     <Text style={styles.playText}>Play</Text>
@@ -116,7 +122,7 @@ const PlaylistDetailsScreen = () => {
                 <View style={{ flex: 1 }}>
                     <View style={{ borderTopColor: '#ECEDEE', borderTopWidth: 1 }}></View>
                     <CustomGridLayout
-                        data={dataPlaylistDetail?.tracks?.map((dataItem, index) => {
+                        data={dataPlaylistDetail?.map((dataItem, index) => {
                             const matchPreference = dataReactTracks.find((item) => item.track._id === dataItem._id);
                             const preference = matchPreference?.preference || '';
                             return (
@@ -127,7 +133,7 @@ const PlaylistDetailsScreen = () => {
                                     setIsDialogVisible={setIsDialogVisible}
                                     setDialogProps={setDialogProps}
                                     playlistId={dataNavigation._id}
-                                    dataTracksOrigin={dataPlaylistDetail?.tracks}
+                                    dataTracksOrigin={dataPlaylistDetail}
                                 />
                             );
                         })}

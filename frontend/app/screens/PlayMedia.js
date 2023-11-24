@@ -21,7 +21,7 @@ const PlayMedia = () => {
     const { dataTracksOrigin, currentReactTrack, playlistId } = route.params;
 
     const [selectSound, setSelectSound] = useState(route.params?.track || dataTracksOrigin[0] || defaultSong);
-    const [dataTracks, setDataTracks] = useState(dataTracksOrigin || []);
+    const [dataTracks, setDataTracks] = useState(dataTracksOrigin || [selectSound]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -74,7 +74,15 @@ const PlayMedia = () => {
                     headerShown: false,
                 }}
             >
-                {() => <PlayMediaDetailAndSuggestion selectSound={selectSound} dataTracks={dataTracks} setDataTracks={setDataTracks} />}
+                {() => (
+                    <PlayMediaDetailAndSuggestion
+                        playlistId={playlistId}
+                        selectSound={selectSound}
+                        setSelectSound={setSelectSound}
+                        dataTracks={dataTracks}
+                        setDataTracks={setDataTracks}
+                    />
+                )}
             </Tab.Screen>
         </Tab.Navigator>
     );

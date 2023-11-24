@@ -5,6 +5,8 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const { connectDb, closeDb } = require('../lib/mongodb');
 const { ProfileModel } = require('../models/profile');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
+const { PlaylistModel } = require('../models/playlist');
+const { TrackModel } = require('../models/track');
 
 connectDb();
 
@@ -50,6 +52,26 @@ const createProfile = async (event) => {
             yearBirth,
             genres,
         });
+
+        const randomSongs = await TrackModel.aggregate([
+            {
+                $match: {
+                    $or: [{ Language: { $in: genres } }, { Genre: { $in: genres } }],
+                },
+            },
+            { $sample: { size: 15 } },
+        ]);
+
+        const arrayTrackIds = randomSongs.map((song) => song._id);
+
+        const playlist = await PlaylistModel.create({
+            profileId: new ObjectId(profile._id),
+            namePlaylist: 'Suggestion for you',
+            tracks: arrayTrackIds,
+        });
+
+        await PlaylistModel.populate(playlist, 'tracks');
+
         if (profile) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Profile created success', profile)) };
         } else {

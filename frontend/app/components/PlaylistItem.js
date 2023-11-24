@@ -8,9 +8,15 @@ const PlaylistItem = ({ onPress, heightItem, data }) => {
     ));
     return (
         <TouchableOpacity onPress={onPress}>
-            <View style={{ height: heightItem, borderRadius: 6, overflow: 'hidden' }}>
-                <CustomGridLayout columns={2} data={listImages} />
-            </View>
+            {data.namePlaylist !== 'Suggestion for you' ? (
+                <View style={{ height: heightItem, borderRadius: 6, overflow: 'hidden' }}>
+                    <CustomGridLayout columns={2} data={listImages} />
+                </View>
+            ) : (
+                <View style={{ height: heightItem }}>
+                    <Image source={require('../assets/default_l8mbsa.png')} style={{ width: '100%', height: '100%', borderRadius: 6 }} />
+                </View>
+            )}
             <Text style={styles.likesSongText} numberOfLines={2}>
                 {data.namePlaylist}
             </Text>

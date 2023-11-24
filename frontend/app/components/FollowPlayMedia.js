@@ -23,7 +23,7 @@ const getReact = async (trackId) => {
     }
 };
 
-const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, removeTrack, handleNextTrack }) => {
+const FollowPlayMedia = ({ playlistId, selectSound, reactTrack, setDataTracks, setReactTrack, removeTrack }) => {
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
 
@@ -150,7 +150,8 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, removeTrack, 
             } else if (reactTrack.status == undefined) {
                 setReactTrack(preference.LK);
                 setIsDialogVisible(false);
-                await addReactTrack(_id, selectSound._id, preference.LK.status);
+                const response = await addReactTrack(_id, playlistId, selectSound._id, preference.LK.status);
+                setDataTracks(response.data);
             } else if (reactTrack.status == 'strongly dislike') {
                 setReactTrack(preference.LK);
                 setIsDialogVisible(false);
@@ -177,7 +178,7 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, removeTrack, 
             } else if (reactTrack.status == undefined) {
                 setReactTrack(preference.DK);
                 setIsDialogVisible(false);
-                await addReactTrack(_id, selectSound._id, preference.DK.status);
+                await addReactTrack(_id, playlistId, selectSound._id, preference.DK.status);
             } else if (reactTrack.status == 'strongly like') {
                 setReactTrack(preference.DK);
                 setIsDialogVisible(false);
@@ -187,7 +188,6 @@ const FollowPlayMedia = ({ selectSound, reactTrack, setReactTrack, removeTrack, 
                 setIsDialogVisible(false);
                 await updateReactTrack(_id, selectSound._id, preference.DK.status);
             }
-            handleNextTrack();
             removeTrack();
             alert('The song is removed from the playlist');
         } else {
