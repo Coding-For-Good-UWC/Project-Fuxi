@@ -1,6 +1,6 @@
 import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useLayoutEffect, useState } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { getStoreData } from '../utils/AsyncStorage';
@@ -82,9 +82,14 @@ const LikedSongsScreen = () => {
         }
     }
 
-    useEffect(() => {
-        getPlaylist();
-    }, []);
+    useFocusEffect(
+        React.useCallback(() => {
+            (async () => {
+                await getPlaylist();
+            })();
+            return;
+        }, [])
+    );
 
     const EmptySongs = () => (
         <>

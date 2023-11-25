@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import ToggleDialog from './ToggleDialog';
 import { preference } from '../utils/utils';
-import { addReactTrack, updateReactTrack } from '../api/profileReact';
 import { getStoreData } from '../utils/AsyncStorage';
-import { getReactTrackByTrackId } from '../api/profileReact';
+import { addReactTrack, updateReactTrack, getReactTrackByTrackId } from '../api/profileReact';
+import { autoAddTrackInPlaylist } from '../api/playlist';
 
 const getReact = async (trackId) => {
     const profile0 = await getStoreData('profile0');
@@ -144,14 +144,29 @@ const FollowPlayMedia = ({ playlistId, selectSound, reactTrack, setDataTracks, s
         if (profile0 !== null) {
             const { _id } = JSON.parse(profile0);
             if (reactTrack.status == 'like') {
-                setReactTrack(preference.SLK);
                 setIsDialogVisible(false);
                 await updateReactTrack(_id, selectSound._id, preference.SLK.status);
+                await autoAddTrackInPlaylist(
+                    _id,
+                    playlistId,
+                    preference.SLK.status,
+                    selectSound?.Language || '',
+                    selectSound?.Genre || '',
+                    selectSound?.Era || ''
+                );
+                setReactTrack(preference.SLK);
             } else if (reactTrack.status == undefined) {
-                setReactTrack(preference.LK);
                 setIsDialogVisible(false);
-                const response = await addReactTrack(_id, playlistId, selectSound._id, preference.LK.status);
-                setDataTracks(response.data);
+                await addReactTrack(_id, selectSound._id, preference.LK.status);
+                await autoAddTrackInPlaylist(
+                    _id,
+                    playlistId,
+                    preference.LK.status,
+                    selectSound?.Language || '',
+                    selectSound?.Genre || '',
+                    selectSound?.Era || ''
+                );
+                setReactTrack(preference.LK);
             } else if (reactTrack.status == 'strongly dislike') {
                 setReactTrack(preference.LK);
                 setIsDialogVisible(false);
@@ -178,7 +193,7 @@ const FollowPlayMedia = ({ playlistId, selectSound, reactTrack, setDataTracks, s
             } else if (reactTrack.status == undefined) {
                 setReactTrack(preference.DK);
                 setIsDialogVisible(false);
-                await addReactTrack(_id, playlistId, selectSound._id, preference.DK.status);
+                await addReactTrack(_id, selectSound._id, preference.DK.status);
             } else if (reactTrack.status == 'strongly like') {
                 setReactTrack(preference.DK);
                 setIsDialogVisible(false);

@@ -67,9 +67,7 @@ const PlayMediaDetailAndSuggestion = ({ playlistId, selectSound, setSelectSound,
                 setDataTracks((prevItems) => prevItems.filter((selected) => selected !== item));
             } else {
                 if (playlistId) {
-                    const profile0 = await getStoreData('profile0');
-                    const { _id } = JSON.parse(profile0);
-                    await removeTrackInPlaylist(_id, playlistId, item?._id);
+                    await removeTrackInPlaylist(playlistId, item?._id);
                 }
                 setDataTracks((prevItems) => [...prevItems, item]);
             }

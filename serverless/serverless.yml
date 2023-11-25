@@ -185,18 +185,18 @@ functions:
       - http:
           path: /playlists
           method: get
-  getPlaylistSuggestions:
-    handler: lambdas/playlist.getPlaylistSuggestions
-    events:
-      - http:
-          path: /playlist/suggest
-          method: get
   getSuggestionsInPlaymedia:
     handler: lambdas/playlist.getSuggestionsInPlaymedia
     events:
       - http:
           path: /playlist/suggest-media
           method: get
+  autoAddTrackInPlaylist:
+    handler: lambdas/playlist.autoAddTrackInPlaylist
+    events:
+      - http:
+          path: /playlist/auto-add-track
+          method: post
   createPlaylist:
     handler: lambdas/playlist.createPlaylist
     events:

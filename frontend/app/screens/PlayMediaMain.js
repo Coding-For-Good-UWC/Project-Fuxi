@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import { StyleSheet, Text, SafeAreaView, TouchableOpacity, Dimensions, View } from 'react-native';
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -10,7 +10,7 @@ import SongItem from '../components/SongItem';
 import PlayMediaComponent from '../components/PlayMediaComponent';
 import BottomSheetScrollView from '../components/BottomSheetScrollView';
 import FollowPlayMedia from '../components/FollowPlayMedia';
-import { deletePlaylist, removeTrackInPlaylist } from '../api/playlist';
+import { autoAddTrackInPlaylist, deletePlaylist, getPlaylistById, removeTrackInPlaylist } from '../api/playlist';
 import { getStoreData } from '../utils/AsyncStorage';
 
 function findPreviousTrack(tracks, trackId) {
@@ -41,6 +41,17 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
         bottomSheetRef.current?.expand();
     }, []);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            if (playlistId) {
+                const response = await getPlaylistById(playlistId);
+                setDataTracks(response.data.tracks);
+            }
+        };
+
+        fetchData();
+    }, [reactTrack]);
+
     const handleTrackPress = async (item) => {
         console.log(item.Title);
         setSelectSound(item);
@@ -60,14 +71,20 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
 
     const removeTrack = async () => {
         const trackArrRemove = dataTracks.filter((track) => track._id !== selectSound._id);
-        console.log(Object.keys(trackArrRemove).length);
         if (Object.keys(trackArrRemove).length !== 0) {
             if (playlistId !== null && playlistId !== undefined) {
-                const profile0 = await getStoreData('profile0');
-                const { _id } = JSON.parse(profile0);
-                const response = await removeTrackInPlaylist(_id, playlistId, selectSound._id);
+                await removeTrackInPlaylist(playlistId, selectSound._id);
                 if (Object.keys(trackArrRemove).length <= 5) {
-                    setDataTracks(response.data);
+                    const profile0 = await getStoreData('profile0');
+                    const { _id } = JSON.parse(profile0);
+                    await autoAddTrackInPlaylist(
+                        _id,
+                        playlistId,
+                        null,
+                        selectSound?.Language || '',
+                        selectSound?.Genre || '',
+                        selectSound?.Era || ''
+                    );
                 } else {
                     setDataTracks(trackArrRemove);
                 }
@@ -97,7 +114,7 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
                                 removeTrack={removeTrack}
                                 handleNextTrack={handleNextTrack}
                             />
-                            {Object.keys(dataTracks).length !== 1 && (
+                            {Object.keys(dataTracks).length >= 2 && (
                                 <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
                                     <Text style={styles.viewPlaylistText}>View playlist</Text>
                                 </TouchableOpacity>

@@ -4,13 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import colours from '../config/colours';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import TipComponent from './../components/TipComponent';
 import WithProfile from '../components/WithProfile';
 import PlaylistItem from '../components/PlaylistItem';
 import PlaylistLikedSongItem from '../components/PlaylistLikedSongItem';
 import { getAllPlayListByProfileId } from '../api/playlist';
 import { getStoreData } from '../utils/AsyncStorage';
-import SuggestTrack from '../components/SuggestTrack';
 import { AppContext } from '../context/AppContext';
 
 const LibraryScreen = () => {

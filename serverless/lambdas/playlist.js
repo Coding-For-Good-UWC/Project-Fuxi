@@ -60,29 +60,6 @@ const getAllPlayListByProfileId = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
 };
-const getPlaylistSuggestions = async (event) => {
-    const { profileId, pageNumber = 1, pageSize = 15 } = event.queryStringParameters;
-    const skipCount = (pageNumber - 1) * pageSize;
-
-    const profile = await ProfileModel.findById(profileId);
-
-    let getTrackSuggestions = [];
-
-    if (Object.keys(profile.genres).length !== 0) {
-        getTrackSuggestions = await TrackModel.find({
-            $or: [{ Language: { $in: profile.genres } }, { Genre: { $in: profile.genres } }],
-        })
-            .skip(skipCount)
-            .limit(pageSize)
-            .exec();
-    } else {
-        getTrackSuggestions = await TrackModel.find({ Artist: { $regex: new RegExp('', 'i') } })
-            .skip(skipCount)
-            .limit(pageSize)
-            .exec();
-    }
-    return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Get all playlist in profile success', getTrackSuggestions)) };
-};
 
 const createPlaylist = async (event) => {
     const json = JSON.parse(event.body);
@@ -144,54 +121,35 @@ const addTrackInPlaylist = async (event) => {
 };
 
 const removeTrackInPlaylist = async (event) => {
+    const json = JSON.parse(event.body);
+    const { playlistId, trackId } = json;
+
+    if (!playlistId || !trackId) {
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+    }
+
     try {
-        const json = JSON.parse(event.body);
-        const { profileId, playlistId, trackId } = json;
-
-        if (!profileId || !playlistId || !trackId) {
-            return {
-                statusCode: 200,
-                body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields: playlistId, trackId')),
-            };
-        }
-
         const existingPlaylist = await PlaylistModel.findById(playlistId);
 
         if (!existingPlaylist) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Track not found in the playlist')) };
         }
-
-        const filterTrackDislike = existingPlaylist.reactTracks.filter(
-            (item) => item.preference === 'dislike' || item.preference === 'strongly dislike'
-        );
-        const filteredTrackIdsDislike = filterTrackDislike.map((item) => item._id);
 
         const filteredTracks = existingPlaylist.tracks.filter((existingTrackId) => existingTrackId.toString() !== trackId);
 
-        const updatedPlaylist = await PlaylistModel.findByIdAndUpdate(playlistId, { $set: { tracks: filteredTracks } }, { new: true });
-
-        if (updatedPlaylist) {
-            if (filteredTracks.length <= 5) {
-                const profile = await ProfileModel.findById(profileId);
-                const randomSongs = await TrackModel.aggregate([
-                    {
-                        $match: {
-                            $or: [{ Language: { $in: profile.genres } }, { Genre: { $in: profile.genres } }],
-                            _id: { $nin: filteredTrackIdsDislike },
-                        },
-                    },
-                    { $sample: { size: 10 } },
-                ]);
-
-                const arrayTrackIds = randomSongs.map((song) => song._id);
-                const mergedArray = filteredTracks.concat(arrayTrackIds.filter((id) => !filteredTracks.includes(id)));
-                const addPlaylist = await PlaylistModel.findByIdAndUpdate(playlistId, { tracks: mergedArray }, { new: true }).populate('tracks');
-                return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success', addPlaylist?.tracks)) };
-            } else {
-                return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success', updatedPlaylist)) };
+        const updatedProfile = await PlaylistModel.findOneAndUpdate(
+            { _id: new mongoose.Types.ObjectId(playlistId) },
+            {
+                $set: {
+                    tracks: filteredTracks,
+                },
             }
+        );
+
+        if (updatedProfile) {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success')) };
         } else {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update playlist')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update profile')) };
         }
     } catch (error) {
         console.error(error);
@@ -330,14 +288,83 @@ const getSuggestionsInPlaymedia = async (event) => {
     }
 };
 
+const autoAddTrackInPlaylist = async (event) => {
+    const json = JSON.parse(event.body);
+    const { profileId, playlistId, preference, language, genre, era } = json;
+    if (!profileId || !playlistId) {
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+    }
+    try {
+        const existingPlaylist = await PlaylistModel.findById(playlistId);
+
+        if (!existingPlaylist) {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
+        }
+
+        const existingReactProfile = await ProfileReactModal.findOne({ profileId: profileId });
+
+        if (!existingReactProfile) {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
+        }
+
+        const filterTrackDislike = existingReactProfile.reactTracks.filter(
+            (item) => item.preference === 'dislike' || item.preference === 'strongly dislike'
+        );
+        const filteredTrackIdsDislike = filterTrackDislike.map((item) => item._id);
+
+        if (existingPlaylist.tracks.length <= 5) {
+            const profile = await ProfileModel.findById(profileId);
+            const randomSongs = await TrackModel.aggregate([
+                {
+                    $match: {
+                        $or: [{ Language: { $in: profile.genres } }, { Genre: { $in: profile.genres } }],
+                        _id: { $nin: filteredTrackIdsDislike },
+                    },
+                },
+                { $sample: { size: 10 } },
+            ]);
+
+            const arrayTrackIds = randomSongs.map((song) => song._id);
+            const mergedArray = existingPlaylist.tracks.concat(arrayTrackIds.filter((id) => !existingPlaylist.tracks.includes(id)));
+
+            await PlaylistModel.findByIdAndUpdate(playlistId, { tracks: mergedArray });
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success')) };
+        }
+
+        if (preference === 'like' || preference === 'strongly like') {
+            const randomSongs = await TrackModel.aggregate([
+                {
+                    $match: {
+                        $or: [{ Language: language }, { Genre: genre }, { Era: era }],
+                        _id: { $nin: filteredTrackIdsDislike },
+                    },
+                },
+                { $sample: { size: 10 } },
+            ]);
+
+            const response = await PlaylistModel.findById(playlistId);
+
+            const arrayTrackIds = randomSongs.map((song) => song._id);
+
+            const mergedArray = response.tracks.concat(arrayTrackIds.filter((id) => !response.tracks.includes(id)));
+
+            await PlaylistModel.findByIdAndUpdate(playlistId, { tracks: mergedArray });
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added tracks to playlist successfully')) };
+        }
+    } catch (error) {
+        console.error(error);
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    }
+};
+
 module.exports = {
     getPlaylistById,
     getAllPlayListByProfileId,
-    getPlaylistSuggestions,
     createPlaylist,
     addTrackInPlaylist,
     removeTrackInPlaylist,
     deletePlaylist,
     deleteAllPlaylist,
     getSuggestionsInPlaymedia,
+    autoAddTrackInPlaylist,
 };

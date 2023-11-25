@@ -112,7 +112,7 @@ const PlaylistDetailsScreen = () => {
                     style={styles.buttonPlay}
                     onPress={() => {
                         if (dataPlaylistDetail.length > 0) {
-                            navigation.navigate('PlayMedia', { dataTracksOrigin: dataPlaylistDetail, playlistId: dataNavigation?._id });
+                            navigation.navigate('PlayMedia', { firstTrackInPlaylist: dataPlaylistDetail[0], playlistId: dataNavigation?._id });
                         }
                     }}
                 >
