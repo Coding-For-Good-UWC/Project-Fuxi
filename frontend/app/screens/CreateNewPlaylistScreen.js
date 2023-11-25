@@ -106,7 +106,7 @@ const CreateNewPlaylistScreen = () => {
                 const response = await createPlaylist(_id, namePlaylistText, selectedItems);
                 const { code, message, data } = response;
                 if (code == 201) {
-                    navigation.navigate('PlayMedia', { playlistId: data?._id, dataTracksOrigin: data?.tracks });
+                    navigation.navigate('PlayMedia', { playlistId: data?._id, firstTrackInPlaylist: data.tracks[0] });
                     alert('Playlist creation successful');
                 } else {
                     alert(message);

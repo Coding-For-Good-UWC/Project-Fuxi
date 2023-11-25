@@ -96,19 +96,16 @@ const createPlaylist = async (event) => {
 
 const addTrackInPlaylist = async (event) => {
     const json = JSON.parse(event.body);
-    const { profileId, trackId } = json;
-    if (!profileId || !trackId) {
+    const { playlistId, trackId } = json;
+    if (!playlistId || !trackId) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const addTrack = await PlaylistModel.findOneAndUpdate(
-            { profileId: profileId },
-            {
-                $push: {
-                    tracks: new mongoose.Types.ObjectId(trackId),
-                },
-            }
-        );
+        const addTrack = await PlaylistModel.findByIdAndUpdate(playlistId, {
+            $push: {
+                tracks: new mongoose.Types.ObjectId(trackId),
+            },
+        });
         if (addTrack) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added track success')) };
         } else {

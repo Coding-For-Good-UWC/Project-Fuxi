@@ -49,10 +49,10 @@ export const createPlaylist = async (profileId, namePlaylist, tracks) => {
 
 export const updatePlaylist = async () => {};
 
-export const addTrackInPlaylist = async (profileId, trackId) => {
+export const addTrackInPlaylist = async (playlistId, trackId) => {
     try {
         const response = await axios.put(`${apiUrl}/dev/playlist/add-track`, {
-            profileId: profileId,
+            playlistId: playlistId,
             trackId: trackId,
         });
         return response.data;

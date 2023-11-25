@@ -5,7 +5,7 @@ import ToggleDialog from './ToggleDialog';
 import { preference } from '../utils/utils';
 import { getStoreData } from '../utils/AsyncStorage';
 import { addReactTrack, updateReactTrack, getReactTrackByTrackId } from '../api/profileReact';
-import { autoAddTrackInPlaylist } from '../api/playlist';
+import { autoAddTrackInPlaylist, getPlaylistById } from '../api/playlist';
 
 const getReact = async (trackId) => {
     const profile0 = await getStoreData('profile0');
@@ -146,27 +146,35 @@ const FollowPlayMedia = ({ playlistId, selectSound, reactTrack, setDataTracks, s
             if (reactTrack.status == 'like') {
                 setIsDialogVisible(false);
                 await updateReactTrack(_id, selectSound._id, preference.SLK.status);
-                await autoAddTrackInPlaylist(
-                    _id,
-                    playlistId,
-                    preference.SLK.status,
-                    selectSound?.Language || '',
-                    selectSound?.Genre || '',
-                    selectSound?.Era || ''
-                );
+                if (playlistId) {
+                    await autoAddTrackInPlaylist(
+                        _id,
+                        playlistId,
+                        preference.SLK.status,
+                        selectSound?.Language || '',
+                        selectSound?.Genre || '',
+                        selectSound?.Era || ''
+                    );
+                }
                 setReactTrack(preference.SLK);
+                const response = await getPlaylistById(playlistId);
+                setDataTracks(response.data.tracks);
             } else if (reactTrack.status == undefined) {
                 setIsDialogVisible(false);
                 await addReactTrack(_id, selectSound._id, preference.LK.status);
-                await autoAddTrackInPlaylist(
-                    _id,
-                    playlistId,
-                    preference.LK.status,
-                    selectSound?.Language || '',
-                    selectSound?.Genre || '',
-                    selectSound?.Era || ''
-                );
+                if (playlistId) {
+                    await autoAddTrackInPlaylist(
+                        _id,
+                        playlistId,
+                        preference.LK.status,
+                        selectSound?.Language || '',
+                        selectSound?.Genre || '',
+                        selectSound?.Era || ''
+                    );
+                }
                 setReactTrack(preference.LK);
+                const response = await getPlaylistById(playlistId);
+                setDataTracks(response.data.tracks);
             } else if (reactTrack.status == 'strongly dislike') {
                 setReactTrack(preference.LK);
                 setIsDialogVisible(false);

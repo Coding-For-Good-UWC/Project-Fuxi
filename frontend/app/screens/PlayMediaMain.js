@@ -50,10 +50,9 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
         };
 
         fetchData();
-    }, [reactTrack]);
+    }, []);
 
     const handleTrackPress = async (item) => {
-        console.log(item.Title);
         setSelectSound(item);
     };
 
@@ -85,6 +84,8 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
                         selectSound?.Genre || '',
                         selectSound?.Era || ''
                     );
+                    const response = await getPlaylistById(playlistId);
+                    setDataTracks(response.data.tracks);
                 } else {
                     setDataTracks(trackArrRemove);
                 }
@@ -114,7 +115,7 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
                                 removeTrack={removeTrack}
                                 handleNextTrack={handleNextTrack}
                             />
-                            {Object.keys(dataTracks).length >= 2 && (
+                            {Object.keys(dataTracks).length >= 1 && (
                                 <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
                                     <Text style={styles.viewPlaylistText}>View playlist</Text>
                                 </TouchableOpacity>
