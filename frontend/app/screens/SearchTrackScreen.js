@@ -9,7 +9,7 @@ import { addTrackInPlaylist, getPlaylistById, removeTrackInPlaylist } from '../a
 
 const SearchTrackScreen = () => {
     const route = useRoute();
-    const { playlistId } = route.params;
+    const playlistId = route.params?.playlistId;
     const navigation = useNavigation();
     const textInputRef = useRef(null);
     const [text, setText] = useState('');
@@ -36,7 +36,7 @@ const SearchTrackScreen = () => {
     }, [page, text]);
 
     useEffect(() => {
-        if (playlistId) {
+        if (playlistId !== undefined) {
             const fetchData = async () => {
                 const response = await getPlaylistById(playlistId);
                 const { code, message, data } = response;
@@ -62,7 +62,7 @@ const SearchTrackScreen = () => {
     };
 
     const RenderItem = ({ item }) => {
-        if (playlistId) {
+        if (playlistId !== undefined) {
             const isSelected = trackIds.includes(item._id);
             const [select, setSelect] = useState(isSelected);
 
