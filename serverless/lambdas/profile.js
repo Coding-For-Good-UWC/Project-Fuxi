@@ -7,6 +7,7 @@ const { ProfileModel } = require('../models/profile');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 const { PlaylistModel } = require('../models/playlist');
 const { TrackModel } = require('../models/track');
+const { createPlaylistWhenCreateProfile } = require('./playlist');
 
 connectDb();
 
@@ -46,6 +47,15 @@ const createProfile = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
+        const existingProfile = await ProfileModel.findOne({ uid: instituteUid, fullname: fullname });
+
+        if (existingProfile && existingProfile.fullname === fullname) {
+            return {
+                statusCode: 200,
+                body: JSON.stringify(ApiResponse.success(HttpStatus.BAD_REQUEST, 'The profile name already exists, please choose a different name')),
+            };
+        }
+
         const profile = await ProfileModel.create({
             uid: instituteUid,
             fullname,
@@ -53,24 +63,7 @@ const createProfile = async (event) => {
             genres,
         });
 
-        const randomSongs = await TrackModel.aggregate([
-            {
-                $match: {
-                    $or: [{ Language: { $in: genres } }, { Genre: { $in: genres } }],
-                },
-            },
-            { $sample: { size: 15 } },
-        ]);
-
-        const arrayTrackIds = randomSongs.map((song) => song._id);
-
-        const playlist = await PlaylistModel.create({
-            profileId: new ObjectId(profile._id),
-            namePlaylist: 'Suggestion for you',
-            tracks: arrayTrackIds,
-        });
-
-        await PlaylistModel.populate(playlist, 'tracks');
+        await createPlaylistWhenCreateProfile(profile._id, genres);
 
         if (profile) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Profile created success', profile)) };

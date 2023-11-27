@@ -103,15 +103,16 @@ export const deleteAllPlaylist = async (profileId) => {
     }
 };
 
-export const getSuggestionsInPlaymedia = async (profileId, artist, language, genre, era) => {
+export const getSuggestionsInPlaymedia = async (profileId, playlistId, artist, language, genre, era) => {
     try {
-        let paramsProfile = null;
-        if (profileId !== undefined && profileId !== null) {
-            paramsProfile = `&profileId=${profileId}`;
-        }
-        const response = await axios.get(
-            `${apiUrl}/dev/playlist/suggest-media?artist=${artist}&language=${language}&genre=${genre}&era=${era}${paramsProfile}`
-        );
+        const response = await axios.post(`${apiUrl}/dev/playlist/suggest-media`, {
+            profileId: profileId,
+            playlistId: playlistId,
+            artist: artist,
+            language: language,
+            genre: genre,
+            era: era,
+        });
         return response.data;
     } catch (error) {
         console.error('Error in searchTrack:', error);
@@ -119,15 +120,40 @@ export const getSuggestionsInPlaymedia = async (profileId, artist, language, gen
     }
 };
 
-export const autoAddTrackInPlaylist = async (profileId, playlistId, preference, language, genre, era) => {
+export const addSuggetionTrackWhenLikeInPlaylist = async (profileId, playlistId, currentTrackId, preference) => {
     try {
-        const response = await axios.post(`${apiUrl}/dev/playlist/auto-add-track`, {
+        const response = await axios.post(`${apiUrl}/dev/playlist/add-track-like`, {
             profileId: profileId,
             playlistId: playlistId,
+currentTrackId: currentTrackId,
             preference: preference,
-            language: language,
-            genre: genre,
-            era: era,
+            });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
+
+export const addSuggetionTrackWhenDislikeInPlaylist = async (profileId, playlistId) => {
+    try {
+        const response = await axios.post(`${apiUrl}/dev/playlist/add-10track`, {
+            profileId: profileId,
+            playlistId: playlistId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
+
+export const randomNextTrack = async (profileId, trackIds, trackId) => {
+    try {
+        const response = await axios.post(`${apiUrl}/dev/playlist/random-next-track`, {
+            profileId: profileId,
+            trackIds: trackIds,
+            trackId: trackId,
         });
         return response.data;
     } catch (error) {

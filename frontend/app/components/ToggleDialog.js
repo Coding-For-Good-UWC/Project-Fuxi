@@ -37,9 +37,9 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#FFFFFF',
         backgroundColor: '#315F64',
-        borderRadius: 100,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
+        borderRadius: Platform.OS === 'android' ? 100 : 0,
+        paddingVertical: Platform.OS === 'android' ? 12 : 0,
+        paddingHorizontal: Platform.OS === 'android' ? 20 : 0,
         marginLeft: Platform.OS === 'android' ? 24 : 0,
     },
 });

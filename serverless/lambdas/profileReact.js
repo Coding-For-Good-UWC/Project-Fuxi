@@ -34,23 +34,15 @@ const getLikeTrackByProfileId = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        // const response = await ProfileReactModal
-        //     .find({
-        //         profileId: profileId,
-        //         'reactTracks.preference': { $in: ['like', 'strongly like'] }, // Not working
-        //     })
-        //     .populate('reactTracks.track');
-        const response = await ProfileReactModal.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
+                const response = await ProfileReactModal.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
+const tracksLike = response[0].reactTracks.filter((item) => item.preference === 'like' || item.preference === 'strongly like');
+        const uniqueTracks = Array.from(new Set(tracksLike.map((track) => track._id))).map((_id) => {
+            return tracksLike.find((track) => track._id === _id);
+        });
         if (response) {
             return {
                 statusCode: 200,
-                body: JSON.stringify(
-                    ApiResponse.success(
-                        HttpStatus.OK,
-                        'Data retrieved successfully.',
-                        response[0].reactTracks.filter((item) => item.preference === 'like' || item.preference === 'strongly like')
-                    )
-                ),
+                body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Data retrieved successfully.', uniqueTracks)),
             };
         } else {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile with this ID was not found.')) };

@@ -18,10 +18,10 @@ const defaultSong = {
 const PlayMedia = () => {
     const route = useRoute();
     const navigation = useNavigation();
-    const { firstTrackInPlaylist, currentReactTrack, playlistId } = route.params;
+    const { firstTrackInPlaylist, currentReactTrack, playlistId, dataTracksOrigin } = route.params;
 
     const [selectSound, setSelectSound] = useState(route.params?.track || firstTrackInPlaylist || defaultSong);
-    const [dataTracks, setDataTracks] = useState([selectSound]);
+    const [dataTracks, setDataTracks] = useState(dataTracksOrigin || [selectSound]);
 
     useLayoutEffect(() => {
         navigation.setOptions({

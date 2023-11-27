@@ -1,18 +1,21 @@
 import { Platform, StatusBar, StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TextInput } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import CustomGridLayout from '../components/CustomGridLayout';
 import { searchTrack } from '../api/track';
-import ReactSongItem from '../components/ReactSongItem';
 import SongItem from '../components/SongItem';
+import { addTrackInPlaylist, getPlaylistById, removeTrackInPlaylist } from '../api/playlist';
 
 const SearchTrackScreen = () => {
+    const route = useRoute();
+    const { playlistId } = route.params;
     const navigation = useNavigation();
     const textInputRef = useRef(null);
     const [text, setText] = useState('');
     const [page, setPage] = useState(1);
     const [dataTracks, setDataTracks] = useState([]);
+    const [trackIds, setTrackIds] = useState([]);
 
     useEffect(() => {
         if (textInputRef.current) {
@@ -32,6 +35,19 @@ const SearchTrackScreen = () => {
         fetchData();
     }, [page, text]);
 
+    useEffect(() => {
+        if (playlistId) {
+            const fetchData = async () => {
+                const response = await getPlaylistById(playlistId);
+                const { code, message, data } = response;
+                if (code === 200) {
+                    setTrackIds(data.tracks.map((track) => track._id));
+                }
+            };
+            fetchData();
+        }
+    }, [playlistId]);
+
     const getData = async (text, page) => {
         try {
             const response = await searchTrack(text, page);
@@ -42,6 +58,43 @@ const SearchTrackScreen = () => {
         } catch (error) {
             console.error('Error:', error);
             return;
+        }
+    };
+
+    const RenderItem = ({ item }) => {
+        if (playlistId) {
+            const isSelected = trackIds.includes(item._id);
+            const [select, setSelect] = useState(isSelected);
+
+            const toggleItemAndSelect = async () => {
+                if (!select) {
+                    if (playlistId) {
+                        await addTrackInPlaylist(playlistId, item?._id);
+                    }
+                } else {
+                    if (playlistId) {
+                        await removeTrackInPlaylist(playlistId, item?._id);
+                    }
+                }
+
+                setSelect((prevSelect) => !prevSelect);
+            };
+
+            const renderIconRight = () => {
+                return (
+                    <TouchableOpacity onPress={toggleItemAndSelect}>
+                        {select ? (
+                            <Text style={styles.removeText}>Remove</Text>
+                        ) : (
+                            <Ionicons name="add" color="#757575" size={30} style={{ padding: 6, paddingRight: 0 }} />
+                        )}
+                    </TouchableOpacity>
+                );
+            };
+
+            return <SongItem item={item} iconRight={renderIconRight()} onPress={() => navigation.navigate('PlayMedia', { track: item })} />;
+        } else {
+            return <SongItem item={item} onPress={() => navigation.navigate('PlayMedia', { track: item })} />;
         }
     };
 
@@ -68,7 +121,7 @@ const SearchTrackScreen = () => {
                     {dataTracks.length !== 0 ? (
                         <CustomGridLayout
                             data={dataTracks?.map((item, index) => (
-                                <SongItem key={index} item={item} onPress={() => navigation.navigate('PlayMedia', { track: item })} />
+                                <RenderItem key={index} item={item} />
                             ))}
                             columns={1}
                             handleEndReached={() => setPage(page + 1)}
@@ -189,5 +242,13 @@ const styles = StyleSheet.create({
         fontSize: 12,
         lineHeight: 16,
         color: '#757575',
+    },
+    removeText: {
+        fontWeight: '600',
+        fontSize: 14,
+        lineHeight: 20,
+        color: '#C31E1E',
+        padding: 6,
+        paddingRight: 0,
     },
 });

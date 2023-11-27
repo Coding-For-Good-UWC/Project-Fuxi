@@ -101,15 +101,37 @@ const addTrackInPlaylist = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const addTrack = await PlaylistModel.findByIdAndUpdate(playlistId, {
-            $push: {
-                tracks: new mongoose.Types.ObjectId(trackId),
+        const existingPlaylist = await PlaylistModel.findById(playlistId);
+
+        if (!existingPlaylist) {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
+        }
+
+        if (existingPlaylist.tracks.length >= 30 && existingPlaylist.namePlaylist === 'Suggestion for you') {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Playlist suggests up to 30 songs for you')) };
+        }
+
+        const playlist = await PlaylistModel.findByIdAndUpdate(
+            playlistId,
+            {
+                $addToSet: {
+                    tracks: new mongoose.Types.ObjectId(trackId),
+                },
             },
-        });
-        if (addTrack) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added track success')) };
+            { new: true }
+        );
+
+        if (playlist) {
+            if (playlist.tracks.includes(new mongoose.Types.ObjectId(trackId))) {
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify(ApiResponse.success(HttpStatus.BAD_REQUEST, 'Track already exists in the playlist')),
+                };
+            } else {
+                return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Track added to the playlist successfully')) };
+            }
         } else {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile not found')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
         }
     } catch (error) {
         console.error(error);
@@ -193,16 +215,19 @@ const deleteAllPlaylist = async (event) => {
 };
 
 const getSuggestionsInPlaymedia = async (event) => {
-    const { profileId, artist, language, genre, era } = event.queryStringParameters;
+    const json = JSON.parse(event.body);
+    const { profileId, playlistId, artist, language, genre, era } = json;
 
-    let filteredTrackIds = [];
-    let filteredTrackIdsDislike = [];
-    if (profileId !== undefined && profileId !== null && profileId.length >= 0) {
-        const response = await ProfileReactModal.findOne({ profileId: new mongoose.Types.ObjectId(profileId) });
-        filteredTrackIds = response.reactTracks.map((item) => item.track);
+    const response = await ProfileReactModal.findOne({ profileId: new mongoose.Types.ObjectId(profileId) });
+    const filteredTrackIds = response.reactTracks.map((item) => item.track);
 
-        const filterTrackDislike = response.reactTracks.filter((item) => item.preference === 'dislike' || item.preference === 'strongly dislike');
-        filteredTrackIdsDislike = filterTrackDislike.map((item) => item._id);
+    const filterTrackDislike = response.reactTracks.filter((item) => item.preference === 'dislike' || item.preference === 'strongly dislike');
+    const filteredTrackIdsDislike = filterTrackDislike.map((item) => item._id);
+
+    const existingPlaylist = await PlaylistModel.findById(playlistId);
+    let existingTrackIdsPlaylist = [];
+    if (existingPlaylist) {
+        existingTrackIdsPlaylist = existingPlaylist.tracks;
     }
 
     try {
@@ -212,14 +237,6 @@ const getSuggestionsInPlaymedia = async (event) => {
                 { $match: { Artist: artist, _id: { $nin: filteredTrackIdsDislike } } },
                 { $sample: { size: 7 } },
             ]);
-        }
-
-        const matchCriteria = {};
-        if (language) {
-            matchCriteria.Language = language;
-        }
-        if (genre) {
-            matchCriteria.Genre = genre;
         }
 
         const highScoredProfiles = await ProfileReactModal.find(
@@ -245,25 +262,36 @@ const getSuggestionsInPlaymedia = async (event) => {
 
         const filteredUniqueTracksArray = uniqueTracksArray.filter((track) => !filteredTrackIds.some((id) => id.toString() === track.toString()));
 
+        const matchCriteria = {};
+        if (language) {
+            matchCriteria.Language = language;
+        }
+        if (genre) {
+            matchCriteria.Genre = genre;
+        }
+
         let listTrackHighLike = await TrackModel.aggregate([
-            { $match: { _id: { $in: filteredUniqueTracksArray }, ...matchCriteria } },
+            {
+                $match: {
+                    _id: {
+                        $in: filteredUniqueTracksArray,
+                        $nin: [...filteredTrackIdsDislike, ...existingTrackIdsPlaylist],
+                    },
+                    ...matchCriteria,
+                },
+            },
             { $sample: { size: 7 } },
         ]);
 
         let listTrackByLanguageAndGenre = await TrackModel.aggregate([
-            { $match: { _id: { $nin: filteredTrackIds }, ...matchCriteria } },
+            { $match: { _id: { $nin: [...filteredTrackIdsDislike, ...existingTrackIdsPlaylist] }, ...matchCriteria } },
             { $sample: { size: 7 } },
         ]);
 
         let listTrackByEra = [];
         if (era !== undefined && era !== null) {
             listTrackByEra = await TrackModel.aggregate([
-                { $match: { Era: parseInt(era, 10), _id: { $nin: filteredTrackIds } } },
-                { $sample: { size: 7 } },
-            ]);
-        } else {
-            listTrackByEra = await TrackModel.aggregate([
-                { $match: { Era: { $exists: false }, _id: { $nin: filteredTrackIds } } },
+                { $match: { Era: parseInt(era, 10), _id: { $nin: [...filteredTrackIdsDislike, ...existingTrackIdsPlaylist] } } },
                 { $sample: { size: 7 } },
             ]);
         }
@@ -285,9 +313,70 @@ const getSuggestionsInPlaymedia = async (event) => {
     }
 };
 
-const autoAddTrackInPlaylist = async (event) => {
+const addSuggetionTrackWhenLikeInPlaylist = async (event) => {
     const json = JSON.parse(event.body);
-    const { profileId, playlistId, preference, language, genre, era } = json;
+    const { profileId, playlistId, currentTrackId, preference } = json;
+
+    try {
+        const existingPlaylist = await PlaylistModel.findById(playlistId);
+
+        if (!existingPlaylist) {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
+        }
+
+        if (existingPlaylist.tracks.length >= 30 && existingPlaylist.namePlaylist === 'Suggestion for you') {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Playlist suggests up to 30 songs for you')) };
+        }
+
+        const existingReactProfile = await ProfileReactModal.findOne({ profileId: profileId });
+
+        if (!existingReactProfile) {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile react not found')) };
+        }
+
+        if (preference === 'like' || preference === 'strongly like') {
+            const filterTrackDislike = existingReactProfile.reactTracks.filter(
+                (item) => item.preference === 'dislike' || item.preference === 'strongly dislike'
+            );
+            const filteredTrackIdsDislike = filterTrackDislike.map((item) => item._id);
+
+            const mergeFilter = [...filteredTrackIdsDislike, ...existingPlaylist.tracks];
+
+            const currentTrack = await TrackModel.findById(currentTrackId);
+            const randomSongs = await TrackModel.aggregate([
+                {
+                    $match: {
+                        $or: [{ Language: currentTrack.Language }, { Genre: currentTrack.Genre }, { Era: currentTrack.Era }],
+                        _id: { $nin: mergeFilter },
+                    },
+                },
+                { $sample: { size: 1 } },
+            ]);
+
+            let indexCurrentTrackId = existingPlaylist.tracks.indexOf(new mongoose.Types.ObjectId(currentTrackId));
+
+            if (indexCurrentTrackId === -1) {
+                indexCurrentTrackId = existingPlaylist.tracks.length - 1;
+            }
+
+            existingPlaylist.tracks.splice(indexCurrentTrackId + 1, 0, randomSongs[0]?._id);
+
+            await PlaylistModel.findByIdAndUpdate(playlistId, { tracks: existingPlaylist.tracks });
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added tracks to playlist successfully')),
+            };
+        }
+    } catch (error) {
+        console.error(error);
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    }
+};
+
+const addSuggetionTrackWhenDislikeInPlaylist = async (event) => {
+    const json = JSON.parse(event.body);
+    const { profileId, playlistId } = json;
     if (!profileId || !playlistId) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
@@ -298,10 +387,54 @@ const autoAddTrackInPlaylist = async (event) => {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
         }
 
+        if (existingPlaylist.tracks.length <= 5) {
+            const existingReactProfile = await ProfileReactModal.findOne({ profileId: profileId });
+
+            if (!existingReactProfile) {
+                return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile react not found')) };
+            }
+
+            const filterTrackDislike = existingReactProfile.reactTracks.filter(
+                (item) => item.preference === 'dislike' || item.preference === 'strongly dislike'
+            );
+            const filteredTrackIdsDislike = filterTrackDislike.map((item) => item._id);
+            const mergeFilter = [...filteredTrackIdsDislike, ...existingPlaylist.tracks];
+
+            const profile = await ProfileModel.findById(profileId);
+
+            const randomSongs = await TrackModel.aggregate([
+                {
+                    $match: {
+                        $or: [{ Language: { $in: profile.genres } }, { Genre: { $in: profile.genres } }],
+                        _id: { $nin: mergeFilter },
+                    },
+                },
+                { $sample: { size: 10 } },
+            ]);
+
+            const arrayTrackIds = randomSongs.map((song) => song._id);
+            const mergedArrayObjectId = existingPlaylist.tracks.concat(arrayTrackIds.filter((id) => !existingPlaylist.tracks.includes(id)));
+
+            await PlaylistModel.findByIdAndUpdate(playlistId, { tracks: mergedArrayObjectId });
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success')) };
+        }
+    } catch (error) {
+        console.error(error);
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
+    }
+};
+
+const randomNextTrack = async (event) => {
+    const json = JSON.parse(event.body);
+    const { profileId, trackIds, trackId } = json;
+    if (!profileId || !trackId) {
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
+    }
+    try {
         const existingReactProfile = await ProfileReactModal.findOne({ profileId: profileId });
 
         if (!existingReactProfile) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Profile react not found')) };
         }
 
         const filterTrackDislike = existingReactProfile.reactTracks.filter(
@@ -309,49 +442,54 @@ const autoAddTrackInPlaylist = async (event) => {
         );
         const filteredTrackIdsDislike = filterTrackDislike.map((item) => item._id);
 
-        if (existingPlaylist.tracks.length <= 5) {
-            const profile = await ProfileModel.findById(profileId);
-            const randomSongs = await TrackModel.aggregate([
-                {
-                    $match: {
-                        $or: [{ Language: { $in: profile.genres } }, { Genre: { $in: profile.genres } }],
-                        _id: { $nin: filteredTrackIdsDislike },
-                    },
+        const objectTrackIdsArray = trackIds.map((trackId) => new mongoose.Types.ObjectId(trackId));
+
+        const mergedArray = [...new Set([...filteredTrackIdsDislike, ...objectTrackIdsArray])];
+
+        const currentTrack = await TrackModel.findById(trackId);
+        const randomTrack = await TrackModel.aggregate([
+            {
+                $match: {
+                    $or: [{ Language: currentTrack.Language }, { Genre: currentTrack.Genre }, { Era: currentTrack.Era }],
+                    _id: { $nin: mergedArray },
                 },
-                { $sample: { size: 10 } },
-            ]);
-
-            const arrayTrackIds = randomSongs.map((song) => song._id);
-            const mergedArray = existingPlaylist.tracks.concat(arrayTrackIds.filter((id) => !existingPlaylist.tracks.includes(id)));
-
-            await PlaylistModel.findByIdAndUpdate(playlistId, { tracks: mergedArray });
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed track success')) };
-        }
-
-        if (preference === 'like' || preference === 'strongly like') {
-            const randomSongs = await TrackModel.aggregate([
-                {
-                    $match: {
-                        $or: [{ Language: language }, { Genre: genre }, { Era: era }],
-                        _id: { $nin: filteredTrackIdsDislike },
-                    },
-                },
-                { $sample: { size: 10 } },
-            ]);
-
-            const response = await PlaylistModel.findById(playlistId);
-
-            const arrayTrackIds = randomSongs.map((song) => song._id);
-
-            const mergedArray = response.tracks.concat(arrayTrackIds.filter((id) => !response.tracks.includes(id)));
-
-            await PlaylistModel.findByIdAndUpdate(playlistId, { tracks: mergedArray });
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added tracks to playlist successfully')) };
-        }
+            },
+            { $sample: { size: 1 } },
+        ]);
+        return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Random next track', randomTrack[0])) };
     } catch (error) {
         console.error(error);
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Server error')) };
     }
+};
+
+const createPlaylistWhenCreateProfile = async (profileId, genres) => {
+    const maxTracks = 30;
+    const tracksPerGenre = Math.ceil(maxTracks / genres.length);
+
+    let selectedTracks = [];
+
+    for (const genre of genres) {
+        const genreTracks = await TrackModel.find({
+            $or: [{ Language: genre }, { Genre: genre }],
+        });
+
+        for (let i = 0; i < Math.min(tracksPerGenre, genreTracks.length); i++) {
+            const randomIndex = Math.floor(Math.random() * genreTracks.length);
+            selectedTracks.push(genreTracks[randomIndex]);
+            genreTracks.splice(randomIndex, 1);
+        }
+    }
+
+    const arrayTrackIds = selectedTracks.map((song) => song._id);
+
+    const playlist = await PlaylistModel.create({
+        profileId: new mongoose.Types.ObjectId(profileId),
+        namePlaylist: 'Suggestion for you',
+        tracks: arrayTrackIds,
+    });
+
+    await PlaylistModel.populate(playlist, 'tracks');
 };
 
 module.exports = {
@@ -363,5 +501,8 @@ module.exports = {
     deletePlaylist,
     deleteAllPlaylist,
     getSuggestionsInPlaymedia,
-    autoAddTrackInPlaylist,
+    addSuggetionTrackWhenLikeInPlaylist,
+    addSuggetionTrackWhenDislikeInPlaylist,
+    randomNextTrack,
+    createPlaylistWhenCreateProfile,
 };

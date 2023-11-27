@@ -10,24 +10,49 @@ import SongItem from '../components/SongItem';
 import PlayMediaComponent from '../components/PlayMediaComponent';
 import BottomSheetScrollView from '../components/BottomSheetScrollView';
 import FollowPlayMedia from '../components/FollowPlayMedia';
-import { autoAddTrackInPlaylist, deletePlaylist, getPlaylistById, removeTrackInPlaylist } from '../api/playlist';
+import { addSuggetionTrackWhenDislikeInPlaylist, deletePlaylist, getPlaylistById, randomNextTrack, removeTrackInPlaylist } from '../api/playlist';
 import { getStoreData } from '../utils/AsyncStorage';
 
-function findPreviousTrack(tracks, trackId) {
+async function findPreviousTrack(playlistId, tracks, trackId) {
     const index = tracks.findIndex((track) => track._id === trackId);
     if (index === -1) {
-        return null;
+        const profile0 = await getStoreData('profile0');
+        const { _id } = JSON.parse(profile0);
+        const trackIds = tracks.map((track) => track._id);
+        const response = await randomNextTrack(_id, trackIds, trackId);
+        if (response.data !== null) {
+            return response.data;
+        }
     }
     const previousIndex = index === 0 ? tracks.length - 1 : index - 1;
     return tracks[previousIndex];
 }
 
-function findNextTrack(tracks, trackId) {
+async function findNextTrack(playlistId, tracks, trackId) {
     const index = tracks.findIndex((track) => track._id === trackId);
     if (index === -1) {
-        return null;
+        const profile0 = await getStoreData('profile0');
+        const { _id } = JSON.parse(profile0);
+        const trackIds = tracks.map((track) => track._id);
+        const response = await randomNextTrack(_id, trackIds, trackId);
+        if (response.data !== null) {
+            return response.data;
+        }
     }
+
     const nextIndex = index === tracks.length - 1 ? 0 : index + 1;
+
+    if (nextIndex === 0) {
+        if (!playlistId) {
+            const profile0 = await getStoreData('profile0');
+            const { _id } = JSON.parse(profile0);
+            const trackIds = tracks.map((track) => track._id);
+            const response = await randomNextTrack(_id, trackIds, trackId);
+            if (response.data !== null) {
+                return response.data;
+            }
+        }
+    }
     return tracks[nextIndex];
 }
 
@@ -54,17 +79,21 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
 
     const handleTrackPress = async (item) => {
         setSelectSound(item);
+        const isItemIdExist = dataTracks.findIndex((data) => data._id === item._id);
+        if (isItemIdExist === -1) {
+            dataTracks.push(item);
+        }
     };
 
     const handlePrevTrack = async () => {
         if (Object.keys(dataTracks).length !== 0) {
-            await handleTrackPress(findPreviousTrack(dataTracks, selectSound._id));
+            await handleTrackPress(await findPreviousTrack(playlistId, dataTracks, selectSound._id));
         }
     };
 
     const handleNextTrack = async () => {
         if (Object.keys(dataTracks).length !== 0) {
-            await handleTrackPress(findNextTrack(dataTracks, selectSound._id));
+            await handleTrackPress(await findNextTrack(playlistId, dataTracks, selectSound._id));
         }
     };
 
@@ -76,14 +105,7 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
                 if (Object.keys(trackArrRemove).length <= 5) {
                     const profile0 = await getStoreData('profile0');
                     const { _id } = JSON.parse(profile0);
-                    await autoAddTrackInPlaylist(
-                        _id,
-                        playlistId,
-                        null,
-                        selectSound?.Language || '',
-                        selectSound?.Genre || '',
-                        selectSound?.Era || ''
-                    );
+                    await addSuggetionTrackWhenDislikeInPlaylist(_id, playlistId);
                     const response = await getPlaylistById(playlistId);
                     setDataTracks(response.data.tracks);
                 } else {
@@ -91,7 +113,8 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
                 }
             }
             handleNextTrack();
-        } else {
+        }
+        if (Object.keys(trackArrRemove).length === 0) {
             if (playlistId !== undefined) {
                 navigation.navigate('LibraryScreen');
                 await deletePlaylist(playlistId);

@@ -21,6 +21,7 @@ const PlayMediaDetailAndSuggestion = ({ playlistId, selectSound, setSelectSound,
                     }
                     const response = await getSuggestionsInPlaymedia(
                         profileId,
+                        playlistId,
                         selectSound.Artist || '',
                         selectSound.Language || '',
                         selectSound.Genre || '',
@@ -57,27 +58,35 @@ const PlayMediaDetailAndSuggestion = ({ playlistId, selectSound, setSelectSound,
         );
 
     const RenderItem = ({ item }) => {
-        const isSelected = dataTracks.includes(item);
+        const isSelected = dataTracks.some((data) => data._id === item._id);
+        const [select, setSelect] = useState(isSelected);
 
         const toggleItemAndSelect = async () => {
-            if (isSelected) {
+            if (!select) {
                 if (playlistId) {
-                    await addTrackInPlaylist(playlistId, item?._id);
+                    const response = await addTrackInPlaylist(playlistId, item?._id);
+                    if (response.code === 200) {
+                        setDataTracks((prevItems) => [...prevItems, item]);
+                        setSelect((prevSelect) => !prevSelect);
+                    } else {
+                        alert(response.message);
+                    }
                 }
-                setDataTracks((prevItems) => prevItems.filter((selected) => selected !== item));
             } else {
                 if (playlistId) {
                     await removeTrackInPlaylist(playlistId, item?._id);
+                    setSelect((prevSelect) => !prevSelect);
                 }
-                setDataTracks((prevItems) => [...prevItems, item]);
+                setDataTracks((prevItems) => prevItems.filter((selected) => selected._id !== item._id));
             }
+
         };
 
         const renderIconRight = () => {
             return (
                 <TouchableOpacity onPress={toggleItemAndSelect}>
                     <Ionicons
-                        name={!isSelected ? 'add-circle-outline' : 'remove-circle-outline'}
+                        name={!select ? 'add-circle-outline' : 'remove-circle-outline'}
                         color="#757575"
                         size={30}
                         style={{ padding: 6, paddingRight: 0 }}

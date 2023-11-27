@@ -51,7 +51,10 @@ const PlaylistDetailsScreen = () => {
             ),
             headerRight: () => (
                 <View style={styles.bar}>
-                    <TouchableOpacity style={styles.roundButtonHeader} onPress={() => navigation.navigate('SearchTrackScreen')}>
+                    <TouchableOpacity
+                        style={styles.roundButtonHeader}
+                        onPress={() => navigation.navigate('SearchTrackScreen', { playlistId: dataNavigation?._id })}
+                    >
                         <Ionicons name="search" size={24} color={'#3C4647'} />
                     </TouchableOpacity>
                 </View>

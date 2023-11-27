@@ -190,12 +190,24 @@ functions:
     events:
       - http:
           path: /playlist/suggest-media
-          method: get
-  autoAddTrackInPlaylist:
-    handler: lambdas/playlist.autoAddTrackInPlaylist
+          method: post
+  addSuggetionTrackWhenLikeInPlaylist:
+    handler: lambdas/playlist.addSuggetionTrackWhenLikeInPlaylist
     events:
       - http:
-          path: /playlist/auto-add-track
+          path: /playlist/add-track-like
+          method: post
+  addSuggetionTrackWhenDislikeInPlaylist:
+    handler: lambdas/playlist.addSuggetionTrackWhenDislikeInPlaylist
+    events:
+      - http:
+          path: /playlist/add-10track
+          method: post
+  randomNextTrack:
+    handler: lambdas/playlist.randomNextTrack
+    events:
+      - http:
+          path: /playlist/random-next-track
           method: post
   createPlaylist:
     handler: lambdas/playlist.createPlaylist

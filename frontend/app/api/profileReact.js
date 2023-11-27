@@ -46,10 +46,11 @@ export const getReactTrackByTrackId = async (profileId, trackId) => {
     }
 };
 
-export const addReactTrack = async (profileId, trackId, preference) => {
+export const addReactTrack = async (profileId, playlistId, trackId, preference) => {
     try {
         const response = await axios.put(`${apiUrl}/dev/profile-react/add`, {
             profileId: profileId,
+            playlistId: playlistId,
             trackId: trackId,
             preference: preference,
         });
