@@ -34,8 +34,8 @@ const getLikeTrackByProfileId = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-                const response = await ProfileReactModal.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
-const tracksLike = response[0].reactTracks.filter((item) => item.preference === 'like' || item.preference === 'strongly like');
+        const response = await ProfileReactModal.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
+        const tracksLike = response[0].reactTracks.filter((item) => item.preference === 'like' || item.preference === 'strongly like');
         const uniqueTracks = Array.from(new Set(tracksLike.map((track) => track._id))).map((_id) => {
             return tracksLike.find((track) => track._id === _id);
         });
