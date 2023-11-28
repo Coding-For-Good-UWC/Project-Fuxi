@@ -1,5 +1,8 @@
 import { TouchableOpacity } from 'react-native';
 import React, { useState, useLayoutEffect } from 'react';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -36,55 +39,61 @@ const PlayMedia = () => {
     }, [navigation]);
 
     return (
-        <Tab.Navigator
-            style={{ backgroundColor: '#fff' }}
-            screenOptions={{
-                tabBarScrollEnabled: true,
-                tabBarStyle: {
-                    maxWidth: 0,
-                    maxHeight: 0,
-                },
-                android_ripple: null,
-            }}
-        >
-            <Tab.Screen
-                name="PlayMediaMain"
-                options={{
-                    title: '',
-                    tabBarLabel: '',
-                    headerShown: false,
-                }}
-            >
-                {() => (
-                    <PlayMediaMain
-                        playlistId={playlistId}
-                        selectSound={selectSound}
-                        setSelectSound={setSelectSound}
-                        dataTracks={dataTracks}
-                        setDataTracks={setDataTracks}
-                        currentReactTrack={currentReactTrack}
-                    />
-                )}
-            </Tab.Screen>
-            <Tab.Screen
-                name="PlayMediaDetailAndSuggestion"
-                options={{
-                    title: '',
-                    tabBarLabel: '',
-                    headerShown: false,
-                }}
-            >
-                {() => (
-                    <PlayMediaDetailAndSuggestion
-                        playlistId={playlistId}
-                        selectSound={selectSound}
-                        setSelectSound={setSelectSound}
-                        dataTracks={dataTracks}
-                        setDataTracks={setDataTracks}
-                    />
-                )}
-            </Tab.Screen>
-        </Tab.Navigator>
+        <SafeAreaProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <BottomSheetModalProvider>
+                    <Tab.Navigator
+                        style={{ backgroundColor: '#fff' }}
+                        screenOptions={{
+                            tabBarScrollEnabled: true,
+                            tabBarStyle: {
+                                maxWidth: 0,
+                                maxHeight: 0,
+                            },
+                            android_ripple: null,
+                        }}
+                    >
+                        <Tab.Screen
+                            name="PlayMediaMain"
+                            options={{
+                                title: '',
+                                tabBarLabel: '',
+                                headerShown: false,
+                            }}
+                        >
+                            {() => (
+                                <PlayMediaMain
+                                    playlistId={playlistId}
+                                    selectSound={selectSound}
+                                    setSelectSound={setSelectSound}
+                                    dataTracks={dataTracks}
+                                    setDataTracks={setDataTracks}
+                                    currentReactTrack={currentReactTrack}
+                                />
+                            )}
+                        </Tab.Screen>
+                        <Tab.Screen
+                            name="PlayMediaDetailAndSuggestion"
+                            options={{
+                                title: '',
+                                tabBarLabel: '',
+                                headerShown: false,
+                            }}
+                        >
+                            {() => (
+                                <PlayMediaDetailAndSuggestion
+                                    playlistId={playlistId}
+                                    selectSound={selectSound}
+                                    setSelectSound={setSelectSound}
+                                    dataTracks={dataTracks}
+                                    setDataTracks={setDataTracks}
+                                />
+                            )}
+                        </Tab.Screen>
+                    </Tab.Navigator>
+                </BottomSheetModalProvider>
+            </GestureHandlerRootView>
+        </SafeAreaProvider>
     );
 };
 

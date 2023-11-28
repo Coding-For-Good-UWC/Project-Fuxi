@@ -109,7 +109,7 @@ const addTrackInPlaylist = async (event) => {
         }
 
         if (existingPlaylist.namePlaylist === 'Suggestion for you') {
-            if (existingPlaylist.tracks.length >= 30) {
+            if (existingPlaylist.tracks.length >= 60) {
                 return {
                     statusCode: 200,
                     body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Playlist suggests up to 30 songs for you')),
@@ -337,8 +337,8 @@ const addSuggetionTrackWhenLikeInPlaylist = async (event) => {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
         }
 
-        if (existingPlaylist.tracks.length >= 30 && existingPlaylist.namePlaylist === 'Suggestion for you') {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Playlist suggests up to 30 songs for you')) };
+        if (existingPlaylist.tracks.length >= 60 && existingPlaylist.namePlaylist === 'Suggestion for you') {
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Playlist suggests up to 60 songs for you')) };
         }
 
         const existingReactProfile = await ProfileReactModal.findOne({ profileId: profileId });
@@ -517,7 +517,6 @@ const createOrUpdateInitialPlaylistWhenChangeProfile = async (profileId, genres)
             namePlaylist: 'Suggestion for you',
             tracks: arrayTrackIds,
         });
-        await PlaylistModel.populate(playlist, 'tracks');
     }
 };
 

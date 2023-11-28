@@ -149,10 +149,14 @@ const FollowPlayMedia = ({ playlistId, selectSound, reactTrack, setReactTrack, d
                 await updateReactTrack(_id, selectSound._id, preference.SLK.status);
                 if (playlistId) {
                     const response = await addSuggetionTrackWhenLikeInPlaylist(_id, playlistId, selectSound._id || '', preference.SLK.status);
-                    const index = dataTracks.findIndex((track) => track._id === selectSound._id);
-                    if (index !== -1 && response.data !== null) {
-                        dataTracks.splice(index + 1, 0, response.data);
-                        setDataTracks([...dataTracks]);
+                    if (response?.code === 200) {
+                        const index = dataTracks.findIndex((track) => track._id === selectSound._id);
+                        if (index !== -1 && response.data !== null) {
+                            dataTracks.splice(index + 1, 0, response.data);
+                            setDataTracks([...dataTracks]);
+                        }
+                    } else {
+                        alert(response.message);
                     }
                 }
             } else if (reactTrack.status == undefined) {
@@ -161,10 +165,14 @@ const FollowPlayMedia = ({ playlistId, selectSound, reactTrack, setReactTrack, d
                 await addReactTrack(_id, selectSound._id, preference.LK.status);
                 if (playlistId) {
                     const response = await addSuggetionTrackWhenLikeInPlaylist(_id, playlistId, selectSound._id || '', preference.SLK.status);
-                    const index = dataTracks.findIndex((track) => track._id === selectSound._id);
-                    if (index !== -1 && response.data !== null) {
-                        dataTracks.splice(index + 1, 0, response.data);
-                        setDataTracks([...dataTracks]);
+                    if (response?.code === 200) {
+                        const index = dataTracks.findIndex((track) => track._id === selectSound._id);
+                        if (index !== -1 && response.data !== null) {
+                            dataTracks.splice(index + 1, 0, response.data);
+                            setDataTracks([...dataTracks]);
+                        }
+                    } else {
+                        alert(response.message);
                     }
                 }
             } else if (reactTrack.status == 'strongly dislike') {

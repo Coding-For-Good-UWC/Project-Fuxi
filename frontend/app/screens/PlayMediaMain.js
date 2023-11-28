@@ -1,9 +1,6 @@
 import 'react-native-gesture-handler';
 import { StyleSheet, Text, SafeAreaView, TouchableOpacity, Dimensions, View } from 'react-native';
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import CustomGridLayout from './../components/CustomGridLayout';
 import SongItem from '../components/SongItem';
@@ -123,42 +120,36 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
     };
 
     return (
-        <SafeAreaProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-                <BottomSheetModalProvider>
-                    <SafeAreaView style={styles.safeArea}>
-                        <View style={{ backgroundColor: '#fff', flex: 1 }}>
-                            <PlayMediaComponent selectSound={selectSound} handlePrevTrack={handlePrevTrack} handleNextTrack={handleNextTrack} />
-                            <FollowPlayMedia
-                                playlistId={playlistId}
-                                selectSound={selectSound}
-                                reactTrack={reactTrack}
-                                setReactTrack={setReactTrack}
-                                dataTracks={dataTracks}
-                                setDataTracks={setDataTracks}
-                                removeTrack={removeTrack}
-                                handleNextTrack={handleNextTrack}
-                            />
-                            {Object.keys(dataTracks).length >= 1 && (
-                                <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
-                                    <Text style={styles.viewPlaylistText}>View playlist</Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                        <BottomSheetScrollView ref={bottomSheetRef} snapTo={'50%'} backgroundColor="#fff" backDropColor="#000">
-                            <CustomGridLayout
-                                data={dataTracks?.map((item, index) => (
-                                    <SongItem key={index} item={item} onPress={() => setSelectSound(item)} />
-                                ))}
-                                columns={1}
-                                styleLayout={{ paddingHorizontal: 20 }}
-                                styleCell={{ borderBottomWidth: 1, borderBottomColor: '#E0E0E0' }}
-                            />
-                        </BottomSheetScrollView>
-                    </SafeAreaView>
-                </BottomSheetModalProvider>
-            </GestureHandlerRootView>
-        </SafeAreaProvider>
+        <SafeAreaView style={styles.safeArea}>
+            <View style={{ backgroundColor: '#fff', flex: 1 }}>
+                <PlayMediaComponent selectSound={selectSound} handlePrevTrack={handlePrevTrack} handleNextTrack={handleNextTrack} />
+                <FollowPlayMedia
+                    playlistId={playlistId}
+                    selectSound={selectSound}
+                    reactTrack={reactTrack}
+                    setReactTrack={setReactTrack}
+                    dataTracks={dataTracks}
+                    setDataTracks={setDataTracks}
+                    removeTrack={removeTrack}
+                    handleNextTrack={handleNextTrack}
+                />
+                {Object.keys(dataTracks).length >= 1 && (
+                    <TouchableOpacity style={styles.viewPlaylistBottom} onPress={expandHandler}>
+                        <Text style={styles.viewPlaylistText}>View playlist</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+            <BottomSheetScrollView ref={bottomSheetRef} snapTo={'50%'} backgroundColor="#fff" backDropColor="#000">
+                <CustomGridLayout
+                    data={dataTracks?.map((item, index) => (
+                        <SongItem key={index} item={item} onPress={() => setSelectSound(item)} />
+                    ))}
+                    columns={1}
+                    styleLayout={{ paddingHorizontal: 20 }}
+                    styleCell={{ borderBottomWidth: 1, borderBottomColor: '#E0E0E0' }}
+                />
+            </BottomSheetScrollView>
+        </SafeAreaView>
     );
 };
 
