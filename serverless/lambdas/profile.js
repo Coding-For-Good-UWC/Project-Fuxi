@@ -7,7 +7,8 @@ const { ProfileModel } = require('../models/profile');
 const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 const { PlaylistModel } = require('../models/playlist');
 const { TrackModel } = require('../models/track');
-const { createPlaylistWhenCreateProfile } = require('./playlist');
+const { createOrUpdateInitialPlaylistWhenChangeProfile } = require('./playlist');
+const { arraysHaveSameElementsAndLength } = require('../utils');
 
 connectDb();
 
@@ -63,7 +64,7 @@ const createProfile = async (event) => {
             genres,
         });
 
-        await createPlaylistWhenCreateProfile(profile._id, genres);
+        await createOrUpdateInitialPlaylistWhenChangeProfile(profile._id, genres);
 
         if (profile) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Profile created success', profile)) };
@@ -102,6 +103,12 @@ const updateProfile = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
+        const existingProfile = await ProfileModel.findById(profileId);
+
+        if (!arraysHaveSameElementsAndLength(existingProfile.genres, genres)) {
+            await createOrUpdateInitialPlaylistWhenChangeProfile(profileId, genres);
+        }
+
         const exitsUpdateProfile = await ProfileModel.findOneAndUpdate(
             { _id: new ObjectId(profileId) },
             {

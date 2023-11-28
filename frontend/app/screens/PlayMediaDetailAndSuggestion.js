@@ -64,7 +64,12 @@ const PlayMediaDetailAndSuggestion = ({ playlistId, selectSound, setSelectSound,
         const toggleItemAndSelect = async () => {
             if (!select) {
                 if (playlistId) {
-                    const response = await addTrackInPlaylist(playlistId, item?._id);
+                    const profile0 = await getStoreData('profile0');
+                    if (profile0 === null) {
+                        return;
+                    }
+                    const { _id } = JSON.parse(profile0);
+                    const response = await addTrackInPlaylist(_id, playlistId, item?._id);
                     if (response.code === 200) {
                         setSelect((prevSelect) => !prevSelect);
                         setDataTracks((prevItems) => [...prevItems, item]);

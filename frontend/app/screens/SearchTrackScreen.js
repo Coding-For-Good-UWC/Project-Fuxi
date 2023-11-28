@@ -6,6 +6,7 @@ import CustomGridLayout from '../components/CustomGridLayout';
 import { searchTrack } from '../api/track';
 import SongItem from '../components/SongItem';
 import { addTrackInPlaylist, getPlaylistById, removeTrackInPlaylist } from '../api/playlist';
+import { getStoreData } from '../utils/AsyncStorage';
 
 const SearchTrackScreen = () => {
     const route = useRoute();
@@ -68,16 +69,21 @@ const SearchTrackScreen = () => {
 
             const toggleItemAndSelect = async () => {
                 if (!select) {
-                    if (playlistId) {
-                        await addTrackInPlaylist(playlistId, item?._id);
+                    const profile0 = await getStoreData('profile0');
+                    if (profile0 === null) {
+                        return;
+                    }
+                    const { _id } = JSON.parse(profile0);
+                    const response = await addTrackInPlaylist(_id, playlistId, item?._id);
+                    if (response?.code !== 200) {
+                        alert(response?.message);
+                    } else {
+                        setSelect((prevSelect) => !prevSelect);
                     }
                 } else {
-                    if (playlistId) {
-                        await removeTrackInPlaylist(playlistId, item?._id);
-                    }
+                    await removeTrackInPlaylist(playlistId, item?._id);
+                    setSelect((prevSelect) => !prevSelect);
                 }
-
-                setSelect((prevSelect) => !prevSelect);
             };
 
             const renderIconRight = () => {

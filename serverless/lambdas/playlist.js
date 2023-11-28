@@ -97,7 +97,7 @@ const createPlaylist = async (event) => {
 const addTrackInPlaylist = async (event) => {
     await connectDb();
     const json = JSON.parse(event.body);
-    const { playlistId, trackId } = json;
+    const { profileId, playlistId, trackId } = json;
     if (!playlistId || !trackId) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
@@ -108,8 +108,27 @@ const addTrackInPlaylist = async (event) => {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
         }
 
-        if (existingPlaylist.tracks.length >= 30 && existingPlaylist.namePlaylist === 'Suggestion for you') {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Playlist suggests up to 30 songs for you')) };
+        if (existingPlaylist.namePlaylist === 'Suggestion for you') {
+            if (existingPlaylist.tracks.length >= 30) {
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Playlist suggests up to 30 songs for you')),
+                };
+            }
+            const existingProfile = await ProfileModel.findById(profileId);
+            const existingTrack = await TrackModel.findById(trackId);
+
+            const isMatchingLanguage = existingProfile.genres.includes(existingTrack.Language);
+            const isMatchingGenre = existingProfile.genres.includes(existingTrack.Genre);
+
+            if (!isMatchingLanguage || !isMatchingGenre) {
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify(
+                        ApiResponse.success(HttpStatus.BAD_REQUEST, 'You can only add songs with the same taste profile in Suggestion for you')
+                    ),
+                };
+            }
         }
 
         const playlist = await PlaylistModel.findByIdAndUpdate(
@@ -457,33 +476,49 @@ const randomNextTrack = async (event) => {
     }
 };
 
-const createPlaylistWhenCreateProfile = async (profileId, genres) => {
+const createOrUpdateInitialPlaylistWhenChangeProfile = async (profileId, genres) => {
     const maxTracks = 30;
-    const tracksPerGenre = Math.ceil(maxTracks / genres.length);
 
     let selectedTracks = [];
 
     for (const genre of genres) {
-        const genreTracks = await TrackModel.find({
+        let genreTracks = await TrackModel.find({
             $or: [{ Language: genre }, { Genre: genre }],
         });
 
-        for (let i = 0; i < Math.min(tracksPerGenre, genreTracks.length); i++) {
+        while (selectedTracks.length < maxTracks && genreTracks.length > 0) {
             const randomIndex = Math.floor(Math.random() * genreTracks.length);
             selectedTracks.push(genreTracks[randomIndex]);
             genreTracks.splice(randomIndex, 1);
         }
     }
 
+    while (selectedTracks.length < maxTracks) {
+        const randomGenre = genres[Math.floor(Math.random() * genres.length)];
+        const genreTracks = await TrackModel.find({
+            $or: [{ Language: randomGenre }, { Genre: randomGenre }],
+        });
+
+        if (genreTracks.length > 0) {
+            const randomIndex = Math.floor(Math.random() * genreTracks.length);
+            selectedTracks.push(genreTracks[randomIndex]);
+        }
+    }
+
     const arrayTrackIds = selectedTracks.map((song) => song._id);
 
-    const playlist = await PlaylistModel.create({
-        profileId: new mongoose.Types.ObjectId(profileId),
-        namePlaylist: 'Suggestion for you',
-        tracks: arrayTrackIds,
-    });
+    const existingPlaylist = await PlaylistModel.findOne({ profileId: profileId, namePlaylist: 'Suggestion for you' });
 
-    await PlaylistModel.populate(playlist, 'tracks');
+    if (existingPlaylist) {
+        await PlaylistModel.findOneAndUpdate({ profileId: profileId }, { $set: { tracks: arrayTrackIds } });
+    } else {
+        await PlaylistModel.create({
+            profileId: new mongoose.Types.ObjectId(profileId),
+            namePlaylist: 'Suggestion for you',
+            tracks: arrayTrackIds,
+        });
+        await PlaylistModel.populate(playlist, 'tracks');
+    }
 };
 
 module.exports = {
@@ -498,5 +533,5 @@ module.exports = {
     addSuggetionTrackWhenLikeInPlaylist,
     addSuggetionTrackWhenDislikeInPlaylist,
     randomNextTrack,
-    createPlaylistWhenCreateProfile,
+    createOrUpdateInitialPlaylistWhenChangeProfile,
 };

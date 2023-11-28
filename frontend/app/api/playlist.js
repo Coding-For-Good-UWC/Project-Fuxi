@@ -49,9 +49,10 @@ export const createPlaylist = async (profileId, namePlaylist, tracks) => {
 
 export const updatePlaylist = async () => {};
 
-export const addTrackInPlaylist = async (playlistId, trackId) => {
+export const addTrackInPlaylist = async (profileId, playlistId, trackId) => {
     try {
         const response = await axios.put(`${apiUrl}/dev/playlist/add-track`, {
+            profileId: profileId,
             playlistId: playlistId,
             trackId: trackId,
         });
@@ -125,9 +126,9 @@ export const addSuggetionTrackWhenLikeInPlaylist = async (profileId, playlistId,
         const response = await axios.post(`${apiUrl}/dev/playlist/add-track-like`, {
             profileId: profileId,
             playlistId: playlistId,
-currentTrackId: currentTrackId,
+            currentTrackId: currentTrackId,
             preference: preference,
-            });
+        });
         return response.data;
     } catch (error) {
         console.error(error);
