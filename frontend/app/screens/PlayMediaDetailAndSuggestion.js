@@ -2,7 +2,7 @@ import { SafeAreaView, StatusBar, StyleSheet, Text, View, Image, ScrollView, Tou
 import React, { useEffect, useState } from 'react';
 import CustomGridLayout from '../components/CustomGridLayout';
 import SongItem from '../components/SongItem';
-import { addTrackInPlaylist, getSuggestionsInPlaymedia, removeTrackInPlaylist } from '../api/playlist';
+import { addTrackInPlaylist, getSuggestionsInPlaymedia, randomNextTrack, removeTrackInPlaylist } from '../api/playlist';
 import { Ionicons } from '@expo/vector-icons';
 import { getStoreData } from '../utils/AsyncStorage';
 
@@ -66,8 +66,8 @@ const PlayMediaDetailAndSuggestion = ({ playlistId, selectSound, setSelectSound,
                 if (playlistId) {
                     const response = await addTrackInPlaylist(playlistId, item?._id);
                     if (response.code === 200) {
-                        setDataTracks((prevItems) => [...prevItems, item]);
                         setSelect((prevSelect) => !prevSelect);
+                        setDataTracks((prevItems) => [...prevItems, item]);
                     } else {
                         alert(response.message);
                     }
@@ -76,10 +76,39 @@ const PlayMediaDetailAndSuggestion = ({ playlistId, selectSound, setSelectSound,
                 if (playlistId) {
                     await removeTrackInPlaylist(playlistId, item?._id);
                     setSelect((prevSelect) => !prevSelect);
-                }
-                setDataTracks((prevItems) => prevItems.filter((selected) => selected._id !== item._id));
-            }
+                    if (selectSound._id === item._id) {
+                        const index = dataTracks.findIndex((track) => track._id === item._id);
 
+                        if (index === -1) {
+                            if (!playlistId) {
+                                const profile0 = await getStoreData('profile0');
+                                const { _id } = JSON.parse(profile0);
+                                const trackIds = dataTracks.map((track) => track._id);
+                                const response = await randomNextTrack(_id, trackIds, item._id);
+                                if (response.data !== null) {
+                                    return response.data;
+                                }
+                            }
+                        }
+
+                        const nextIndex = index === dataTracks.length - 1 ? 0 : index + 1;
+
+                        if (nextIndex === 0) {
+                            if (!playlistId) {
+                                const profile0 = await getStoreData('profile0');
+                                const { _id } = JSON.parse(profile0);
+                                const trackIds = dataTracks.map((track) => track._id);
+                                const response = await randomNextTrack(_id, trackIds, item._id);
+                                if (response.data !== null) {
+                                    return response.data;
+                                }
+                            }
+                        }
+                        setSelectSound(dataTracks[nextIndex]);
+                    }
+                    setDataTracks((prevItems) => prevItems.filter((selected) => selected._id !== item._id));
+                }
+            }
         };
 
         const renderIconRight = () => {

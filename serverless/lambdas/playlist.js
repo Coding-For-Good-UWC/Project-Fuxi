@@ -122,14 +122,7 @@ const addTrackInPlaylist = async (event) => {
         );
 
         if (playlist) {
-            if (playlist.tracks.includes(new mongoose.Types.ObjectId(trackId))) {
-                return {
-                    statusCode: 200,
-                    body: JSON.stringify(ApiResponse.success(HttpStatus.BAD_REQUEST, 'Track already exists in the playlist')),
-                };
-            } else {
-                return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Track added to the playlist successfully')) };
-            }
+            return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Track added to the playlist successfully')) };
         } else {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
         }
