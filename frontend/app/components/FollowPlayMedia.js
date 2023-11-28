@@ -23,7 +23,7 @@ const getReact = async (trackId) => {
     }
 };
 
-const FollowPlayMedia = ({ playlistId, selectSound, reactTrack, setDataTracks, setReactTrack, removeTrack }) => {
+const FollowPlayMedia = ({ playlistId, selectSound, reactTrack, setReactTrack, dataTracks, setDataTracks, removeTrack }) => {
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [dialogProps, setDialogProps] = useState({});
 
@@ -145,30 +145,36 @@ const FollowPlayMedia = ({ playlistId, selectSound, reactTrack, setDataTracks, s
             const { _id } = JSON.parse(profile0);
             if (reactTrack.status == 'like') {
                 setIsDialogVisible(false);
+                setReactTrack(preference.SLK);
                 await updateReactTrack(_id, selectSound._id, preference.SLK.status);
                 if (playlistId) {
-                    await addSuggetionTrackWhenLikeInPlaylist(_id, playlistId, selectSound._id || '', preference.SLK.status);
-                    const response = await getPlaylistById(playlistId);
-                    setDataTracks(response.data.tracks);
+                    const response = await addSuggetionTrackWhenLikeInPlaylist(_id, playlistId, selectSound._id || '', preference.SLK.status);
+                    const index = dataTracks.findIndex((track) => track._id === selectSound._id);
+                    if (index !== -1 && response.data !== null) {
+                        dataTracks.splice(index + 1, 0, response.data);
+                        setDataTracks([...dataTracks]);
+                    }
                 }
-                setReactTrack(preference.SLK);
             } else if (reactTrack.status == undefined) {
                 setIsDialogVisible(false);
+                setReactTrack(preference.LK);
                 await addReactTrack(_id, selectSound._id, preference.LK.status);
                 if (playlistId) {
-                    await addSuggetionTrackWhenLikeInPlaylist(_id, playlistId, selectSound._id || '', preference.LK.status);
-                    const response = await getPlaylistById(playlistId);
-                    setDataTracks(response.data.tracks);
+                    const response = await addSuggetionTrackWhenLikeInPlaylist(_id, playlistId, selectSound._id || '', preference.SLK.status);
+                    const index = dataTracks.findIndex((track) => track._id === selectSound._id);
+                    if (index !== -1 && response.data !== null) {
+                        dataTracks.splice(index + 1, 0, response.data);
+                        setDataTracks([...dataTracks]);
+                    }
                 }
-                setReactTrack(preference.LK);
             } else if (reactTrack.status == 'strongly dislike') {
                 setReactTrack(preference.LK);
-                setIsDialogVisible(false);
                 await updateReactTrack(_id, selectSound._id, preference.LK.status);
+                setIsDialogVisible(false);
             } else if (reactTrack.status == 'dislike') {
                 setReactTrack(preference.LK);
-                setIsDialogVisible(false);
                 await updateReactTrack(_id, selectSound._id, preference.LK.status);
+                setIsDialogVisible(false);
             }
         } else {
             setIsDialogVisible(false);

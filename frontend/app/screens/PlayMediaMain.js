@@ -133,8 +133,9 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
                                 playlistId={playlistId}
                                 selectSound={selectSound}
                                 reactTrack={reactTrack}
-                                setDataTracks={setDataTracks}
                                 setReactTrack={setReactTrack}
+                                dataTracks={dataTracks}
+                                setDataTracks={setDataTracks}
                                 removeTrack={removeTrack}
                                 handleNextTrack={handleNextTrack}
                             />

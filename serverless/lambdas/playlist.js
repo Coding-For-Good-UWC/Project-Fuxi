@@ -95,6 +95,7 @@ const createPlaylist = async (event) => {
 // const updatePlaylist = async (event) => {};
 
 const addTrackInPlaylist = async (event) => {
+    await connectDb();
     const json = JSON.parse(event.body);
     const { playlistId, trackId } = json;
     if (!playlistId || !trackId) {
@@ -358,7 +359,7 @@ const addSuggetionTrackWhenLikeInPlaylist = async (event) => {
 
             return {
                 statusCode: 200,
-                body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added tracks to playlist successfully')),
+                body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added tracks to playlist successfully', randomSongs[0])),
             };
         }
     } catch (error) {
