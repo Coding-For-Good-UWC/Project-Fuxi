@@ -27,6 +27,11 @@ const schema = new Schema(
         OTPResetPassword: {
             type: String,
         },
+        isVerifyAuth: {
+            type: Boolean,
+            default: false,
+            required: true,
+        },
     },
     { timestamps: true }
 );

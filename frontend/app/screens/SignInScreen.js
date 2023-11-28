@@ -86,8 +86,8 @@ const SignInScreen = () => {
                         if (dataGetProfile0.data[0] !== undefined) {
                             await storeData('profile0', JSON.stringify(dataGetProfile0.data[0]));
                         }
-                        const existEmailInStore = await isItemInAsyncStorageArray('ArrayEmailVerify', email);
-                        if (existEmailInStore) {
+                        console.log('isVerify: ' + dataLogin.data.isVerifyAuth);
+                        if (dataLogin.data.isVerifyAuth) {
                             loginAuthContext(dataLogin.data.token);
                         } else {
                             const CodeOTP = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;

@@ -24,7 +24,7 @@ const signup = async (event) => {
     if (!institute) {
         const userUid = generateRandomString(28);
         const createToken = jwt.sign({ email }, process.env.JWT_SECRET_KEY);
-        const newInStitutes = await InstituteModel.create({ uid: userUid, email, name, password });
+        const newInStitutes = await InstituteModel.create({ uid: userUid, email, name, password, isVerifyAuth: false });
         return {
             statusCode: 201,
             body: JSON.stringify(
@@ -68,6 +68,7 @@ const signin = async (event) => {
                             name: institute.name,
                         },
                         token: createToken,
+                        isVerifyAuth: institute.isVerifyAuth,
                     })
                 ),
             };
@@ -222,6 +223,8 @@ const verifyAccount = async (event) => {
                 const resultOTP = await bcryptjs.compare(OTP.toString(), institute.OTPResetPassword);
 
                 if (resultOTP) {
+                    await InstituteModel.findOneAndUpdate({ email: email }, { $set: { isVerifyAuth: true } });
+
                     return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Account verified successfully')) };
                 } else {
                     return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.UNAUTHORIZED, 'Invalid OTP code')) };
