@@ -8,7 +8,7 @@ const ToggleDialog = ({ visible = false, title, desc, labelYes, labelNo, onPress
             <Dialog.Title style={styles.dialogTitle}>{title}</Dialog.Title>
             <Dialog.Description style={styles.dialogDescription}>{desc}</Dialog.Description>
             <Dialog.Button style={styles.dialogButtonNo} label={labelNo} onPress={onPressNo} />
-            <Dialog.Button style={[styles.dialogButtonYes, styleBtnYes]} label={labelYes} onPress={onPressYes} />
+            <Dialog.Button style={[styles.dialogButtonYes, styleBtnYes, Platform.OS === 'android' ? {}: styles.iosButtonStyle]} label={labelYes} onPress={onPressYes} />
         </Dialog.Container>
     );
 };
@@ -42,4 +42,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: Platform.OS === 'android' ? 20 : 0,
         marginLeft: Platform.OS === 'android' ? 24 : 0,
     },
+    iosButtonStyle: {
+        width: '100%',
+        height: '100%',
+        lineHeight: 44,
+    }
 });

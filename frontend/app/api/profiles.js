@@ -54,7 +54,7 @@ export const deleteProfile = async (id) => {
 
 export const updateProfile = async (profileId, fullname, yearBirth, genres) => {
     try {
-        const response = await axios.put(`${apiUrl}/dev/profile `, {
+        const response = await axios.put(`${apiUrl}/dev/profile`, {
             profileId: profileId,
             fullname: fullname,
             yearBirth: yearBirth,

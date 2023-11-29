@@ -2,7 +2,7 @@ export default {
     expo: {
         name: "FUXI",
         slug: "FUXI",
-        version: "1.0.0",
+        version: "1.0.1",
         orientation: "portrait",
         icon: "./app/assets/fuxi-high-resolution-logo.png",
         userInterfaceStyle: "light",
@@ -44,6 +44,7 @@ export default {
                 backgroundColor: "#FFFFFF",
             },
             package: "com.codingforgood.projectfuxi",
+            versionCode: 5,
         },
         web: {
             favicon: "./app/assets/fuxi-high-resolution-logo.png",
