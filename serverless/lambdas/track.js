@@ -18,7 +18,7 @@ const searchTrack = async (event) => {
             query.Title = { $regex: new RegExp(title, 'i') };
         }
 
-        if (musicTaste) {
+        if (musicTaste && musicTaste.length > 0) {
             query.$or = [{ Language: musicTaste }, { Genre: musicTaste }];
         }
 
