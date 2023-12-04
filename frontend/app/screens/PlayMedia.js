@@ -21,7 +21,7 @@ const defaultSong = {
 const PlayMedia = () => {
     const route = useRoute();
     const navigation = useNavigation();
-    const { firstTrackInPlaylist, currentReactTrack, playlistId, dataTracksOrigin } = route.params;
+    const { firstTrackInPlaylist, currentReactTrack, playlistId, dataTracksOrigin, isCircle } = route.params;
 
     const [selectSound, setSelectSound] = useState(route.params?.track || firstTrackInPlaylist || defaultSong);
     const [dataTracks, setDataTracks] = useState(dataTracksOrigin || [selectSound]);
@@ -69,6 +69,7 @@ const PlayMedia = () => {
                                     dataTracks={dataTracks}
                                     setDataTracks={setDataTracks}
                                     currentReactTrack={currentReactTrack}
+                                    isCircle={isCircle}
                                 />
                             )}
                         </Tab.Screen>

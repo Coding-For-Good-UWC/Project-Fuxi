@@ -100,9 +100,9 @@ const SearchTrackScreen = () => {
                 );
             };
 
-            return <SongItem item={item} iconRight={renderIconRight()} onPress={() => navigation.navigate('PlayMedia', { track: item })} />;
+            return <SongItem item={item} iconRight={renderIconRight()} onPress={() => navigation.navigate('PlayMedia', { track: item, isCircle: false})} />;
         } else {
-            return <SongItem item={item} onPress={() => navigation.navigate('PlayMedia', { track: item })} />;
+            return <SongItem item={item} onPress={() => navigation.navigate('PlayMedia', { track: item, isCircle: false })} />;
         }
     };
 

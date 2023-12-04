@@ -7,7 +7,7 @@ import { removeReactTrack } from '../api/profileReact';
 import { getStoreData } from '../utils/AsyncStorage';
 import { preference } from '../utils/utils';
 
-const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, dataTracksOrigin, playlistId, icon, removeTrack }) => {
+const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, dataTracksOrigin, playlistId, icon, removeTrack, isCircle }) => {
     const navigation = useNavigation();
     const [currentReactTrack, setCurrentReactTrack] = useState({});
 
@@ -34,6 +34,7 @@ const ReactSongItem = ({ item, reactTrack, setIsDialogVisible, setDialogProps, d
             currentReactTrack: currentReactTrack,
             dataTracksOrigin: dataTracksOrigin,
             playlistId: playlistId,
+            isCircle: isCircle,
         });
     };
 

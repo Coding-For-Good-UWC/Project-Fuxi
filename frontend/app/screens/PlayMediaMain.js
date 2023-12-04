@@ -25,7 +25,7 @@ async function findPreviousTrack(playlistId, tracks, trackId) {
     return tracks[previousIndex];
 }
 
-async function findNextTrack(playlistId, tracks, trackId) {
+async function findNextTrack(playlistId, tracks, trackId, isCircle) {
     const index = tracks.findIndex((track) => track._id === trackId);
     if (index === -1) {
         const profile0 = await getStoreData('profile0');
@@ -40,6 +40,10 @@ async function findNextTrack(playlistId, tracks, trackId) {
     const nextIndex = index === tracks.length - 1 ? 0 : index + 1;
 
     if (nextIndex === 0) {
+        if (isCircle) {
+            console.log(tracks[nextIndex]);
+            return tracks[nextIndex];
+        }
         if (!playlistId) {
             const profile0 = await getStoreData('profile0');
             const { _id } = JSON.parse(profile0);
@@ -53,7 +57,7 @@ async function findNextTrack(playlistId, tracks, trackId) {
     return tracks[nextIndex];
 }
 
-const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, setDataTracks, currentReactTrack }) => {
+const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, setDataTracks, currentReactTrack, isCircle }) => {
     const navigation = useNavigation();
     const [reactTrack, setReactTrack] = useState(currentReactTrack || {});
 
@@ -90,7 +94,7 @@ const PlayMediaMain = ({ playlistId, selectSound, setSelectSound, dataTracks, se
 
     const handleNextTrack = async () => {
         if (Object.keys(dataTracks).length !== 0) {
-            await handleTrackPress(await findNextTrack(playlistId, dataTracks, selectSound._id));
+            await handleTrackPress(await findNextTrack(playlistId, dataTracks, selectSound._id, isCircle));
         }
     };
 

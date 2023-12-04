@@ -132,6 +132,7 @@ const LikedSongsScreen = () => {
                                 </TouchableOpacity>
                             }
                             removeTrack={removeTrack}
+                            isCircle={true}
                         />
                     ))}
                     columns={1}
