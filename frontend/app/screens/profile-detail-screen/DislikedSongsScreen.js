@@ -17,7 +17,7 @@ const DislikedSongsScreen = ({ setIsDialogVisible, setDialogProps, dataProfile }
             const response = await getReactTrackByProfileId(dataProfile._id);
             const { code, message, data } = response;
             if (code == 200) {
-                setDataReactTracks(data?.reactTracks);
+                setDataReactTracks(data?.reactTracks || []);
             }
         } catch (error) {
             return;

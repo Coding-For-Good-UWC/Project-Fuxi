@@ -39,9 +39,7 @@ const ListenerProfileScreen2 = ({ selectedItems, setSelectedItems, formData, tok
         console.log('uid', uid, nameListener, yearBirth, selectedItems)
         try {
             const newProfile = await createProfile(uid, nameListener, yearBirth, selectedItems);
-            console.log('new profile')
             const { code, message, data } = newProfile;
-            await createProfileReact(data._id, []);
             if (code == 201) {
                 await storeData('profile0', JSON.stringify(data));
                 navigation.navigate('ListenerProfileScreen3', { nameProfile: formData.nameListener, token: token });

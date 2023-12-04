@@ -53,14 +53,12 @@ const getLikeTrackByProfileId = async (event) => {
     }
 };
 
-const createProfileReact = async (event) => {
-    const json = JSON.parse(event.body);
-    const { profileId, reactTracks } = json;
+const createProfileReact = async (profileId, reactTracks) => {
     if (!profileId) {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const response = await ProfileReactModal.create({ profileId, reactTracks });
+        const response = await ProfileReactModal.create({ profileId: profileId, reactTracks: reactTracks });
         if (response) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Created react profile success', response)) };
         } else {

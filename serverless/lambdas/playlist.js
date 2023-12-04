@@ -102,35 +102,6 @@ const addTrackInPlaylist = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
-        const existingPlaylist = await PlaylistModel.findById(playlistId);
-
-        if (!existingPlaylist) {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
-        }
-
-        if (existingPlaylist.namePlaylist === 'Suggestion for you') {
-            if (existingPlaylist.tracks.length >= 60) {
-                return {
-                    statusCode: 200,
-                    body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Playlist suggests up to 30 songs for you')),
-                };
-            }
-            const existingProfile = await ProfileModel.findById(profileId);
-            const existingTrack = await TrackModel.findById(trackId);
-
-            const isMatchingLanguage = existingProfile.genres.includes(existingTrack.Language);
-            const isMatchingGenre = existingProfile.genres.includes(existingTrack.Genre);
-
-            if (!isMatchingLanguage || !isMatchingGenre) {
-                return {
-                    statusCode: 200,
-                    body: JSON.stringify(
-                        ApiResponse.success(HttpStatus.BAD_REQUEST, 'You can only add songs with the same taste profile in Suggestion for you')
-                    ),
-                };
-            }
-        }
-
         const playlist = await PlaylistModel.findByIdAndUpdate(
             playlistId,
             {
@@ -337,10 +308,6 @@ const addSuggetionTrackWhenLikeInPlaylist = async (event) => {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.NOT_FOUND, 'Playlist not found')) };
         }
 
-        if (existingPlaylist.tracks.length >= 60 && existingPlaylist.namePlaylist === 'Suggestion for you') {
-            return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Playlist suggests up to 60 songs for you')) };
-        }
-
         const existingReactProfile = await ProfileReactModal.findOne({ profileId: profileId });
 
         if (!existingReactProfile) {
@@ -478,6 +445,7 @@ const randomNextTrack = async (event) => {
 
 const createOrUpdateInitialPlaylistWhenChangeProfile = async (profileId, genres) => {
     const maxTracks = 30;
+    const maxTracksPerGenre = Math.floor(maxTracks / genres.length);
 
     let selectedTracks = [];
 
@@ -486,10 +454,14 @@ const createOrUpdateInitialPlaylistWhenChangeProfile = async (profileId, genres)
             $or: [{ Language: genre }, { Genre: genre }],
         });
 
-        while (selectedTracks.length < maxTracks && genreTracks.length > 0) {
+        let tracksFromGenre = 0;
+
+        while (selectedTracks.length < maxTracks && genreTracks.length > 0 && tracksFromGenre < maxTracksPerGenre) {
             const randomIndex = Math.floor(Math.random() * genreTracks.length);
             selectedTracks.push(genreTracks[randomIndex]);
             genreTracks.splice(randomIndex, 1);
+
+            tracksFromGenre++;
         }
     }
 

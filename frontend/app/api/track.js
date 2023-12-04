@@ -3,9 +3,13 @@ import Constants from 'expo-constants';
 
 const apiUrl = Constants.expoConfig.extra.apiUrl;
 
-export const searchTrack = async (title, pageNumber) => {
+export const searchTrack = async (title, pageNumber, musicTaste) => {
     try {
-        const response = await axios.get(`${apiUrl}/dev/track/searchTrack?title=${title}&pageNumber=${pageNumber}`);
+        const response = await axios.post(`${apiUrl}/dev/track/searchTrack`, {
+            title: title,
+            pageNumber: pageNumber,
+            musicTaste: musicTaste,
+        });
         return response.data;
     } catch (error) {
         console.error('Error in searchTrack:', error);

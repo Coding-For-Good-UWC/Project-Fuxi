@@ -279,9 +279,9 @@ export default FollowPlayMedia;
 
 const styles = StyleSheet.create({
     following: {
-        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
+        paddingVertical: 10,
     },
     followingWrapper: {
         flex: 1,

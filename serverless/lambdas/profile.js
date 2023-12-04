@@ -9,6 +9,7 @@ const { PlaylistModel } = require('../models/playlist');
 const { TrackModel } = require('../models/track');
 const { createOrUpdateInitialPlaylistWhenChangeProfile } = require('./playlist');
 const { arraysHaveSameElementsAndLength } = require('../utils');
+const { createProfileReact } = require('./profileReact');
 
 connectDb();
 
@@ -64,9 +65,9 @@ const createProfile = async (event) => {
             genres,
         });
 
-        await createOrUpdateInitialPlaylistWhenChangeProfile(profile._id, genres);
-
         if (profile) {
+            await createOrUpdateInitialPlaylistWhenChangeProfile(profile._id, genres);
+            await createProfileReact(profile._id, []);
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Profile created success', profile)) };
         } else {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Create failure')) };

@@ -244,7 +244,7 @@ functions:
     events:
       - http:
           path: /track/searchTrack
-          method: get
+          method: post
   getTracksByArtist:
     handler: lambdas/track.getTracksByArtist
     events:
@@ -269,12 +269,6 @@ functions:
       - http:
           path: /profile-react/like
           method: get
-  createProfileReact:
-    handler: lambdas/profileReact.createProfileReact
-    events:
-      - http:
-          path: /profile-react
-          method: post
   addReactTrack:
     handler: lambdas/profileReact.addReactTrack
     events:

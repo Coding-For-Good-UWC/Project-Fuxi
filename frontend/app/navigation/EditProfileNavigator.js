@@ -76,7 +76,6 @@ const EditProfileNavigator = () => {
                 const newProfile = await createProfile(uid, nameListener, yearBirth, selectedItems);
                 const { code, message, data } = newProfile;
                 if (code == 201) {
-                    await createProfileReact(data._id, []);
                     await storeData('profile0', JSON.stringify(data));
                     navigation.navigate('AllListenerProfilesScreen');
                 } else {

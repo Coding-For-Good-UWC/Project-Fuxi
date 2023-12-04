@@ -8,12 +8,18 @@ const { ApiResponse, HttpStatus } = require('../middlewares/ApiResponse');
 connectDb();
 
 const searchTrack = async (event) => {
-    const { title, pageNumber = 1, pageSize = 15 } = event.queryStringParameters;
+    const json = JSON.parse(event.body);
+    const { title, pageNumber = 1, pageSize = 15, musicTaste = [] } = json;
     try {
         const skipCount = (pageNumber - 1) * pageSize;
         let query = {};
+
         if (title) {
-            query = { Title: { $regex: new RegExp(title, 'i') } };
+            query.Title = { $regex: new RegExp(title, 'i') };
+        }
+
+        if (musicTaste) {
+            query.$or = [{ Language: musicTaste }, { Genre: musicTaste }];
         }
 
         const tracks = await TrackModel.find(query).skip(skipCount).limit(pageSize).exec();

@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View, SafeAreaView, StatusBar, Dimensions, TouchableOpacity } from 'react-native';
 import React, { useContext, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
-import Dialog from 'react-native-dialog';
 import { useRoute } from '@react-navigation/native';
 import ListenerProfileScreen1 from './ListenerProfileScreen1';
 import ListenerProfileScreen2 from './ListenerProfileScreen2';
@@ -9,8 +8,8 @@ import CustomProgressBar from '../../components/CustomProgressBar';
 import { AuthContext } from '../../context/AuthContext';
 import { getStoreData, storeData } from '../../utils/AsyncStorage';
 import { createProfile } from '../../api/profiles';
-import { createProfileReact } from '../../api/profileReact';
 import CustomAnimatedLoader from '../../components/CustomAnimatedLoader';
+import ToggleDialog from '../../components/ToggleDialog';
 
 const ListenerProfileMain = () => {
     const route = useRoute();
@@ -60,8 +59,6 @@ const ListenerProfileMain = () => {
                 setIsLoading(true);
                 const newProfile = await createProfile(uid, name, '1950', []);
                 const { code, message, data } = newProfile;
-                console.log(data);
-                await createProfileReact(data._id, []);
                 if (code == 201) {
                     await storeData('profile0', JSON.stringify(data));
                 } else {
@@ -126,16 +123,16 @@ const ListenerProfileMain = () => {
                 onSnapToItem={(index) => setCurrentScreen(index)}
                 renderItem={({ item }) => <View style={{ flex: 1 }}>{screens[currentScreen]}</View>}
             />
-            <View style={styles.dialog}>
-                <Dialog.Container visible={visible}>
-                    <Dialog.Title style={styles.dialogTitle}>Unsaved profile</Dialog.Title>
-                    <Dialog.Description style={styles.dialogDescription}>
-                        You haven’t finished setting up this profile yet. Are you sure?
-                    </Dialog.Description>
-                    <Dialog.Button style={styles.dialogButtonNo} label="No, go back" onPress={() => setVisible(false)} />
-                    <Dialog.Button style={styles.dialogButtonYes} label="Skip anyway" onPress={handleSkip} />
-                </Dialog.Container>
-            </View>
+            <ToggleDialog
+                visible={visible}
+                title={'Unsaved profile'}
+                desc={'You haven’t finished setting up this profile yet. Are you sure?'}
+                labelYes={'Skip anyway'}
+                labelNo={'No, go back'}
+                onPressYes={handleSkip}
+                onPressNo={() => setVisible(false)}
+                styleBtnYes={{ backgroundColor: '#E84C4C' }}
+            />
         </SafeAreaView>
     );
 };
@@ -155,38 +152,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    skip: {},
     skipText: {
         fontSize: 16,
         fontWeight: '600',
         color: '#137882',
         paddingLeft: 10,
         paddingVertical: 10,
-    },
-    dialogTitle: {
-        fontSize: 20,
-        fontWeight: '500',
-        color: '#1D1B20',
-    },
-    dialogDescription: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: '#49454F',
-        marginBottom: 10,
-    },
-    dialogButtonNo: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#3C4647',
-    },
-    dialogButtonYes: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: '#FFFFFF',
-        backgroundColor: '#E84C4C',
-        borderRadius: 100,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        marginLeft: 24,
     },
 });

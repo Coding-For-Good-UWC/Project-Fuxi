@@ -46,7 +46,7 @@ const PlayMediaComponent = ({ selectSound, handlePrevTrack, handleNextTrack }) =
     }, [selectSound]);
 
     return (
-        <>
+        <View style={{ flex: 1, flexDirection: 'column' }}>
             <View style={styles.playlistHeader}>
                 <View style={styles.viewImage}>
                     <Image style={styles.image} source={{ uri: selectSound.ImageURL }} />
@@ -76,7 +76,7 @@ const PlayMediaComponent = ({ selectSound, handlePrevTrack, handleNextTrack }) =
                     <Ionicons name="play-skip-forward" size={40} color={'#222C2D'} />
                 </TouchableOpacity>
             </View>
-        </>
+        </View>
     );
 };
 
@@ -84,7 +84,7 @@ export default PlayMediaComponent;
 
 const styles = StyleSheet.create({
     playlistHeader: {
-        flex: 3,
+        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'column',
@@ -114,7 +114,6 @@ const styles = StyleSheet.create({
         color: '#222C2D',
         marginTop: 10,
         textAlign: 'center',
-        paddingHorizontal: 20,
     },
     patientText: {
         fontSize: 16,
