@@ -34,11 +34,18 @@ const getLikeTrackByProfileId = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
+        // Fetch react information for the specified profileId and populate associated track information
         const response = await ProfileReactModal.find({ profileId: new ObjectId(profileId) }).populate('reactTracks.track');
+
+        // Extract tracks with a preference of 'like' or 'strongly like'
         const tracksLike = response[0].reactTracks.filter((item) => item.preference === 'like' || item.preference === 'strongly like');
+
+        // Remove duplicate tracks based on their IDs
         const uniqueTracks = Array.from(new Set(tracksLike.map((track) => track._id))).map((_id) => {
+            // Find the first occurrence of the track with the given ID
             return tracksLike.find((track) => track._id === _id);
         });
+
         if (response) {
             return {
                 statusCode: 200,
@@ -97,18 +104,23 @@ const addReactTrack = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
+        // Update the ProfileReactModal collection
         const updatedReactTrack = await ProfileReactModal.findOneAndUpdate(
             { profileId: profileId },
             {
                 $push: {
                     reactTracks: {
+                        // Include the track ID, preference, and calculated score in the new react track entry
                         track: new ObjectId(trackId),
                         preference: preference,
                         score: getScoreByPreference(preference),
                     },
                 },
-            }
+            },
+            // Set the option to return the modified document after the update
+            { new: true }
         );
+
         if (updatedReactTrack) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Added a new react track success')) };
         } else {
@@ -127,17 +139,21 @@ const updateReactTrack = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
+        // Update the ProfileReactModal collection by finding the specific react track entry
         const updatedReactTrack = await ProfileReactModal.findOneAndUpdate(
             {
                 profileId: profileId,
                 'reactTracks.track': new ObjectId(trackId),
             },
             {
+                // Set the new values for the preference and score fields in the found react track entry
                 $set: {
                     'reactTracks.$.preference': preference,
                     'reactTracks.$.score': getScoreByPreference(preference),
                 },
-            }
+            },
+            // Set the option to return the modified document after the update
+            { new: true }
         );
         if (updatedReactTrack) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Updated react track preference success')) };
@@ -157,13 +173,17 @@ const removeReactTrack = async (event) => {
         return { statusCode: 200, body: JSON.stringify(ApiResponse.error(HttpStatus.BAD_REQUEST, 'Missing required fields')) };
     }
     try {
+        // Update the ProfileReactModal collection by pulling (removing) the specified react track entry
         const updatedProfile = await ProfileReactModal.findOneAndUpdate(
             { profileId: profileId },
             {
+                // Use $pull to remove the react track entry with the specified trackId
                 $pull: {
                     reactTracks: { track: new ObjectId(trackId) },
                 },
-            }
+            },
+            // Set the option to return the modified document after the update
+            { new: true }
         );
         if (updatedProfile) {
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.OK, 'Removed a react track success')) };

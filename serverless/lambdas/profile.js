@@ -51,6 +51,7 @@ const createProfile = async (event) => {
     try {
         const existingProfile = await ProfileModel.findOne({ uid: instituteUid, fullname: fullname });
 
+        // Check if the profile name already exists or not
         if (existingProfile && existingProfile.fullname === fullname) {
             return {
                 statusCode: 200,
@@ -66,6 +67,7 @@ const createProfile = async (event) => {
         });
 
         if (profile) {
+            // After successfully creating a profile, immediately create an initial playlist and song reaction board
             await createOrUpdateInitialPlaylistWhenChangeProfile(profile._id, genres);
             await createProfileReact(profile._id, []);
             return { statusCode: 200, body: JSON.stringify(ApiResponse.success(HttpStatus.CREATED, 'Profile created success', profile)) };
@@ -106,10 +108,12 @@ const updateProfile = async (event) => {
     try {
         const existingProfile = await ProfileModel.findById(profileId);
 
+        // Check to see if the music taste changes and update the original playlist
         if (!arraysHaveSameElementsAndLength(existingProfile.genres, genres)) {
             await createOrUpdateInitialPlaylistWhenChangeProfile(profileId, genres);
         }
 
+        // update infomation profile
         const exitsUpdateProfile = await ProfileModel.findOneAndUpdate(
             { _id: new ObjectId(profileId) },
             {
