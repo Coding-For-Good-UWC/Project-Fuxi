@@ -1,31 +1,31 @@
 {
-  "cli": {
-    "version": ">= 3.14.0"
-  },
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "BACKEND_HOST": "http://127.0.0.1:8080" 
-      }
+    "cli": {
+        "version": ">= 3.14.0"
     },
-    "preview": {
-      "android": {
-        "buildType": "apk"
-      },
-      "distribution": "internal",
-      "env": {
-        "BACKEND_HOST": "https://project-fuxi-fsugt.ondigitalocean.app"
-      }
+    "build": {
+        "development": {
+            "developmentClient": true,
+            "distribution": "internal",
+            "env": {
+                "BACKEND_HOST": "http://127.0.0.1:8080"
+            }
+        },
+        "preview": {
+            "android": {
+                "buildType": "apk"
+            },
+            "distribution": "internal",
+            "env": {
+                "BACKEND_HOST": "https://project-fuxi-fsugt.ondigitalocean.app"
+            }
+        },
+        "production": {
+            "env": {
+                "BACKEND_HOST": "https://project-fuxi-fsugt.ondigitalocean.app"
+            }
+        }
     },
-    "production": {
-      "env": {
-        "BACKEND_HOST": "https://project-fuxi-fsugt.ondigitalocean.app"
-      }
+    "submit": {
+        "production": {}
     }
-  },
-  "submit": {
-    "production": {}
-  }
 }
