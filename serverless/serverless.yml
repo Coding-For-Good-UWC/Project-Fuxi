@@ -1,0 +1,352 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: fuxibackend
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  state: dev
+  region: ap-southeast-1
+
+# you can overwrite defaults here
+#  stage: dev
+#  region: us-east-1
+
+plugins:
+  - serverless-middleware
+  - serverless-offline
+  - serverless-offline-watcher
+
+custom:
+  api:
+    cors:
+      AllowMethods: "*"
+      AllowHeaders: "*"
+      AllowOrigin: "*"
+  serverless-offline:
+    httpPort: 3000
+  serverless-offline-watcher:
+    # - path: src/index.ts
+    #   command: echo "index.ts was modified!"
+    - path:
+        - lambdas/*.js
+        - models/*.js
+      command: echo "api folder or js file in cow folder was modified!"
+
+# you can add statements to the Lambda function's IAM Role here
+#  iam:
+#    role:
+#      statements:
+#        - Effect: "Allow"
+#          Action:
+#            - "s3:ListBucket"
+#          Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+#        - Effect: "Allow"
+#          Action:
+#            - "s3:PutObject"
+#          Resource:
+#            Fn::Join:
+#              - ""
+#              - - "arn:aws:s3:::"
+#                - "Ref" : "ServerlessDeploymentBucket"
+#                - "/*"
+
+# you can define service wide environment variables here
+#  environment:
+#    variable1: value1
+
+# you can add packaging information here
+package:
+  patterns:
+    - lib/**
+    - models/**
+  #  - '!exclude-me.js'
+  #  - '!exclude-me-dir/**'
+  #  - include-me.js
+  #  - include-me-dir/**
+functions:
+  signup:
+    handler: lambdas/institute.signup
+    events:
+      - http:
+          path: /institute/signup
+          method: post
+  signin:
+    handler: lambdas/institute.signin
+    events:
+      - http:
+          path: /institute/signin
+          method: post
+  updateOTP:
+    handler: lambdas/institute.updateOTP
+    events:
+      - http:
+          path: /institute/update-otp
+          method: post
+  verifyAccount:
+    handler: lambdas/institute.verifyAccount
+    events:
+      - http:
+          path: /institute/verify-account
+          method: post
+  SendEmailPasswordReset:
+    handler: utils/mailer.SendEmailPasswordReset
+    events:
+      - http:
+          path: /mailer/otp-reset-password
+          method: post
+  SendEmailSignUp:
+    handler: utils/mailer.SendEmailSignUp
+    events:
+      - http:
+          path: /mailer/otp-sign-up
+          method: post
+  SendEmailLogin:
+    handler: utils/mailer.SendEmailLogin
+    events:
+      - http:
+          path: /mailer/otp-login
+          method: post
+  changePassword:
+    handler: lambdas/institute.changePassword
+    events:
+      - http:
+          path: /institute/change-password
+          method: post
+  changePasswordInReset:
+    handler: lambdas/institute.changePasswordInReset
+    events:
+      - http:
+          path: /institute/change-reset-password
+          method: post
+  deleteAccount:
+    handler: lambdas/institute.deleteAccount
+    events:
+      - http:
+          path: /institute
+          method: delete
+  getAllProfilesByInstituteUId:
+    handler: lambdas/profile.getAllProfilesByInstituteUId
+    events:
+      - http:
+          path: /profiles
+          method: get
+  getProfileById:
+    handler: lambdas/profile.getProfileById
+    events:
+      - http:
+          path: /profile
+          method: get
+  createProfile:
+    handler: lambdas/profile.createProfile
+    events:
+      - http:
+          path: /profile
+          method: post
+  updateProfile:
+    handler: lambdas/profile.updateProfile
+    events:
+      - http:
+          path: /profile
+          method: put
+  deleteProfile:
+    handler: lambdas/profile.deleteProfile
+    events:
+      - http:
+          path: /profile
+          method: delete
+  getPlaylistById:
+    handler: lambdas/playlist.getPlaylistById
+    events:
+      - http:
+          path: /playlist
+          method: get
+  getAllPlayListByProfileId:
+    handler: lambdas/playlist.getAllPlayListByProfileId
+    events:
+      - http:
+          path: /playlists
+          method: get
+  getSuggestionsInPlaymedia:
+    handler: lambdas/playlist.getSuggestionsInPlaymedia
+    events:
+      - http:
+          path: /playlist/suggest-media
+          method: post
+  addSuggetionTrackWhenLikeInPlaylist:
+    handler: lambdas/playlist.addSuggetionTrackWhenLikeInPlaylist
+    events:
+      - http:
+          path: /playlist/add-track-like
+          method: post
+  addSuggetionTrackWhenDislikeInPlaylist:
+    handler: lambdas/playlist.addSuggetionTrackWhenDislikeInPlaylist
+    events:
+      - http:
+          path: /playlist/add-10track
+          method: post
+  randomNextTrack:
+    handler: lambdas/playlist.randomNextTrack
+    events:
+      - http:
+          path: /playlist/random-next-track
+          method: post
+  createPlaylist:
+    handler: lambdas/playlist.createPlaylist
+    events:
+      - http:
+          path: /playlist
+          method: post
+  addTrackInPlaylist:
+    handler: lambdas/playlist.addTrackInPlaylist
+    events:
+      - http:
+          path: /playlist/add-track
+          method: put
+  removeTrackInPlaylist:
+    handler: lambdas/playlist.removeTrackInPlaylist
+    events:
+      - http:
+          path: /playlist/remove-track
+          method: put
+  deletePlaylist:
+    handler: lambdas/playlist.deletePlaylist
+    events:
+      - http:
+          path: /playlist
+          method: delete
+  deleteAllPlaylist:
+    handler: lambdas/playlist.deleteAllPlaylist
+    events:
+      - http:
+          path: /playlists
+          method: delete
+  searchTrack:
+    handler: lambdas/track.searchTrack
+    events:
+      - http:
+          path: /track/searchTrack
+          method: post
+  getTracksByArtist:
+    handler: lambdas/track.getTracksByArtist
+    events:
+      - http:
+          path: /track/artist
+          method: get
+  getTrackById:
+    handler: lambdas/track.getTrackById
+    events:
+      - http:
+          path: /track
+          method: get
+  getReactTrackByProfileId:
+    handler: lambdas/profileReact.getReactTrackByProfileId
+    events:
+      - http:
+          path: /profile-react
+          method: get
+  getLikeTrackByProfileId:
+    handler: lambdas/profileReact.getLikeTrackByProfileId
+    events:
+      - http:
+          path: /profile-react/like
+          method: get
+  addReactTrack:
+    handler: lambdas/profileReact.addReactTrack
+    events:
+      - http:
+          path: /profile-react/add
+          method: put
+  getReactTrackByTrackId:
+    handler: lambdas/profileReact.getReactTrackByTrackId
+    events:
+      - http:
+          path: /profile-react/track
+          method: get
+  updateReactTrack:
+    handler: lambdas/profileReact.updateReactTrack
+    events:
+      - http:
+          path: /profile-react/update
+          method: put
+  removeReactTrack:
+    handler: lambdas/profileReact.removeReactTrack
+    events:
+      - http:
+          path: /profile-react/remove
+          method: put
+  deleteProfileReact:
+    handler: lambdas/profileReact.deleteProfileReact
+    events:
+      - http:
+          path: /profile-react
+          method: delete
+#    The following are a few example events you can configure
+#    NOTE: Please make sure to change your handler code to work with those events
+#    Check the event documentation for details
+#    events:
+#      - httpApi:
+#          path: /users/create
+#          method: get
+#      - websocket: $connect
+#      - s3: ${env:BUCKET}
+#      - schedule: rate(10 minutes)
+#      - sns: greeter-topic
+#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
+#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
+#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
+#      - iot:
+#          sql: "SELECT * FROM 'some_topic'"
+#      - cloudwatchEvent:
+#          event:
+#            source:
+#              - "aws.ec2"
+#            detail-type:
+#              - "EC2 Instance State-change Notification"
+#            detail:
+#              state:
+#                - pending
+#      - cloudwatchLog: '/aws/lambda/hello'
+#      - cognitoUserPool:
+#          pool: MyUserPool
+#          trigger: PreSignUp
+#      - alb:
+#          listenerArn: arn:aws:elasticloadbalancing:us-east-1:XXXXXX:listener/app/my-load-balancer/50dc6c495c0c9188/
+#          priority: 1
+#          conditions:
+#            host: example.com
+#            path: /hello
+
+#    Define function environment variables here
+#    environment:
+#      variable2: value2
+
+# you can add CloudFormation resource templates here
+#resources:
+#  Resources:
+#    NewResource:
+#      Type: AWS::S3::Bucket
+#      Properties:
+#        BucketName: my-new-bucket
+#  Outputs:
+#     NewOutput:
+#       Description: "Description for the output"
+#       Value: "Some output value"
