@@ -1,5 +1,6 @@
 const path = require('path');
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 const filePath = path.join(__dirname, 'global-bundle.pem');
 
@@ -21,10 +22,7 @@ const connectDb = async () => {
     }
 
     try {
-        cachedDb = await mongoose.connect(
-            'mongodb://zany:EXm7B3b9uRwc8D2pK@fuxi-app.cluster-cw2bftuqzp8d.ap-southeast-1.docdb.amazonaws.com:27017/Project_FUXI',
-            options,
-        );
+        cachedDb = await mongoose.connect(process.env.MONGO_URL, options);
         console.log('Connected to DocumentDB');
         return cachedDb;
     } catch (err) {
