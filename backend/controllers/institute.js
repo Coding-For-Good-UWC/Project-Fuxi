@@ -5,6 +5,7 @@ const getPatients = async (req, res) =>
 {
     try
     {
+        //test
         const instituteId = req.uid;
         
         if (!instituteId)
