@@ -1,9 +1,10 @@
 const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 const SendEmailPasswordReset = async (event) => {
     const { email, CodeOTP } = JSON.parse(event.body);
-    const username = 'fuximusicapp@gmail.com';
-    const password = 'tzuh tuui xxeo mnrj';
+    const username = process.env.MAILER_USERNAME;
+    const password = process.env.MAILER_PASSWORD;
 
     var transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -29,8 +30,8 @@ const SendEmailPasswordReset = async (event) => {
 
 const SendEmailSignUp = async (event) => {
     const { email, CodeOTP } = JSON.parse(event.body);
-    const username = 'fuximusicapp@gmail.com';
-    const password = 'tzuh tuui xxeo mnrj';
+    const username = process.env.MAILER_USERNAME;
+    const password = process.env.MAILER_PASSWORD;
 
     var transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -56,8 +57,8 @@ const SendEmailSignUp = async (event) => {
 
 const SendEmailLogin = async (event) => {
     const { email, CodeOTP } = JSON.parse(event.body);
-    const username = 'fuximusicapp@gmail.com';
-    const password = 'tzuh tuui xxeo mnrj';
+    const username = process.env.MAILER_USERNAME;
+    const password = process.env.MAILER_PASSWORD;
 
     var transporter = nodemailer.createTransport({
         service: 'gmail',
