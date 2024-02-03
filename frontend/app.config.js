@@ -52,10 +52,7 @@ export default {
             favicon: './app/assets/fuxi-high-resolution-logo.png',
         },
         extra: {
-            apiUrl: process.env.BACKEND_HOST || '',
-            serviceacc: process.env.SERVICE_ACCOUNT_EMAILJS || '',
-            templateid: process.env.TEMPLATE_ID_EMAILJS || '',
-            publicapikey: process.env.PUBLIC_API_KEY_EMAILJS || '',
+            apiUrl: process.env.BACKEND_HOST || 'http://0.0.0.0:3000',
             eas: {
                 projectId: process.env.EAS_PROJECTID || '',
             },

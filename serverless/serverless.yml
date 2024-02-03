@@ -20,11 +20,15 @@ service: fuxibackend
 # Check out our docs for more details
 frameworkVersion: "3"
 
+useDotenv: true
+
 provider:
   name: aws
   runtime: nodejs18.x
-  state: dev
+  # state: dev
   region: ap-southeast-1
+  environment:
+    MONGO_URL: ${env:MONGO_URL}
 
 # you can overwrite defaults here
 #  stage: dev
@@ -34,6 +38,7 @@ plugins:
   - serverless-middleware
   - serverless-offline
   - serverless-offline-watcher
+  # - serverless-dotenv-plugin
 
 custom:
   api:
@@ -70,8 +75,8 @@ custom:
 #                - "/*"
 
 # you can define service wide environment variables here
-#  environment:
-#    variable1: value1
+# environment:
+#   # MONGO_URL: ${env:MONGO_URL}
 
 # you can add packaging information here
 package:
